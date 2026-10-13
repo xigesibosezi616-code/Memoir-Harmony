@@ -5,7 +5,7 @@
 ## 从哪开始
 
 1. 负责人：读 [`docs/harmony-spec/README.md`](docs/harmony-spec/README.md) → [`09_OPEN_QUESTIONS.md`](docs/harmony-spec/09_OPEN_QUESTIONS.md) → [`10_BUILD_MANUAL.md`](docs/harmony-spec/10_BUILD_MANUAL.md)
-2. coding agent：根目录的 [`CLAUDE.md`](CLAUDE.md) 会自动加载；每次按手册里的一张任务卡做，开场提示词见手册附录 A
+2. coding agent：每次做手册里的一张任务卡。在 agent 里输入一句 **读取 TASK.md，执行第 X.Y 步** 即可（[`TASK.md`](TASK.md) 里是完整的开场提示词，会让它先读 [`CLAUDE.md`](CLAUDE.md)）
 3. 进度记在 [`PROGRESS.md`](PROGRESS.md)
 
 ## 目录
