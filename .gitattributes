@@ -1,0 +1,8 @@
+# 统一换行：仓库里存 LF，Windows 检出时自动转 CRLF
+* text=auto
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.heic binary
+*.wav binary
+*.mov binary

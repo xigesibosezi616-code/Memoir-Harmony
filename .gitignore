@@ -1,0 +1,26 @@
+# DevEco Studio / hvigor / ohpm
+node_modules/
+oh_modules/
+.hvigor/
+build/
+.idea/
+.preview/
+.cxx/
+.clangd
+local.properties
+*.hap
+*.hsp
+
+# 签名材料、密钥：绝不进仓库
+*.p12
+*.p7b
+*.cer
+*.csr
+*.keystore
+*.jks
+.env
+.env.*
+
+# 系统
+.DS_Store
+Thumbs.db
