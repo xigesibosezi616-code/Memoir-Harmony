@@ -52,9 +52,22 @@ export class ThemeManager {
    * 异步（读偏好），在 EntryAbility.onCreate 里 await 调用。
    */
   static async create(appContext: Context): Promise<ThemeManager> {
-    const prefs = await preferences.getPreferences(appContext, ThemeManager.PREFS_NAME);
+    let prefs: preferences.Preferences;
+    try {
+      prefs = await preferences.getPreferences(appContext, ThemeManager.PREFS_NAME);
+    } catch (err) {
+      // 偏好打不开：抛给调用方（EntryAbility 已 catch，启动不拦，AppStorage 里有素笺兜底）
+      hilog.error(0x0000, 'ThemeManager', 'getPreferences failed: %{public}s', JSON.stringify(err));
+      throw new Error('ThemeManager.getPreferences failed');
+    }
     const mgr = new ThemeManager(prefs, appContext);
-    const raw = prefs.getSync(ThemeManager.PREF_KEY, 'bamboo');
+    let raw: preferences.ValueType = 'bamboo';
+    try {
+      raw = prefs.getSync(ThemeManager.PREF_KEY, 'bamboo');
+    } catch (err) {
+      // 读失败当没存过：走素笺兜底
+      hilog.error(0x0000, 'ThemeManager', 'read selectedTheme failed: %{public}s', JSON.stringify(err));
+    }
     const saved = typeof raw === 'string' ? raw : 'bamboo';
     const canonical = ThemeManager.canonicalThemeId(saved);
     if (canonical !== saved) {

@@ -5,6 +5,34 @@
       "value": "Déjà Vu"
     },
     {
+      "name": "lang_name_zh_hans",
+      "value": "简体中文"
+    },
+    {
+      "name": "lang_name_zh_hant",
+      "value": "繁體中文"
+    },
+    {
+      "name": "lang_name_en",
+      "value": "English"
+    },
+    {
+      "name": "lang_name_ja",
+      "value": "日本語"
+    },
+    {
+      "name": "lang_name_ko",
+      "value": "한국어"
+    },
+    {
+      "name": "lang_name_fr",
+      "value": "Français"
+    },
+    {
+      "name": "lang_name_es",
+      "value": "Español"
+    },
+    {
       "name": "s_00360964eb",
       "value": "Fédération japonaise des industries de l'imprimerie, glossaire des termes d'imprimerie ; université des arts Musashino, fichier Zokei. L'attribution du nom au Japon est rapportée dans les cinquante ans d'histoire de Tokushu Paper Manufacturing."
     },

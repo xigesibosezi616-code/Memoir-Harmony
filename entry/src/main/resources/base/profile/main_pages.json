@@ -1,6 +1,7 @@
 {
   "src": [
     "pages/Index",
-    "pages/ThemeDebug"
+    "pages/ThemeDebug",
+    "pages/LanguageDebug"
   ]
 }

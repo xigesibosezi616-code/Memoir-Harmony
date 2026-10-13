@@ -5,6 +5,34 @@
       "value": "그리움"
     },
     {
+      "name": "lang_name_zh_hans",
+      "value": "简体中文"
+    },
+    {
+      "name": "lang_name_zh_hant",
+      "value": "繁體中文"
+    },
+    {
+      "name": "lang_name_en",
+      "value": "English"
+    },
+    {
+      "name": "lang_name_ja",
+      "value": "日本語"
+    },
+    {
+      "name": "lang_name_ko",
+      "value": "한국어"
+    },
+    {
+      "name": "lang_name_fr",
+      "value": "Français"
+    },
+    {
+      "name": "lang_name_es",
+      "value": "Español"
+    },
+    {
       "name": "s_00360964eb",
       "value": "일본인쇄산업연합회 『인쇄용어집』, 무사시노미술대학 조형 파일. '켄트지라는 이름은 일본에서 붙였다'는 설은 『도쿠슈제지 50년사』에 나온다."
     },

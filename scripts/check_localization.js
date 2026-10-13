@@ -36,6 +36,18 @@ const INDEX_FILE = path.join(ROOT, 'strings_index.json');
 
 const LANG_DIRS = ['zh_Hans', 'zh_Hant', 'en', 'ja', 'ko', 'fr', 'es'];
 
+/**
+ * 中文字面量豁免文件（相对仓库根）：这些文件里的中文是**格式 pattern 的一部分**，
+ * 不是待翻译的界面文案，不走字符串资源：
+ * - `services/AppDateFormatters.ets`：zh 日期格式片段（「2026年9月」「9月27日 星期日」），
+ *   与 iOS `Date+Formatting.swift` 的固定 pattern（"yyyy年M月"、"EEEE"）等价；
+ *   非 zh 分支用标准 Intl 按 CLDR 本地化，不硬编码任何语言文案。
+ * 这些文件的**资源齐全性检查不豁免**（七种语言目录一致性照查）。
+ */
+const EXEMPT_LITERAL_FILES = new Set([
+  'entry/src/main/ets/services/AppDateFormatters.ets',
+]);
+
 const CJK = /[\u4e00-\u9fff]/;
 
 function readJson(file) {
@@ -298,6 +310,10 @@ function main() {
       })(ETS_DIR);
 
       for (const file of etsFiles) {
+        const relPath = path.relative(ROOT, file);
+        if (EXEMPT_LITERAL_FILES.has(relPath)) {
+          continue; // 格式 pattern 文件：中文是格式不是文案（见 EXEMPT_LITERAL_FILES 注释）
+        }
         const src = fs.readFileSync(file, 'utf8');
         const lines = src.split('\n');
         for (const lit of extractStringLiterals(src)) {

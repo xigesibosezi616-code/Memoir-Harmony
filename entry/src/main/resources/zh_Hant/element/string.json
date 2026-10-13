@@ -5,6 +5,34 @@
       "value": "尺素"
     },
     {
+      "name": "lang_name_zh_hans",
+      "value": "简体中文"
+    },
+    {
+      "name": "lang_name_zh_hant",
+      "value": "繁體中文"
+    },
+    {
+      "name": "lang_name_en",
+      "value": "English"
+    },
+    {
+      "name": "lang_name_ja",
+      "value": "日本語"
+    },
+    {
+      "name": "lang_name_ko",
+      "value": "한국어"
+    },
+    {
+      "name": "lang_name_fr",
+      "value": "Français"
+    },
+    {
+      "name": "lang_name_es",
+      "value": "Español"
+    },
+    {
       "name": "s_00360964eb",
       "value": "日本印刷產業連合會印刷用語集、武藏野美術大學造形檔案；「肯特紙為日本所命名」一說見《特種製紙五十年史》。"
     },
