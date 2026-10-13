@@ -1,0 +1,2676 @@
+{
+  "string": [
+    {
+      "name": "EntryAbility_label",
+      "value": "Déjà Vu"
+    },
+    {
+      "name": "s_00360964eb",
+      "value": "Fédération japonaise des industries de l'imprimerie, glossaire des termes d'imprimerie ; université des arts Musashino, fichier Zokei. L'attribution du nom au Japon est rapportée dans les cinquante ans d'histoire de Tokushu Paper Manufacturing."
+    },
+    {
+      "name": "s_004f777b5c",
+      "value": "Ivoire"
+    },
+    {
+      "name": "s_0064d7c8e8",
+      "value": "« Les nuits d'hiver sont faites pour les longues lettres. »"
+    },
+    {
+      "name": "s_00a0a58be6",
+      "value": "30 derniers jours"
+    },
+    {
+      "name": "s_00c4e416fa",
+      "value": "Une fois associé, vous pourrez vous connecter au même compte avec Apple sur cet appareil"
+    },
+    {
+      "name": "s_00e69bd114",
+      "value": "Connecté"
+    },
+    {
+      "name": "s_01d498446e",
+      "value": "Saisissez le mot de passe défini à l'export. Il ne sert qu'à ouvrir le fichier sur cet appareil et n'est jamais transmis."
+    },
+    {
+      "name": "s_022bf3283d",
+      "value": "Insérer"
+    },
+    {
+      "name": "s_02abbe99ce",
+      "value": "Adresse de requête invalide"
+    },
+    {
+      "name": "s_0399ad7167",
+      "value": "Conditions d’utilisation"
+    },
+    {
+      "name": "s_03d786b9dc",
+      "value": "« Le toi de demain remerciera celui qui écrit aujourd'hui. »"
+    },
+    {
+      "name": "s_04543b3673",
+      "value": "Chaque mois, une lettre sur « vous ce mois-ci », et « votre année » en fin d'année."
+    },
+    {
+      "name": "s_047472a1db",
+      "value": "Changer le style de papier"
+    },
+    {
+      "name": "s_0498f1dcc0",
+      "value": "Changer la photo"
+    },
+    {
+      "name": "s_06829794c0",
+      "value": "L'import ajoute seulement des entrées ; les existantes sont ignorées. Vous pouvez aussi ouvrir une sauvegarde depuis WeChat ou Fichiers."
+    },
+    {
+      "name": "s_069d0578bc",
+      "value": "Offre 1re année"
+    },
+    {
+      "name": "s_06f6dfc980",
+      "value": "Une fois associé, connectez-vous à ce compte depuis n’importe quel appareil"
+    },
+    {
+      "name": "s_07315b84c5",
+      "value": "Afficher l'émoji choisi"
+    },
+    {
+      "name": "s_084f68942b",
+      "value": "Envoyer le code"
+    },
+    {
+      "name": "s_085de89c6f",
+      "value": "Avant de supprimer votre compte"
+    },
+    {
+      "name": "s_086b405189",
+      "value": "Annuler le barré"
+    },
+    {
+      "name": "s_088b3628a1",
+      "value": "Nom du correspondant"
+    },
+    {
+      "name": "s_08c2940d38",
+      "value": "À proximité"
+    },
+    {
+      "name": "s_08cf5d323f",
+      "value": "« Tu n'as rien à expliquer : écris, simplement. »"
+    },
+    {
+      "name": "s_0903a88878",
+      "value": "Les pages de cette lettre ont toutes été supprimées"
+    },
+    {
+      "name": "s_094774b4a7",
+      "value": "Se déconnecter"
+    },
+    {
+      "name": "s_09638dca5f",
+      "value": "Changez de formule ou résiliez dans « Gérer l'abonnement ». Après résiliation, les papiers photo et couvertures déjà utilisés restent tels quels."
+    },
+    {
+      "name": "s_09873b1938",
+      "value": "Aucune entrée"
+    },
+    {
+      "name": "s_09b58aa342",
+      "value": "Apparence"
+    },
+    {
+      "name": "s_09f2cefb0c",
+      "value": "« S'autoriser à aller mal est aussi une forme de douceur. »"
+    },
+    {
+      "name": "s_0ae0dc846a",
+      "value": "« Toute attente est l'attente d'un soi meilleur. »"
+    },
+    {
+      "name": "s_0b1c024ac9",
+      "value": "Après déconnexion, les lettres et les fonctions en ligne cessent de fonctionner. Vos entrées sur cet appareil restent intactes."
+    },
+    {
+      "name": "s_0b3e909f02",
+      "value": "L'après-midi est là. Comment va ta journée ?"
+    },
+    {
+      "name": "s_0b4487d003",
+      "value": "Mon étagère"
+    },
+    {
+      "name": "s_0ba6de577f",
+      "value": "« Chaque page blanche attend une parole sincère. »"
+    },
+    {
+      "name": "s_0c168f5d2c",
+      "value": "Faites d'une de vos photos la couverture de ce carnet"
+    },
+    {
+      "name": "s_0cda8d1c71",
+      "value": "Nouveau"
+    },
+    {
+      "name": "s_0cfc3b0e21",
+      "value": "La localisation est désactivée — activez-la dans Réglages"
+    },
+    {
+      "name": "s_0d4dd89acf",
+      "value": "Numéro à 11 chiffres"
+    },
+    {
+      "name": "s_0e37efff8d",
+      "value": "Votre session a expiré. Veuillez vous reconnecter."
+    },
+    {
+      "name": "s_0f2fc67cd3",
+      "value": "Suivre le système"
+    },
+    {
+      "name": "s_0f47f66752",
+      "value": "Lettres"
+    },
+    {
+      "name": "s_0f534330b9",
+      "value": "Encore scellée"
+    },
+    {
+      "name": "s_0fba22e066",
+      "value": "Touchez la boîte aux lettres pour envoyer vos dernières pages"
+    },
+    {
+      "name": "s_0fee25f074",
+      "value": "Formule"
+    },
+    {
+      "name": "s_1017debe4c",
+      "value": "Annuel"
+    },
+    {
+      "name": "s_105137838b",
+      "value": "Sticker washi"
+    },
+    {
+      "name": "s_111bf28fb7",
+      "value": "Affiché sous le titre sur la page du carnet. S'il est vide, la période couverte s'affiche."
+    },
+    {
+      "name": "s_11ab7804df",
+      "value": "Boîte aux lettres"
+    },
+    {
+      "name": "s_121c1f2d8e",
+      "value": "Partager la sauvegarde (%s)"
+    },
+    {
+      "name": "s_129af6c2eb",
+      "value": "Échec du changement. Réessayez plus tard."
+    },
+    {
+      "name": "s_12cc5f519b",
+      "value": "Impossible d'enregistrer la vidéo Live Photo. La photo a été insérée en image fixe."
+    },
+    {
+      "name": "s_132f0d719a",
+      "value": "Renvoyer (%ds)"
+    },
+    {
+      "name": "s_1335fc30b7",
+      "value": "Ville uniquement, ex. « Canton »"
+    },
+    {
+      "name": "s_13ff717165",
+      "value": "Rappel de scellé (jours)"
+    },
+    {
+      "name": "s_14c9516e3f",
+      "value": "Trop de requêtes — réessayez plus tard"
+    },
+    {
+      "name": "s_15b21b73b7",
+      "value": "La lettre n’a pas pu être envoyée : %s"
+    },
+    {
+      "name": "s_16070acfe0",
+      "value": "%d"
+    },
+    {
+      "name": "s_16460eb17d",
+      "value": "Choisir un style de papier"
+    },
+    {
+      "name": "s_168b37f367",
+      "value": "Les premières heures n'appartiennent qu'à toi."
+    },
+    {
+      "name": "s_16ed8e1cbb",
+      "value": "Un enregistrement a été retiré · %s"
+    },
+    {
+      "name": "s_172e681d96",
+      "value": "Désactiver l’abonnement test"
+    },
+    {
+      "name": "s_173e51e1e5",
+      "value": "Vérifiez d’abord votre numéro actuel"
+    },
+    {
+      "name": "s_17f7c3a2d7",
+      "value": "Vert sapin"
+    },
+    {
+      "name": "s_1a4cb39357",
+      "value": "Ce qu'on écrit tard dans la nuit est souvent le plus vrai."
+    },
+    {
+      "name": "s_1a6ddc0c96",
+      "value": "« Ce jour n'a pas besoin de sens : être là en est un. »"
+    },
+    {
+      "name": "s_1ab35f0df8",
+      "value": "Grand format"
+    },
+    {
+      "name": "s_1b0adeee54",
+      "value": "Sous les Tang, on coupait le bambou et on l'immergeait cent jours dans l'étang, jusqu'à ce que l'écorce verte se détache — une étape que les papetiers appelaient shaqing, « tuer le vert ». La pâte donnait un papier légèrement jaune et étonnamment résistant : les Song y imprimèrent leurs livres, les Ming y écrivirent leurs lettres. Les cinq opérations consignées par Song Yingxing en 1637 sont encore suivies aujourd'hui."
+    },
+    {
+      "name": "s_1be7ae4fc2",
+      "value": "Nom"
+    },
+    {
+      "name": "s_1c5dfb22c6",
+      "value": "Accepter et continuer"
+    },
+    {
+      "name": "s_1c89ce16cb",
+      "value": "Votre lettre du %s est revenue"
+    },
+    {
+      "name": "s_1cd80fd7a8",
+      "value": "Renommer"
+    },
+    {
+      "name": "s_1ce1054c48",
+      "value": "L’icône change avec votre thème"
+    },
+    {
+      "name": "s_1d56b27a5e",
+      "value": "Aa"
+    },
+    {
+      "name": "s_1d72fd4c59",
+      "value": "Paisible"
+    },
+    {
+      "name": "s_1d83c41037",
+      "value": "Impossible de changer l’icône. Veuillez réessayer."
+    },
+    {
+      "name": "s_1dce997c92",
+      "value": "%s / an"
+    },
+    {
+      "name": "s_1e2443b94b",
+      "value": "L’abonnement est gratuit pendant les tests. Désactivez-le pour revenir à la version gratuite."
+    },
+    {
+      "name": "s_1f2998c9c8",
+      "value": "Ouvrir Réglages"
+    },
+    {
+      "name": "s_1fdf0d90c3",
+      "value": "·"
+    },
+    {
+      "name": "s_1ffe69200e",
+      "value": "En mode grande carte, appuyez longuement sur une photo pendant la rédaction pour la définir comme couverture."
+    },
+    {
+      "name": "s_212c3cace3",
+      "value": "C'est ainsi que votre correspondant vous appellera. Laissez vide pour ne rien mettre."
+    },
+    {
+      "name": "s_215574245b",
+      "value": "Supprimer l'entrée"
+    },
+    {
+      "name": "s_21f1e88275",
+      "value": "Se connecter"
+    },
+    {
+      "name": "s_221b549139",
+      "value": "Compte récupéré"
+    },
+    {
+      "name": "s_22339c750d",
+      "value": "Votre numéro est le seul moyen de récupérer ce compte. Sans lui, vous perdrez l’accès en changeant de téléphone ou si votre identifiant Apple devient inutilisable."
+    },
+    {
+      "name": "s_223d9e4e74",
+      "value": "Supprimer cette photo ?"
+    },
+    {
+      "name": "s_226a655b92",
+      "value": "3 minutes maximum"
+    },
+    {
+      "name": "s_22739c882c",
+      "value": "La journée s'achève. Quelque chose à retenir ?"
+    },
+    {
+      "name": "s_22ba7f6b51",
+      "value": "Supprimer cette entrée"
+    },
+    {
+      "name": "s_2312adef49",
+      "value": "« Les petites choses d'aujourd'hui compteront peut-être demain. »"
+    },
+    {
+      "name": "s_234289679b",
+      "value": "Carte épurée"
+    },
+    {
+      "name": "s_24a42e71b3",
+      "value": "Afficher l'icône de l'humeur du moment"
+    },
+    {
+      "name": "s_24f71d98ec",
+      "value": "Jusqu’à l’arrondissement, ex. « Canton, Tianhe »"
+    },
+    {
+      "name": "s_25124ed74c",
+      "value": "Nom"
+    },
+    {
+      "name": "s_25fbc95421",
+      "value": "Vous avez une nouvelle réponse"
+    },
+    {
+      "name": "s_263a3081dc",
+      "value": "Environ %s/mois"
+    },
+    {
+      "name": "s_2643a85f0c",
+      "value": "Il s'agit d'une sauvegarde texte seul : les entrées importées n'auront ni photo ni enregistrement."
+    },
+    {
+      "name": "s_26f030bca7",
+      "value": "En attente…"
+    },
+    {
+      "name": "s_282ab93d10",
+      "value": "Total"
+    },
+    {
+      "name": "s_287dbc9adc",
+      "value": "Songeur"
+    },
+    {
+      "name": "s_28cfd5c34e",
+      "value": "« Ce n'est pas grave de ne pas comprendre : écris d'abord. »"
+    },
+    {
+      "name": "s_28d07a1e09",
+      "value": "Écrivez d'abord quelques entrées dans Journal"
+    },
+    {
+      "name": "s_29205ba269",
+      "value": "Vos pages n’ont pas passé la vérification du contenu : la lettre n’a pas été envoyée"
+    },
+    {
+      "name": "s_295cb60c39",
+      "value": "La suppression du compte efface uniquement votre compte et l'historique des lettres sur nos serveurs. Votre journal n'est pas touché."
+    },
+    {
+      "name": "s_2a8f9bcff7",
+      "value": "Inactif"
+    },
+    {
+      "name": "s_2a90aa456f",
+      "value": "Le calme du matin se prête aux conversations avec soi-même."
+    },
+    {
+      "name": "s_2a91ea5068",
+      "value": "%d jours écrits ce mois-ci"
+    },
+    {
+      "name": "s_2afb730db8",
+      "value": "« Ce qui ne se dit pas peut s'écrire. »"
+    },
+    {
+      "name": "s_2bbc8185e3",
+      "value": "Connectez-vous pour que votre correspondant puisse vous écrire"
+    },
+    {
+      "name": "s_2c6afc5f55",
+      "value": "« Ne laisse pas ce jour n'être qu'un jour de plus. »"
+    },
+    {
+      "name": "s_2c71bcc7df",
+      "value": "⚠️ Rien n’a encore été sauvegardé sur iCloud : supprimer l’app maintenant effacerait tous vos journaux. Les entrées récentes mettent un instant à se téléverser ; si cela persiste, utilisez « Exporter la sauvegarde »."
+    },
+    {
+      "name": "s_2ca4a60f15",
+      "value": "Votre compte a été supprimé"
+    },
+    {
+      "name": "s_2ca8ce9b3f",
+      "value": "%s la 1re année"
+    },
+    {
+      "name": "s_2d54b2d8e5",
+      "value": "Garde cette pensée : tu te remercieras plus tard."
+    },
+    {
+      "name": "s_2dde9465fd",
+      "value": "Une sauvegarde complète, restaurable telle quelle sur un nouvel appareil."
+    },
+    {
+      "name": "s_2e172ff8fc",
+      "value": "Réponse inattendue du serveur (%d)"
+    },
+    {
+      "name": "s_2e529b5331",
+      "value": "Gérer l'abonnement"
+    },
+    {
+      "name": "s_2e813d55e6",
+      "value": "Accord de confidentialité"
+    },
+    {
+      "name": "s_2ed0fae234",
+      "value": "%s par mois. Renouvellement automatique dans les 24 heures précédant l'échéance. Résiliable à tout moment dans Réglages → Compte Apple → Abonnements."
+    },
+    {
+      "name": "s_2f17ec1476",
+      "value": "Résultats"
+    },
+    {
+      "name": "s_2f6633ce4b",
+      "value": "Retirer"
+    },
+    {
+      "name": "s_2f752c005e",
+      "value": "Retirer"
+    },
+    {
+      "name": "s_300ee58e24",
+      "value": "Humeur"
+    },
+    {
+      "name": "s_30f4d7cfe8",
+      "value": "ou"
+    },
+    {
+      "name": "s_3150ea0d70",
+      "value": "Contenu inclus"
+    },
+    {
+      "name": "s_328070e3ac",
+      "value": "Arrondissement"
+    },
+    {
+      "name": "s_33246f6a5e",
+      "value": "Terminé"
+    },
+    {
+      "name": "s_333ab56285",
+      "value": "Encadré"
+    },
+    {
+      "name": "s_33736fe5a5",
+      "value": "Ajouts : %1$d · dernier %2$s"
+    },
+    {
+      "name": "s_33a1272ec8",
+      "value": "Confirmer"
+    },
+    {
+      "name": "s_34028338a4",
+      "value": "« Prends ton temps : ce qui est bon vaut qu'on l'attende. »"
+    },
+    {
+      "name": "s_34346fa337",
+      "value": "Appareil HarmonyOS"
+    },
+    {
+      "name": "s_3505075551",
+      "value": "Un jour nouveau, qui commence par quelques mots."
+    },
+    {
+      "name": "s_354343bcbf",
+      "value": "« La texture d'une vie se cache dans les détails. »"
+    },
+    {
+      "name": "s_35795a4e98",
+      "value": "Aucun lieu correspondant"
+    },
+    {
+      "name": "s_36179dc44d",
+      "value": "Vous pouvez passer et le changer plus tard dans les réglages"
+    },
+    {
+      "name": "s_3755f56f2f",
+      "value": "Supprimer"
+    },
+    {
+      "name": "s_375d6fd193",
+      "value": "Exportez un carnet en PDF relié, prêt à imprimer."
+    },
+    {
+      "name": "s_37eb470096",
+      "value": "Valable jusqu'au"
+    },
+    {
+      "name": "s_384964cd05",
+      "value": "Le thé de l'après-midi et quelques mots : deux cadeaux que tu te fais."
+    },
+    {
+      "name": "s_39074a4234",
+      "value": "Une photo a été retirée · %s"
+    },
+    {
+      "name": "s_39bc5e6806",
+      "value": "Cette sauvegarde est chiffrée"
+    },
+    {
+      "name": "s_39bd23b773",
+      "value": "Calendrier d’écriture"
+    },
+    {
+      "name": "s_3aaae04c18",
+      "value": "Rétrospectives du mois et de l'année"
+    },
+    {
+      "name": "s_3aad2fe07a",
+      "value": "%d mots"
+    },
+    {
+      "name": "s_3ae6d0bf40",
+      "value": "Nettoyer %d fichiers résiduels"
+    },
+    {
+      "name": "s_3b849347c8",
+      "value": "Une lettre n’a pas pu partir"
+    },
+    {
+      "name": "s_3ba60ad590",
+      "value": "Enregistrement"
+    },
+    {
+      "name": "s_3ba6edb371",
+      "value": "Apple ID"
+    },
+    {
+      "name": "s_3bba23dbc1",
+      "value": "Envie d'une réponse à chaque page ?"
+    },
+    {
+      "name": "s_3bf179d8d0",
+      "value": "Non lié"
+    },
+    {
+      "name": "s_3c079f2974",
+      "value": "« L'automne se prête à relire d'anciennes pages. »"
+    },
+    {
+      "name": "s_3c0e11b682",
+      "value": "Ce fichier n’est pas chiffré"
+    },
+    {
+      "name": "s_3c607f617b",
+      "value": "Le service d’IA n’est pas encore activé"
+    },
+    {
+      "name": "s_3c71843c7b",
+      "value": "Rechercher un lieu"
+    },
+    {
+      "name": "s_3d04880897",
+      "value": "Lancer l'import"
+    },
+    {
+      "name": "s_3d39e30c5a",
+      "value": "Touchez pour enregistrer"
+    },
+    {
+      "name": "s_3d93dce578",
+      "value": "Cette sauvegarde nécessite un mot de passe"
+    },
+    {
+      "name": "s_3da4b3651a",
+      "value": "Prendre une photo"
+    },
+    {
+      "name": "s_3e3d59a258",
+      "value": "Code"
+    },
+    {
+      "name": "s_3e720ee6d4",
+      "value": "Impossible d'insérer la photo. Réessayez."
+    },
+    {
+      "name": "s_3e81ed47a5",
+      "value": "Ce n’est que lorsque vous **demandez une lettre à votre correspondant** que le texte des entrées choisies transite par nos serveurs pour composer une réponse — et nous ne le conservons pas."
+    },
+    {
+      "name": "s_3eb416223e",
+      "value": "|"
+    },
+    {
+      "name": "s_3f94e8a8dc",
+      "value": "Saisir un nom d'humeur"
+    },
+    {
+      "name": "s_3fb4374f11",
+      "value": "Bambou coupé, trempé à l'étang — le papier en garde l'odeur verte"
+    },
+    {
+      "name": "s_40525a7328",
+      "value": "Échec de l'enregistrement"
+    },
+    {
+      "name": "s_4181851141",
+      "value": "Série"
+    },
+    {
+      "name": "s_41984afcd9",
+      "value": "Une entrée par écran, balayez, photos en grand"
+    },
+    {
+      "name": "s_41c3719d6a",
+      "value": "Reprendre"
+    },
+    {
+      "name": "s_41e5243e2d",
+      "value": "Sommaire"
+    },
+    {
+      "name": "s_41f8b5303e",
+      "value": "« Écrire n'a pas à être parfait : sincère suffit. »"
+    },
+    {
+      "name": "s_421efbce02",
+      "value": "Enregistrement…"
+    },
+    {
+      "name": "s_42b37aa07d",
+      "value": "⚠️ Retenez bien ce mot de passe : c'est le seul moyen d'ouvrir la sauvegarde, et nous ne pouvons pas le récupérer."
+    },
+    {
+      "name": "s_42ffce9145",
+      "value": "À cet instant, il n'y a que toi et ce qui t'habite."
+    },
+    {
+      "name": "s_4306623202",
+      "value": "Vous pourrez reprendre là où vous vous êtes arrêté."
+    },
+    {
+      "name": "s_431c606023",
+      "value": "Mise en page"
+    },
+    {
+      "name": "s_4361b1e753",
+      "value": "iCloud restreint"
+    },
+    {
+      "name": "s_43680b11bb",
+      "value": "Un compte supprimé ne peut pas être récupéré. Vous pourrez vous réinscrire avec le même numéro, mais ce sera un tout nouveau compte."
+    },
+    {
+      "name": "s_4394cb2863",
+      "value": "Ces carnets de la sauvegarde portent le même nom que des carnets de cet appareil : %s. S'ils sont importés comme nouveaux, un numéro sera ajouté à leur nom."
+    },
+    {
+      "name": "s_43a879165d",
+      "value": "Aucune entrée à sauvegarder pour l’instant"
+    },
+    {
+      "name": "s_446462a28f",
+      "value": "« Même un jour ordinaire recèle quelque chose qui ne l'est pas. »"
+    },
+    {
+      "name": "s_44fd049d7d",
+      "value": "Courrier"
+    },
+    {
+      "name": "s_45260c7012",
+      "value": "%s par an. Renouvellement automatique dans les 24 heures précédant l'échéance. Résiliable à tout moment dans Réglages → Compte Apple → Abonnements."
+    },
+    {
+      "name": "s_4562024dde",
+      "value": "Appliquer"
+    },
+    {
+      "name": "s_4696b4622d",
+      "value": "Douce, discrète, amatrice de poésie… vous choisissez le caractère de votre correspondant."
+    },
+    {
+      "name": "s_476dd084aa",
+      "value": "iCloud ne répond pas : vos journaux ne sont que sur cet appareil. Enregistrez une copie via « Exporter la sauvegarde », puis vérifiez iCloud dans les réglages."
+    },
+    {
+      "name": "s_477a226253",
+      "value": "« L'été s'étire ; quelques mots font de l'ombre. »"
+    },
+    {
+      "name": "s_482d201d8b",
+      "value": "Liez un numéro pour pouvoir récupérer ce compte"
+    },
+    {
+      "name": "s_482d69aab3",
+      "value": "%ds"
+    },
+    {
+      "name": "s_487942b7ff",
+      "value": "Bienvenue dans Memoir. Avant de commencer, veuillez lire et accepter la « Politique de confidentialité » et les « Conditions d’utilisation »."
+    },
+    {
+      "name": "s_48aed26e83",
+      "value": "Gratuit : une lettre par semaine. Avec Plus, votre correspondant répond à chaque page."
+    },
+    {
+      "name": "s_48f55a18f1",
+      "value": "Une réponse est en chemin"
+    },
+    {
+      "name": "s_497b5a5707",
+      "value": "S'abonner à Memoir Plus"
+    },
+    {
+      "name": "s_49f055a8cc",
+      "value": "Aucune connexion — vérifiez le Wi-Fi ou les données mobiles"
+    },
+    {
+      "name": "s_49fcec9454",
+      "value": "Répartition des humeurs"
+    },
+    {
+      "name": "s_4aaa4b57b9",
+      "value": "Aucun lieu"
+    },
+    {
+      "name": "s_4afad87755",
+      "value": "Auto"
+    },
+    {
+      "name": "s_4b2eae4e13",
+      "value": "Impossible de lire ce fichier — il a peut-être été déplacé ou supprimé"
+    },
+    {
+      "name": "s_4c25fbcd78",
+      "value": "La connexion nécessite votre numéro de téléphone ; la météo nécessite l’accès à votre position. Vous pouvez désactiver les deux à tout moment dans les réglages."
+    },
+    {
+      "name": "s_4c67117f26",
+      "value": "Le « papier Kent » n'existe pas en Angleterre : le nom a été forgé au Japon. Il désigne une feuille d'un blanc pur, dure et parfaitement lisse, née dans le Kent au XIXe siècle — la gomme y passe sans faire de peluche, car elle est faite pour la planche à dessin. Les dessinateurs anglophones, eux, disent papier à dessin ou bristol."
+    },
+    {
+      "name": "s_4c99a7a774",
+      "value": "« Les jours se vivent un à un, et s'écrivent de même. »"
+    },
+    {
+      "name": "s_4cad1a999a",
+      "value": "Changer seulement le thème"
+    },
+    {
+      "name": "s_4cd30ef91e",
+      "value": "Enregistrer"
+    },
+    {
+      "name": "s_4d0b4688c7",
+      "value": "Annuler"
+    },
+    {
+      "name": "s_4e09cf222e",
+      "value": "Code envoyé"
+    },
+    {
+      "name": "s_4e1393a65c",
+      "value": "Toutes les entrées"
+    },
+    {
+      "name": "s_4e6b4fffe0",
+      "value": "Précision du lieu"
+    },
+    {
+      "name": "s_4f4fa3aee4",
+      "value": "Non enregistré : %s"
+    },
+    {
+      "name": "s_4f724002d4",
+      "value": "Masquer le cercle du cachet"
+    },
+    {
+      "name": "s_50034b8b01",
+      "value": "Saisissez le nouveau numéro"
+    },
+    {
+      "name": "s_502b05fb33",
+      "value": "Voulez-vous vraiment supprimer cette entrée ? Cette action est irréversible."
+    },
+    {
+      "name": "s_5070487278",
+      "value": "Sources"
+    },
+    {
+      "name": "s_50f87ef514",
+      "value": "Aucune humeur enregistrée sur cette période"
+    },
+    {
+      "name": "s_514dbb7b7e",
+      "value": "Pas maintenant"
+    },
+    {
+      "name": "s_518462faa6",
+      "value": "Choisir dans Photos"
+    },
+    {
+      "name": "s_524e22ba8d",
+      "value": "Votre première lettre est partie. %s est en train de la lire."
+    },
+    {
+      "name": "s_5272cb33b0",
+      "value": "Les six papiers photo et les trois mises en page de couverture."
+    },
+    {
+      "name": "s_5283bf449c",
+      "value": "Plusieurs tentatives, mais l’envoi a échoué"
+    },
+    {
+      "name": "s_529cdcc5f7",
+      "value": "Impossible de restaurer les achats. Réessayez plus tard."
+    },
+    {
+      "name": "s_52c25b074b",
+      "value": "Ardoise"
+    },
+    {
+      "name": "s_52cd34ba98",
+      "value": "Aucun lieu trouvé à proximité"
+    },
+    {
+      "name": "s_534de73969",
+      "value": "Création du paquet…"
+    },
+    {
+      "name": "s_54b8a90b3c",
+      "value": "Données"
+    },
+    {
+      "name": "s_54c43eaca1",
+      "value": "%d entrées"
+    },
+    {
+      "name": "s_54e712fa52",
+      "value": "Une réponse arrivera dans votre courrier d’ici trois jours"
+    },
+    {
+      "name": "s_55406b4cd3",
+      "value": "Le maroquin est une peau de chèvre au grain serré, le meilleur fond pour l'or ; le veau, lisse et peu marqué, domine la reliure anglaise de qualité du XVIIe au XIXe siècle."
+    },
+    {
+      "name": "s_559a6ba154",
+      "value": "Gérer les humeurs"
+    },
+    {
+      "name": "s_55b7664990",
+      "value": "Définir un mot de passe (4 caractères min.)"
+    },
+    {
+      "name": "s_5720afd3c4",
+      "value": "Li Zhao, Supplément à l'histoire des Tang (IXe s.) : « pour le papier, il y a le papier de bambou de Shao ». Song Yingxing, Tiangong Kaiwu, chapitre « Tuer le vert » (1637), décrit cinq opérations : tremper le bambou coupé, le cuire à la chaux, puiser à la forme, coucher la feuille, la sécher au feu. Le papier de bambou de Jiajiang (Sichuan) est cité à l'égal du papier Xuan ; Zhang Daqian les appelait « les deux trésors du pays »."
+    },
+    {
+      "name": "s_582c50066c",
+      "value": "car."
+    },
+    {
+      "name": "s_589be40a92",
+      "value": "La lettre de cette semaine est déjà partie. %s répond une fois par semaine — revenez la semaine prochaine."
+    },
+    {
+      "name": "s_58a94d895d",
+      "value": "Nettoyer les fichiers résiduels ?"
+    },
+    {
+      "name": "s_596b003c23",
+      "value": "Aubergine"
+    },
+    {
+      "name": "s_59a4ba58b0",
+      "value": "Avant que tout s'accélère, arrête-toi un instant."
+    },
+    {
+      "name": "s_59b153249b",
+      "value": "Impossible de supprimer le compte. Réessayez plus tard."
+    },
+    {
+      "name": "s_5a0a430923",
+      "value": "« Chaque jour te rapproche d'une réponse. »"
+    },
+    {
+      "name": "s_5a393262ea",
+      "value": "Écris quelques lignes avant de dormir, et laisse aller cette journée."
+    },
+    {
+      "name": "s_5a616bb0d3",
+      "value": "Bonjour. Garde-toi un peu de temps."
+    },
+    {
+      "name": "s_5a9cc5e891",
+      "value": "Numéro de téléphone"
+    },
+    {
+      "name": "s_5b7d127ef6",
+      "value": "Touchez encore pour ouvrir l’enveloppe"
+    },
+    {
+      "name": "s_5bc920edd7",
+      "value": "Une réponse à chaque page"
+    },
+    {
+      "name": "s_5c23be05d4",
+      "value": "Masqué"
+    },
+    {
+      "name": "s_5c6e6c1b88",
+      "value": "Les deux saisies diffèrent"
+    },
+    {
+      "name": "s_5cd32361fa",
+      "value": "Grille"
+    },
+    {
+      "name": "s_5d2df2c92d",
+      "value": "Se connecter / S'inscrire"
+    },
+    {
+      "name": "s_5d4d85a57d",
+      "value": "%1$s la première année, puis %2$s par an. Renouvellement automatique dans les 24 heures précédant l'échéance. Résiliable à tout moment dans Réglages → Compte Apple → Abonnements."
+    },
+    {
+      "name": "s_5d527e99c3",
+      "value": "Renommer le carnet"
+    },
+    {
+      "name": "s_5d701678ab",
+      "value": "Memoir"
+    },
+    {
+      "name": "s_5e03599e74",
+      "value": "« Cet endroit reste là, pour quand tu voudras parler. »"
+    },
+    {
+      "name": "s_5eb5a366c6",
+      "value": "Échec de l'autorisation Apple : aucun identifiant reçu"
+    },
+    {
+      "name": "s_5ed893c012",
+      "value": "Espace photos et audio"
+    },
+    {
+      "name": "s_5f03b3f09c",
+      "value": "Texte seul — un fichier très léger. Ni photos ni enregistrements."
+    },
+    {
+      "name": "s_5f2271d2b8",
+      "value": "Tourner à droite"
+    },
+    {
+      "name": "s_5f7e5d5768",
+      "value": "Lecture en cours"
+    },
+    {
+      "name": "s_5f9ab839a4",
+      "value": "Retirer de la couverture"
+    },
+    {
+      "name": "s_5fdfe71cba",
+      "value": "Plein d'espoir"
+    },
+    {
+      "name": "s_6055fe4b90",
+      "value": "Météo"
+    },
+    {
+      "name": "s_607cd976d2",
+      "value": "RETOUR"
+    },
+    {
+      "name": "s_60dbc09b63",
+      "value": "« La solitude n'est pas un mal : c'est du temps avec soi. »"
+    },
+    {
+      "name": "s_613b4f74e0",
+      "value": "Déplacer à droite"
+    },
+    {
+      "name": "s_61af9a4751",
+      "value": "Choisissez votre papier"
+    },
+    {
+      "name": "s_6210f62fdd",
+      "value": "Accès à l'appareil photo requis"
+    },
+    {
+      "name": "s_62d5f22319",
+      "value": "Une accalmie ? Assieds-toi et écris un peu."
+    },
+    {
+      "name": "s_640b8f590d",
+      "value": "Icône d'humeur"
+    },
+    {
+      "name": "s_644c1623fe",
+      "value": "Échec de l'envoi du code"
+    },
+    {
+      "name": "s_654040bb31",
+      "value": "Enregistrer ce brouillon ?"
+    },
+    {
+      "name": "s_677df5aca2",
+      "value": "Erreur lors de la préparation des données : %s"
+    },
+    {
+      "name": "s_677fa61f1d",
+      "value": "Contenu de la sauvegarde"
+    },
+    {
+      "name": "s_67a01a5a15",
+      "value": "Surligner"
+    },
+    {
+      "name": "s_67f415d86d",
+      "value": "Aucune lettre pour l'instant"
+    },
+    {
+      "name": "s_68363aefdc",
+      "value": "Supprimer votre compte ? Cette action est irréversible."
+    },
+    {
+      "name": "s_686748c67b",
+      "value": "Chaque lettre arrive dans une enveloppe scellée à la cire, sur un beau papier."
+    },
+    {
+      "name": "s_69007df2b7",
+      "value": "entrées"
+    },
+    {
+      "name": "s_692e58f019",
+      "value": "Votre première lettre est partie. %s la lit ; la réponse arrivera dans un jour ou deux."
+    },
+    {
+      "name": "s_69b55bf474",
+      "value": "Ce carnet est encore vide"
+    },
+    {
+      "name": "s_6a576f3bf9",
+      "value": "Sans titre"
+    },
+    {
+      "name": "s_6a7c90ae15",
+      "value": "Revenir"
+    },
+    {
+      "name": "s_6a8e6df501",
+      "value": "« Les saisons tournent. Ton histoire aussi. »"
+    },
+    {
+      "name": "s_6a94ee7065",
+      "value": "Retirer le surlignage"
+    },
+    {
+      "name": "s_6aed7c48be",
+      "value": "Associer"
+    },
+    {
+      "name": "s_6b16103d80",
+      "value": "Maroquin de chèvre — nul fond ne porte mieux la dorure"
+    },
+    {
+      "name": "s_6b19c847d8",
+      "value": "Faites glisser pour repositionner, pincez pour zoomer"
+    },
+    {
+      "name": "s_6b3f21b5dd",
+      "value": "Connectez-vous pour que %s puisse vous répondre"
+    },
+    {
+      "name": "s_6b4f2d224d",
+      "value": "Plus de 80 Mo — WeChat risque de refuser l'envoi. Essayez AirDrop, ou désactivez Photos et enregistrements pour ne sauvegarder que le texte."
+    },
+    {
+      "name": "s_6b7fba6ac9",
+      "value": "Carnets portant le même nom"
+    },
+    {
+      "name": "s_6c14bd7f6f",
+      "value": "Fermer"
+    },
+    {
+      "name": "s_6c2b170c04",
+      "value": "Impossible de charger la photo"
+    },
+    {
+      "name": "s_6c42607c7c",
+      "value": "Touchez encore pour sortir la lettre"
+    },
+    {
+      "name": "s_6ca9eae4f6",
+      "value": "Choisir un lieu"
+    },
+    {
+      "name": "s_6cbd10c2ff",
+      "value": "Afficher automatiquement la météo à la rédaction"
+    },
+    {
+      "name": "s_6d1f3e58bb",
+      "value": "« Aucun pas n'est perdu : chacun compte. »"
+    },
+    {
+      "name": "s_6e5c04b091",
+      "value": "Chaque thème a son icône. Les nouveaux thèmes en ajouteront ici."
+    },
+    {
+      "name": "s_6ec8fe27cd",
+      "value": "Renvoyer"
+    },
+    {
+      "name": "s_6efeb2c455",
+      "value": "« Le passé ne disparaît pas : il attend que tu te retournes. »"
+    },
+    {
+      "name": "s_6f69dd45f8",
+      "value": "Réenregistrer"
+    },
+    {
+      "name": "s_706bcb8f6f",
+      "value": "Toutes vos données sur nos serveurs : votre compte Memoir, le numéro de téléphone et l'Apple ID associés, votre surnom, le nom de votre correspondant et l'historique des lettres."
+    },
+    {
+      "name": "s_70eeb8233a",
+      "value": "Il est tard. Le monde s'est tu."
+    },
+    {
+      "name": "s_712c2ff8d3",
+      "value": "Page du journal"
+    },
+    {
+      "name": "s_7147dd5d08",
+      "value": "Nettoyer %d fichiers résiduels et libérer %s ?"
+    },
+    {
+      "name": "s_71cfa4ee81",
+      "value": "À %s"
+    },
+    {
+      "name": "s_72ca690ff2",
+      "value": "« Les jours dont on ne se souvient pas n'ont pas été vécus. »"
+    },
+    {
+      "name": "s_72d04e5cd0",
+      "value": "Animation de lancement"
+    },
+    {
+      "name": "s_731247adaa",
+      "value": "Ou vérifiez avec Apple"
+    },
+    {
+      "name": "s_733a444c99",
+      "value": "Pas encore sauvegardé"
+    },
+    {
+      "name": "s_73f8dc416c",
+      "value": "Pas encore de courrier"
+    },
+    {
+      "name": "s_7402638ab2",
+      "value": "Memoir Plus"
+    },
+    {
+      "name": "s_74bd07ef78",
+      "value": "Aujourd'hui, je voudrais dire…"
+    },
+    {
+      "name": "s_7549a61e00",
+      "value": "Les entrées, photos et enregistrements sur ce téléphone et dans votre iCloud, ainsi que les lettres déjà reçues. Ils vous appartiennent et resteront là après la suppression du compte."
+    },
+    {
+      "name": "s_755eaf62bd",
+      "value": "Plusieurs entrées par écran, faciles à parcourir"
+    },
+    {
+      "name": "s_75c33f5c2e",
+      "value": "Import terminé"
+    },
+    {
+      "name": "s_75ce20b461",
+      "value": "« Certains paysages ne reviennent pas. Note-les. »"
+    },
+    {
+      "name": "s_7645c5d19c",
+      "value": "Noter la météo"
+    },
+    {
+      "name": "s_76a21b5df1",
+      "value": "« Une plume, une page : un monde entier. »"
+    },
+    {
+      "name": "s_76ce8e3d5e",
+      "value": "Synchronisé"
+    },
+    {
+      "name": "s_76e2f7abf9",
+      "value": "« À l'instant où la plume se pose, le temps s'arrête. »"
+    },
+    {
+      "name": "s_771ba2fa48",
+      "value": "C'est prêt. Envoyez-le-vous, enregistrez-le dans Fichiers, ou transférez-le par AirDrop."
+    },
+    {
+      "name": "s_7744960f42",
+      "value": "Envoi impossible. Réessayez plus tard."
+    },
+    {
+      "name": "s_775660537d",
+      "value": "Style de papier photo"
+    },
+    {
+      "name": "s_778db1c262",
+      "value": "En touchant « Accepter et continuer », vous confirmez avoir lu et accepté l’intégralité des deux accords."
+    },
+    {
+      "name": "s_778fc8f994",
+      "value": "Tout"
+    },
+    {
+      "name": "s_781c5c7050",
+      "value": "Restaurer les achats"
+    },
+    {
+      "name": "s_7945500987",
+      "value": "Choisir dans Photos"
+    },
+    {
+      "name": "s_79b0ebdd1c",
+      "value": "Changer de numéro"
+    },
+    {
+      "name": "s_7bf3cf769a",
+      "value": "En faire un livre"
+    },
+    {
+      "name": "s_7c130d80b8",
+      "value": "Ville"
+    },
+    {
+      "name": "s_7d84c682b8",
+      "value": "Couleur de couverture"
+    },
+    {
+      "name": "s_7d8e819a4b",
+      "value": "Rien n’est coché : l’enveloppe est vide"
+    },
+    {
+      "name": "s_7debf9cb03",
+      "value": "Réglages"
+    },
+    {
+      "name": "s_7ebd4ae074",
+      "value": "Kent"
+    },
+    {
+      "name": "s_7fbe49401c",
+      "value": "Associer un numéro"
+    },
+    {
+      "name": "s_805a0473b6",
+      "value": "« Aujourd'hui aussi mérite qu'on s'en souvienne. »"
+    },
+    {
+      "name": "s_806666de10",
+      "value": "Aucun abonnement Memoir Plus trouvé pour ce compte Apple."
+    },
+    {
+      "name": "s_808887de3e",
+      "value": "La lumière est parfaite pour noter ce que tu ressens."
+    },
+    {
+      "name": "s_80a37cf380",
+      "value": "Commencer à écrire"
+    },
+    {
+      "name": "s_81d3179a26",
+      "value": "Votre position ne figure que dans les entrées de cet appareil et n'est jamais envoyée. Les modifications ne concernent que les entrées à venir."
+    },
+    {
+      "name": "s_81d428a1d8",
+      "value": "Enregistrer le lieu"
+    },
+    {
+      "name": "s_824e119909",
+      "value": "Abattu"
+    },
+    {
+      "name": "s_83a302c43c",
+      "value": "Code à 6 chiffres"
+    },
+    {
+      "name": "s_83c6e3fd12",
+      "value": "Reconnaissant"
+    },
+    {
+      "name": "s_83e94c92d7",
+      "value": "Appareil photo indisponible"
+    },
+    {
+      "name": "s_83f9f94e0b",
+      "value": "Choisissez votre nom"
+    },
+    {
+      "name": "s_840d2718da",
+      "value": "Joyeux"
+    },
+    {
+      "name": "s_84366e6a6f",
+      "value": "Affichage"
+    },
+    {
+      "name": "s_84476c8174",
+      "value": "Localisation"
+    },
+    {
+      "name": "s_85a35ccdd6",
+      "value": "Fusionner avec les carnets existants"
+    },
+    {
+      "name": "s_85f02cfb34",
+      "value": "Nouvelle entrée"
+    },
+    {
+      "name": "s_85f84428c2",
+      "value": "Désactivé, les Live Photos apparaissent en image fixe sur vos autres appareils."
+    },
+    {
+      "name": "s_86ef74c64f",
+      "value": "Échec de l'autorisation Apple"
+    },
+    {
+      "name": "s_87363c0bec",
+      "value": "Envoyée le %s"
+    },
+    {
+      "name": "s_876c5b2f4c",
+      "value": "Synchroniser les vidéos Live Photo"
+    },
+    {
+      "name": "s_877d91d42a",
+      "value": "Irréversible"
+    },
+    {
+      "name": "s_87d04c6c61",
+      "value": "Déjà Vu"
+    },
+    {
+      "name": "s_8803176f5e",
+      "value": "Trancher, jeter, se détacher — dans le minimalisme moderne, moins c'est plus"
+    },
+    {
+      "name": "s_89345cda95",
+      "value": "Ne pas envoyer"
+    },
+    {
+      "name": "s_8949122316",
+      "value": "Cachet du journal"
+    },
+    {
+      "name": "s_895ec8fd1b",
+      "value": "Erreur lors de l’archivage : %s"
+    },
+    {
+      "name": "s_8a7a73f2b2",
+      "value": "😊"
+    },
+    {
+      "name": "s_8a7af824ab",
+      "value": "Aucune obligation : écrire, synchroniser et sauvegarder restent gratuits pour toujours."
+    },
+    {
+      "name": "s_8a97792ca9",
+      "value": "Erreur lors de l’enregistrement : %s"
+    },
+    {
+      "name": "s_8ad31155b2",
+      "value": "« Ce journal ne te trouvera jamais trop bavard. »"
+    },
+    {
+      "name": "s_8b196caa75",
+      "value": "Toutes les entrées de cette sauvegarde sont déjà sur cet appareil."
+    },
+    {
+      "name": "s_8b365db6c9",
+      "value": "Rien de nouveau depuis votre dernière lettre. Écrivez d’abord, puis envoyez."
+    },
+    {
+      "name": "s_8b5b1182d2",
+      "value": "Non connecté à iCloud"
+    },
+    {
+      "name": "s_8c276c1fea",
+      "value": "Politique de confidentialité"
+    },
+    {
+      "name": "s_8c2d497713",
+      "value": "Les nouvelles photos partiront de ce style, modifiable au moment de l'insertion."
+    },
+    {
+      "name": "s_8c8658f454",
+      "value": "« Quelque part, quelqu'un regarde le même ciel que toi. »"
+    },
+    {
+      "name": "s_8cd62ee39c",
+      "value": "« Tu es plus courageux que tu ne le crois. »"
+    },
+    {
+      "name": "s_8d1a970c8d",
+      "value": "Style par défaut"
+    },
+    {
+      "name": "s_8d6bc0a28f",
+      "value": "Langue"
+    },
+    {
+      "name": "s_8db187e659",
+      "value": "Limite de 5 photos atteinte"
+    },
+    {
+      "name": "s_8dcc9a2d73",
+      "value": "Correspondant"
+    },
+    {
+      "name": "s_8e39a34dcc",
+      "value": "« Le temps d'un thé suffit à écrire ce qu'on ressent. »"
+    },
+    {
+      "name": "s_8ec3a93dbd",
+      "value": "Impossible de joindre l'App Store pour le moment. Réessayez plus tard."
+    },
+    {
+      "name": "s_8ee0b6f9eb",
+      "value": "Photo de couverture"
+    },
+    {
+      "name": "s_8f31a480bd",
+      "value": "« Conditions d’utilisation »"
+    },
+    {
+      "name": "s_8f7126f2d3",
+      "value": "Touchez l'enveloppe en haut à droite et %s vous écrira"
+    },
+    {
+      "name": "s_8fad83c181",
+      "value": "« Rien ne presse : l'histoire ne fait que commencer. »"
+    },
+    {
+      "name": "s_9013849179",
+      "value": "Compte"
+    },
+    {
+      "name": "s_9058a1c2c5",
+      "value": "Journal"
+    },
+    {
+      "name": "s_907c3945d8",
+      "value": "Nettoyer"
+    },
+    {
+      "name": "s_90c36f74f2",
+      "value": "Thème changé, mais l'icône n'a pas pu être modifiée"
+    },
+    {
+      "name": "s_9101853a76",
+      "value": "Sous-titre (facultatif)"
+    },
+    {
+      "name": "s_91732e25ee",
+      "value": "Choisir une couleur"
+    },
+    {
+      "name": "s_918e4226fe",
+      "value": "L'import ne fait qu'ajouter. Les entrées déjà présentes sont ignorées : rien n'est écrasé ni supprimé."
+    },
+    {
+      "name": "s_9199a16092",
+      "value": "Données et sauvegarde"
+    },
+    {
+      "name": "s_91c4b31f0e",
+      "value": "« Écrire est la façon la plus douce de résister à l'oubli. »"
+    },
+    {
+      "name": "s_91e5f2c416",
+      "value": "« Inutile de faire semblant d'être fort : il n'y a que toi ici. »"
+    },
+    {
+      "name": "s_930c3a22eb",
+      "value": "« Quand on est seul, les mots sont la meilleure compagnie. »"
+    },
+    {
+      "name": "s_9392c3c977",
+      "value": "Statistiques"
+    },
+    {
+      "name": "s_93aeabd110",
+      "value": "Vérifiez avec l'Apple ID associé"
+    },
+    {
+      "name": "s_9401eee769",
+      "value": "30 jours"
+    },
+    {
+      "name": "s_9545e4dc22",
+      "value": "J'ai compris, continuer"
+    },
+    {
+      "name": "s_95a2fe4ab7",
+      "value": "Ne pas enregistrer"
+    },
+    {
+      "name": "s_95a69206f7",
+      "value": "Cet instant est désormais sur le papier"
+    },
+    {
+      "name": "s_975ac3e011",
+      "value": "Jointe à la lettre"
+    },
+    {
+      "name": "s_9860e2406f",
+      "value": "« Le soleil sur la page réchauffe les mots. »"
+    },
+    {
+      "name": "s_989d1affa0",
+      "value": "Version"
+    },
+    {
+      "name": "s_98a39c3dda",
+      "value": "Délai dépassé — réessayez plus tard"
+    },
+    {
+      "name": "s_9908c922f2",
+      "value": "Vérification…"
+    },
+    {
+      "name": "s_997b9c5847",
+      "value": "Terminé — réécoutez ou insérez"
+    },
+    {
+      "name": "s_9a15479618",
+      "value": "Photo collée"
+    },
+    {
+      "name": "s_9a21654c81",
+      "value": "Ouvre la fenêtre : l'histoire du jour commence."
+    },
+    {
+      "name": "s_9b662606e2",
+      "value": "Jusqu'au %s"
+    },
+    {
+      "name": "s_9b87ed617f",
+      "value": "Quelque chose à noter aujourd'hui ?"
+    },
+    {
+      "name": "s_9bb34ecd75",
+      "value": "Vous n'êtes pas connecté à iCloud : les entrées restent sur cet appareil. Connectez-vous dans Réglages → Compte Apple et la synchronisation démarrera."
+    },
+    {
+      "name": "s_9c92f8559a",
+      "value": "Ces fichiers n'appartiennent à aucune entrée existante. Les supprimer n'affectera pas vos contenus."
+    },
+    {
+      "name": "s_9cb1bcd558",
+      "value": "21 jours"
+    },
+    {
+      "name": "s_9d4c418473",
+      "value": "Rouge bordeaux"
+    },
+    {
+      "name": "s_9d84cfe84d",
+      "value": "Brouillon enregistré"
+    },
+    {
+      "name": "s_9e19a026db",
+      "value": "Dans cette lettre"
+    },
+    {
+      "name": "s_9e5cbe5e55",
+      "value": "Ce qui est supprimé"
+    },
+    {
+      "name": "s_9eda140339",
+      "value": "Déplacer à gauche"
+    },
+    {
+      "name": "s_9f0103656b",
+      "value": "Couleur de la toile"
+    },
+    {
+      "name": "s_9f9a88b0c8",
+      "value": "Changer aussi l'icône"
+    },
+    {
+      "name": "s_9fbb2e66c7",
+      "value": "Cette sauvegarde provient d’une version plus récente de Memoir (format v%d). Mettez l’app à jour avant d’importer."
+    },
+    {
+      "name": "s_a09ce12ef3",
+      "value": "« Politique de confidentialité »"
+    },
+    {
+      "name": "s_a0a02d4593",
+      "value": "Icône déjà en place"
+    },
+    {
+      "name": "s_a0b3cc9c47",
+      "value": "« Partout où le vent est passé mérite d'être noté. »"
+    },
+    {
+      "name": "s_a11d72f33b",
+      "value": "Rédaction en cours…"
+    },
+    {
+      "name": "s_a20949550e",
+      "value": "S'abonner"
+    },
+    {
+      "name": "s_a26f1abe64",
+      "value": "Importer une sauvegarde"
+    },
+    {
+      "name": "s_a2917545f5",
+      "value": "D’autres lettres sont en chemin"
+    },
+    {
+      "name": "s_a2a4dab858",
+      "value": "#%s"
+    },
+    {
+      "name": "s_a33bda51e5",
+      "value": "Mot de passe incorrect — réessayez"
+    },
+    {
+      "name": "s_a3b90b392b",
+      "value": "Carnets"
+    },
+    {
+      "name": "s_a428575031",
+      "value": "L'achat n'a pas pu aboutir. Réessayez plus tard."
+    },
+    {
+      "name": "s_a4e6f10bf1",
+      "value": "Renvoyer"
+    },
+    {
+      "name": "s_a4fb934a6f",
+      "value": "Format de fichier incorrect — il est peut-être endommagé"
+    },
+    {
+      "name": "s_a612e01da7",
+      "value": "Écrire la première entrée"
+    },
+    {
+      "name": "s_a671f238f1",
+      "value": "Rue"
+    },
+    {
+      "name": "s_a7f814c0a4",
+      "value": "Modifier"
+    },
+    {
+      "name": "s_a803dc45fe",
+      "value": "Courrier, nouvelle réponse"
+    },
+    {
+      "name": "s_a87b5e1491",
+      "value": "Type de cachet"
+    },
+    {
+      "name": "s_a8d4081ed6",
+      "value": "Impossible d'écrire la lettre : %s"
+    },
+    {
+      "name": "s_a911a90bfb",
+      "value": "La lettre du jour vient de partir, elle n'est pas allée loin. Écrivez demain, la réponse viendra demain."
+    },
+    {
+      "name": "s_a9d57f8585",
+      "value": "Écrire cet instant"
+    },
+    {
+      "name": "s_aaa25533ca",
+      "value": "Noter la météo et le lieu"
+    },
+    {
+      "name": "s_ab58e2f999",
+      "value": "« Dans le doute, commence à écrire. »"
+    },
+    {
+      "name": "s_ab7fb2e196",
+      "value": "Mot de passe de la sauvegarde"
+    },
+    {
+      "name": "s_abafd65e30",
+      "value": "Bambou"
+    },
+    {
+      "name": "s_aca36c266f",
+      "value": "« Le temps ne t'attend pas. Les mots, si. »"
+    },
+    {
+      "name": "s_acc4a9dd8c",
+      "value": "%s n'est pas à son bureau pour l'instant. Revenez un peu plus tard."
+    },
+    {
+      "name": "s_ad1e6b0e58",
+      "value": "Ce thème possède une icône assortie sur l'écran d'accueil."
+    },
+    {
+      "name": "s_ad5abaa04c",
+      "value": "Aperçu :"
+    },
+    {
+      "name": "s_ad8012ee9f",
+      "value": "Thèmes"
+    },
+    {
+      "name": "s_ad904830fe",
+      "value": "Ce n’est pas une sauvegarde Memoir, ou le fichier est endommagé"
+    },
+    {
+      "name": "s_ade3dc5859",
+      "value": "Touchez le sceau pour ouvrir la lettre"
+    },
+    {
+      "name": "s_ae002a8a37",
+      "value": "Nom du carnet"
+    },
+    {
+      "name": "s_ae7b18f8be",
+      "value": "Touchez la boîte aux lettres pour envoyer à %s les pages cochées"
+    },
+    {
+      "name": "s_af5a2c8bff",
+      "value": "Italique"
+    },
+    {
+      "name": "s_b0068cfb4a",
+      "value": "Supprimer le carnet"
+    },
+    {
+      "name": "s_b04c38d8e1",
+      "value": "« Ce qu'on écrit ne s'envole pas. »"
+    },
+    {
+      "name": "s_b065d573da",
+      "value": "Impossible d'écrire la lettre"
+    },
+    {
+      "name": "s_b1a9ba7930",
+      "value": "« Continuer d'écrire, c'est déjà le plus grand courage. »"
+    },
+    {
+      "name": "s_b1b08dc4d9",
+      "value": "Puis %1$s/an · environ %2$s/mois"
+    },
+    {
+      "name": "s_b1fb8f13cc",
+      "value": "Envoyer vos pages"
+    },
+    {
+      "name": "s_b1fc6613b2",
+      "value": "Supprimer le compte"
+    },
+    {
+      "name": "s_b27fe843c8",
+      "value": "Impossible d'enregistrer la lettre qui attendait sur le serveur"
+    },
+    {
+      "name": "s_b2a64d5441",
+      "value": "Ce mois-ci"
+    },
+    {
+      "name": "s_b2c510fd6a",
+      "value": "Productif"
+    },
+    {
+      "name": "s_b2e8e82a2a",
+      "value": "Votre lettre est dans la boîte"
+    },
+    {
+      "name": "s_b34f3cc999",
+      "value": "Ce qui est conservé"
+    },
+    {
+      "name": "s_b3addb5e3f",
+      "value": "Associé"
+    },
+    {
+      "name": "s_b3f3b0c40c",
+      "value": "Envoyé. Une réponse arrivera dans votre courrier d’ici trois jours."
+    },
+    {
+      "name": "s_b416882c45",
+      "value": "Cuir"
+    },
+    {
+      "name": "s_b418d20f0d",
+      "value": "Memoir"
+    },
+    {
+      "name": "s_b458ea40bf",
+      "value": "Position actuelle"
+    },
+    {
+      "name": "s_b477b8791b",
+      "value": "Un carnet porte déjà ce nom"
+    },
+    {
+      "name": "s_b4a7bb16c0",
+      "value": "À"
+    },
+    {
+      "name": "s_b4f504af2c",
+      "value": "La réponse de %s est arrivée. Allez voir votre courrier."
+    },
+    {
+      "name": "s_b5040678f0",
+      "value": "La lumière s'allonge. Note cette journée pendant qu'il en est temps."
+    },
+    {
+      "name": "s_b6c0279a8a",
+      "value": "Impossible de remettre ces pages"
+    },
+    {
+      "name": "s_b72205943e",
+      "value": "Touchez « Obtenir le code » : nous l’enverrons à votre numéro actuel."
+    },
+    {
+      "name": "s_b74d58bd95",
+      "value": "« Le vent de printemps porte un recommencement. »"
+    },
+    {
+      "name": "s_b7607a6106",
+      "value": "Définir comme couverture"
+    },
+    {
+      "name": "s_b768d5ebc5",
+      "value": "Restez dans l'application pendant l'import."
+    },
+    {
+      "name": "s_b7c45049d1",
+      "value": "Trop de requêtes — réessayez dans environ %d secondes"
+    },
+    {
+      "name": "s_b869f3199c",
+      "value": "Mots"
+    },
+    {
+      "name": "s_b8bb31e170",
+      "value": "Couverture"
+    },
+    {
+      "name": "s_b90591eec2",
+      "value": "Relâcher pour déposer ici"
+    },
+    {
+      "name": "s_b981bb73cb",
+      "value": "La lumière de l'après-midi est douce. Toi aussi."
+    },
+    {
+      "name": "s_bb69e30f5a",
+      "value": "Récupération du moment et du lieu…"
+    },
+    {
+      "name": "s_bb7874b421",
+      "value": "Intertitre"
+    },
+    {
+      "name": "s_bb9da11863",
+      "value": "Ambre"
+    },
+    {
+      "name": "s_bbfd0f9d4f",
+      "value": "Ce contenu n’a pas passé la modération, aucune lettre n’a pu être écrite"
+    },
+    {
+      "name": "s_bc266e5f3b",
+      "value": "Modifier le carnet"
+    },
+    {
+      "name": "s_bc369f65c9",
+      "value": "Touchez-en une pour l'ajouter à votre entrée"
+    },
+    {
+      "name": "s_bce579c597",
+      "value": "Mot de passe incorrect — réessayez"
+    },
+    {
+      "name": "s_bd1775eabd",
+      "value": "Écris quelques mots avant que le soleil ne se retire."
+    },
+    {
+      "name": "s_bd7fc4488b",
+      "value": "Rien de plus à droite"
+    },
+    {
+      "name": "s_bd86a7ba02",
+      "value": "Demande envoyée. L'abonnement démarrera dès qu'il sera approuvé."
+    },
+    {
+      "name": "s_bddddc8c10",
+      "value": "« Le changement n'a pas à être spectaculaire : écrire, c'est déjà commencer. »"
+    },
+    {
+      "name": "s_be58bf9d7d",
+      "value": "Rien de nouveau à ajouter"
+    },
+    {
+      "name": "s_bed172efc9",
+      "value": "À propos"
+    },
+    {
+      "name": "s_bf50d67138",
+      "value": "Entrées"
+    },
+    {
+      "name": "s_bf6ad0ba08",
+      "value": "« Arrête-toi parfois pour regarder le chemin parcouru. »"
+    },
+    {
+      "name": "s_bfae481139",
+      "value": "Vous n’êtes pas connecté à iCloud. Vos journaux ne sont que sur cet appareil et seront perdus si vous supprimez l’app. Connectez-vous dans « Réglages → Compte Apple » et la synchronisation démarrera automatiquement."
+    },
+    {
+      "name": "s_bfd6de1bee",
+      "value": "Saisir à nouveau"
+    },
+    {
+      "name": "s_c06a9a8733",
+      "value": "Erreur lors de la décompression : %s"
+    },
+    {
+      "name": "s_c0fc825651",
+      "value": "La lettre de cette semaine est déjà arrivée. %s ne répond qu'une fois par semaine — tout ce que vous écrivez est lu. Revenez dimanche prochain."
+    },
+    {
+      "name": "s_c11b65b92c",
+      "value": "L'aube point. Une page neuve t'attend."
+    },
+    {
+      "name": "s_c15e3efa81",
+      "value": "« Les émotions ne sont ni justes ni fausses : elles sont entendues, ou ignorées. »"
+    },
+    {
+      "name": "s_c20e6cdf1d",
+      "value": "Chaque page mérite une réponse"
+    },
+    {
+      "name": "s_c266fc5a91",
+      "value": "Écris quelques lignes avant que le monde ne s'éveille."
+    },
+    {
+      "name": "s_c2b46a7849",
+      "value": "La lettre du jour est déjà partie. Revenez demain."
+    },
+    {
+      "name": "s_c3304d1e49",
+      "value": "jours"
+    },
+    {
+      "name": "s_c33c1e2c83",
+      "value": "Supprimer un carnet n'efface pas ses entrées : seule l'association d'étiquette disparaît."
+    },
+    {
+      "name": "s_c36573f3f7",
+      "value": "Donnez un nom à votre correspondant"
+    },
+    {
+      "name": "s_c3915c323e",
+      "value": "Photogramme"
+    },
+    {
+      "name": "s_c3d92b20c8",
+      "value": "Compte"
+    },
+    {
+      "name": "s_c488684daf",
+      "value": "Supprimer la photo"
+    },
+    {
+      "name": "s_c5096164af",
+      "value": "MEMOIR"
+    },
+    {
+      "name": "s_c51f0d0011",
+      "value": "Chiffrement"
+    },
+    {
+      "name": "s_c567ba63ab",
+      "value": "« Certains chemins se font seul, mais on n'a pas à tout porter seul. »"
+    },
+    {
+      "name": "s_c5c198d890",
+      "value": "Nouveau numéro"
+    },
+    {
+      "name": "s_c5e6652443",
+      "value": "%s a déjà répondu plusieurs fois ce mois-ci. Une plume lente ; la suite le mois prochain."
+    },
+    {
+      "name": "s_c62079d2ba",
+      "value": "Ajuster le cadrage"
+    },
+    {
+      "name": "s_c65a22ccf7",
+      "value": "« Le ciel change chaque jour. L'avais-tu remarqué ? »"
+    },
+    {
+      "name": "s_c665b719e0",
+      "value": "Le nom choisi apparaît sur les nouvelles lettres. Le changer n'affecte que les suivantes ; les anciennes gardent leur signature."
+    },
+    {
+      "name": "s_c72e1ce65f",
+      "value": "Le jour décline : le moment de revenir sur ta journée."
+    },
+    {
+      "name": "s_c74dd33b63",
+      "value": "« Les jours de pluie sont toujours plus riches en émotions. »"
+    },
+    {
+      "name": "s_c7a3044d8f",
+      "value": "Nouveau carnet"
+    },
+    {
+      "name": "s_c8d09cf955",
+      "value": "Par défaut"
+    },
+    {
+      "name": "s_ca2e64e0b5",
+      "value": "Payant"
+    },
+    {
+      "name": "s_ca4fe69fd3",
+      "value": "Les fichiers résiduels proviennent d'entrées supprimées. Ils n'appartiennent plus à aucune entrée : les effacer n'affectera rien de ce que vous avez."
+    },
+    {
+      "name": "s_ca8ffc3990",
+      "value": "Statistiques"
+    },
+    {
+      "name": "s_ca96133fe5",
+      "value": "Autre appareil"
+    },
+    {
+      "name": "s_cad0c3af51",
+      "value": "Placer à gauche"
+    },
+    {
+      "name": "s_cb2d681e91",
+      "value": "Calme"
+    },
+    {
+      "name": "s_cb399ce358",
+      "value": "Memoir doit conserver votre numéro de téléphone pour la connexion et transmettre le texte de vos entrées pour composer une réponse lorsque vous demandez une lettre. Sans votre consentement, ces fonctionnalités ne peuvent pas être proposées. Nous en sommes désolés."
+    },
+    {
+      "name": "s_cb7f4c5817",
+      "value": "Suivre le thème"
+    },
+    {
+      "name": "s_cb9d926f92",
+      "value": "Lin"
+    },
+    {
+      "name": "s_cba4ea4cc9",
+      "value": "Échec de la génération de la clé"
+    },
+    {
+      "name": "s_cbcc5a7c11",
+      "value": "Envoi en cours…"
+    },
+    {
+      "name": "s_cca54b96ed",
+      "value": "Anthracite"
+    },
+    {
+      "name": "s_ccf97f8d85",
+      "value": "Mensuel"
+    },
+    {
+      "name": "s_cd0f3ad8dd",
+      "value": "Original"
+    },
+    {
+      "name": "s_cd2db65a0a",
+      "value": "%s a déjà répondu plusieurs fois ce mois-ci. Revenez le mois prochain."
+    },
+    {
+      "name": "s_cd847d1b02",
+      "value": "Mes carnets"
+    },
+    {
+      "name": "s_cd85b99707",
+      "value": "Ajouté · %s"
+    },
+    {
+      "name": "s_cd91dfd56d",
+      "value": "« Le trouble d'aujourd'hui est peut-être la réponse de demain. »"
+    },
+    {
+      "name": "s_cd99b225a0",
+      "value": "Langue"
+    },
+    {
+      "name": "s_cdf36d8e2f",
+      "value": "Placer à droite"
+    },
+    {
+      "name": "s_ce3e4010fe",
+      "value": "Modifier la couverture"
+    },
+    {
+      "name": "s_ce4ad523f3",
+      "value": "Sans choix, elle n'ira que dans « Toutes les entrées »."
+    },
+    {
+      "name": "s_ce8689ed1e",
+      "value": "Envoyé. Écrivez de nouvelles pages et revenez les envoyer."
+    },
+    {
+      "name": "s_cf9d76b498",
+      "value": "Découvrir Memoir Plus"
+    },
+    {
+      "name": "s_cfe9c440c8",
+      "value": "Vous pouvez retourner y jeter un œil."
+    },
+    {
+      "name": "s_d01a4dd338",
+      "value": "Aucun numéro de téléphone associé. Votre numéro est le seul moyen de récupérer votre compte : sans lui, vous perdrez l'accès en cas de changement de téléphone ou d'indisponibilité de votre identifiant Apple."
+    },
+    {
+      "name": "s_d11b66842a",
+      "value": "Exporter une sauvegarde"
+    },
+    {
+      "name": "s_d190c58094",
+      "value": "De %s"
+    },
+    {
+      "name": "s_d302bacb72",
+      "value": "Bientôt disponible"
+    },
+    {
+      "name": "s_d3fc6fa5bc",
+      "value": "Pleine page"
+    },
+    {
+      "name": "s_d46f82fdf0",
+      "value": "Liste"
+    },
+    {
+      "name": "s_d55de11445",
+      "value": "Synchronisé avec l'App Store"
+    },
+    {
+      "name": "s_d567eeebd2",
+      "value": "⚠️ Sans mot de passe, quiconque obtient ce fichier peut lire toutes vos entrées."
+    },
+    {
+      "name": "s_d5af163131",
+      "value": "« Chaque jour est neuf. Chaque page aussi. »"
+    },
+    {
+      "name": "s_d60bcc29e2",
+      "value": "Erreur de synchronisation"
+    },
+    {
+      "name": "s_d63d98608d",
+      "value": "Fatigué"
+    },
+    {
+      "name": "s_d647d251c2",
+      "value": "Ouvrir la lettre"
+    },
+    {
+      "name": "s_d67f0e000d",
+      "value": "Tous les papiers photo et mises en page de couverture"
+    },
+    {
+      "name": "s_d78cde076b",
+      "value": "Activé"
+    },
+    {
+      "name": "s_d84664c768",
+      "value": "Après le changement, connectez-vous avec le nouveau numéro."
+    },
+    {
+      "name": "s_d9b91c877d",
+      "value": "Changer de papier"
+    },
+    {
+      "name": "s_daf00cb705",
+      "value": "La ville est belle au crépuscule. Toi aussi, aujourd'hui."
+    },
+    {
+      "name": "s_db0abd6cdb",
+      "value": "Oiseau bleu"
+    },
+    {
+      "name": "s_db7cac8e24",
+      "value": "Nom de l'humeur"
+    },
+    {
+      "name": "s_dc36d11a9a",
+      "value": "Écrivez d’abord quelques pages, puis revenez les envoyer."
+    },
+    {
+      "name": "s_dc7945487b",
+      "value": "« Un journal ne s'écrit pas pour autrui, mais pour soi plus tard. »"
+    },
+    {
+      "name": "s_dcf37c99eb",
+      "value": "Le temps passe. Certains sentiments méritent de rester."
+    },
+    {
+      "name": "s_ddb8fb6094",
+      "value": "La nuit est l'heure de la franchise."
+    },
+    {
+      "name": "s_dee14a14e2",
+      "value": "« L'imparfait mérite aussi d'être aimé. »"
+    },
+    {
+      "name": "s_df5dc2b3c5",
+      "value": "**Le texte, les photos et les enregistrements que vous écrivez ne sont jamais envoyés à nos serveurs.** Ils restent sur votre appareil et se synchronisent entre vos appareils via votre propre iCloud, auquel nous n’avons pas accès."
+    },
+    {
+      "name": "s_df73c654d2",
+      "value": "Créer une sauvegarde"
+    },
+    {
+      "name": "s_dfd9e22f59",
+      "value": "Un code sera envoyé au numéro associé à votre compte"
+    },
+    {
+      "name": "s_e162d4656a",
+      "value": "Le système bloque temporairement l’accès à iCloud : vos journaux ne sont que sur cet appareil. Utilisez « Exporter la sauvegarde » pour en conserver une copie locale."
+    },
+    {
+      "name": "s_e1d4f63ed0",
+      "value": "10 jours"
+    },
+    {
+      "name": "s_e1d765507d",
+      "value": "La brise du soir se lève. Tu as assez donné aujourd'hui."
+    },
+    {
+      "name": "s_e2322d97a3",
+      "value": "Votre dernière lettre vient de partir. Envoyez la suivante un peu plus tard."
+    },
+    {
+      "name": "s_e2aedf50f2",
+      "value": "« S'accepter tel qu'on est maintenant : voilà le meilleur commencement. »"
+    },
+    {
+      "name": "s_e3e397c743",
+      "value": "Associer l'identifiant Apple"
+    },
+    {
+      "name": "s_e488fa1386",
+      "value": "Touchez le bouton ci-dessous pour écrire l'histoire du jour"
+    },
+    {
+      "name": "s_e524dcf71e",
+      "value": "« Cet instant est l'éternité même. »"
+    },
+    {
+      "name": "s_e561c3d4bd",
+      "value": "Numéro modifié"
+    },
+    {
+      "name": "s_e5e80726bd",
+      "value": "Saisir cet instant"
+    },
+    {
+      "name": "s_e69ad1e05f",
+      "value": "iCloud indisponible"
+    },
+    {
+      "name": "s_e6dbbfdb59",
+      "value": "« Ce sont les petits instants qui font une vie. »"
+    },
+    {
+      "name": "s_e6eecaf81b",
+      "value": "Bleu de Prusse"
+    },
+    {
+      "name": "s_e73f6f1b4f",
+      "value": "La lune elle-même attend que tu achèves l'histoire du jour."
+    },
+    {
+      "name": "s_e775910242",
+      "value": "Un journal écrit pour soi"
+    },
+    {
+      "name": "s_e79f9a294a",
+      "value": "by Sinara"
+    },
+    {
+      "name": "s_e7b319db30",
+      "value": "%1$s · Memoir %2$s"
+    },
+    {
+      "name": "s_e7dca6ac80",
+      "value": "Vous avez lu toutes les entrées"
+    },
+    {
+      "name": "s_e7ec4d5c09",
+      "value": "Ou choisissez une couleur"
+    },
+    {
+      "name": "s_e9989b9fd6",
+      "value": "Un numéro non inscrit crée automatiquement un compte après vérification"
+    },
+    {
+      "name": "s_ea0ef2ae72",
+      "value": "Suivant"
+    },
+    {
+      "name": "s_eaa6b0540d",
+      "value": "%s / mois"
+    },
+    {
+      "name": "s_eab9fafde7",
+      "value": "Reprise de votre brouillon"
+    },
+    {
+      "name": "s_eae4b17fa9",
+      "value": "« Tu ne sais pas quoi écrire ? Ouvre la page, c'est déjà ça. »"
+    },
+    {
+      "name": "s_eb7cf7b71a",
+      "value": "Déverrouiller"
+    },
+    {
+      "name": "s_ebf9dfc91c",
+      "value": "%d photos ou enregistrements manquaient dans la sauvegarde. Le reste de ces entrées a été importé normalement."
+    },
+    {
+      "name": "s_ec094809a3",
+      "value": "« Le monde est vaste, mais cette page n'est qu'à toi. »"
+    },
+    {
+      "name": "s_ec470aba74",
+      "value": "Vérification de l’état iCloud…"
+    },
+    {
+      "name": "s_ec7e3bcb5d",
+      "value": "À partir du XVIe siècle, les plus beaux livres d'Europe furent reliés en maroquin : son grain serré est le fond qui met le mieux l'or en valeur. Dans le cabinet de travail anglais du XIXe siècle, le veau habillait le dos et la feuille d'or y frappait le titre — un livre était d'abord un objet, un texte ensuite."
+    },
+    {
+      "name": "s_ec85a65494",
+      "value": "Titre (facultatif)"
+    },
+    {
+      "name": "s_ecf727ea04",
+      "value": "•"
+    },
+    {
+      "name": "s_ed7a57b32a",
+      "value": "Pose ce que tu fais et parle-toi un peu."
+    },
+    {
+      "name": "s_ed839905d8",
+      "value": "« Bien manger, bien écrire, bien vivre. »"
+    },
+    {
+      "name": "s_edd53ba0ee",
+      "value": "Des lettres scellées à la cire"
+    },
+    {
+      "name": "s_ee7391e94f",
+      "value": "Enthousiaste"
+    },
+    {
+      "name": "s_ee8a3ce436",
+      "value": "Code envoyé au %s"
+    },
+    {
+      "name": "s_ee9f38e186",
+      "value": "count"
+    },
+    {
+      "name": "s_ef6e0d1008",
+      "value": "Choisir une icône"
+    },
+    {
+      "name": "s_ef86be8969",
+      "value": "Position et météo"
+    },
+    {
+      "name": "s_efa9b5121e",
+      "value": "« Tu es déjà plus courageux qu'hier. »"
+    },
+    {
+      "name": "s_efeb0dc955",
+      "value": "Synchronisation iCloud"
+    },
+    {
+      "name": "s_eff49a2e1b",
+      "value": "Recherche de lieux à proximité…"
+    },
+    {
+      "name": "s_f075b5a3ad",
+      "value": "Tout s'est tu : le moment d'écouter ce qui vient de l'intérieur."
+    },
+    {
+      "name": "s_f2187b0114",
+      "value": "Requête annulée"
+    },
+    {
+      "name": "s_f2465a6c8c",
+      "value": "Vos entrées se synchronisent automatiquement avec iCloud : rien n'est perdu en changeant d'appareil. Elles vivent dans votre compte, nous n'y avons pas accès."
+    },
+    {
+      "name": "s_f29761cd03",
+      "value": "MEMOIR"
+    },
+    {
+      "name": "s_f297b996de",
+      "value": "7 derniers jours"
+    },
+    {
+      "name": "s_f2a27892d0",
+      "value": "Actif"
+    },
+    {
+      "name": "s_f32f4dac3a",
+      "value": "Insérer une photo ici"
+    },
+    {
+      "name": "s_f3be3e4b09",
+      "value": "Commencer la lecture"
+    },
+    {
+      "name": "s_f4aaa93473",
+      "value": "On coupe encore le papier"
+    },
+    {
+      "name": "s_f4ae8c66ad",
+      "value": "Polaroid"
+    },
+    {
+      "name": "s_f60d7d12e4",
+      "value": "14 jours"
+    },
+    {
+      "name": "s_f65ce37afd",
+      "value": "Météo indisponible — touchez pour réessayer"
+    },
+    {
+      "name": "s_f660675cd6",
+      "value": "Format de réponse incorrect"
+    },
+    {
+      "name": "s_f670b2adc0",
+      "value": "Gras"
+    },
+    {
+      "name": "s_f685ba2f14",
+      "value": "Anxieux"
+    },
+    {
+      "name": "s_f6c9fb2f33",
+      "value": "Écrire l'histoire du jour"
+    },
+    {
+      "name": "s_f6d2484a35",
+      "value": "Acheter pour débloquer"
+    },
+    {
+      "name": "s_f72b6c2eb7",
+      "value": "Votre consentement est nécessaire pour continuer"
+    },
+    {
+      "name": "s_f85412ce62",
+      "value": "Nous noter"
+    },
+    {
+      "name": "s_f8778319a6",
+      "value": "Importer comme nouveaux carnets"
+    },
+    {
+      "name": "s_f8d820eebf",
+      "value": "%1$d / %2$d"
+    },
+    {
+      "name": "s_f90d3aab55",
+      "value": "Un café, quelques lignes. C'est bien ainsi."
+    },
+    {
+      "name": "s_f93d423da3",
+      "value": "Icône de l’app"
+    },
+    {
+      "name": "s_f94c7162ad",
+      "value": "Émoji personnalisé"
+    },
+    {
+      "name": "s_f99c577247",
+      "value": "« Un jour, tu rouvriras cette page et tu souriras. »"
+    },
+    {
+      "name": "s_fa49679ade",
+      "value": "Choisissez un correspondant à votre goût"
+    },
+    {
+      "name": "s_fa58d00e4f",
+      "value": "« Faire le premier pas compte plus que la direction. »"
+    },
+    {
+      "name": "s_fa78a6eba6",
+      "value": "Échec de la génération : %s"
+    },
+    {
+      "name": "s_fac430ea0c",
+      "value": "« La tristesse aussi mérite d'être prise au sérieux. »"
+    },
+    {
+      "name": "s_fadf24dbc5",
+      "value": "Enregistrer"
+    },
+    {
+      "name": "s_fb589e4d58",
+      "value": "Carnets précieux"
+    },
+    {
+      "name": "s_fcbd093292",
+      "value": "Créer"
+    },
+    {
+      "name": "s_fdc1a10b4f",
+      "value": "Nostalgique"
+    },
+    {
+      "name": "s_fe06546672",
+      "value": "J'ai compris : ce fichier contient le texte, les photos et les enregistrements de toutes mes entrées. Déjà Vu ne le consulte jamais et ne l'envoie nulle part. Dès que je le transmets ou le dépose chez un tiers (WeChat, cloud…), sa sécurité dépend de cette plateforme."
+    },
+    {
+      "name": "s_fe1629f682",
+      "value": "ex. : 2025 · Kyoto"
+    },
+    {
+      "name": "s_fe9ea3f070",
+      "value": "Cette année"
+    },
+    {
+      "name": "s_fee9c0540f",
+      "value": "Confirmez d'abord votre identité"
+    },
+    {
+      "name": "s_ff0e280d48",
+      "value": "En chemin"
+    },
+    {
+      "name": "s_ff12ea562c",
+      "value": "Jusqu’à la rue ou un lieu, ex. « Tour de Canton »"
+    },
+    {
+      "name": "s_ff8c685438",
+      "value": "Ranger dans un carnet"
+    },
+    {
+      "name": "s_08d486c16b",
+      "value": "Déjà Vu accède à votre photothèque pour que vous puissiez ajouter des photos et des Live Photos à vos entrées. Les images restent sur votre appareil et ne se synchronisent qu’avec votre propre iCloud."
+    },
+    {
+      "name": "s_19563f66a0",
+      "value": "Déjà Vu"
+    },
+    {
+      "name": "s_2dc7e41549",
+      "value": "尺素备份包"
+    },
+    {
+      "name": "s_342d89fd91",
+      "value": "NSLocalNetworkUsageDescription"
+    },
+    {
+      "name": "s_6ccf6187f5",
+      "value": "Déjà Vu utilise votre position pour noter la météo du moment dans votre entrée."
+    },
+    {
+      "name": "s_8d037e1dca",
+      "value": "Déjà Vu enregistre dans votre photothèque les Live Photos prises dans l’app, afin que la version complète ne reste pas uniquement dans l’app."
+    },
+    {
+      "name": "s_ce3452a6fb",
+      "value": "Déjà Vu utilise le micro pour enregistrer des notes vocales dans vos entrées. Les enregistrements restent sur votre appareil et ne se synchronisent qu’avec votre propre iCloud."
+    },
+    {
+      "name": "s_d46c936cb4",
+      "value": "Déjà Vu"
+    },
+    {
+      "name": "s_e15f73bdc6",
+      "value": "Déjà Vu utilise l’appareil photo pour ajouter des photos à vos entrées."
+    }
+  ]
+}

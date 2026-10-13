@@ -4,8 +4,8 @@
 
 | 步骤 | 状态 | 负责人 | 完成日期 | 与 iOS 的偏差 / 备注 |
 |---|---|---|---|---|
-| 0.4 物料转换 | ⬜ | | | |
-| 1.1 主题系统 | ⬜ | | | |
+| 0.4 物料转换 | ✅ | Gavin（agent） | 2026-10-14 | 脚本用 Node.js（本机无 python3）。资源名 `s_`+SHA1 前 10 位；11 条无译文条目（`·`、`#%@` 等）按 iOS 回退行为填原文；`尺素备份包`（InfoPlist，iOS 侧无译文）同样填原文；AppScope `app_name` + entry `EntryAbility_label` 已接七语言（R-LANG-06）。额外拷了 0.1 未点名的 BookOpen_*/Texture_*（用户确认）。图片 35 张改小写下划线进 base/media；5 个 wav 进 rawfile/sounds。检查脚本跳过 hilog/console 行（开发者日志不算文案）。App 名 base 兜底用简中「尺素」（与 iOS 回退开发区域一致） |
+| 1.1 主题系统 | ✅ | Gavin（agent） | 2026-10-14 | token 接口与 iOS 同名（`AppTheme` 15 色必填 + `colorMode`/`mailboxImage`/5 档 `FontInfo` + 行距/宽字距）；三套实现色值逐项对照 04 全表。`ThemeManager`：偏好 `selectedTheme`、旧 id 归一写回（R-THEME-01）、AppStorage `theme`/`themeId` 整体替换 + `themeManager` 实例下发（1.6 接 `@Provide` 后移除）；皮革应用级 `COLOR_MODE_DARK`（R-THEME-03）。字体 serif 占位（Q6）。调试页 `pages/ThemeDebug`（临时脚手架，标签用英文调试文案，6.2 删）：全 token 列表 + 三套即时切换 + 系统弹窗样例。单测 6 条过编译（`hvigor test`：旧 id 归一/实例映射/明暗/宽字距）；**执行**被环境挡住（CLI SDK 无 previewer 二进制，待 DevEco Studio 完整环境跑绿）。构建环境：hvigorw 因沙箱禁 symlink 不可用，改引擎直调（详见会话记录） |
 | 1.2 多语言 | ⬜ | | | |
 | 1.3 数据层 | ⬜ | | | |
 | 1.4 媒体存储 | ⬜ | | | |

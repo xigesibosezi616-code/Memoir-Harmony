@@ -1,0 +1,2676 @@
+{
+  "string": [
+    {
+      "name": "EntryAbility_label",
+      "value": "memoir"
+    },
+    {
+      "name": "s_00360964eb",
+      "value": "Japan Federation of Printing Industries, glossary of printing terms; Musashino Art University, Zokei File. The claim that the name was coined in Japan appears in Tokushu Paper Manufacturing's fifty-year history."
+    },
+    {
+      "name": "s_004f777b5c",
+      "value": "Ivory"
+    },
+    {
+      "name": "s_0064d7c8e8",
+      "value": "“Winter nights are made for long letters.”"
+    },
+    {
+      "name": "s_00a0a58be6",
+      "value": "Last 30 days"
+    },
+    {
+      "name": "s_00c4e416fa",
+      "value": "Once linked, you can sign in to the same account with Apple on this device"
+    },
+    {
+      "name": "s_00e69bd114",
+      "value": "Signed in"
+    },
+    {
+      "name": "s_01d498446e",
+      "value": "Enter the password you set when exporting. It is used on this device only to open the file, and is never uploaded."
+    },
+    {
+      "name": "s_022bf3283d",
+      "value": "Insert"
+    },
+    {
+      "name": "s_02abbe99ce",
+      "value": "Invalid request address"
+    },
+    {
+      "name": "s_0399ad7167",
+      "value": "Terms of Service"
+    },
+    {
+      "name": "s_03d786b9dc",
+      "value": "“The you of the future will thank the you writing this now.”"
+    },
+    {
+      "name": "s_04543b3673",
+      "value": "A monthly letter about “you this month,” and “your year” at year's end."
+    },
+    {
+      "name": "s_047472a1db",
+      "value": "Change paper style"
+    },
+    {
+      "name": "s_0498f1dcc0",
+      "value": "Change photo"
+    },
+    {
+      "name": "s_06829794c0",
+      "value": "Importing only adds entries; existing ones are skipped. You can also open a backup directly from WeChat or Files."
+    },
+    {
+      "name": "s_069d0578bc",
+      "value": "First-year offer"
+    },
+    {
+      "name": "s_06f6dfc980",
+      "value": "Once linked, you can sign in to this account from any device"
+    },
+    {
+      "name": "s_07315b84c5",
+      "value": "Show selected emoji"
+    },
+    {
+      "name": "s_084f68942b",
+      "value": "Send code"
+    },
+    {
+      "name": "s_085de89c6f",
+      "value": "Before you delete your account"
+    },
+    {
+      "name": "s_086b405189",
+      "value": "Undo Strike"
+    },
+    {
+      "name": "s_088b3628a1",
+      "value": "Pen pal's name"
+    },
+    {
+      "name": "s_08c2940d38",
+      "value": "Nearby"
+    },
+    {
+      "name": "s_08cf5d323f",
+      "value": "“You don't owe anyone an explanation. Just write.”"
+    },
+    {
+      "name": "s_0903a88878",
+      "value": "The entries in this letter have all been deleted"
+    },
+    {
+      "name": "s_094774b4a7",
+      "value": "Sign out"
+    },
+    {
+      "name": "s_09638dca5f",
+      "value": "Change plans or cancel under “Manage Subscription.” If you cancel, photo papers and covers you've already used stay as they are."
+    },
+    {
+      "name": "s_09873b1938",
+      "value": "No entries yet"
+    },
+    {
+      "name": "s_09b58aa342",
+      "value": "Appearance"
+    },
+    {
+      "name": "s_09f2cefb0c",
+      "value": "“Letting yourself be unhappy is its own kind of kindness.”"
+    },
+    {
+      "name": "s_0ae0dc846a",
+      "value": "“All this waiting is waiting on a better you.”"
+    },
+    {
+      "name": "s_0b1c024ac9",
+      "value": "After signing out, letters and other cloud features stop working. Your entries on this device are untouched."
+    },
+    {
+      "name": "s_0b3e909f02",
+      "value": "It's afternoon. How has your day been?"
+    },
+    {
+      "name": "s_0b4487d003",
+      "value": "My shelf"
+    },
+    {
+      "name": "s_0ba6de577f",
+      "value": "“Every blank page is waiting for something true.”"
+    },
+    {
+      "name": "s_0c168f5d2c",
+      "value": "Use one of your own photos as this notebook's cover"
+    },
+    {
+      "name": "s_0cda8d1c71",
+      "value": "New"
+    },
+    {
+      "name": "s_0cfc3b0e21",
+      "value": "Location is off — open Settings to turn it on"
+    },
+    {
+      "name": "s_0d4dd89acf",
+      "value": "11-digit phone number"
+    },
+    {
+      "name": "s_0e37efff8d",
+      "value": "Your session has expired. Please sign in again."
+    },
+    {
+      "name": "s_0f2fc67cd3",
+      "value": "Follow System"
+    },
+    {
+      "name": "s_0f47f66752",
+      "value": "Letters"
+    },
+    {
+      "name": "s_0f534330b9",
+      "value": "Still sealed"
+    },
+    {
+      "name": "s_0fba22e066",
+      "value": "Tap the mailbox to send your latest entries"
+    },
+    {
+      "name": "s_0fee25f074",
+      "value": "Plan"
+    },
+    {
+      "name": "s_1017debe4c",
+      "value": "Yearly"
+    },
+    {
+      "name": "s_105137838b",
+      "value": "Washi Sticker"
+    },
+    {
+      "name": "s_111bf28fb7",
+      "value": "Shown under the title on the notebook's page. If left empty, the months it covers are shown."
+    },
+    {
+      "name": "s_11ab7804df",
+      "value": "Mailbox"
+    },
+    {
+      "name": "s_121c1f2d8e",
+      "value": "Share backup (%s)"
+    },
+    {
+      "name": "s_129af6c2eb",
+      "value": "Couldn’t change the number. Try again later."
+    },
+    {
+      "name": "s_12cc5f519b",
+      "value": "Couldn’t save the Live Photo video. Inserted as a still photo."
+    },
+    {
+      "name": "s_132f0d719a",
+      "value": "Resend (%ds)"
+    },
+    {
+      "name": "s_1335fc30b7",
+      "value": "City level only, e.g. “Guangzhou”"
+    },
+    {
+      "name": "s_13ff717165",
+      "value": "Seal reminder days"
+    },
+    {
+      "name": "s_14c9516e3f",
+      "value": "Too many requests — try again later"
+    },
+    {
+      "name": "s_15b21b73b7",
+      "value": "Your letter couldn’t be sent: %s"
+    },
+    {
+      "name": "s_16070acfe0",
+      "value": "%d"
+    },
+    {
+      "name": "s_16460eb17d",
+      "value": "Choose a paper style"
+    },
+    {
+      "name": "s_168b37f367",
+      "value": "The early hours belong to you alone."
+    },
+    {
+      "name": "s_16ed8e1cbb",
+      "value": "A recording was removed · %s"
+    },
+    {
+      "name": "s_172e681d96",
+      "value": "Turn Off Test Membership"
+    },
+    {
+      "name": "s_173e51e1e5",
+      "value": "Verify your current number first"
+    },
+    {
+      "name": "s_17f7c3a2d7",
+      "value": "Pine Green"
+    },
+    {
+      "name": "s_1a4cb39357",
+      "value": "What we write late at night is usually the truest."
+    },
+    {
+      "name": "s_1a6ddc0c96",
+      "value": "“Today needs no meaning. Being here is the meaning.”"
+    },
+    {
+      "name": "s_1ab35f0df8",
+      "value": "Showcase"
+    },
+    {
+      "name": "s_1b0adeee54",
+      "value": "In Tang China, bamboo was cut and sunk in ponds for a hundred days, until the green skin sloughed away — a step the papermakers called shaqing, “killing the green”. The pulp yielded a paper faintly yellow and remarkably tough: the Song printed books on it, the Ming wrote letters on it. The five steps Song Yingxing set down in 1637 are still followed today."
+    },
+    {
+      "name": "s_1be7ae4fc2",
+      "value": "Name"
+    },
+    {
+      "name": "s_1c5dfb22c6",
+      "value": "Agree and Continue"
+    },
+    {
+      "name": "s_1c89ce16cb",
+      "value": "Your letter from %s came back"
+    },
+    {
+      "name": "s_1cd80fd7a8",
+      "value": "Rename"
+    },
+    {
+      "name": "s_1ce1054c48",
+      "value": "The icon changes with your theme"
+    },
+    {
+      "name": "s_1d56b27a5e",
+      "value": "Aa"
+    },
+    {
+      "name": "s_1d72fd4c59",
+      "value": "Peaceful"
+    },
+    {
+      "name": "s_1d83c41037",
+      "value": "Couldn’t change the icon. Please try again."
+    },
+    {
+      "name": "s_1dce997c92",
+      "value": "%s / year"
+    },
+    {
+      "name": "s_1e2443b94b",
+      "value": "Membership is free during testing. Turn it off to go back to the free version."
+    },
+    {
+      "name": "s_1f2998c9c8",
+      "value": "Open Settings"
+    },
+    {
+      "name": "s_1fdf0d90c3",
+      "value": "·"
+    },
+    {
+      "name": "s_1ffe69200e",
+      "value": "In large-card mode, press and hold a photo while writing to set it as the cover."
+    },
+    {
+      "name": "s_212c3cace3",
+      "value": "This is how your pen pal will address you. Leave it blank to skip."
+    },
+    {
+      "name": "s_215574245b",
+      "value": "Delete Entry"
+    },
+    {
+      "name": "s_21f1e88275",
+      "value": "Sign in"
+    },
+    {
+      "name": "s_221b549139",
+      "value": "Account recovered"
+    },
+    {
+      "name": "s_22339c750d",
+      "value": "Your phone number is the only way to recover this account. Without it, you’ll lose access if you switch phones or your Apple ID becomes unavailable."
+    },
+    {
+      "name": "s_223d9e4e74",
+      "value": "Delete this photo?"
+    },
+    {
+      "name": "s_226a655b92",
+      "value": "Up to 3 minutes"
+    },
+    {
+      "name": "s_22739c882c",
+      "value": "The day is nearly over. Anything you want to remember?"
+    },
+    {
+      "name": "s_22ba7f6b51",
+      "value": "Delete this entry"
+    },
+    {
+      "name": "s_2312adef49",
+      "value": "“Small things today may turn out to matter.”"
+    },
+    {
+      "name": "s_234289679b",
+      "value": "Minimal Card"
+    },
+    {
+      "name": "s_24a42e71b3",
+      "value": "Show icon for current mood"
+    },
+    {
+      "name": "s_24f71d98ec",
+      "value": "Down to the district, e.g. “Guangzhou, Tianhe”"
+    },
+    {
+      "name": "s_25124ed74c",
+      "value": "Name"
+    },
+    {
+      "name": "s_25fbc95421",
+      "value": "You have a new reply"
+    },
+    {
+      "name": "s_263a3081dc",
+      "value": "About %s/month"
+    },
+    {
+      "name": "s_2643a85f0c",
+      "value": "This is a text-only backup — the imported entries will have no photos or recordings."
+    },
+    {
+      "name": "s_26f030bca7",
+      "value": "Waiting…"
+    },
+    {
+      "name": "s_282ab93d10",
+      "value": "Total"
+    },
+    {
+      "name": "s_287dbc9adc",
+      "value": "Reflective"
+    },
+    {
+      "name": "s_28cfd5c34e",
+      "value": "“It's fine not to understand yet. Write it down first.”"
+    },
+    {
+      "name": "s_28d07a1e09",
+      "value": "Write a few entries in Records first"
+    },
+    {
+      "name": "s_29205ba269",
+      "value": "Your entries didn’t pass content review, so this letter wasn’t sent"
+    },
+    {
+      "name": "s_295cb60c39",
+      "value": "Deleting your account only removes your account and letter records from our servers. Your journal is not affected."
+    },
+    {
+      "name": "s_2a8f9bcff7",
+      "value": "Off"
+    },
+    {
+      "name": "s_2a90aa456f",
+      "value": "Mornings are quiet — a good time to talk to yourself."
+    },
+    {
+      "name": "s_2a91ea5068",
+      "value": "%d days written this month"
+    },
+    {
+      "name": "s_2afb730db8",
+      "value": "“Some things can't be said aloud. Write them instead.”"
+    },
+    {
+      "name": "s_2bbc8185e3",
+      "value": "Sign in first so your pen pal can write to you"
+    },
+    {
+      "name": "s_2c6afc5f55",
+      "value": "“Don't let today be just another day.”"
+    },
+    {
+      "name": "s_2c71bcc7df",
+      "value": "⚠️ Nothing has been backed up to iCloud yet — deleting the app right now would lose every journal. Recent entries need a moment to upload; if it stays like this, use Export Backup to save a local copy."
+    },
+    {
+      "name": "s_2ca4a60f15",
+      "value": "Your account has been deleted"
+    },
+    {
+      "name": "s_2ca8ce9b3f",
+      "value": "%s first year"
+    },
+    {
+      "name": "s_2d54b2d8e5",
+      "value": "Keep this thought — you'll thank yourself later."
+    },
+    {
+      "name": "s_2dde9465fd",
+      "value": "A complete backup — restores exactly as it is on a new device."
+    },
+    {
+      "name": "s_2e172ff8fc",
+      "value": "Unexpected server response (%d)"
+    },
+    {
+      "name": "s_2e529b5331",
+      "value": "Manage Subscription"
+    },
+    {
+      "name": "s_2e813d55e6",
+      "value": "Privacy Agreement"
+    },
+    {
+      "name": "s_2ed0fae234",
+      "value": "%s per month. Renews automatically within 24 hours before it ends. Cancel anytime in Settings → Apple Account → Subscriptions."
+    },
+    {
+      "name": "s_2f17ec1476",
+      "value": "Results"
+    },
+    {
+      "name": "s_2f6633ce4b",
+      "value": "Take Off"
+    },
+    {
+      "name": "s_2f752c005e",
+      "value": "Remove"
+    },
+    {
+      "name": "s_300ee58e24",
+      "value": "Mood"
+    },
+    {
+      "name": "s_30f4d7cfe8",
+      "value": "or"
+    },
+    {
+      "name": "s_3150ea0d70",
+      "value": "What is included"
+    },
+    {
+      "name": "s_328070e3ac",
+      "value": "District"
+    },
+    {
+      "name": "s_33246f6a5e",
+      "value": "Done"
+    },
+    {
+      "name": "s_333ab56285",
+      "value": "Framed"
+    },
+    {
+      "name": "s_33736fe5a5",
+      "value": "Additions: %1$d · last %2$s"
+    },
+    {
+      "name": "s_33a1272ec8",
+      "value": "Confirm change"
+    },
+    {
+      "name": "s_34028338a4",
+      "value": "“Take your time. Good things are worth waiting for.”"
+    },
+    {
+      "name": "s_34346fa337",
+      "value": "HarmonyOS device"
+    },
+    {
+      "name": "s_3505075551",
+      "value": "A new day, beginning with a few words."
+    },
+    {
+      "name": "s_354343bcbf",
+      "value": "“The texture of a life hides in its details.”"
+    },
+    {
+      "name": "s_35795a4e98",
+      "value": "No matching places"
+    },
+    {
+      "name": "s_36179dc44d",
+      "value": "You can skip this and change it later in Settings"
+    },
+    {
+      "name": "s_3755f56f2f",
+      "value": "Delete"
+    },
+    {
+      "name": "s_375d6fd193",
+      "value": "Export a notebook as a beautifully bound PDF, ready to print."
+    },
+    {
+      "name": "s_37eb470096",
+      "value": "Valid until"
+    },
+    {
+      "name": "s_384964cd05",
+      "value": "Afternoon tea and a few words — both are gifts to yourself."
+    },
+    {
+      "name": "s_39074a4234",
+      "value": "A photo was taken off · %s"
+    },
+    {
+      "name": "s_39bc5e6806",
+      "value": "This backup is encrypted"
+    },
+    {
+      "name": "s_39bd23b773",
+      "value": "Writing calendar"
+    },
+    {
+      "name": "s_3aaae04c18",
+      "value": "Monthly and yearly look-backs"
+    },
+    {
+      "name": "s_3aad2fe07a",
+      "value": "%d words"
+    },
+    {
+      "name": "s_3ae6d0bf40",
+      "value": "Clean up %d leftover files"
+    },
+    {
+      "name": "s_3b849347c8",
+      "value": "One letter couldn’t be sent"
+    },
+    {
+      "name": "s_3ba60ad590",
+      "value": "Recording"
+    },
+    {
+      "name": "s_3ba6edb371",
+      "value": "Apple ID"
+    },
+    {
+      "name": "s_3bba23dbc1",
+      "value": "Want a reply to every entry?"
+    },
+    {
+      "name": "s_3bf179d8d0",
+      "value": "Not linked"
+    },
+    {
+      "name": "s_3c079f2974",
+      "value": "“Autumn is for rereading old entries.”"
+    },
+    {
+      "name": "s_3c0e11b682",
+      "value": "This file isn’t encrypted"
+    },
+    {
+      "name": "s_3c607f617b",
+      "value": "AI service is not enabled yet"
+    },
+    {
+      "name": "s_3c71843c7b",
+      "value": "Search for a place"
+    },
+    {
+      "name": "s_3d04880897",
+      "value": "Start importing"
+    },
+    {
+      "name": "s_3d39e30c5a",
+      "value": "Tap to start recording"
+    },
+    {
+      "name": "s_3d93dce578",
+      "value": "This backup needs a password"
+    },
+    {
+      "name": "s_3da4b3651a",
+      "value": "Take Photo"
+    },
+    {
+      "name": "s_3e3d59a258",
+      "value": "Code"
+    },
+    {
+      "name": "s_3e720ee6d4",
+      "value": "Couldn’t insert the photo. Try again."
+    },
+    {
+      "name": "s_3e81ed47a5",
+      "value": "Only when you **ask your pen pal for a letter** is the text of the entries you selected sent through our servers to compose a reply — and we do not keep it."
+    },
+    {
+      "name": "s_3eb416223e",
+      "value": "|"
+    },
+    {
+      "name": "s_3f94e8a8dc",
+      "value": "Enter a mood name"
+    },
+    {
+      "name": "s_3fb4374f11",
+      "value": "Bamboo cut and steeped in the pond — the sheet still carries its green scent"
+    },
+    {
+      "name": "s_40525a7328",
+      "value": "Couldn't save"
+    },
+    {
+      "name": "s_4181851141",
+      "value": "Streak"
+    },
+    {
+      "name": "s_41984afcd9",
+      "value": "One entry per screen, swipe across, photos shown large"
+    },
+    {
+      "name": "s_41c3719d6a",
+      "value": "Retake"
+    },
+    {
+      "name": "s_41e5243e2d",
+      "value": "Contents"
+    },
+    {
+      "name": "s_41f8b5303e",
+      "value": "“Writing needn't be perfect. Honest is enough.”"
+    },
+    {
+      "name": "s_421efbce02",
+      "value": "Recording…"
+    },
+    {
+      "name": "s_42b37aa07d",
+      "value": "⚠️ Please remember this password. It is the only way to open the backup, and we cannot recover it for you."
+    },
+    {
+      "name": "s_42ffce9145",
+      "value": "Right now it's just you and what's on your mind."
+    },
+    {
+      "name": "s_4306623202",
+      "value": "You can pick up where you left off next time."
+    },
+    {
+      "name": "s_431c606023",
+      "value": "Layout"
+    },
+    {
+      "name": "s_4361b1e753",
+      "value": "iCloud restricted"
+    },
+    {
+      "name": "s_43680b11bb",
+      "value": "A deleted account can't be recovered. You can sign up again later with the same phone number, but it will be a brand-new account."
+    },
+    {
+      "name": "s_4394cb2863",
+      "value": "These notebooks in the backup have the same names as ones on this device: %s. If imported as new, a number will be added to their names."
+    },
+    {
+      "name": "s_43a879165d",
+      "value": "No entries to back up yet"
+    },
+    {
+      "name": "s_446462a28f",
+      "value": "“Even an ordinary day holds something out of the ordinary.”"
+    },
+    {
+      "name": "s_44fd049d7d",
+      "value": "Letterbox"
+    },
+    {
+      "name": "s_45260c7012",
+      "value": "%s per year. Renews automatically within 24 hours before it ends. Cancel anytime in Settings → Apple Account → Subscriptions."
+    },
+    {
+      "name": "s_4562024dde",
+      "value": "Apply"
+    },
+    {
+      "name": "s_4696b4622d",
+      "value": "Gentle, quiet, fond of poetry… you pick your pen pal's personality."
+    },
+    {
+      "name": "s_476dd084aa",
+      "value": "iCloud isn’t responding, so your journals are only on this device. Save a copy with Export Backup, then check iCloud in system settings."
+    },
+    {
+      "name": "s_477a226253",
+      "value": "“Summer runs long. A few words make good shade.”"
+    },
+    {
+      "name": "s_482d201d8b",
+      "value": "Link a phone number so you can recover this account"
+    },
+    {
+      "name": "s_482d69aab3",
+      "value": "%ds"
+    },
+    {
+      "name": "s_487942b7ff",
+      "value": "Welcome to Memoir. Before you begin, please read and accept the Privacy Policy and the Terms of Service."
+    },
+    {
+      "name": "s_48aed26e83",
+      "value": "Free: one letter a week. With Plus, your pen pal answers every entry."
+    },
+    {
+      "name": "s_48f55a18f1",
+      "value": "A reply is on its way"
+    },
+    {
+      "name": "s_497b5a5707",
+      "value": "Join Memoir Plus"
+    },
+    {
+      "name": "s_49f055a8cc",
+      "value": "No connection — check Wi-Fi or cellular data"
+    },
+    {
+      "name": "s_49fcec9454",
+      "value": "Mood Distribution"
+    },
+    {
+      "name": "s_4aaa4b57b9",
+      "value": "No location"
+    },
+    {
+      "name": "s_4afad87755",
+      "value": "Auto"
+    },
+    {
+      "name": "s_4b2eae4e13",
+      "value": "Can’t read this file — it may have been moved or deleted"
+    },
+    {
+      "name": "s_4c25fbcd78",
+      "value": "Signing in requires your phone number; weather requires location access. You can turn both off in Settings at any time."
+    },
+    {
+      "name": "s_4c67117f26",
+      "value": "You will not find “Kent paper” in England — the name was coined in Japan. It belongs to a hard, pure-white sheet first made in nineteenth-century Kent: smooth enough that an eraser passes without raising a fuzz, and built for the drawing board. English-speaking draughtsmen call the same thing drawing paper, or Bristol board."
+    },
+    {
+      "name": "s_4c99a7a774",
+      "value": "“Days are lived one at a time, and written the same way.”"
+    },
+    {
+      "name": "s_4cad1a999a",
+      "value": "Change the theme only"
+    },
+    {
+      "name": "s_4cd30ef91e",
+      "value": "Save Draft"
+    },
+    {
+      "name": "s_4d0b4688c7",
+      "value": "Cancel"
+    },
+    {
+      "name": "s_4e09cf222e",
+      "value": "Code sent"
+    },
+    {
+      "name": "s_4e1393a65c",
+      "value": "All Entries"
+    },
+    {
+      "name": "s_4e6b4fffe0",
+      "value": "Location precision"
+    },
+    {
+      "name": "s_4f4fa3aee4",
+      "value": "Not recorded: %s"
+    },
+    {
+      "name": "s_4f724002d4",
+      "value": "Hide stamp circle"
+    },
+    {
+      "name": "s_50034b8b01",
+      "value": "Enter your new number"
+    },
+    {
+      "name": "s_502b05fb33",
+      "value": "Are you sure you want to delete this entry? This action cannot be undone."
+    },
+    {
+      "name": "s_5070487278",
+      "value": "Source"
+    },
+    {
+      "name": "s_50f87ef514",
+      "value": "No moods recorded in this period"
+    },
+    {
+      "name": "s_514dbb7b7e",
+      "value": "Not Now"
+    },
+    {
+      "name": "s_518462faa6",
+      "value": "Choose from Photos"
+    },
+    {
+      "name": "s_524e22ba8d",
+      "value": "Your first letter has gone out. %s is reading it."
+    },
+    {
+      "name": "s_5272cb33b0",
+      "value": "All six photo papers and all three notebook cover layouts."
+    },
+    {
+      "name": "s_5283bf449c",
+      "value": "Tried a few times, but it couldn’t be sent"
+    },
+    {
+      "name": "s_529cdcc5f7",
+      "value": "Couldn't restore purchases. Please try again later."
+    },
+    {
+      "name": "s_52c25b074b",
+      "value": "Slate"
+    },
+    {
+      "name": "s_52cd34ba98",
+      "value": "No places found nearby"
+    },
+    {
+      "name": "s_534de73969",
+      "value": "Packing…"
+    },
+    {
+      "name": "s_54b8a90b3c",
+      "value": "Data"
+    },
+    {
+      "name": "s_54c43eaca1",
+      "value": "%d entries"
+    },
+    {
+      "name": "s_54e712fa52",
+      "value": "A reply will reach your letterbox within three days"
+    },
+    {
+      "name": "s_55406b4cd3",
+      "value": "Morocco is goatskin: close-grained, the best ground for gold. Calf is smooth and lightly figured, the mainstay of English fine binding from the seventeenth to the nineteenth century."
+    },
+    {
+      "name": "s_559a6ba154",
+      "value": "Manage moods"
+    },
+    {
+      "name": "s_55b7664990",
+      "value": "Set a password (at least 4 characters)"
+    },
+    {
+      "name": "s_5720afd3c4",
+      "value": "Li Zhao, Supplement to the History of the Tang (9th c.): “for paper, there is the bamboo note-paper of Shao”. Song Yingxing, Tiangong Kaiwu, chapter “Killing the Green” (1637), records five steps: steeping the cut bamboo, boiling it with lime, dipping the mould, couching the sheet, drying it over heat. Jiajiang bamboo paper of Sichuan ranks alongside Xuan paper; Zhang Daqian called the two “the nation's twin treasures”."
+    },
+    {
+      "name": "s_582c50066c",
+      "value": "chars"
+    },
+    {
+      "name": "s_589be40a92",
+      "value": "This week’s letter has already gone out. %s writes back once a week — come back next week."
+    },
+    {
+      "name": "s_58a94d895d",
+      "value": "Clear leftover files?"
+    },
+    {
+      "name": "s_596b003c23",
+      "value": "Eggplant"
+    },
+    {
+      "name": "s_59a4ba58b0",
+      "value": "Before the day gets busy, pause and think."
+    },
+    {
+      "name": "s_59b153249b",
+      "value": "Couldn't delete your account. Please try again later."
+    },
+    {
+      "name": "s_5a0a430923",
+      "value": "“Every day brings you closer to some answer.”"
+    },
+    {
+      "name": "s_5a393262ea",
+      "value": "Write a few lines before bed and let today go."
+    },
+    {
+      "name": "s_5a616bb0d3",
+      "value": "Good morning. Keep a little time for yourself."
+    },
+    {
+      "name": "s_5a9cc5e891",
+      "value": "Phone number"
+    },
+    {
+      "name": "s_5b7d127ef6",
+      "value": "Tap again to open the envelope"
+    },
+    {
+      "name": "s_5bc920edd7",
+      "value": "A reply to every entry"
+    },
+    {
+      "name": "s_5c23be05d4",
+      "value": "Hidden"
+    },
+    {
+      "name": "s_5c6e6c1b88",
+      "value": "The two entries do not match"
+    },
+    {
+      "name": "s_5cd32361fa",
+      "value": "Grid"
+    },
+    {
+      "name": "s_5d2df2c92d",
+      "value": "Sign in / Sign up"
+    },
+    {
+      "name": "s_5d4d85a57d",
+      "value": "%1$s for the first year, then %2$s per year. Renews automatically within 24 hours before it ends. Cancel anytime in Settings → Apple Account → Subscriptions."
+    },
+    {
+      "name": "s_5d527e99c3",
+      "value": "Rename notebook"
+    },
+    {
+      "name": "s_5d701678ab",
+      "value": "Memoir"
+    },
+    {
+      "name": "s_5e03599e74",
+      "value": "“This place stays, for whenever you feel like talking.”"
+    },
+    {
+      "name": "s_5eb5a366c6",
+      "value": "Apple authorization failed: no credential received"
+    },
+    {
+      "name": "s_5ed893c012",
+      "value": "Photo & audio storage"
+    },
+    {
+      "name": "s_5f03b3f09c",
+      "value": "Text only — a very small file. Photos and recordings are not included."
+    },
+    {
+      "name": "s_5f2271d2b8",
+      "value": "Turn right"
+    },
+    {
+      "name": "s_5f7e5d5768",
+      "value": "Playing"
+    },
+    {
+      "name": "s_5f9ab839a4",
+      "value": "Remove as cover"
+    },
+    {
+      "name": "s_5fdfe71cba",
+      "value": "Hopeful"
+    },
+    {
+      "name": "s_6055fe4b90",
+      "value": "Weather"
+    },
+    {
+      "name": "s_607cd976d2",
+      "value": "RETURNED"
+    },
+    {
+      "name": "s_60dbc09b63",
+      "value": "“Solitude isn't bad — it's time alone with yourself.”"
+    },
+    {
+      "name": "s_613b4f74e0",
+      "value": "Move to the right"
+    },
+    {
+      "name": "s_61af9a4751",
+      "value": "Choose your paper"
+    },
+    {
+      "name": "s_6210f62fdd",
+      "value": "Camera access needed"
+    },
+    {
+      "name": "s_62d5f22319",
+      "value": "Done for now? Sit down and write a little."
+    },
+    {
+      "name": "s_640b8f590d",
+      "value": "Mood Icon"
+    },
+    {
+      "name": "s_644c1623fe",
+      "value": "Couldn't send the code"
+    },
+    {
+      "name": "s_654040bb31",
+      "value": "Save this draft?"
+    },
+    {
+      "name": "s_677df5aca2",
+      "value": "Error while gathering data: %s"
+    },
+    {
+      "name": "s_677fa61f1d",
+      "value": "Backup contents"
+    },
+    {
+      "name": "s_67a01a5a15",
+      "value": "Highlight"
+    },
+    {
+      "name": "s_67f415d86d",
+      "value": "No letters yet"
+    },
+    {
+      "name": "s_68363aefdc",
+      "value": "Delete your account? This can't be undone."
+    },
+    {
+      "name": "s_686748c67b",
+      "value": "Each letter arrives in a wax-sealed envelope, on fine stationery."
+    },
+    {
+      "name": "s_69007df2b7",
+      "value": "entries"
+    },
+    {
+      "name": "s_692e58f019",
+      "value": "Your first letter is on its way. %s is reading it — expect a reply in a day or two."
+    },
+    {
+      "name": "s_69b55bf474",
+      "value": "This notebook is still empty"
+    },
+    {
+      "name": "s_6a576f3bf9",
+      "value": "Untitled"
+    },
+    {
+      "name": "s_6a7c90ae15",
+      "value": "Go Back"
+    },
+    {
+      "name": "s_6a8e6df501",
+      "value": "“The seasons turn. So does your story.”"
+    },
+    {
+      "name": "s_6a94ee7065",
+      "value": "Remove Highlight"
+    },
+    {
+      "name": "s_6aed7c48be",
+      "value": "Link"
+    },
+    {
+      "name": "s_6b16103d80",
+      "value": "Morocco goatskin — no ground shows gold better"
+    },
+    {
+      "name": "s_6b19c847d8",
+      "value": "Drag to reposition, pinch to zoom"
+    },
+    {
+      "name": "s_6b3f21b5dd",
+      "value": "Sign in so %s can write back to you"
+    },
+    {
+      "name": "s_6b4f2d224d",
+      "value": "Over 80 MB — WeChat may refuse to send it. Try AirDrop, or turn off Photos and recordings to back up text only."
+    },
+    {
+      "name": "s_6b7fba6ac9",
+      "value": "Notebooks with the same name"
+    },
+    {
+      "name": "s_6c14bd7f6f",
+      "value": "Close"
+    },
+    {
+      "name": "s_6c2b170c04",
+      "value": "Could not load photo"
+    },
+    {
+      "name": "s_6c42607c7c",
+      "value": "Tap again to draw out the letter"
+    },
+    {
+      "name": "s_6ca9eae4f6",
+      "value": "Choose a place"
+    },
+    {
+      "name": "s_6cbd10c2ff",
+      "value": "Auto-display weather when writing"
+    },
+    {
+      "name": "s_6d1f3e58bb",
+      "value": "“No step is wasted. Every one counts.”"
+    },
+    {
+      "name": "s_6e5c04b091",
+      "value": "Each theme has its own icon. New themes will add new icons here."
+    },
+    {
+      "name": "s_6ec8fe27cd",
+      "value": "Send again"
+    },
+    {
+      "name": "s_6efeb2c455",
+      "value": "“The past doesn't vanish — it waits for you to look back.”"
+    },
+    {
+      "name": "s_6f69dd45f8",
+      "value": "Record again"
+    },
+    {
+      "name": "s_706bcb8f6f",
+      "value": "Everything about you on our servers: your Memoir account, the linked phone number and Apple ID, your nickname, your pen pal's name, and your letter records."
+    },
+    {
+      "name": "s_70eeb8233a",
+      "value": "It's late. The world has gone quiet."
+    },
+    {
+      "name": "s_712c2ff8d3",
+      "value": "Journal view"
+    },
+    {
+      "name": "s_7147dd5d08",
+      "value": "Clear %d leftover files and free %s?"
+    },
+    {
+      "name": "s_71cfa4ee81",
+      "value": "Dear %s"
+    },
+    {
+      "name": "s_72ca690ff2",
+      "value": "“Days that go unremembered were never really lived.”"
+    },
+    {
+      "name": "s_72d04e5cd0",
+      "value": "Launch animation"
+    },
+    {
+      "name": "s_731247adaa",
+      "value": "Or verify with Apple"
+    },
+    {
+      "name": "s_733a444c99",
+      "value": "Not backed up yet"
+    },
+    {
+      "name": "s_73f8dc416c",
+      "value": "Your letterbox is empty"
+    },
+    {
+      "name": "s_7402638ab2",
+      "value": "Memoir Plus"
+    },
+    {
+      "name": "s_74bd07ef78",
+      "value": "Today, I want to say..."
+    },
+    {
+      "name": "s_7549a61e00",
+      "value": "The entries, photos and recordings on this phone and in your iCloud, plus the letters you've already received. They're yours and will still be here after you delete your account."
+    },
+    {
+      "name": "s_755eaf62bd",
+      "value": "Several entries per screen — easy to scan"
+    },
+    {
+      "name": "s_75c33f5c2e",
+      "value": "Import complete"
+    },
+    {
+      "name": "s_75ce20b461",
+      "value": "“Some sights come only once. Write them down.”"
+    },
+    {
+      "name": "s_7645c5d19c",
+      "value": "Record the weather"
+    },
+    {
+      "name": "s_76a21b5df1",
+      "value": "“A pen and a page make a whole world.”"
+    },
+    {
+      "name": "s_76ce8e3d5e",
+      "value": "Synced"
+    },
+    {
+      "name": "s_76e2f7abf9",
+      "value": "“The moment your pen touches down, time stays put.”"
+    },
+    {
+      "name": "s_771ba2fa48",
+      "value": "Ready. Send it to yourself, save it to Files, or AirDrop it to another device."
+    },
+    {
+      "name": "s_7744960f42",
+      "value": "Couldn’t send. Please try again later."
+    },
+    {
+      "name": "s_775660537d",
+      "value": "Photo paper style"
+    },
+    {
+      "name": "s_778db1c262",
+      "value": "By tapping “Agree and Continue”, you confirm that you have read and accept both agreements in full."
+    },
+    {
+      "name": "s_778fc8f994",
+      "value": "All time"
+    },
+    {
+      "name": "s_781c5c7050",
+      "value": "Restore Purchases"
+    },
+    {
+      "name": "s_7945500987",
+      "value": "Choose from Photos"
+    },
+    {
+      "name": "s_79b0ebdd1c",
+      "value": "Change phone number"
+    },
+    {
+      "name": "s_7bf3cf769a",
+      "value": "Print it as a book"
+    },
+    {
+      "name": "s_7c130d80b8",
+      "value": "City"
+    },
+    {
+      "name": "s_7d84c682b8",
+      "value": "Cover color"
+    },
+    {
+      "name": "s_7d8e819a4b",
+      "value": "Nothing is checked — the envelope is empty"
+    },
+    {
+      "name": "s_7debf9cb03",
+      "value": "Settings"
+    },
+    {
+      "name": "s_7ebd4ae074",
+      "value": "Kent"
+    },
+    {
+      "name": "s_7fbe49401c",
+      "value": "Link phone number"
+    },
+    {
+      "name": "s_805a0473b6",
+      "value": "“Today, too, is worth remembering.”"
+    },
+    {
+      "name": "s_806666de10",
+      "value": "No Memoir Plus membership found for this Apple Account."
+    },
+    {
+      "name": "s_808887de3e",
+      "value": "The light is just right for writing down how you feel."
+    },
+    {
+      "name": "s_80a37cf380",
+      "value": "Start Writing"
+    },
+    {
+      "name": "s_81d3179a26",
+      "value": "Your location stays in the entries on this device and is never uploaded. Changes apply only to entries written from now on."
+    },
+    {
+      "name": "s_81d428a1d8",
+      "value": "Record location"
+    },
+    {
+      "name": "s_824e119909",
+      "value": "Low"
+    },
+    {
+      "name": "s_83a302c43c",
+      "value": "6-digit code"
+    },
+    {
+      "name": "s_83c6e3fd12",
+      "value": "Grateful"
+    },
+    {
+      "name": "s_83e94c92d7",
+      "value": "Camera unavailable"
+    },
+    {
+      "name": "s_83f9f94e0b",
+      "value": "Give yourself a name"
+    },
+    {
+      "name": "s_840d2718da",
+      "value": "Joyful"
+    },
+    {
+      "name": "s_84366e6a6f",
+      "value": "Display"
+    },
+    {
+      "name": "s_84476c8174",
+      "value": "Location"
+    },
+    {
+      "name": "s_85a35ccdd6",
+      "value": "Merge into existing notebooks"
+    },
+    {
+      "name": "s_85f02cfb34",
+      "value": "New entry"
+    },
+    {
+      "name": "s_85f84428c2",
+      "value": "When off, Live Photos appear as still images on your other devices."
+    },
+    {
+      "name": "s_86ef74c64f",
+      "value": "Apple authorization failed"
+    },
+    {
+      "name": "s_87363c0bec",
+      "value": "Sent %s"
+    },
+    {
+      "name": "s_876c5b2f4c",
+      "value": "Sync Live Photo videos"
+    },
+    {
+      "name": "s_877d91d42a",
+      "value": "Can't be undone"
+    },
+    {
+      "name": "s_87d04c6c61",
+      "value": "memoir"
+    },
+    {
+      "name": "s_8803176f5e",
+      "value": "Cut, discard, detach — in modern minimalism, less is more"
+    },
+    {
+      "name": "s_89345cda95",
+      "value": "Don’t send"
+    },
+    {
+      "name": "s_8949122316",
+      "value": "Journal Stamp"
+    },
+    {
+      "name": "s_895ec8fd1b",
+      "value": "Error while packaging: %s"
+    },
+    {
+      "name": "s_8a7a73f2b2",
+      "value": "😊"
+    },
+    {
+      "name": "s_8a7af824ab",
+      "value": "No pressure — writing, sync and backups are free forever."
+    },
+    {
+      "name": "s_8a97792ca9",
+      "value": "Error while writing data: %s"
+    },
+    {
+      "name": "s_8ad31155b2",
+      "value": "“This diary will never think you've said too much.”"
+    },
+    {
+      "name": "s_8b196caa75",
+      "value": "Every entry in this backup is already on this device."
+    },
+    {
+      "name": "s_8b365db6c9",
+      "value": "No new entries since your last letter. Write something first, then send."
+    },
+    {
+      "name": "s_8b5b1182d2",
+      "value": "Not signed in to iCloud"
+    },
+    {
+      "name": "s_8c276c1fea",
+      "value": "Privacy Policy"
+    },
+    {
+      "name": "s_8c2d497713",
+      "value": "New photos start with this style. You can still change it while inserting."
+    },
+    {
+      "name": "s_8c8658f454",
+      "value": "“Somewhere, someone is looking at the same sky.”"
+    },
+    {
+      "name": "s_8cd62ee39c",
+      "value": "“You are braver than you think.”"
+    },
+    {
+      "name": "s_8d1a970c8d",
+      "value": "Default style"
+    },
+    {
+      "name": "s_8d6bc0a28f",
+      "value": "Language"
+    },
+    {
+      "name": "s_8db187e659",
+      "value": "Limit of 5 photos reached"
+    },
+    {
+      "name": "s_8dcc9a2d73",
+      "value": "Pen pal"
+    },
+    {
+      "name": "s_8e39a34dcc",
+      "value": "“A cup of tea is just long enough to write down a mood.”"
+    },
+    {
+      "name": "s_8ec3a93dbd",
+      "value": "Can't reach the App Store right now. Please try again later."
+    },
+    {
+      "name": "s_8ee0b6f9eb",
+      "value": "Cover photo"
+    },
+    {
+      "name": "s_8f31a480bd",
+      "value": "Terms of Service"
+    },
+    {
+      "name": "s_8f7126f2d3",
+      "value": "Tap the envelope in the top right and %s will write to you"
+    },
+    {
+      "name": "s_8fad83c181",
+      "value": "“No hurry. The story is only beginning.”"
+    },
+    {
+      "name": "s_9013849179",
+      "value": "Account"
+    },
+    {
+      "name": "s_9058a1c2c5",
+      "value": "Records"
+    },
+    {
+      "name": "s_907c3945d8",
+      "value": "Clear"
+    },
+    {
+      "name": "s_90c36f74f2",
+      "value": "Theme changed, but the icon could not be updated"
+    },
+    {
+      "name": "s_9101853a76",
+      "value": "Subtitle (optional)"
+    },
+    {
+      "name": "s_91732e25ee",
+      "value": "Choose a color"
+    },
+    {
+      "name": "s_918e4226fe",
+      "value": "Importing only adds. Entries already on this device are skipped — nothing is overwritten, and nothing you have now is deleted."
+    },
+    {
+      "name": "s_9199a16092",
+      "value": "Data & Backup"
+    },
+    {
+      "name": "s_91c4b31f0e",
+      "value": "“Writing is the gentlest way to resist forgetting.”"
+    },
+    {
+      "name": "s_91e5f2c416",
+      "value": "“No need to seem strong. It's only you here.”"
+    },
+    {
+      "name": "s_930c3a22eb",
+      "value": "“When you're alone, words are the best company.”"
+    },
+    {
+      "name": "s_9392c3c977",
+      "value": "Writing Stats"
+    },
+    {
+      "name": "s_93aeabd110",
+      "value": "Verify with your linked Apple ID"
+    },
+    {
+      "name": "s_9401eee769",
+      "value": "30 days"
+    },
+    {
+      "name": "s_9545e4dc22",
+      "value": "I understand, continue"
+    },
+    {
+      "name": "s_95a2fe4ab7",
+      "value": "Don't Save"
+    },
+    {
+      "name": "s_95a69206f7",
+      "value": "This moment is on paper now"
+    },
+    {
+      "name": "s_975ac3e011",
+      "value": "Attached to Letter"
+    },
+    {
+      "name": "s_9860e2406f",
+      "value": "“Sunlight on the page warms the words.”"
+    },
+    {
+      "name": "s_989d1affa0",
+      "value": "Version"
+    },
+    {
+      "name": "s_98a39c3dda",
+      "value": "Request timed out — try again later"
+    },
+    {
+      "name": "s_9908c922f2",
+      "value": "Checking…"
+    },
+    {
+      "name": "s_997b9c5847",
+      "value": "Done — listen back or insert it"
+    },
+    {
+      "name": "s_9a15479618",
+      "value": "Mounted"
+    },
+    {
+      "name": "s_9a21654c81",
+      "value": "Open the window — today's story is just beginning."
+    },
+    {
+      "name": "s_9b662606e2",
+      "value": "Until %s"
+    },
+    {
+      "name": "s_9b87ed617f",
+      "value": "Anything you'd like to write down today?"
+    },
+    {
+      "name": "s_9bb34ecd75",
+      "value": "You are not signed in to iCloud, so entries stay on this device only. Sign in under Settings → Apple Account and syncing starts automatically."
+    },
+    {
+      "name": "s_9c92f8559a",
+      "value": "These files do not belong to any existing entry. Deleting them will not affect your content."
+    },
+    {
+      "name": "s_9cb1bcd558",
+      "value": "21 days"
+    },
+    {
+      "name": "s_9d4c418473",
+      "value": "Wine Red"
+    },
+    {
+      "name": "s_9d84cfe84d",
+      "value": "Draft saved"
+    },
+    {
+      "name": "s_9e19a026db",
+      "value": "In this letter"
+    },
+    {
+      "name": "s_9e5cbe5e55",
+      "value": "What gets deleted"
+    },
+    {
+      "name": "s_9eda140339",
+      "value": "Move to the left"
+    },
+    {
+      "name": "s_9f0103656b",
+      "value": "Cloth color"
+    },
+    {
+      "name": "s_9f9a88b0c8",
+      "value": "Change the icon too"
+    },
+    {
+      "name": "s_9fbb2e66c7",
+      "value": "This backup comes from a newer version of Memoir (format v%d). Update the app first, then import."
+    },
+    {
+      "name": "s_a09ce12ef3",
+      "value": "Privacy Policy"
+    },
+    {
+      "name": "s_a0a02d4593",
+      "value": "Already using this icon"
+    },
+    {
+      "name": "s_a0b3cc9c47",
+      "value": "“Everywhere the wind has passed is worth writing about.”"
+    },
+    {
+      "name": "s_a11d72f33b",
+      "value": "Writing…"
+    },
+    {
+      "name": "s_a20949550e",
+      "value": "Join"
+    },
+    {
+      "name": "s_a26f1abe64",
+      "value": "Import backup"
+    },
+    {
+      "name": "s_a2917545f5",
+      "value": "More letters are on the way"
+    },
+    {
+      "name": "s_a2a4dab858",
+      "value": "#%s"
+    },
+    {
+      "name": "s_a33bda51e5",
+      "value": "Wrong password — try again"
+    },
+    {
+      "name": "s_a3b90b392b",
+      "value": "Notebooks"
+    },
+    {
+      "name": "s_a428575031",
+      "value": "The purchase couldn't be completed. Please try again later."
+    },
+    {
+      "name": "s_a4e6f10bf1",
+      "value": "Resend"
+    },
+    {
+      "name": "s_a4fb934a6f",
+      "value": "Wrong file format — it may be damaged"
+    },
+    {
+      "name": "s_a612e01da7",
+      "value": "Write the first entry"
+    },
+    {
+      "name": "s_a671f238f1",
+      "value": "Street"
+    },
+    {
+      "name": "s_a7f814c0a4",
+      "value": "Edit"
+    },
+    {
+      "name": "s_a803dc45fe",
+      "value": "Letterbox, new reply"
+    },
+    {
+      "name": "s_a87b5e1491",
+      "value": "Stamp Mode"
+    },
+    {
+      "name": "s_a8d4081ed6",
+      "value": "Could not write the letter: %s"
+    },
+    {
+      "name": "s_a911a90bfb",
+      "value": "Today's letter has only just set off — it hasn't gone far. Write again tomorrow, and a reply will come tomorrow."
+    },
+    {
+      "name": "s_a9d57f8585",
+      "value": "Write this moment down"
+    },
+    {
+      "name": "s_aaa25533ca",
+      "value": "Record weather and place"
+    },
+    {
+      "name": "s_ab58e2f999",
+      "value": "“When in doubt, start writing.”"
+    },
+    {
+      "name": "s_ab7fb2e196",
+      "value": "Backup password"
+    },
+    {
+      "name": "s_abafd65e30",
+      "value": "Bamboo"
+    },
+    {
+      "name": "s_aca36c266f",
+      "value": "“Time won't wait for you. Words will.”"
+    },
+    {
+      "name": "s_acc4a9dd8c",
+      "value": "%s has stepped away from the desk. Try again a little later."
+    },
+    {
+      "name": "s_ad1e6b0e58",
+      "value": "This theme comes with a matching Home Screen icon."
+    },
+    {
+      "name": "s_ad5abaa04c",
+      "value": "Preview:"
+    },
+    {
+      "name": "s_ad8012ee9f",
+      "value": "Themes"
+    },
+    {
+      "name": "s_ad904830fe",
+      "value": "This isn’t a Memoir backup, or the file is damaged"
+    },
+    {
+      "name": "s_ade3dc5859",
+      "value": "Tap the seal to open this letter"
+    },
+    {
+      "name": "s_ae002a8a37",
+      "value": "Notebook name"
+    },
+    {
+      "name": "s_ae7b18f8be",
+      "value": "Tap the mailbox to send the checked entries to %s"
+    },
+    {
+      "name": "s_af5a2c8bff",
+      "value": "Italic"
+    },
+    {
+      "name": "s_b0068cfb4a",
+      "value": "Delete Notebook"
+    },
+    {
+      "name": "s_b04c38d8e1",
+      "value": "“What you write down cannot be blown away.”"
+    },
+    {
+      "name": "s_b065d573da",
+      "value": "Could not write the letter"
+    },
+    {
+      "name": "s_b1a9ba7930",
+      "value": "“Keeping on writing is courage enough.”"
+    },
+    {
+      "name": "s_b1b08dc4d9",
+      "value": "Then %1$s/year · about %2$s/month"
+    },
+    {
+      "name": "s_b1fb8f13cc",
+      "value": "Send your journal entries"
+    },
+    {
+      "name": "s_b1fc6613b2",
+      "value": "Delete Account"
+    },
+    {
+      "name": "s_b27fe843c8",
+      "value": "Couldn't save the letter waiting on the server"
+    },
+    {
+      "name": "s_b2a64d5441",
+      "value": "This Month"
+    },
+    {
+      "name": "s_b2c510fd6a",
+      "value": "Productive"
+    },
+    {
+      "name": "s_b2e8e82a2a",
+      "value": "Your letter is in the mailbox"
+    },
+    {
+      "name": "s_b34f3cc999",
+      "value": "What stays"
+    },
+    {
+      "name": "s_b3addb5e3f",
+      "value": "Linked"
+    },
+    {
+      "name": "s_b3f3b0c40c",
+      "value": "Sent. A reply will reach your letterbox within three days."
+    },
+    {
+      "name": "s_b416882c45",
+      "value": "Leather"
+    },
+    {
+      "name": "s_b418d20f0d",
+      "value": "Memoir"
+    },
+    {
+      "name": "s_b458ea40bf",
+      "value": "Current location"
+    },
+    {
+      "name": "s_b477b8791b",
+      "value": "A notebook with this name already exists"
+    },
+    {
+      "name": "s_b4a7bb16c0",
+      "value": "To"
+    },
+    {
+      "name": "s_b4f504af2c",
+      "value": "%s’s reply has arrived. Take a look in your letterbox."
+    },
+    {
+      "name": "s_b5040678f0",
+      "value": "The light is stretching out. Write today down while it lasts."
+    },
+    {
+      "name": "s_b6c0279a8a",
+      "value": "Couldn’t put these entries back"
+    },
+    {
+      "name": "s_b72205943e",
+      "value": "Tap Get code and we’ll text your currently linked number."
+    },
+    {
+      "name": "s_b74d58bd95",
+      "value": "“There's a new beginning in the spring wind.”"
+    },
+    {
+      "name": "s_b7607a6106",
+      "value": "Set as cover"
+    },
+    {
+      "name": "s_b768d5ebc5",
+      "value": "Please stay in the app while importing."
+    },
+    {
+      "name": "s_b7c45049d1",
+      "value": "Too many requests — try again in about %d seconds"
+    },
+    {
+      "name": "s_b869f3199c",
+      "value": "Words"
+    },
+    {
+      "name": "s_b8bb31e170",
+      "value": "Cover"
+    },
+    {
+      "name": "s_b90591eec2",
+      "value": "Release to place here"
+    },
+    {
+      "name": "s_b981bb73cb",
+      "value": "The afternoon light is gentle. So are you."
+    },
+    {
+      "name": "s_bb69e30f5a",
+      "value": "Getting the here and now…"
+    },
+    {
+      "name": "s_bb7874b421",
+      "value": "Heading"
+    },
+    {
+      "name": "s_bb9da11863",
+      "value": "Amber Brown"
+    },
+    {
+      "name": "s_bbfd0f9d4f",
+      "value": "This content didn’t pass review, so no letter could be written"
+    },
+    {
+      "name": "s_bc266e5f3b",
+      "value": "Edit Notebook"
+    },
+    {
+      "name": "s_bc369f65c9",
+      "value": "Tap any one to add it to your entry"
+    },
+    {
+      "name": "s_bce579c597",
+      "value": "Wrong password — please try again"
+    },
+    {
+      "name": "s_bd1775eabd",
+      "value": "Write a few lines before the sun folds away."
+    },
+    {
+      "name": "s_bd7fc4488b",
+      "value": "Nothing further to the right"
+    },
+    {
+      "name": "s_bd86a7ba02",
+      "value": "Submitted. Your membership will start once it's approved."
+    },
+    {
+      "name": "s_bddddc8c10",
+      "value": "“Change needn't be dramatic. Writing it down is a start.”"
+    },
+    {
+      "name": "s_be58bf9d7d",
+      "value": "Nothing new to add"
+    },
+    {
+      "name": "s_bed172efc9",
+      "value": "About"
+    },
+    {
+      "name": "s_bf50d67138",
+      "value": "Entries"
+    },
+    {
+      "name": "s_bf6ad0ba08",
+      "value": "“Stop now and then and look at how far you've come.”"
+    },
+    {
+      "name": "s_bfae481139",
+      "value": "You’re not signed in to iCloud. Your journals live only on this device and will be lost if you delete the app. Sign in under Settings → Apple Account and syncing starts automatically."
+    },
+    {
+      "name": "s_bfd6de1bee",
+      "value": "Enter it again"
+    },
+    {
+      "name": "s_c06a9a8733",
+      "value": "Error while unpacking: %s"
+    },
+    {
+      "name": "s_c0fc825651",
+      "value": "This week's letter has already arrived. %s answers once a week — everything you write gets read. Come back next Sunday."
+    },
+    {
+      "name": "s_c11b65b92c",
+      "value": "First light. A new page is waiting for you."
+    },
+    {
+      "name": "s_c15e3efa81",
+      "value": "“Feelings aren't right or wrong — only heard or ignored.”"
+    },
+    {
+      "name": "s_c20e6cdf1d",
+      "value": "Every entry deserves a reply"
+    },
+    {
+      "name": "s_c266fc5a91",
+      "value": "Write a few lines before the world wakes up."
+    },
+    {
+      "name": "s_c2b46a7849",
+      "value": "Today’s letter has already gone out. Come back tomorrow."
+    },
+    {
+      "name": "s_c3304d1e49",
+      "value": "days"
+    },
+    {
+      "name": "s_c33c1e2c83",
+      "value": "Deleting a notebook won't delete its entries, only the tag association will be removed."
+    },
+    {
+      "name": "s_c36573f3f7",
+      "value": "Give your pen pal a name"
+    },
+    {
+      "name": "s_c3915c323e",
+      "value": "Film Frame"
+    },
+    {
+      "name": "s_c3d92b20c8",
+      "value": "Account"
+    },
+    {
+      "name": "s_c488684daf",
+      "value": "Delete photo"
+    },
+    {
+      "name": "s_c5096164af",
+      "value": "MEMOIR"
+    },
+    {
+      "name": "s_c51f0d0011",
+      "value": "Encryption"
+    },
+    {
+      "name": "s_c567ba63ab",
+      "value": "“Some roads you walk alone — but you needn't carry it alone.”"
+    },
+    {
+      "name": "s_c5c198d890",
+      "value": "New phone number"
+    },
+    {
+      "name": "s_c5e6652443",
+      "value": "%s has written back a few times this month — a slow correspondent. Let's continue next month."
+    },
+    {
+      "name": "s_c62079d2ba",
+      "value": "Adjust framing"
+    },
+    {
+      "name": "s_c65a22ccf7",
+      "value": "“The sky outside is different every day. Have you noticed?”"
+    },
+    {
+      "name": "s_c665b719e0",
+      "value": "The name you choose appears on new letters. Renaming affects only future letters — past ones keep their original signature."
+    },
+    {
+      "name": "s_c72e1ce65f",
+      "value": "The light is fading — a good moment to look back on today."
+    },
+    {
+      "name": "s_c74dd33b63",
+      "value": "“Rainy days always hold more feeling.”"
+    },
+    {
+      "name": "s_c7a3044d8f",
+      "value": "New Notebook"
+    },
+    {
+      "name": "s_c8d09cf955",
+      "value": "Default"
+    },
+    {
+      "name": "s_ca2e64e0b5",
+      "value": "Paid"
+    },
+    {
+      "name": "s_ca4fe69fd3",
+      "value": "Leftover files are photos or recordings from entries you deleted. They no longer belong to any entry, so clearing them will not affect anything you still have."
+    },
+    {
+      "name": "s_ca8ffc3990",
+      "value": "Statistics"
+    },
+    {
+      "name": "s_ca96133fe5",
+      "value": "Other device"
+    },
+    {
+      "name": "s_cad0c3af51",
+      "value": "Move Left"
+    },
+    {
+      "name": "s_cb2d681e91",
+      "value": "Calm"
+    },
+    {
+      "name": "s_cb399ce358",
+      "value": "Memoir needs to store your phone number so you can sign in, and to send your entry text for composing a reply when you ask for a letter. Without your consent we’re unable to offer these features. Sorry about that."
+    },
+    {
+      "name": "s_cb7f4c5817",
+      "value": "Match Theme"
+    },
+    {
+      "name": "s_cb9d926f92",
+      "value": "Linen"
+    },
+    {
+      "name": "s_cba4ea4cc9",
+      "value": "Couldn’t derive the key"
+    },
+    {
+      "name": "s_cbcc5a7c11",
+      "value": "Sending…"
+    },
+    {
+      "name": "s_cca54b96ed",
+      "value": "Charcoal"
+    },
+    {
+      "name": "s_ccf97f8d85",
+      "value": "Monthly"
+    },
+    {
+      "name": "s_cd0f3ad8dd",
+      "value": "Original"
+    },
+    {
+      "name": "s_cd2db65a0a",
+      "value": "%s has already written back a few times this month. Come back next month."
+    },
+    {
+      "name": "s_cd847d1b02",
+      "value": "My Notebooks"
+    },
+    {
+      "name": "s_cd85b99707",
+      "value": "Added · %s"
+    },
+    {
+      "name": "s_cd91dfd56d",
+      "value": "“Today's confusion may be tomorrow's answer.”"
+    },
+    {
+      "name": "s_cd99b225a0",
+      "value": "Language"
+    },
+    {
+      "name": "s_cdf36d8e2f",
+      "value": "Move Right"
+    },
+    {
+      "name": "s_ce3e4010fe",
+      "value": "Edit cover"
+    },
+    {
+      "name": "s_ce4ad523f3",
+      "value": "If none is chosen, it's kept only in “All Entries”."
+    },
+    {
+      "name": "s_ce8689ed1e",
+      "value": "Sent. Write something new and you can send again."
+    },
+    {
+      "name": "s_cf9d76b498",
+      "value": "Learn about Memoir Plus"
+    },
+    {
+      "name": "s_cfe9c440c8",
+      "value": "You can go back and take a look now."
+    },
+    {
+      "name": "s_d01a4dd338",
+      "value": "No phone number linked. Your phone number is the only way to recover your account — without it, you'll lose access if you change phones or your Apple ID becomes unavailable."
+    },
+    {
+      "name": "s_d11b66842a",
+      "value": "Export backup"
+    },
+    {
+      "name": "s_d190c58094",
+      "value": "From %s"
+    },
+    {
+      "name": "s_d302bacb72",
+      "value": "Coming Soon"
+    },
+    {
+      "name": "s_d3fc6fa5bc",
+      "value": "Full bleed"
+    },
+    {
+      "name": "s_d46f82fdf0",
+      "value": "List"
+    },
+    {
+      "name": "s_d55de11445",
+      "value": "Synced with the App Store"
+    },
+    {
+      "name": "s_d567eeebd2",
+      "value": "⚠️ Without a password, anyone who gets this file can read every entry you have written."
+    },
+    {
+      "name": "s_d5af163131",
+      "value": "“Every day is new. So is every page.”"
+    },
+    {
+      "name": "s_d60bcc29e2",
+      "value": "Sync error"
+    },
+    {
+      "name": "s_d63d98608d",
+      "value": "Tired"
+    },
+    {
+      "name": "s_d647d251c2",
+      "value": "Open this letter"
+    },
+    {
+      "name": "s_d67f0e000d",
+      "value": "Every photo paper and cover layout"
+    },
+    {
+      "name": "s_d78cde076b",
+      "value": "On"
+    },
+    {
+      "name": "s_d84664c768",
+      "value": "After changing, sign in with the new number."
+    },
+    {
+      "name": "s_d9b91c877d",
+      "value": "Change Paper"
+    },
+    {
+      "name": "s_daf00cb705",
+      "value": "The city is beautiful at dusk. So were you today."
+    },
+    {
+      "name": "s_db0abd6cdb",
+      "value": "Bluebird"
+    },
+    {
+      "name": "s_db7cac8e24",
+      "value": "Mood name"
+    },
+    {
+      "name": "s_dc36d11a9a",
+      "value": "Write a few entries first, then come back to send them."
+    },
+    {
+      "name": "s_dc7945487b",
+      "value": "“A diary isn't for others. It's for the person you'll become.”"
+    },
+    {
+      "name": "s_dcf37c99eb",
+      "value": "Time keeps moving. Some feelings deserve to stay."
+    },
+    {
+      "name": "s_ddb8fb6094",
+      "value": "The night is honest time."
+    },
+    {
+      "name": "s_dee14a14e2",
+      "value": "“Imperfect things deserve love too.”"
+    },
+    {
+      "name": "s_df5dc2b3c5",
+      "value": "**The entries, photos and recordings you write are never uploaded to our servers.** They stay on your device and sync between your own devices through your own iCloud, which we cannot access or read."
+    },
+    {
+      "name": "s_df73c654d2",
+      "value": "Create backup"
+    },
+    {
+      "name": "s_dfd9e22f59",
+      "value": "We'll send a code to the phone number linked to your account"
+    },
+    {
+      "name": "s_e162d4656a",
+      "value": "The system is temporarily blocking iCloud access, so your journals are only on this device. Use Export Backup to save a local copy first."
+    },
+    {
+      "name": "s_e1d4f63ed0",
+      "value": "10 days"
+    },
+    {
+      "name": "s_e1d765507d",
+      "value": "The evening breeze is in. You've done enough today."
+    },
+    {
+      "name": "s_e2322d97a3",
+      "value": "Your last letter has just gone out. Send the next one in a little while."
+    },
+    {
+      "name": "s_e2aedf50f2",
+      "value": "“Accepting who you are right now is the best beginning.”"
+    },
+    {
+      "name": "s_e3e397c743",
+      "value": "Link Apple ID"
+    },
+    {
+      "name": "s_e488fa1386",
+      "value": "Tap the button below to start writing today's story"
+    },
+    {
+      "name": "s_e524dcf71e",
+      "value": "“This moment is the whole of it.”"
+    },
+    {
+      "name": "s_e561c3d4bd",
+      "value": "Phone number changed"
+    },
+    {
+      "name": "s_e5e80726bd",
+      "value": "Capture this moment"
+    },
+    {
+      "name": "s_e69ad1e05f",
+      "value": "iCloud unavailable"
+    },
+    {
+      "name": "s_e6dbbfdb59",
+      "value": "“The small moments are what your life is made of.”"
+    },
+    {
+      "name": "s_e6eecaf81b",
+      "value": "Prussian Blue"
+    },
+    {
+      "name": "s_e73f6f1b4f",
+      "value": "Even the moon is waiting for you to finish today's story."
+    },
+    {
+      "name": "s_e775910242",
+      "value": "A diary written for yourself"
+    },
+    {
+      "name": "s_e79f9a294a",
+      "value": "by Sinara"
+    },
+    {
+      "name": "s_e7b319db30",
+      "value": "%1$s · Memoir %2$s"
+    },
+    {
+      "name": "s_e7dca6ac80",
+      "value": "You have read every entry"
+    },
+    {
+      "name": "s_e7ec4d5c09",
+      "value": "Or pick a color"
+    },
+    {
+      "name": "s_e9989b9fd6",
+      "value": "New numbers get an account automatically after verification"
+    },
+    {
+      "name": "s_ea0ef2ae72",
+      "value": "Next"
+    },
+    {
+      "name": "s_eaa6b0540d",
+      "value": "%s / month"
+    },
+    {
+      "name": "s_eab9fafde7",
+      "value": "Picking up where you left off"
+    },
+    {
+      "name": "s_eae4b17fa9",
+      "value": "“Not sure what to write? Just open the page.”"
+    },
+    {
+      "name": "s_eb7cf7b71a",
+      "value": "Unlock"
+    },
+    {
+      "name": "s_ebf9dfc91c",
+      "value": "%d photos or recordings were missing from the backup. The rest of those entries was imported as usual."
+    },
+    {
+      "name": "s_ec094809a3",
+      "value": "“The world is wide, but this page is yours alone.”"
+    },
+    {
+      "name": "s_ec470aba74",
+      "value": "Checking iCloud status…"
+    },
+    {
+      "name": "s_ec7e3bcb5d",
+      "value": "From the sixteenth century, Europe's finest books were bound in Morocco goatskin: its close grain is the ground that shows gold best. In the nineteenth-century English study, calf wrapped the spine and gold leaf stamped the title — a book was an object first and a text second."
+    },
+    {
+      "name": "s_ec85a65494",
+      "value": "Title (optional)"
+    },
+    {
+      "name": "s_ecf727ea04",
+      "value": "•"
+    },
+    {
+      "name": "s_ed7a57b32a",
+      "value": "Put things down for a moment and talk to yourself."
+    },
+    {
+      "name": "s_ed839905d8",
+      "value": "“Eat well, write well, live well.”"
+    },
+    {
+      "name": "s_edd53ba0ee",
+      "value": "Letters sealed with wax"
+    },
+    {
+      "name": "s_ee7391e94f",
+      "value": "Excited"
+    },
+    {
+      "name": "s_ee8a3ce436",
+      "value": "Code sent to %s"
+    },
+    {
+      "name": "s_ee9f38e186",
+      "value": "count"
+    },
+    {
+      "name": "s_ef6e0d1008",
+      "value": "Select Icon"
+    },
+    {
+      "name": "s_ef86be8969",
+      "value": "Location & Weather"
+    },
+    {
+      "name": "s_efa9b5121e",
+      "value": "“You're already braver than you were yesterday.”"
+    },
+    {
+      "name": "s_efeb0dc955",
+      "value": "iCloud Sync"
+    },
+    {
+      "name": "s_eff49a2e1b",
+      "value": "Looking for nearby places…"
+    },
+    {
+      "name": "s_f075b5a3ad",
+      "value": "Everything is still — a good time to hear yourself."
+    },
+    {
+      "name": "s_f2187b0114",
+      "value": "Request cancelled"
+    },
+    {
+      "name": "s_f2465a6c8c",
+      "value": "Entries sync to your iCloud automatically, so nothing is lost when you change devices. They live in your own account — we cannot see them."
+    },
+    {
+      "name": "s_f29761cd03",
+      "value": "MEMOIR"
+    },
+    {
+      "name": "s_f297b996de",
+      "value": "Last 7 days"
+    },
+    {
+      "name": "s_f2a27892d0",
+      "value": "On"
+    },
+    {
+      "name": "s_f32f4dac3a",
+      "value": "Insert a photo here"
+    },
+    {
+      "name": "s_f3be3e4b09",
+      "value": "Start reading"
+    },
+    {
+      "name": "s_f4aaa93473",
+      "value": "Still cutting paper"
+    },
+    {
+      "name": "s_f4ae8c66ad",
+      "value": "Polaroid"
+    },
+    {
+      "name": "s_f60d7d12e4",
+      "value": "14 days"
+    },
+    {
+      "name": "s_f65ce37afd",
+      "value": "Weather unavailable — tap to retry"
+    },
+    {
+      "name": "s_f660675cd6",
+      "value": "Malformed response data"
+    },
+    {
+      "name": "s_f670b2adc0",
+      "value": "Bold"
+    },
+    {
+      "name": "s_f685ba2f14",
+      "value": "Anxious"
+    },
+    {
+      "name": "s_f6c9fb2f33",
+      "value": "Write today's story"
+    },
+    {
+      "name": "s_f6d2484a35",
+      "value": "Purchase to unlock"
+    },
+    {
+      "name": "s_f72b6c2eb7",
+      "value": "We need your consent to continue"
+    },
+    {
+      "name": "s_f85412ce62",
+      "value": "Rate Us"
+    },
+    {
+      "name": "s_f8778319a6",
+      "value": "Import as new notebooks"
+    },
+    {
+      "name": "s_f8d820eebf",
+      "value": "%1$d / %2$d"
+    },
+    {
+      "name": "s_f90d3aab55",
+      "value": "A cup of coffee, a few lines. That's enough."
+    },
+    {
+      "name": "s_f93d423da3",
+      "value": "App Icon"
+    },
+    {
+      "name": "s_f94c7162ad",
+      "value": "Custom Emoji"
+    },
+    {
+      "name": "s_f99c577247",
+      "value": "“One day you'll turn back to this page and smile.”"
+    },
+    {
+      "name": "s_fa49679ade",
+      "value": "Choose a pen pal who suits you"
+    },
+    {
+      "name": "s_fa58d00e4f",
+      "value": "“Taking the first step matters more than the direction.”"
+    },
+    {
+      "name": "s_fa78a6eba6",
+      "value": "Couldn’t generate: %s"
+    },
+    {
+      "name": "s_fac430ea0c",
+      "value": "“Sadness deserves to be taken seriously too.”"
+    },
+    {
+      "name": "s_fadf24dbc5",
+      "value": "Save"
+    },
+    {
+      "name": "s_fb589e4d58",
+      "value": "Treasured notebooks"
+    },
+    {
+      "name": "s_fcbd093292",
+      "value": "Create"
+    },
+    {
+      "name": "s_fdc1a10b4f",
+      "value": "Nostalgic"
+    },
+    {
+      "name": "s_fe06546672",
+      "value": "I understand: this file contains the full text, photos and recordings of all my entries. memoir never sees it and never uploads it. Once I send it to someone or store it on a third party such as WeChat or a cloud drive, its safety depends on that platform."
+    },
+    {
+      "name": "s_fe1629f682",
+      "value": "e.g. 2025 · Kyoto"
+    },
+    {
+      "name": "s_fe9ea3f070",
+      "value": "This year"
+    },
+    {
+      "name": "s_fee9c0540f",
+      "value": "First, confirm it's you"
+    },
+    {
+      "name": "s_ff0e280d48",
+      "value": "On its way"
+    },
+    {
+      "name": "s_ff12ea562c",
+      "value": "Down to a street or landmark, e.g. “Canton Tower”"
+    },
+    {
+      "name": "s_ff8c685438",
+      "value": "Add to notebook"
+    },
+    {
+      "name": "s_08d486c16b",
+      "value": "memoir needs access to your photo library so you can add photos and Live Photos to your entries. Images stay on your device and sync only to your own iCloud."
+    },
+    {
+      "name": "s_19563f66a0",
+      "value": "memoir"
+    },
+    {
+      "name": "s_2dc7e41549",
+      "value": "尺素备份包"
+    },
+    {
+      "name": "s_342d89fd91",
+      "value": "NSLocalNetworkUsageDescription"
+    },
+    {
+      "name": "s_6ccf6187f5",
+      "value": "memoir uses your location to record the current weather in your entry."
+    },
+    {
+      "name": "s_8d037e1dca",
+      "value": "memoir saves Live Photos taken in the app to your photo library, so the full version isn’t kept only inside the app."
+    },
+    {
+      "name": "s_ce3452a6fb",
+      "value": "memoir uses the microphone to record voice notes for your entries. Recordings stay on your device and sync only to your own iCloud."
+    },
+    {
+      "name": "s_d46c936cb4",
+      "value": "memoir"
+    },
+    {
+      "name": "s_e15f73bdc6",
+      "value": "memoir uses the camera to add photos to your entries."
+    }
+  ]
+}
