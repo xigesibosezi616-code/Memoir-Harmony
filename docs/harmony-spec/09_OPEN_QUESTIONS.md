@@ -26,6 +26,8 @@
 | Q17 | ⚪ | 接华为账号后，**注销时撤销华为授权** | 4.4 | 后端 | |
 | Q18 | ⚪ | 鸿蒙**包名 / 应用市场主体** | 0.3 | 产品 | |
 | Q19 | 🟡 | 正文小图加载**不放大**（iOS `loadImage` 的 `preparingThumbnail` 会把小图放大到 600） | 2.6 照片相纸 | 鸿蒙 + 产品 | |
+| Q20 | 🟡 | **智感握姿实现路径**：`HdsTabs` 不在本 SDK（26），自行用 motion `operatingHandChanged` + `ACTIVITY_MOTION` 实现 | 1.6 主框架 · 真机验收 | 鸿蒙 | 2026-10-15 整体移除：Tabs 系统底栏无横移落点，且 SDK 权限清单证实 `DETECT_GESTURE`（normal + system_grant）后 `holdingHandChanged` 也只是普通权限——智感握姿收益存疑，服务、权限声明、理由文案全部删除（git 历史可寻回），真机验收 `operatingHand` 授权率与灵敏度后若确需再重启 |
+| Q21 | ⚪ | 全局 toast 的 kind：文档卡片只写两种，iOS 源码是三种（error/info/success） | — | — | 2026-10-14 照 iOS 三种 |
 
 ---
 
@@ -139,3 +141,24 @@ iOS `PhotoPaperIO.loadImage` 用 `preparingThumbnail(of: 600×600)` 解码，**�
 `loadCoverImage` 则明确判断了「原图比目标小就别放大」。鸿蒙侧（1.4 `PhotoPaperIO.ets`）统一**不放大**：
 省内存、小图更清晰，但与 iOS 的正文小图行为不一致（iOS 放大后的图会更糊）。
 做 2.6 照片相纸时真机对比两边观感，若要与 iOS 逐像素一致再改 `decodeFit` 的缩放策略。
+
+### Q20 🟡 智感握姿实现路径
+
+HarmonyOS 6 官方「智感握姿」推荐用 `HdsTabs`（HDS 组件库），但本工程 SDK（API 26，hmos-clt 7.26.8）
+**没有该组件**（hds 仅有 ActionBar/ColorPicker/SideBar/SideMenu/SnackBar 等）。
+2026-10-14 曾自研落地：`@ohos.multimodalAwareness.motion` 的 `on('operatingHandChanged')`
+（API 15+，phone）+ `ACTIVITY_MOTION` 权限驱动浮动胶囊底栏横移。
+
+2026-10-15 **整体移除**：
+1. 主框架改用 ArkUI Tabs 系统底栏（`.systemMaterial` 对齐 iOS `.thinMaterial`），底栏由系统绘制，无横移落点；
+2. SDK 权限清单证实 `DETECT_GESTURE` 为 normal + system_grant（三方声明即授予），`holdingHandChanged`
+   并非高门槛——此前暂缓理由不成立，但同时也说明该能力并无稀缺价值；
+3. 智感握姿收益（单手够 tab）在四 tab 大图标场景下存疑，而成本是首启多一个权限弹窗。
+服务文件、单测、`ACTIVITY_MOTION` 权限声明、七语言理由文案全部删除（git 历史可寻回）。
+若真机验收阶段产品确认需要，再重启评估（届时优先核实 `HdsTabs` 在新 SDK 的可用性）。
+
+### Q21 ⚪ 全局 toast 的 kind 数量
+
+10_BUILD_MANUAL.md 1.6 卡片只写了 error / info 两种；iOS `ErrorPresenter.Kind` 实际是
+error / info / success 三种（`ErrorToastView` 三色：赭红 / 墨灰蓝 / 橄榄绿）。
+以 iOS 源码为准做三种（冲突时 iOS 源码 > 文档），`ErrorToastKind` 枚举三值齐全。

@@ -26,20 +26,47 @@ import { LEGAL_CURRENT_VERSION } from '../views/legal/LegalDocument';
 import { LegalConsentView } from '../views/legal/LegalConsentView';
 import { OnboardingView } from '../views/onboarding/OnboardingView';
 import { SplashView } from '../views/splash/SplashView';
-import { MainPlaceholderView } from '../views/main/MainPlaceholderView';
+import { MainTabsView } from '../views/main/MainTabsView';
+import { AppTheme } from '../theme/AppTheme';
+import { BambooTheme } from '../theme/BambooTheme';
+import { STORAGE_KEY_THEME } from '../theme/ThemeManager';
+import { AppEnvironment, STORAGE_KEY_APP_ENVIRONMENT } from '../environment/AppEnvironment';
+import { createDefaultErrorPresenter } from '../environment/ErrorPresenter';
 
 @Entry
 @Component
 struct Index {
+  /**
+   * 应用级依赖容器（10_BUILD_MANUAL.md 1.6）：EntryAbility 在 loadContent 前已把
+   * 实例写进 AppStorage，这里取出 @Provide 下发，View 端 `@Consume` 取用；
+   * 取不到（异常路径）时兜底一个只有 errors 的实例，保证提示链路始终可用。
+   */
+  @Provide env: AppEnvironment =
+    AppStorage.get<AppEnvironment>(STORAGE_KEY_APP_ENVIRONMENT)
+      ?? new AppEnvironment(createDefaultErrorPresenter());
+  @StorageProp(STORAGE_KEY_THEME) @Watch('onThemeChanged') theme: AppTheme = new BambooTheme();
   @StorageProp(STORAGE_KEY_HAS_COMPLETED_ONBOARDING) hasCompletedOnboarding: boolean = false;
   @StorageLink(STORAGE_KEY_NEEDS_LEGAL_CONSENT) needsLegalConsent: boolean = true;
   @StorageLink(STORAGE_KEY_SHOW_SPLASH) showSplash: boolean = false;
 
+  aboutToAppear(): void {
+    // @Watch 首值不保证触发：挂载后手动同步一次系统栏配色（沉浸式下内容色随主题）
+    this.onThemeChanged();
+  }
+
+  /** 主题变化 → 系统栏内容色随主题背景亮度重算（ImmersiveChrome） */
+  onThemeChanged(): void {
+    const chrome = this.env.chrome;
+    if (chrome !== undefined) {
+      chrome.syncSystemBarColors(this.theme);
+    }
+  }
+
   build() {
     Stack() {
       if (this.hasCompletedOnboarding) {
-        // 1.6 主框架落地时换成真实 Tabs，这里现在是空状态占位 + 调试入口
-        MainPlaceholderView()
+        // 1.6 主框架：四 tab + 全局 toast 顶部层
+        MainTabsView()
       } else {
         OnboardingView()
       }

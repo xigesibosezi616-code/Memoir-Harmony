@@ -14,6 +14,10 @@ import legalMarkdownTest from './test/LegalMarkdown.test'
 import legalDocumentTest from './test/LegalDocument.test'
 import defaultDataTest from './test/DefaultData.test'
 import migrationRunnerTest from './test/MigrationRunner.test'
+import errorPresenterTest from './test/ErrorPresenter.test'
+import immersiveChromeTest from './test/ImmersiveChrome.test'
+import iconTintTest from './test/IconTint.test'
+import breakpointTest from './test/Breakpoint.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -32,4 +36,8 @@ export default function testsuite() {
   legalDocumentTest()
   defaultDataTest()
   migrationRunnerTest()
+  errorPresenterTest()
+  immersiveChromeTest()
+  iconTintTest()
+  breakpointTest()
 }

@@ -9,11 +9,17 @@ import { AppPrefs, PREF_KEY_ACCEPTED_LEGAL_VERSION, PREF_KEY_HAS_COMPLETED_ONBOA
 import { needsLegalConsent } from '../views/legal/LegalDocument';
 import { splashImageFor } from '../views/splash/SplashCoverPool';
 import { MigrationRunner } from '../services/MigrationRunner';
+import { AppEnvironment, STORAGE_KEY_APP_ENVIRONMENT } from '../environment/AppEnvironment';
+import { createDefaultErrorPresenter } from '../environment/ErrorPresenter';
+import { ImmersiveChrome } from '../services/ImmersiveChrome';
 
 const DOMAIN = 0x0000;
 const TAG = 'EntryAbility';
 
 export default class EntryAbility extends UIAbility {
+  /** 应用级依赖容器（onWindowStageCreate 创建；onForeground 回前台时取用） */
+  private environment: AppEnvironment | null = null;
+
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onCreate');
   }
@@ -24,7 +30,34 @@ export default class EntryAbility extends UIAbility {
 
   onWindowStageCreate(windowStage: window.WindowStage): void {
     hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onWindowStageCreate');
+    this.setupEnvironment(windowStage);
     this.initThenLoad(windowStage);
+  }
+
+  /**
+   * 应用级依赖容器装配（10_BUILD_MANUAL.md 1.6），**必须同步**完成再 loadContent：
+   * - 沉浸式全屏：拿主窗口（getMainWindowSync 可抛，失败降级为非沉浸）包
+   *   ImmersiveChrome；setup（全屏 + 避让区订阅）异步先行，首帧即延伸到系统栏下
+   * - AppEnvironment：ErrorPresenter + chrome 同步创建存进 AppStorage，
+   *   Index 取出 @Provide 下发——冷启动 onForeground 在 onWindowStageCreate 之后
+   *   触发，先建好才不丢回前台事件
+   */
+  private setupEnvironment(windowStage: window.WindowStage): void {
+    let chrome: ImmersiveChrome | undefined = undefined;
+    try {
+      const mainWindow: window.Window = windowStage.getMainWindowSync();
+      chrome = new ImmersiveChrome(mainWindow);
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'getMainWindowSync failed, immersive degraded: %{public}s', JSON.stringify(err));
+    }
+    const env = new AppEnvironment(createDefaultErrorPresenter(), chrome);
+    this.environment = env;
+    AppStorage.setOrCreate(STORAGE_KEY_APP_ENVIRONMENT, env);
+    if (chrome !== undefined) {
+      chrome.setup().catch((err: Object): void => {
+        hilog.error(DOMAIN, TAG, 'chrome setup failed: %{public}s', JSON.stringify(err));
+      });
+    }
   }
 
   /**
@@ -95,6 +128,11 @@ export default class EntryAbility extends UIAbility {
 
   onForeground(): void {
     hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onForeground');
+    // 回前台钩子（10_BUILD_MANUAL.md 1.6）：后续挂通知重排 / 寄信队列等
+    const env = this.environment;
+    if (env !== null) {
+      env.onAppForeground();
+    }
   }
 
   onBackground(): void {
