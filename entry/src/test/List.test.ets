@@ -9,6 +9,7 @@ import notebookTest from './test/Notebook.test'
 import letterDeliveryTest from './test/LetterDelivery.test'
 import uuidTest from './test/Uuid.test'
 import databaseTest from './test/Database.test'
+import mediaStorageTest from './test/MediaStorage.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -22,4 +23,5 @@ export default function testsuite() {
   letterDeliveryTest()
   uuidTest()
   databaseTest()
+  mediaStorageTest()
 }
