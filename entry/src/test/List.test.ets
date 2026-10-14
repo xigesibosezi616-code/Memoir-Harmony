@@ -10,6 +10,10 @@ import letterDeliveryTest from './test/LetterDelivery.test'
 import uuidTest from './test/Uuid.test'
 import databaseTest from './test/Database.test'
 import mediaStorageTest from './test/MediaStorage.test'
+import legalMarkdownTest from './test/LegalMarkdown.test'
+import legalDocumentTest from './test/LegalDocument.test'
+import defaultDataTest from './test/DefaultData.test'
+import migrationRunnerTest from './test/MigrationRunner.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -24,4 +28,8 @@ export default function testsuite() {
   uuidTest()
   databaseTest()
   mediaStorageTest()
+  legalMarkdownTest()
+  legalDocumentTest()
+  defaultDataTest()
+  migrationRunnerTest()
 }

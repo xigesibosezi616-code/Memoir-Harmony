@@ -37,15 +37,22 @@ const INDEX_FILE = path.join(ROOT, 'strings_index.json');
 const LANG_DIRS = ['zh_Hans', 'zh_Hant', 'en', 'ja', 'ko', 'fr', 'es'];
 
 /**
- * 中文字面量豁免文件（相对仓库根）：这些文件里的中文是**格式 pattern 的一部分**，
- * 不是待翻译的界面文案，不走字符串资源：
+ * 中文字面量豁免文件（相对仓库根）：这些文件里的中文不是待翻译的界面文案，不走字符串资源：
  * - `services/AppDateFormatters.ets`：zh 日期格式片段（「2026年9月」「9月27日 星期日」），
  *   与 iOS `Date+Formatting.swift` 的固定 pattern（"yyyy年M月"、"EEEE"）等价；
  *   非 zh 分支用标准 Intl 按 CLDR 本地化，不硬编码任何语言文案。
+ * - `data/Database.ets`：建表 SQL 里的列默认值（`from_character DEFAULT '青鸟'` 是
+ *   用户数据的默认值，随数据走不随界面语言走）+ 抛给调用方的内部错误消息
+ *   （只进 hilog / 日志，不上界面；1.5 起纳入豁免，1.3 遗留 9 条清零）。
+ * - `models/Notebook.ets`：`DEFAULT_NOTEBOOK_NAMES`（生活/读书笔记/旅行/工作）。
+ *   首启写库的**用户数据**，按名字就是身份的设计不能换语言重查
+ *   （R-LANG-10；iOS `ContentView.swift` 同样硬编码）。
  * 这些文件的**资源齐全性检查不豁免**（七种语言目录一致性照查）。
  */
 const EXEMPT_LITERAL_FILES = new Set([
   'entry/src/main/ets/services/AppDateFormatters.ets',
+  'entry/src/main/ets/data/Database.ets',
+  'entry/src/main/ets/models/Notebook.ets',
 ]);
 
 const CJK = /[\u4e00-\u9fff]/;
