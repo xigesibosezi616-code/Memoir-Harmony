@@ -54,6 +54,20 @@ export struct MainPlaceholderView {
 
       Blank()
 
+      // 写日记入口（2.2 记录页上线后随占位页一起替换为底部浮钮）
+      Button($r('app.string.s_85f02cfb34'))
+        .fontSize(this.theme.bodyFont.size)
+        .fontWeight(this.theme.bodyFont.weight)
+        .fontFamily(this.theme.bodyFont.family)
+        .fontColor(this.theme.cardBackground)
+        .backgroundColor(this.theme.accent)
+        .borderRadius(22)
+        .padding({ left: 28, right: 28, top: 12, bottom: 12 })
+        .margin({ bottom: 24 })
+        .onClick((): void => {
+          this.getUIContext().getRouter().pushUrl({ url: 'pages/Compose' });
+        })
+
       // 调试入口（脚手架；真实页面卡片上线后删）
       Row({ space: 12 }) {
         Button('ThemeDebug')

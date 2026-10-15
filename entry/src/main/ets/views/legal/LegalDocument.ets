@@ -54,10 +54,11 @@ export function legalNavigationTitleRes(doc: LegalDocument): Resource {
  * `fr` 找不到时退到 `en`（比中文更可能读懂）再退 `zh-Hans`。
  */
 export function legalCandidates(language: string): string[] {
-  const chain: string[] = [];
-  if (language.length > 0) {
-    chain.push(language);
+  // 语言为空（读不到偏好）：什么都不知道，直接简中兜底，不猜英语
+  if (language.length === 0) {
+    return ['zh-Hans'];
   }
+  const chain: string[] = [language];
   if (language.startsWith('zh')) {
     chain.push('zh-Hans');
   } else if (language !== 'en') {

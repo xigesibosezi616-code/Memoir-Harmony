@@ -45,7 +45,9 @@ export function perceivedLuminance(argb: number): number {
 
 /** 系统栏内容色：背景感知亮度低于 128 用白字，否则黑字（纯函数） */
 export function systemBarContentColorFor(backgroundArgb: number): string {
-  return perceivedLuminance(backgroundArgb) < 128 ? '#FFFFFF' : '#000000';
+  // 先四舍五入消浮点误差：灰 0x80 数学上恰为 128（黑字），
+  // 直接比较会算成 127.999…→ 误判白字
+  return Math.round(perceivedLuminance(backgroundArgb)) < 128 ? '#FFFFFF' : '#000000';
 }
 
 @SuppressWarnings({ rules: [SuppressWarningsType.SYSCAP] })

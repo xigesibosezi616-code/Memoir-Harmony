@@ -281,7 +281,9 @@ export default function mediaStorageTest() {
 
     it('entryAudioFilenamesTakeBareNameOfRelativePaths', 0, () => {
       const entry = makeEntryWithPhotoAndAudio('E1', 'photo_e1.jpg', 'audio/rec_1.m4a');
-      expect(entryAudioFilenames(entry)).assertEqual(['rec_1.m4a']);
+      const audio = entryAudioFilenames(entry);
+      expect(audio.length).assertEqual(1);
+      expect(audio[0]).assertEqual('rec_1.m4a');
     })
 
     it('draftMediaFilenamesIncludePhotosAndAudio', 0, () => {
@@ -296,7 +298,9 @@ export default function mediaStorageTest() {
       expect(photos.includes('photo_draft.jpg')).assertTrue();
       expect(photos.includes('photo_draft.mov')).assertTrue();
       expect(photos.includes('photo_draft_full.jpg')).assertTrue();
-      expect(draftAudioFilenames(draft)).assertEqual(['rec_d.m4a']);
+      const draftAudio = draftAudioFilenames(draft);
+      expect(draftAudio.length).assertEqual(1);
+      expect(draftAudio[0]).assertEqual('rec_d.m4a');
     })
 
     // ---- 库列容错 ----

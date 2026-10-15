@@ -121,13 +121,16 @@ export class ThemeManager {
 
   /**
    * 按当前主题的 `colorMode` 设置应用级明暗（R-THEME-03）：
-   * 深色主题 → `COLOR_MODE_DARK`（状态栏、系统弹窗、底栏全走深色）；
-   * 其余 → `COLOR_MODE_NOT_SET`（恢复跟随系统）。
+   * 深色主题 → `COLOR_MODE_DARK`；浅色主题 → `COLOR_MODE_LIGHT`。
+   * 浅色主题必须**显式**切浅色而不是跟随系统：设备在系统深色模式下，
+   * 系统玻璃（HdsTabs 材质面板、键盘）会按深色渲染，浅色页面上
+   * tab bar 下方出现深灰带（2026-10-15 真机反馈）；显式 LIGHT 让
+   * 系统玻璃与浅色主题一致。
    */
   private applyColorMode(): void {
     const mode = this.current.colorMode === 'dark'
       ? ConfigurationConstant.ColorMode.COLOR_MODE_DARK
-      : ConfigurationConstant.ColorMode.COLOR_MODE_NOT_SET;
+      : ConfigurationConstant.ColorMode.COLOR_MODE_LIGHT;
     try {
       this.appContext.getApplicationContext().setColorMode(mode);
     } catch (err) {

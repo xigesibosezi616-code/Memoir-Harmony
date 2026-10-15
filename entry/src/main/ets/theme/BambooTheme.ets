@@ -21,6 +21,11 @@ export class BambooTheme implements AppTheme {
   readonly border: ResourceColor = 0xFFE8E2D6;
   readonly borderAccent: ResourceColor = 0xFFD4C9B8;
 
+  // 玻璃按钮：米白底上 55% 暖灰玻璃 + 90% 暖灰边框（素笺 cardBackground 与背景同色，
+  // 白玻璃提亮在米白底上不可见，改暖灰降一档明度靠 1vp 边框成型）
+  readonly glassBackground: ResourceColor = 0x8CE8E2D6;
+  readonly glassBorder: ResourceColor = 0xE6D4C9B8;
+
   readonly accent: ResourceColor = 0xFF8B7E6A;
   readonly accentBackground: ResourceColor = 0xFFF0EBE1;
 

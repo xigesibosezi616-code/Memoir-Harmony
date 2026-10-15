@@ -18,6 +18,7 @@ import errorPresenterTest from './test/ErrorPresenter.test'
 import immersiveChromeTest from './test/ImmersiveChrome.test'
 import iconTintTest from './test/IconTint.test'
 import breakpointTest from './test/Breakpoint.test'
+import composeLogicTest from './test/ComposeLogic.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -40,4 +41,5 @@ export default function testsuite() {
   immersiveChromeTest()
   iconTintTest()
   breakpointTest()
+  composeLogicTest()
 }

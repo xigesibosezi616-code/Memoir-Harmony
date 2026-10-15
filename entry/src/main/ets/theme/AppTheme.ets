@@ -38,6 +38,17 @@ export interface AppTheme {
   /** 强调边框 */
   borderAccent: ResourceColor;
 
+  // ---- 玻璃按钮（2）----
+  /**
+   * 玻璃质感按钮底色（半透明，配合 0.5vp 玻璃边框模拟 iOS 26 `.glass`）。
+   * 沉浸光感系统材质按官方限制仅标题栏/底部 TabBar 生效，内容区按钮
+   * （写日记页返回/完成）只能用主题化半透明底 + 细边框实现玻璃分量。
+   * 每主题单独调：与页面背景拉开一档明度差（2026-10-15 真机反馈「看不清」）。
+   */
+  glassBackground: ResourceColor;
+  /** 玻璃按钮边框（半透明，比普通 border 清晰一档） */
+  glassBorder: ResourceColor;
+
   // ---- 强调色（2）----
   /** 主色（按钮 / 链接） */
   accent: ResourceColor;
@@ -56,11 +67,12 @@ export interface AppTheme {
   /** 删除 / 错误。整个主题仅这一处用红（04_DESIGN_LANGUAGE.md） */
   destructive: ResourceColor;
 
-  // ---- 系统明暗（必填；值表达「不指定」）----
+  // ---- 系统明暗（必填；值表达浅色）----
   /**
    * 这个主题要求 App 整体走哪种系统明暗（R-THEME-03）：
-   * - `'dark'`：应用级切系统深色（底栏、弹窗、状态栏全跟上）
-   * - `'unset'`：不指定，跟随系统
+   * - `'dark'`：应用级切系统深色（底栏材质、键盘、状态栏全跟上）
+   * - `'unset'`：应用级切系统浅色（浅色主题必须显式浅色——跟随系统时
+   *   系统深色模式会让系统玻璃按深色渲染，浅色页面上 tab bar 下方发灰）
    * 深色主题必须显式写 `'dark'`，浅色主题写 `'unset'` —— 漏配编译报错。
    */
   colorMode: 'dark' | 'unset';

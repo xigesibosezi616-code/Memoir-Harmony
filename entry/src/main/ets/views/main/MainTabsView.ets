@@ -2,13 +2,16 @@
  * 主框架（10_BUILD_MANUAL.md 1.6）：四 tab + 全局 toast 顶部层。
  * 对应 iOS `ContentView.swift` 的 TabView + toast overlay。
  *
- * - 四 tab（记录 / 日记本 / 邮筒 / 设置）使用 ArkUI Tabs 组件，
- *   barPosition: End + barOverlap + systemMaterial（对齐 iOS `.thinMaterial` 底栏）
+ * - 四 tab（记录 / 日记本 / 邮筒 / 设置）用 HDS `HdsTabs`（`@kit.UIDesignKit`）：
+ *   barPosition End + barOverlap 悬浮胶囊 + barFloatingStyle
+ *   （barBottomMargin 适配安全区、adaptToHandedness 智感握姿跟随交互手、
+ *   systemMaterialEffect 沉浸光感材质，对齐官方「沉浸光感/智感握姿」最佳实践）
  * - toast 顶部层：`ErrorToastView` 挂载 / 摘除驱动滑入滑出（0.35s 弹簧）
  * - 一多：断点（sm/md/lg）测宽发布 AppStorage，占位内容限宽 840vp 居中
  * - 记录 tab 本步仍是占位页（2.1/2.2 换真实记录页），其余三 tab 用现有资源名占位
  */
-import { curves, uiMaterial } from '@kit.ArkUI';
+import { curves } from '@kit.ArkUI';
+import { HdsTabs, HdsTabsController, hdsMaterial } from '@kit.UIDesignKit';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
@@ -53,11 +56,11 @@ export struct MainTabsView {
     new TabSpec(3, $r('app.string.s_7debf9cb03'), $r('app.media.tab_settings'))
   ];
 
-  private readonly tabsController: TabsController = new TabsController();
+  private readonly tabsController: HdsTabsController = new HdsTabsController();
 
   build() {
     Stack() {
-      Tabs({
+      HdsTabs({
         barPosition: BarPosition.End,
         index: this.currentTab,
         controller: this.tabsController
@@ -88,11 +91,29 @@ export struct MainTabsView {
       .onChange((index: number): void => {
         this.currentTab = index;
       })
-      .systemMaterial(this.tabBarMaterial())
       .clip(false)
       .width('100%')
       .height('100%')
-      .margin({ bottom: this.safeAreaBottomVp })
+      // 悬浮胶囊样式：安全区离底 + 智感握姿跟随交互手 + 沉浸光感材质
+      // （官方「沉浸光感」「智感握姿」最佳实践；内容区按钮拿不到系统材质，见 09 OQ）
+      // systemMaterialEffect ADAPTIVE：材质跟随系统策略（透明度/强度按用户手机设置走）；
+      // gradientMask 透明：HdsTabs 默认在胶囊下方渲染带色调的渐变遮罩，
+      // 素笺/肯特浅色页面上呈灰蓝带（2026-10-15 真机反馈「tab bar 下面发灰」）
+      .barFloatingStyle({
+        barBottomMargin: this.safeAreaBottomVp,
+        adaptToHandedness: true,
+        gradientMask: { maskColor: Color.Transparent },
+        // materialLevel ADAPTIVE：官方最佳实践推荐绝大多数场景用自适应档，
+        // 系统按设备算力/用户系统设置自动选 SMOOTH/GENTLE/EXQUISITE；
+        // 浅色主题（素笺/肯特）下动效弱是玻璃材质浅色物理特性 + 系统档位策略，
+        // 与 iOS 同款表现，不做强行 EXQUISITE（官方警示：低端设备卡顿发热、
+        // 亮色下 EXQUISITE 可能覆盖白色叠层）。
+        // materialType 同 ADAPTIVE（明暗风格跟 colorMode 自动切）
+        systemMaterialEffect: {
+          materialType: hdsMaterial.MaterialType.ADAPTIVE,
+          materialLevel: hdsMaterial.MaterialLevel.ADAPTIVE
+        }
+      })
 
       // toast 顶部层：有提示时挂载（顶部滑入），无提示摘除（滑出）
       if (this.currentToast !== null) {
@@ -162,19 +183,18 @@ export struct MainTabsView {
     .height('100%')
   }
 
-  /** 底栏材质：对齐 iOS `.toolbarBackground(.thinMaterial, for: .tabBar)` */
-  private tabBarMaterial(): uiMaterial.Material {
-    return new uiMaterial.ImmersiveMaterial({ style: uiMaterial.ImmersiveStyle.THIN });
-  }
-
+  /**
+   * 未选中前景色用 textSecondary（对齐 iOS：未选中 tab 是系统灰，
+   * 对比度约 3.4:1 ≈ 各主题 textSecondary 的对比度；textTertiary 在素笺下仅 1.6:1 几乎不可见）
+   */
   private iconTint(index: number): number {
     return index === this.currentTab
       ? this.numberColor(this.theme.accent, 0xFF8B7E6A)
-      : this.numberColor(this.theme.textTertiary, 0xFFC8BDA8);
+      : this.numberColor(this.theme.textSecondary, 0xFFC8BDA8);
   }
 
   private labelColor(index: number): ResourceColor {
-    return index === this.currentTab ? this.theme.accent : this.theme.textTertiary;
+    return index === this.currentTab ? this.theme.accent : this.theme.textSecondary;
   }
 
   /** ResourceColor 是数字色值时取数值（三套主题均为数字），否则给主题近似兜底 */

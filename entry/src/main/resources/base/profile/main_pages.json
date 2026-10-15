@@ -2,6 +2,7 @@
   "src": [
     "pages/Index",
     "pages/ThemeDebug",
-    "pages/LanguageDebug"
+    "pages/LanguageDebug",
+    "pages/Compose"
   ]
 }

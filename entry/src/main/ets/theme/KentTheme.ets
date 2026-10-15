@@ -21,6 +21,11 @@ export class KentTheme implements AppTheme {
   readonly border: ResourceColor = 0xFFE5E5E5;
   readonly borderAccent: ResourceColor = 0xFF1A1A1A;
 
+  // 玻璃按钮：纯白底上 55% 浅灰玻璃 + 70% 中灰边框（肯特 cardBackground 与背景同色，
+  // 白玻璃在纯白底上不可见，靠灰底+边框成型；中灰边框保持极简风的克制对比）
+  readonly glassBackground: ResourceColor = 0x8CE5E5E5;
+  readonly glassBorder: ResourceColor = 0xB3999999;
+
   readonly accent: ResourceColor = 0xFF1A1A1A;
   readonly accentBackground: ResourceColor = 0xFFF0F0F0;
 

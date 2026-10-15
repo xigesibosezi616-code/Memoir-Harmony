@@ -28,6 +28,7 @@
 | Q19 | 🟡 | 正文小图加载**不放大**（iOS `loadImage` 的 `preparingThumbnail` 会把小图放大到 600） | 2.6 照片相纸 | 鸿蒙 + 产品 | |
 | Q20 | 🟡 | **智感握姿实现路径**：`HdsTabs` 不在本 SDK（26），自行用 motion `operatingHandChanged` + `ACTIVITY_MOTION` 实现 | 1.6 主框架 · 真机验收 | 鸿蒙 | 2026-10-15 整体移除：Tabs 系统底栏无横移落点，且 SDK 权限清单证实 `DETECT_GESTURE`（normal + system_grant）后 `holdingHandChanged` 也只是普通权限——智感握姿收益存疑，服务、权限声明、理由文案全部删除（git 历史可寻回），真机验收 `operatingHand` 授权率与灵敏度后若确需再重启 |
 | Q21 | ⚪ | 全局 toast 的 kind：文档卡片只写两种，iOS 源码是三种（error/info/success） | — | — | 2026-10-14 照 iOS 三种 |
+| Q22 | ⚪ | 2.1 卡片写心情「单选**可取消**」，iOS `MoodSelector` 点已选心情**不取消**（点了始终选中） | 2.1 写日记页 | 产品 | 2026-10-15 按 iOS 源码不可取消实现（CLAUDE.md：iOS 源码优先；用户已确认）。产品若想要「再点一下取消」，iOS 侧要一起改 |
 
 ---
 

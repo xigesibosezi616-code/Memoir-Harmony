@@ -47,12 +47,20 @@ const LANG_DIRS = ['zh_Hans', 'zh_Hant', 'en', 'ja', 'ko', 'fr', 'es'];
  * - `models/Notebook.ets`：`DEFAULT_NOTEBOOK_NAMES`（生活/读书笔记/旅行/工作）。
  *   首启写库的**用户数据**，按名字就是身份的设计不能换语言重查
  *   （R-LANG-10；iOS `ContentView.swift` 同样硬编码）。
+ * - `data/{Draft,Entry,Notebook,Mood}Repository.ets`（2.1 起纳入豁免）：
+ *   RDB 仓库层的内部错误消息（「查询失败」「读行失败」等），
+ *   只进 hilog / 日志不上界面，与 `Database.ets` 同理；界面上的失败提示
+ *   走 `s_40525a7328`（保存失败）资源。
  * 这些文件的**资源齐全性检查不豁免**（七种语言目录一致性照查）。
  */
 const EXEMPT_LITERAL_FILES = new Set([
   'entry/src/main/ets/services/AppDateFormatters.ets',
   'entry/src/main/ets/data/Database.ets',
   'entry/src/main/ets/models/Notebook.ets',
+  'entry/src/main/ets/data/DraftRepository.ets',
+  'entry/src/main/ets/data/EntryRepository.ets',
+  'entry/src/main/ets/data/NotebookRepository.ets',
+  'entry/src/main/ets/data/MoodRepository.ets',
 ]);
 
 const CJK = /[\u4e00-\u9fff]/;

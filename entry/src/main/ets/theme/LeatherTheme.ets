@@ -21,6 +21,10 @@ export class LeatherTheme implements AppTheme {
   // iOS `Color(hex: "#C8A87C").opacity(0.3)` → ARGB 30% alpha
   readonly borderAccent: ResourceColor = 0x4DC8A87C;
 
+  // 玻璃按钮：深棕底上 30% 金色微亮玻璃 + 45% 金边（深色下用金调提亮，对齐 iOS 深色 .glass）
+  readonly glassBackground: ResourceColor = 0x4DC8A87C;
+  readonly glassBorder: ResourceColor = 0x73C8A87C;
+
   readonly accent: ResourceColor = 0xFFC8A87C;
   readonly accentBackground: ResourceColor = 0xFF241C16;
 
