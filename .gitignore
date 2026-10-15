@@ -24,3 +24,6 @@ local.properties
 # 系统
 .DS_Store
 Thumbs.db
+
+# CLI 缓存
+.cache/

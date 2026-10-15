@@ -17,6 +17,7 @@ import {
   STORAGE_KEY_APP_LANGUAGE,
   STORAGE_KEY_LANGUAGE_MANAGER
 } from '../services/LanguageManager';
+import { STORAGE_KEY_SAFE_AREA_TOP_VP } from '../services/ImmersiveChrome';
 import {
   yearMonthKey,
   dayAndWeekday,
@@ -29,6 +30,8 @@ import {
 struct LanguageDebug {
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
   @StorageProp(STORAGE_KEY_APP_LANGUAGE) appLanguage: string = 'en';
+  /** 沉浸式状态栏避让（ImmersiveChrome 发布，全形态机型动态更新） */
+  @StorageProp(STORAGE_KEY_SAFE_AREA_TOP_VP) safeAreaTopVp: number = 0;
   private languageManager: LanguageManager | undefined = undefined;
 
   aboutToAppear(): void {
@@ -86,7 +89,13 @@ struct LanguageDebug {
     }
     .alignItems(HorizontalAlign.Start)
     .width('100%')
-    .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+    // 状态栏避让：沉浸式下内容从状态栏下沿再留 12（官方避让规范，全形态机型）
+    .padding({
+      left: 16,
+      right: 16,
+      top: this.safeAreaTopVp + 12,
+      bottom: 12
+    })
   }
 
   /** 七种语言（顺序固定 R-LANG-01；没有「跟随系统」） */

@@ -17,6 +17,7 @@ import {
   STORAGE_KEY_THEME_ID,
   STORAGE_KEY_THEME_MANAGER
 } from '../theme/ThemeManager';
+import { STORAGE_KEY_SAFE_AREA_TOP_VP } from '../services/ImmersiveChrome';
 
 /** ResourceColor → 调试用十六进制展示（主题色值都是 0xAARRGGBB 数字，typeof 收窄） */
 function colorToHex(color: ResourceColor): string {
@@ -93,6 +94,8 @@ struct FontSampleRow {
 struct ThemeDebug {
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
   @StorageProp(STORAGE_KEY_THEME_ID) themeId: string = 'bamboo';
+  /** 沉浸式状态栏避让（ImmersiveChrome 发布，全形态机型动态更新） */
+  @StorageProp(STORAGE_KEY_SAFE_AREA_TOP_VP) safeAreaTopVp: number = 0;
   private themeManager: ThemeManager | undefined = undefined;
 
   aboutToAppear(): void {
@@ -150,13 +153,19 @@ struct ThemeDebug {
             .fontSize(this.theme.titleFont.size)
             .fontFamily(this.theme.titleFont.family)
             .fontColor(this.theme.textPrimary)
-          Text(`id: ${this.themeId} · colorMode: ${this.theme.colorMode}`)
-            .fontSize(this.theme.captionFont.size)
-            .fontColor(this.theme.textTertiary)
-        }
-        .alignItems(HorizontalAlign.Start)
-        .width('100%')
-        .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+        Text(`id: ${this.themeId} · colorMode: ${this.theme.colorMode}`)
+          .fontSize(this.theme.captionFont.size)
+          .fontColor(this.theme.textTertiary)
+      }
+      .alignItems(HorizontalAlign.Start)
+      .width('100%')
+      // 状态栏避让：沉浸式下内容从状态栏下沿再留 12（官方避让规范，全形态机型）
+      .padding({
+        left: 16,
+        right: 16,
+        top: this.safeAreaTopVp + 12,
+        bottom: 12
+      })
 
         // ---- 三套主题切换（验收：切换当场变，不重启）----
         Row({ space: 8 }) {

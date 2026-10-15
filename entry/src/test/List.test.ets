@@ -19,6 +19,7 @@ import immersiveChromeTest from './test/ImmersiveChrome.test'
 import iconTintTest from './test/IconTint.test'
 import breakpointTest from './test/Breakpoint.test'
 import composeLogicTest from './test/ComposeLogic.test'
+import homeLogicTest from './test/HomeLogic.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -42,4 +43,5 @@ export default function testsuite() {
   iconTintTest()
   breakpointTest()
   composeLogicTest()
+  homeLogicTest()
 }

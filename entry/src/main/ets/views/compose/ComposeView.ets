@@ -3,7 +3,10 @@
  *
  * - 全屏：左上返回（chevron：退出≠丢弃，可以存草稿）、右上 ✓（**只有点 ✓ 才算完成一篇**，
  *   R-ENTRY-01）；正文空时 ✓ 只降透明度不可点
- * - 左上返回：有内容 → 「不保存 / 保存草稿」（点遮罩=取消，R-ENTRY-02/03）；全空直接退出
+ * - 左上返回 + 系统返回（手势 / 返回键，路由页 onBackPress 拦截后经
+ *   AppStorage tick 转到这里，真机踩坑：不拦截则 router.back() 直接退出）：
+ *   有内容 → 「不保存 / 保存草稿」（官方 @CustomDialog，点遮罩=取消，
+ *   R-ENTRY-02/03）；全空直接退出
  * - 进页面恢复草稿（全局一份，R-ENTRY-04/05），顶部提示「接着上次没写完的」
  * - 日期自动取当下、不可改（R-ENTRY-06）；标题 ≤40、去换行、最多三行（R-ENTRY-07）
  * - v1 不做：照片 / 录音 / 天气地点 / 格式工具条（2.5~2.10 各自的卡片）
@@ -49,6 +52,9 @@ import { CreateNotebookDialog } from './CreateNotebookDialog';
 const DOMAIN = 0x0000;
 const TAG = 'ComposeView';
 
+/** 系统返回（手势/按键）拦截信号：路由页 onBackPress +1，这里 @Watch 决策 */
+export const STORAGE_KEY_COMPOSE_BACK_TICK = 'compose.systemBackTick';
+
 @Component
 export struct ComposeView {
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
@@ -66,8 +72,25 @@ export struct ComposeView {
   @State didRestoreDraft: boolean = false;
   @State moods: MoodTag[] = [];
   @State notebooks: Notebook[] = [];
-  @State showExitDialog: boolean = false;
   @State showCreateNotebook: boolean = false;
+  /** 系统返回信号（路由页 onBackPress 拦截后 +1） */
+  @StorageProp(STORAGE_KEY_COMPOSE_BACK_TICK) @Watch('onSystemBackTick')
+  systemBackTick: number = 0;
+
+  /** 官方弹窗控制器：DraftExitDialog（autoCancel 点遮罩=取消；customStyle 玻璃卡自绘） */
+  private exitDialogController: CustomDialogController = new CustomDialogController({
+    builder: DraftExitDialog({
+      onDiscard: (): void => {
+        this.discardAndClose();
+      },
+      onSave: (): void => {
+        this.saveDraftAndClose();
+      }
+    }),
+    autoCancel: true,
+    alignment: DialogAlignment.Center,
+    customStyle: true
+  });
 
   /** 库句柄（aboutToAppear 打开；AppDatabase 内部有缓存单例） */
   private store: relationalStore.RdbStore | undefined = undefined;
@@ -289,24 +312,8 @@ export struct ComposeView {
       .width('100%')
       .height('100%')
 
-      // 返回确认弹窗（挂在最外层，遮罩连顶栏一起盖住）
-      if (this.showExitDialog) {
-        DraftExitDialog({
-          onDiscard: (): void => {
-            this.showExitDialog = false;
-            this.discardAndClose();
-          },
-          onSave: (): void => {
-            this.showExitDialog = false;
-            this.saveDraftAndClose();
-          },
-          onCancel: (): void => {
-            this.showExitDialog = false;
-          }
-        })
-      }
-
-      // 新建日记本弹窗（撞名判定在 createNotebook 里）
+      // 返回确认弹窗（官方 @CustomDialog，CustomDialogController 挂窗口层，
+      // 遮罩连顶栏一起盖住）；新建日记本弹窗（撞名判定在 createNotebook 里）
       if (this.showCreateNotebook) {
         CreateNotebookDialog({
           onCancel: (): void => {
@@ -442,7 +449,20 @@ export struct ComposeView {
       this.getUIContext().getRouter().back();
       return;
     }
-    this.showExitDialog = true;
+    this.exitDialogController.open();
+  }
+
+  /**
+   * 系统返回（手势 / 返回键）决策：路由页 onBackPress 拦截 +1 到这里。
+   * 新建日记本弹窗开着先收它；有内容弹保存确认；全空直接退。
+   * 保存确认弹窗开着时系统返回由弹窗自己消费（关闭=取消），不会到这。
+   */
+  private onSystemBackTick(): void {
+    if (this.showCreateNotebook) {
+      this.showCreateNotebook = false;
+      return;
+    }
+    this.attemptExit();
   }
 
   /**
@@ -473,6 +493,8 @@ export struct ComposeView {
       if (this.draft !== undefined) {
         await DraftRepository.deleteDraftRecord(store, this.draft.id);
       }
+      // 保存成功后主页刷新由 Index.onPageShow 的 reload tick 驱动
+      //（主页被本页盖住时赋值不渲染，写入侧通知不可用，见 HomeLogic 注释）
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'saveEntry failed: %{public}s', JSON.stringify(err));
       this.presentSaveFailed();

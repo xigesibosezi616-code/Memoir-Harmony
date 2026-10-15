@@ -23,7 +23,7 @@ import {
   STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP
 } from '../../services/ImmersiveChrome';
-import { MainPlaceholderView } from './MainPlaceholderView';
+import { HomeView } from '../home/HomeView';
 import { ErrorToastView } from './ErrorToastView';
 
 /** tab 定义（0 记录 / 1 日记本 / 2 邮筒 / 3 设置，顺序与 iOS ContentView 一致） */
@@ -66,7 +66,7 @@ export struct MainTabsView {
         controller: this.tabsController
       }) {
         TabContent() {
-          MainPlaceholderView()
+          HomeView()
         }
         .tabBar(this.tabBarItem(0))
 
