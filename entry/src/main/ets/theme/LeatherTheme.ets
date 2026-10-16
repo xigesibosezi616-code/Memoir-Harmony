@@ -25,6 +25,11 @@ export class LeatherTheme implements AppTheme {
   readonly glassBackground: ResourceColor = 0x4DC8A87C;
   readonly glassBorder: ResourceColor = 0x73C8A87C;
 
+  // 列表卡：深棕底上抬亮一档的卡面（投影深色下不可见，靠明度差成型，
+  // 备忘录深色款同思路：深灰卡浮黑底）
+  readonly listCardBackground: ResourceColor = 0xFF2A2019;
+  readonly listCardShadow: ShadowOptions = { radius: 0, color: Color.Transparent };
+
   readonly accent: ResourceColor = 0xFFC8A87C;
   readonly accentBackground: ResourceColor = 0xFF241C16;
 

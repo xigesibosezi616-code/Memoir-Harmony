@@ -1,0 +1,9 @@
+{
+  "routerMap": [
+    {
+      "name": "EntryDetail",
+      "pageSourceFile": "src/main/ets/views/detail/EntryDetailView.ets",
+      "buildFunction": "EntryDetailBuilder"
+    }
+  ]
+}

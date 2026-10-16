@@ -28,6 +28,7 @@ import { OnboardingView } from '../views/onboarding/OnboardingView';
 import { SplashView } from '../views/splash/SplashView';
 import { MainTabsView } from '../views/main/MainTabsView';
 import { STORAGE_KEY_HOME_RELOAD_TICK } from '../data/HomeLogic';
+import { STORAGE_KEY_DETAIL_RELOAD_TICK } from '../views/detail/EntryDetailView';
 import { AppTheme } from '../theme/AppTheme';
 import { BambooTheme } from '../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../theme/ThemeManager';
@@ -56,13 +57,17 @@ struct Index {
   }
 
   /**
-   * 页面（重新）可见时 bump 主页重查信号：路由返回（保存日记回来）、
-   * 冷启动、后台回前台都会触发。主页此时可见，重查后立即渲染——
+   * 页面（重新）可见时 bump 重查信号：路由返回（保存日记 / 编辑返回）、
+   * 冷启动、后台回前台都会触发。主页 / 详情页此时可见，重查后立即渲染——
    * RDB 无观察机制，用这个补 iOS `@Query` 的自动响应（见 HomeLogic）。
+   * 详情页已迁入 Tab 内 Navigation 栈（不再是独立路由页），原路由壳
+   * onPageShow 的 detail tick 广播移到这里。
    */
   onPageShow(): void {
     AppStorage.setOrCreate(STORAGE_KEY_HOME_RELOAD_TICK,
       (AppStorage.get<number>(STORAGE_KEY_HOME_RELOAD_TICK) ?? 0) + 1);
+    AppStorage.setOrCreate(STORAGE_KEY_DETAIL_RELOAD_TICK,
+      (AppStorage.get<number>(STORAGE_KEY_DETAIL_RELOAD_TICK) ?? 0) + 1);
   }
 
   /** 主题变化 → 系统栏内容色随主题背景亮度重算（ImmersiveChrome） */

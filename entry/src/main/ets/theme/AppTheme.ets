@@ -49,6 +49,17 @@ export interface AppTheme {
   /** 玻璃按钮边框（半透明，比普通 border 清晰一档） */
   glassBorder: ResourceColor;
 
+  // ---- 列表卡片（2）----
+  /**
+   * 记录页列表卡底色：华为备忘录式实色卡（2026-10-16 真机实测规格：
+   * 页边距 16vp、卡距 12vp、圆角 ~16vp、卡内边距 12~16vp）。浅色主题
+   * 卡比页面底亮一档成型（素笺纯白卡浮米白底、肯特白卡靠投影成型），
+   * 深色皮革卡比页面底亮一档（深色下投影不可见，靠明度差成型）
+   */
+  listCardBackground: ResourceColor;
+  /** 列表卡投影（皮革 radius 0 无影——深底上投影不可见） */
+  listCardShadow: ShadowOptions;
+
   // ---- 强调色（2）----
   /** 主色（按钮 / 链接） */
   accent: ResourceColor;

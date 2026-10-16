@@ -21,7 +21,6 @@ import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
 import { STORAGE_KEY_APP_LANGUAGE } from '../../services/LanguageManager';
 import { dayAndWeekday } from '../../services/AppDateFormatters';
 import {
-  STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP
 } from '../../services/ImmersiveChrome';
 import { AppEnvironment, STORAGE_KEY_APP_ENVIRONMENT } from '../../environment/AppEnvironment';
@@ -61,7 +60,6 @@ export struct ComposeView {
   @StorageProp(STORAGE_KEY_APP_LANGUAGE) appLanguage: string = 'zh-Hans';
   @StorageProp(STORAGE_KEY_APP_ENVIRONMENT) env: AppEnvironment =
     new AppEnvironment(createDefaultErrorPresenter());
-  @StorageProp(STORAGE_KEY_SAFE_AREA_TOP_VP) safeAreaTopVp: number = 0;
   @StorageProp(STORAGE_KEY_SAFE_AREA_BOTTOM_VP) safeAreaBottomVp: number = 0;
 
   @State title: string = '';
@@ -122,31 +120,9 @@ export struct ComposeView {
 
   build() {
     Stack() {
-      Column() {
-        // 顶栏：左上返回、右上完成（同一种分量；能不能点由 enabled 表达）
-        Row() {
-          CircleIconButton({
-            iconRes: $r('sys.symbol.chevron_left'),
-            iconSize: 14,
-            onTap: (): void => {
-              this.attemptExit();
-            }
-          })
-          Blank()
-          CircleIconButton({
-            iconRes: $r('sys.symbol.checkmark'),
-            iconSize: 14,
-            // 直接引用 @State bodyText 的表达式（@Prop 依赖分析跟不进方法体），
-            // 与 hasContent() 等价：v1 正文就是全部内容
-            pressEnabled: this.bodyText.trim().length > 0,
-            onTap: (): void => {
-              this.saveEntryAndClose();
-            }
-          })
-        }
-        .width('100%')
-        .padding({ left: 12, right: 12, top: this.safeAreaTopVp + 6, bottom: 6 })
-
+      // Navigation 自定义标题栏：沉浸光感 Button 的官方生效范围（API 26，
+      // 《沉浸光感常见问题》）；标题栏自动避让状态栏
+      Navigation() {
         Scroll() {
           Column({ space: 16 }) {
             // 日期 + 星期 + 字数（有字才显示，R-ENTRY-06）
@@ -171,7 +147,9 @@ export struct ComposeView {
             // 从草稿恢复时说一声，否则用户会以为自己上次的东西还在别处
             if (this.didRestoreDraft) {
               Row({ space: 5 }) {
-                SymbolGlyph($r('sys.symbol.pencil_line'))
+                // pencil_line 本机运行时缺资源渲染空白（2026-10-16 实测），
+                // 换 square_and_pencil（早期稳定资源）
+                SymbolGlyph($r('sys.symbol.square_and_pencil'))
                   .fontSize(10)
                   .fontWeight(FontWeight.Medium)
                   .fontColor([this.theme.textTertiary])
@@ -303,12 +281,14 @@ export struct ComposeView {
             bottom: this.safeAreaBottomVp + 24
           })
         }
-        .layoutWeight(1)
+        .height('100%')
         .width('100%')
         .align(Alignment.Top)
         .scrollBar(BarState.Off)
         .edgeEffect(EdgeEffect.Spring)
       }
+      .title(this.topBar)
+      .mode(NavigationMode.Stack)
       .width('100%')
       .height('100%')
 
@@ -329,6 +309,34 @@ export struct ComposeView {
     .width('100%')
     .height('100%')
     .backgroundColor(this.theme.background)
+  }
+
+  /** 顶栏（Navigation 标题栏内）：左上返回、右上完成
+   * （同一种分量；能不能点由 enabled 表达） */
+  @Builder
+  topBar() {
+    Row() {
+      CircleIconButton({
+        iconRes: $r('sys.symbol.chevron_left'),
+        iconSize: 14,
+        onTap: (): void => {
+          this.attemptExit();
+        }
+      })
+      Blank()
+      CircleIconButton({
+        iconRes: $r('sys.symbol.checkmark'),
+        iconSize: 14,
+        // 直接引用 @State bodyText 的表达式（@Prop 依赖分析跟不进方法体），
+        // 与 hasContent() 等价：v1 正文就是全部内容
+        pressEnabled: this.bodyText.trim().length > 0,
+        onTap: (): void => {
+          this.saveEntryAndClose();
+        }
+      })
+    }
+    .width('100%')
+    .padding({ left: 12, right: 12, top: 6, bottom: 6 })
   }
 
   // ---- 判定（V1 组件不许用 getter，全部普通方法） ----

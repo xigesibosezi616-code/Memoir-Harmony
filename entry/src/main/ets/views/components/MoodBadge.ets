@@ -9,8 +9,9 @@ import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
 import { isDefaultMoodKey } from '../../models/Mood';
 
-/** 默认心情 key → 显示名资源（与 MoodSelector 同一张映射表，R-LANG-09） */
-function moodLabelRes(key: string): Resource | undefined {
+/** 默认心情 key → 显示名资源（与 MoodSelector 同一张映射表，R-LANG-09）。
+ * 导出供详情页心情印章取显示名（2.3） */
+export function moodLabelRes(key: string): Resource | undefined {
   switch (key) {
     case 'calm': return $r('app.string.s_cb2d681e91');       // 平静
     case 'productive': return $r('app.string.s_b2c510fd6a'); // 充实

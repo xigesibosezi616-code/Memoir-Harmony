@@ -21,10 +21,16 @@ export class KentTheme implements AppTheme {
   readonly border: ResourceColor = 0xFFE5E5E5;
   readonly borderAccent: ResourceColor = 0xFF1A1A1A;
 
-  // 玻璃按钮：纯白底上 55% 浅灰玻璃 + 70% 中灰边框（肯特 cardBackground 与背景同色，
-  // 白玻璃在纯白底上不可见，靠灰底+边框成型；中灰边框保持极简风的克制对比）
-  readonly glassBackground: ResourceColor = 0x8CE5E5E5;
+  // 玻璃按钮：纯白底上 66% 浅灰玻璃 + 70% 中灰边框（肯特 cardBackground 与背景同色，
+  // 白玻璃在纯白底上不可见，靠灰底+边框成型；中灰边框保持极简风的克制对比；
+  // 2026-10-16 真机可读性调优：alpha 55%→66% 且加深一档，玻璃片对纯白底
+  // ΔRGB ~14 → ~24，按钮成型更清楚（图标色见 CircleIconButton）
+  readonly glassBackground: ResourceColor = 0xA8DCDCDC;
   readonly glassBorder: ResourceColor = 0xB3999999;
+
+  // 列表卡：纯白底上白卡，中性柔影成型（备忘录浅色款同款投影思路）
+  readonly listCardBackground: ResourceColor = 0xFFFFFFFF;
+  readonly listCardShadow: ShadowOptions = { radius: 8, color: 0x12000000, offsetX: 0, offsetY: 2 };
 
   readonly accent: ResourceColor = 0xFF1A1A1A;
   readonly accentBackground: ResourceColor = 0xFFF0F0F0;

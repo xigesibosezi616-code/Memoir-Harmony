@@ -102,6 +102,41 @@ export class EntryRepository {
   }
 
   /**
+   * 编辑后整篇写回（10_BUILD_MANUAL.md 2.4）。全字段覆盖：调用方先在
+   * JournalEntry 上改好（内容必须经 setContentBlocks，它会同步派生
+   * content / wordCount / audioURLs / updatedAt，R-RICH-10），这里只落库。
+   */
+  static async updateEntry(store: relationalStore.RdbStore, entry: JournalEntry): Promise<void> {
+    const values: relationalStore.ValuesBucket = {
+      'title': entry.title,
+      'content': entry.content,
+      'mood': entry.mood,
+      'mood_color_hex': entry.moodColorHex ?? null,
+      'tags': JSON.stringify(entry.tags),
+      'word_count': entry.wordCount,
+      'updated_at': entry.updatedAt,
+      'audio_urls': JSON.stringify(entry.audioURLs),
+      'weather_code': entry.weatherCode ?? null,
+      'weather_info': entry.weatherInfo ?? null,
+      'location_info': entry.locationInfo ?? null,
+      'content_blocks': entry.contentBlocksData ?? null
+    };
+    const predicates = new relationalStore.RdbPredicates('journal_entry');
+    predicates.equalTo('id', entry.id);
+    try {
+      // API 12 形态：表名在 RdbPredicates 里，返回受影响行数
+      const changed = await store.update(values, predicates);
+      if (changed === 0) {
+        // 并发删除等：一行都没动，按失败处理（调用方提示「保存失败」）
+        throw new Error('EntryRepository.updateEntry: 目标不存在');
+      }
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'update entry failed id=%{public}s: %{public}s', entry.id, JSON.stringify(err));
+      throw new Error('EntryRepository.updateEntry: 更新失败');
+    }
+  }
+
+  /**
    * 删一篇日记的库记录（详情页，R-ENTRY-16）。媒体清理在调用方先做
    * （`deleteEntryMedia`，05 §2 的顺序：先文件后记录）。
    */

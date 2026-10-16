@@ -4,6 +4,6 @@
     "pages/ThemeDebug",
     "pages/LanguageDebug",
     "pages/Compose",
-    "pages/EntryDetail"
+    "pages/EditEntry"
   ]
 }

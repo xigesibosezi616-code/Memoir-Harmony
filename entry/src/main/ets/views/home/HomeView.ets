@@ -7,7 +7,7 @@
  *   + 每日语录（同一天固定；常规体——iOS 无斜体，斜体还致左缘不齐）
  * - 列表：按年月分组倒序、组头吸顶（List + ListItemGroup + sticky）
  * - 空状态：「暂无日记」卡片；底部浮钮「写下今天的故事」→ 写日记页
- * - 点行进详情是 2.3 的卡片，本卡预留不跳转
+ * - 点行进详情（Tab 内 Navigation 栈，底部 Tab 栏保留可见，对齐 iOS push）
  * - 数据刷新：Index.onPageShow（路由返回 / 回前台）bump `homeReloadTick`
  *   （AppStorage），这里 @Watch 重新查库 —— 对应 iOS `@Query` 对 SwiftData
  *   的自动响应（RDB 无观察机制，用显式信号补齐；2.3 详情删除同样走这里）。
@@ -24,6 +24,7 @@
 import { relationalStore } from '@kit.ArkData';
 import { common } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { hdsEffect } from '@kit.UIDesignKit';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
@@ -67,7 +68,12 @@ export struct HomeView {
   @State private glassOpacity: number = 0;
   /** 玻璃上小标题透明度：大标题滚尽（80vp）后才开始渐显，错峰防重叠 */
   @State private smallTitleOpacity: number = 0;
+  /** FAB 按压光效（官方 pressShadow 状态驱动）：按下 BLEND_WHITE、抬起 NONE */
+  @State private fabPressShadow: hdsEffect.PressShadowType = hdsEffect.PressShadowType.NONE;
   private scroller: Scroller = new Scroller();
+  /** 记录 Tab 内导航栈：详情页（NavDestination）推入后底部 Tab 栏保留可见，
+   * 对齐 iOS TabView > NavigationStack 的 push 呈现 */
+  private navPathStack: NavPathStack = new NavPathStack();
 
   private store: relationalStore.RdbStore | undefined = undefined;
 
@@ -84,7 +90,12 @@ export struct HomeView {
   }
 
   build() {
-    Stack({ alignContent: Alignment.Bottom }) {
+    // 记录 Tab 内 Navigation（系统路由表）：首页 = 原主页 Stack（列表 + 磨砂
+    // 玻璃片 + FAB），详情页以 NavDestination 推入（`router_map.json`）。
+    // 强制 Stack 模式：展开大屏（Mate X6 内屏近似方屏）时 Auto 模式会切
+    // 分栏，手机形态一律整页推入，与 iOS 手机形态一致。
+    Navigation(this.navPathStack) {
+      Stack({ alignContent: Alignment.Bottom }) {
       List({ space: 12, scroller: this.scroller }) {
         // 头部：大标题「MEMOIR · 尺素」+ 时段问候 + 本月记录 + 每日语录
         // （R-HOME-01；大标题随列表滚动，动态非固定）
@@ -158,28 +169,34 @@ export struct HomeView {
         }
 
         // 分组列表（R-HOME-02 列表分支）：组头吸顶、组内倒序；
-        // 官方线式列表：行间 divider 分隔（近透明小卡片方案显示异常已回退）
+        // 卡片式（华为备忘录，2026-10-16 真机实测）：
+        // 卡距 12vp、圆角 16vp、页边距 16vp（EntryRowView 内成型）
         ForEach(this.groups(), (group: EntryGroup) => {
-          ListItemGroup({ header: (): void => { this.groupHeader(group) } }) {
+          // 备忘录卡片式（真机实测）：组内卡距 12vp，组头吸顶；无 divider
+          // （卡间留白即分隔，线式 divider 为历史方案）
+          ListItemGroup({
+            header: (): void => { this.groupHeader(group) },
+            space: 12
+          }) {
             ForEach(group.entries, (entry: JournalEntry) => {
+              // 页边距 16vp（备忘录规格）：卡外留白，包一层 padding——
+              // width('100%') 直接配 margin 会溢出父容器
               ListItem() {
-                EntryRowView({
-                  entry: entry,
-                  // 点行进详情（2.3 最小版：只读 + 删除）
-                  onTap: (): void => {
-                    const params: Record<string, string> = { 'id': entry.id };
-                    this.getUIContext().getRouter().pushUrl({ url: 'pages/EntryDetail', params: params });
-                  }
-                })
+                Column() {
+                  EntryRowView({
+                    entry: entry,
+                    // 点卡进详情（2.3）：推入 Tab 内 Navigation 栈，
+                    // 底部 Tab 栏保留可见（对齐 iOS push 详情页）
+                    onTap: (): void => {
+                      this.navPathStack.pushPathByName('EntryDetail', entry.id);
+                    }
+                  })
+                }
+                .padding({ left: 16, right: 16 })
+                .width('100%')
               }
             }, (entry: JournalEntry): string => entry.id)
           }
-          .divider({
-            strokeWidth: 0.5,
-            color: this.theme.border,
-            startMargin: 16,
-            endMargin: 16
-          })
         }, (group: EntryGroup): string => {
           // key 带内容签名：ForEach 同 key 不重建子树，只写 group.key 时
           // 增删日记 UI 不刷新（真机踩坑）；签名 = 年月 + 条数 + 最新更新时间
@@ -287,7 +304,11 @@ export struct HomeView {
 
       // 底部浮钮（R-HOME-04 列表模式）：备忘录同款实色胶囊 + 柔和投影
       // → 写日记页。官方沉浸光感材质限制内容区组件不可用（仅标题栏 /
-      // 底部 TabBar 生效），参考华为备忘录 FAB 观感：实色 accent + 阴影
+      // 底部 TabBar 生效），参考华为备忘录 FAB 观感：实色 accent + 阴影；
+      // 按压光效走官方 hdsEffect pressShadow（Button 专属按压光效，
+      // 不受材质生效范围限制）。官方《按压阴影》要求状态驱动：
+      // 按下置 BLEND_WHITE、抬起/取消回 NONE——静态常驻渐变会把
+      // 实色底抹成白色渐变团、白字不可读（2026-10-16 真机实测）
       Button($r('app.string.s_f6c9fb2f33'))
         .fontSize(this.theme.captionFont.size)
         .fontWeight(this.theme.captionFont.weight)
@@ -298,13 +319,28 @@ export struct HomeView {
         .padding({ left: 24, right: 24, top: 14, bottom: 14 })
         .shadow({ radius: 16, color: this.accentShadowColor(), offsetX: 0, offsetY: 6 })
         .margin({ bottom: this.safeAreaBottomVp + 90 })
+        .visualEffect(new hdsEffect.HdsEffectBuilder()
+          .pressShadow(this.fabPressShadow)
+          .buildEffect())
+        .onTouch((event: TouchEvent): void => {
+          if (event.type === TouchType.Down) {
+            this.fabPressShadow = hdsEffect.PressShadowType.BLEND_WHITE;
+          } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+            this.fabPressShadow = hdsEffect.PressShadowType.NONE;
+          }
+        })
         .onClick((): void => {
           this.getUIContext().getRouter().pushUrl({ url: 'pages/Compose' });
         })
+      }
+      .width('100%')
+      .height('100%')
+      .backgroundColor(this.theme.background)
     }
+    .hideTitleBar(true)
+    .mode(NavigationMode.Stack)
     .width('100%')
     .height('100%')
-    .backgroundColor(this.theme.background)
   }
 
   /** 组头：年月 + 吸顶背景（R-HOME-02）；左右 16 = 华为官方列表边界，背景全宽遮内容 */

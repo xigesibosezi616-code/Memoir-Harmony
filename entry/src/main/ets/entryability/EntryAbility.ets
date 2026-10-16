@@ -37,7 +37,10 @@ export default class EntryAbility extends UIAbility {
   /**
    * 应用级依赖容器装配（10_BUILD_MANUAL.md 1.6），**必须同步**完成再 loadContent：
    * - 沉浸式全屏：拿主窗口（getMainWindowSync 可抛，失败降级为非沉浸）包
-   *   ImmersiveChrome；setup（全屏 + 避让区订阅）异步先行，首帧即延伸到系统栏下
+   *   ImmersiveChrome。**setup 延后到 loadContent 之后**（见 initThenLoad）：
+   *   loadContent 前调 setWindowLayoutFullScreen(true) 不生效，窗口保持
+   *   裁剪态（页面从状态栏下 y122 起、getWindowAvoidArea 返回 0、
+   *   NavDestination 标题栏按窗口顶布局被裁剩 53px——2026-10-16 真机定位）
    * - AppEnvironment：ErrorPresenter + chrome 同步创建存进 AppStorage，
    *   Index 取出 @Provide 下发——冷启动 onForeground 在 onWindowStageCreate 之后
    *   触发，先建好才不丢回前台事件
@@ -53,11 +56,6 @@ export default class EntryAbility extends UIAbility {
     const env = new AppEnvironment(createDefaultErrorPresenter(), chrome);
     this.environment = env;
     AppStorage.setOrCreate(STORAGE_KEY_APP_ENVIRONMENT, env);
-    if (chrome !== undefined) {
-      chrome.setup().catch((err: Object): void => {
-        hilog.error(DOMAIN, TAG, 'chrome setup failed: %{public}s', JSON.stringify(err));
-      });
-    }
   }
 
   /**
@@ -114,6 +112,14 @@ export default class EntryAbility extends UIAbility {
         return;
       }
       hilog.info(DOMAIN, TAG, 'Succeeded in loading the content.');
+      // 沉浸式全屏必须在 loadContent 之后设置：提前设置不生效（窗口裁剪、
+      // 避让区全 0），页面所有 safeAreaTopVp/BottomVp 让位全部失真
+      const env = this.environment;
+      if (env !== null && env.chrome !== undefined) {
+        env.chrome.setup().catch((err: Object): void => {
+          hilog.error(DOMAIN, TAG, 'chrome setup failed: %{public}s', JSON.stringify(err));
+        });
+      }
     });
 
     // 一次性数据迁移：不挡首帧，首页加载后在后台跑（当前任务表为空，框架先立着）
