@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 2,
+  "status": "ok",
+  "producer": {
+    "tool": "recognize_ui_components",
+    "model": "Qwen3_VL_235B_A22B_Instruct",
+    "invocationId": "fab5d1f5-b3a0-42ad-af2c-bc7fcb624bd6",
+    "createdAt": "2026-10-16T23:21:08.302Z"
+  },
+  "inputs": {
+    "image": {
+      "path": "docs/screenshots/notes-reference/crop_memoir_toolbar.jpeg",
+      "sha256": "19d7683ff3ea53349a83dc634b6fd64a6a10099aef77e3d118975cb3d1604029"
+    },
+    "requirements": {
+      "text": "这是应用编辑页底部裁剪条（原图 y=1290~1480，下方是弹出的键盘顶部）。应用是深色皮革主题。请回答：1) 工具条里可见几个图标按钮、分别是什么、从左到右的中心 x 坐标；2) 工具条背景的材质观感（是否半透明毛玻璃、与上方深色正文和下方浅色键盘的过渡是否自然）；3) 工具条是否全宽（左右有无留白或圆角）；4) 图标颜色在深色底上是否清晰可见；5) 有没有明显的渲染缺陷（错位、拉伸、闪烁残留）。",
+      "sha256": "57e2e2d0acf55e9324956c93a88eb5df73c8ac0a864d46779c8abe164ab5586e"
+    }
+  },
+  "analysis": {
+    "canvas": {
+      "width": 1080,
+      "height": 190
+    },
+    "visible_components": [
+      {
+        "id": "component-1",
+        "name": "文本格式工具条",
+        "visual_evidence": "深色背景条上从左到右排列四个图标：加粗字母B、斜体字母I、字体样式Aa图标、铅笔编辑图标",
+        "component_candidates": [
+          {
+            "name": "Row",
+            "confidence": 0.9,
+            "reason": "水平排列多个图标按钮的容器"
+          },
+          {
+            "name": "Button",
+            "confidence": 0.85,
+            "reason": "每个图标均为可点击的按钮"
+          },
+          {
+            "name": "Image",
+            "confidence": 0.8,
+            "reason": "图标以图像形式呈现"
+          }
+        ]
+      }
+    ],
+    "global_observations": [],
+    "uncertainties": []
+  }
+}

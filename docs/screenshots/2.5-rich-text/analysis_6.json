@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 2,
+  "status": "ok",
+  "producer": {
+    "tool": "recognize_ui_components",
+    "model": "Qwen3_VL_235B_A22B_Instruct",
+    "invocationId": "9c86ffcd-365c-469c-8320-a3caf5a7f4cb",
+    "createdAt": "2026-10-16T12:41:27.311Z"
+  },
+  "inputs": {
+    "image": {
+      "path": "docs/screenshots/2.5-rich-text/screenshot_6.jpeg",
+      "sha256": "6a2d09631ae697e82698ad34169179f06b660f394a82cfab211d2b0292cfe70c"
+    },
+    "requirements": {
+      "text": "这是鸿蒙写日记页截图。请重点核对：1) 底部格式工具条是否显示四个图标按钮（加粗B、斜体、小标题、荧光笔）；2) 荧光笔按钮（最右）是否有高亮背景（亮灯）；3) 工具条与键盘的相对位置（是否贴在键盘上方、有无多余空隙）；4) 正文文字是否有带荧光笔色块的字符。",
+      "sha256": "8b5eae35c2d64eea4a7ffee1937b4d6121423cac162eb422aa9be04bc845f8c6"
+    }
+  },
+  "analysis": {
+    "canvas": {
+      "width": 720,
+      "height": 1626
+    },
+    "visible_components": [
+      {
+        "id": "component-1",
+        "name": "底部格式工具条",
+        "visual_evidence": "底部显示四个图标按钮：B（加粗）、I（斜体）、A（小标题）、荧光笔图标",
+        "component_candidates": [
+          {
+            "name": "Row",
+            "confidence": 0.9,
+            "reason": "用于水平排列四个图标按钮"
+          },
+          {
+            "name": "Button",
+            "confidence": 0.85,
+            "reason": "每个图标按钮可由 Button 组件实现，支持图标和点击事件"
+          }
+        ]
+      },
+      {
+        "id": "component-2",
+        "name": "荧光笔按钮",
+        "visual_evidence": "最右侧图标为荧光笔形状，无高亮背景（未亮灯）",
+        "component_candidates": [
+          {
+            "name": "Button",
+            "confidence": 0.8,
+            "reason": "作为工具条中的可点击图标按钮"
+          },
+          {
+            "name": "Image",
+            "confidence": 0.7,
+            "reason": "用于显示荧光笔图标"
+          }
+        ]
+      },
+      {
+        "id": "component-3",
+        "name": "正文输入区域",
+        "visual_evidence": "显示文字“测试”，无荧光笔色块",
+        "component_candidates": [
+          {
+            "name": "TextInput",
+            "confidence": 0.9,
+            "reason": "用于接收和显示用户输入的正文内容"
+          },
+          {
+            "name": "Text",
+            "confidence": 0.7,
+            "reason": "用于显示静态或格式化文本内容"
+          }
+        ]
+      },
+      {
+        "id": "component-4",
+        "name": "键盘",
+        "visual_evidence": "全屏键盘显示在屏幕底部，工具条位于键盘正上方，无明显空隙",
+        "component_candidates": [
+          {
+            "name": "TextInput",
+            "confidence": 0.85,
+            "reason": "触发系统软键盘，工具条紧贴其上方"
+          },
+          {
+            "name": "Column",
+            "confidence": 0.75,
+            "reason": "用于垂直布局工具条与键盘区域"
+          }
+        ]
+      }
+    ],
+    "global_observations": [],
+    "uncertainties": []
+  }
+}

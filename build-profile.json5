@@ -2,18 +2,18 @@
   app: {
     signingConfigs: [
       {
-        name: 'default',
-        type: 'HarmonyOS',
-        material: {
-          certpath: '/Users/gavin/.ohos/config/default_Memoir-Harmony_WwJNjojtTtLrpdWfjr48jys2DQ7U7spzvV7xKxD3rPw=.cer',
-          keyAlias: 'debugKey',
-          keyPassword: '0000001ac931760b4f1f0408bed454dd36d8baa5e9a8b454a7f09710e6a7de4ce5599545b4b7c29c0f7c',
-          profile: '/Users/gavin/.ohos/config/default_Memoir-Harmony_WwJNjojtTtLrpdWfjr48jys2DQ7U7spzvV7xKxD3rPw=.p7b',
-          signAlg: 'SHA256withECDSA',
-          storeFile: '/Users/gavin/.ohos/config/default_Memoir-Harmony_WwJNjojtTtLrpdWfjr48jys2DQ7U7spzvV7xKxD3rPw=.p12',
-          storePassword: '0000001ac931760b4f1f0408bed454dd36d8baa5e9a8b454a7f09710e6a7de4ce5599545b4b7c29c0f7c',
-        },
-      },
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "certpath": "/Users/gavin/.ohos/config/default_Memoir-Harmony_WwJNjojtTtLrpdWfjr48jys2DQ7U7spzvV7xKxD3rPw=.cer",
+          "keyAlias": "debugKey",
+          "keyPassword": "0000001AE510386CCC1FCF6330E657A622037784A23E6CF8EDD7C7D38BF21D1D75E1AA4E701204A6B44E",
+          "profile": "/Users/gavin/.ohos/config/default_Memoir-Harmony_WwJNjojtTtLrpdWfjr48jys2DQ7U7spzvV7xKxD3rPw=.p7b",
+          "signAlg": "SHA256withECDSA",
+          "storeFile": "/Users/gavin/.ohos/config/default_Memoir-Harmony_WwJNjojtTtLrpdWfjr48jys2DQ7U7spzvV7xKxD3rPw=.p12",
+          "storePassword": "0000001A86A13BE4F11D8DB8E4B0DC05161AFE1500989A5B26F1451548297859631C05BCDCA8CEFBDC67"
+        }
+      }
     ],
     products: [
       {

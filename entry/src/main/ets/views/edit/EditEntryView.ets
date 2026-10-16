@@ -6,7 +6,8 @@
  * - ✕ = 放弃这次编辑（不弹确认，iOS 同款——写日记页的 ‹ 才有存草稿的歧义，
  *   这里 glyph 用 ✕ 诚实表达「丢」）；✓ = 保存
  * - 复用写日记页的编辑组件与排版（MoodSelector / NotebookSelector /
- *   CircleIconButton / RichEditor 标题正文模式），行为与 iOS 一致
+ *   CircleIconButton / RichEditor 标题 + RichBodyEditor 富文本正文，2.5），
+ *   行为与 iOS 一致
  * - 保存必须走 entry.setContentBlocks（派生 content / wordCount / updatedAt，
  *   R-RICH-10 —— iOS 在这页出过「直接写 content 被静默丢弃」的 bug）
  * - 老日记录音补进正文（R-RICH-09）：v1 无录音，2.8 接（09 Q25）
@@ -31,6 +32,13 @@ import { MoodRepository } from '../../data/MoodRepository';
 import { composeCleanedBlocks } from '../../data/ComposeLogic';
 import { JournalEntry } from '../../models/JournalEntry';
 import { ContentBlock } from '../../models/ContentBlock';
+import {
+  RichEditorDocument,
+  blocksWithEditorDocument,
+  editorDocumentFromBlocks
+} from '../../models/RichDocument';
+import { RichBodyController, RichBodyEditor } from '../components/richtext/RichBodyEditor';
+import { RichFormatToolbar } from '../components/richtext/RichFormatToolbar';
 import { MoodTag } from '../../models/Mood';
 import { Notebook, cleanedName, nameKey, nextSortOrder } from '../../models/Notebook';
 import { generateUuid } from '../../models/Uuid';
@@ -52,7 +60,6 @@ export struct EditEntryView {
   @StorageProp(STORAGE_KEY_SAFE_AREA_BOTTOM_VP) safeAreaBottomVp: number = 0;
 
   @State title: string = '';
-  @State bodyText: string = '';
   @State moodName: string = '';
   @State moodColorHex: string = '';
   @State selectedNotebookName: string = '';
@@ -65,17 +72,21 @@ export struct EditEntryView {
   /** 进页面时查出的这篇；✓ 在它身上改再写回 */
   private entry: JournalEntry | undefined = undefined;
   private store: relationalStore.RdbStore | undefined = undefined;
-  /** 标题 / 正文与写日记页同款 RichEditor（空态标准竖线光标，已像素级验证） */
+  /** 标题与写日记页同款 RichEditor（空态标准竖线光标，已像素级验证） */
   private titleEditor: RichEditorController = new RichEditorController();
-  private bodyEditor: RichEditorController = new RichEditorController();
+  /** 正文富文本控制器（2.5：格式灯 / 选中菜单 / 文档装载读回都在它身上） */
+  private bodyController: RichBodyController = new RichBodyController();
   private titleEditorReady: boolean = false;
-  private bodyEditorReady: boolean = false;
+  private bodyReady: boolean = false;
   /** 原文只注入一次（onReady 与 loadEntry 谁后到谁触发） */
   private injectedTitle: boolean = false;
   private injectedBody: boolean = false;
+  /** 原文的编辑器文档（loadEntry 建好，bodyReady 后装载） */
+  private originalDoc: RichEditorDocument | undefined = undefined;
 
   aboutToAppear(): void {
     // 键盘避让与写日记页一致：内容收到键盘上方、可滚动
+    // （灯态由工具条自己订阅 controller.onFlagsChange，页面不再整页重渲染）
     this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE_WITH_CARET);
     const raw = this.getUIContext().getRouter().getParams();
     if (raw !== undefined) {
@@ -96,7 +107,8 @@ export struct EditEntryView {
       // Navigation 自定义标题栏：沉浸光感 Button 的官方生效范围（API 26，
       // 《沉浸光感常见问题》）；标题栏自动避让状态栏
       Navigation() {
-        Scroll() {
+        Column() {
+          Scroll() {
           Column({ space: 16 }) {
             // 日期 + 星期（写的是哪一天，编辑不改这个归属）
             Text(dayAndWeekday(new Date(this.entryDateMillis()), this.appLanguage))
@@ -133,29 +145,15 @@ export struct EditEntryView {
                 this.title = this.titleEditor.toStyledString({}).getString();
               })
 
-            // 正文（注入原文）
-            RichEditor({ controller: this.bodyEditor })
-              .placeholder($r('app.string.s_74bd07ef78'), {
-                font: {
-                  size: this.theme.bodyFont.size,
-                  weight: this.theme.bodyFont.weight,
-                  family: this.theme.bodyFont.family
-                },
-                fontColor: this.theme.textTertiary
-              })
-              .caretColor(this.theme.accent)
-              .backgroundColor(Color.Transparent)
-              .padding({ left: 0, right: 0, top: 2, bottom: 4 })
-              .constraintSize({ minHeight: 26 })
-              .width('100%')
-              .onReady((): void => {
-                this.bodyEditorReady = true;
-                this.bodyEditor.setTypingStyle(this.bodyTextStyle());
+            // 正文（2.5 富文本，注入原文）
+            RichBodyEditor({
+              controller: this.bodyController,
+              editable: true,
+              onReady: (): void => {
+                this.bodyReady = true;
                 this.injectOriginalIntoEditors();
-              })
-              .onDidChange((): void => {
-                this.bodyText = this.bodyEditor.toStyledString({}).getString();
-              })
+              }
+            })
 
             // 心情（单选、只读预设，R-ENTRY-09）
             Column({ space: 8 }) {
@@ -210,14 +208,20 @@ export struct EditEntryView {
             left: 20,
             right: 20,
             top: 16,
-            bottom: this.safeAreaBottomVp + 24
+            bottom: 24
           })
+          }
+          .layoutWeight(1)
+          .width('100%')
+          .align(Alignment.Top)
+          .scrollBar(BarState.Off)
+          .edgeEffect(EdgeEffect.Spring)
+
+          // 底部格式工具条（2.5）：与写日记页同款，间距与灯态镜像由工具条自管
+          RichFormatToolbar({ controller: this.bodyController })
         }
-        .height('100%')
         .width('100%')
-        .align(Alignment.Top)
-        .scrollBar(BarState.Off)
-        .edgeEffect(EdgeEffect.Spring)
+        .height('100%')
       }
       .title(this.topBar)
       .mode(NavigationMode.Stack)
@@ -283,16 +287,7 @@ export struct EditEntryView {
     };
   }
 
-  private bodyTextStyle(): RichEditorTextStyle {
-    return {
-      fontSize: this.theme.bodyFont.size,
-      fontWeight: this.theme.bodyFont.weight,
-      fontFamily: this.theme.bodyFont.family,
-      fontColor: this.theme.textPrimary,
-      lineHeight: 20,
-      halfLeading: true
-    };
-  }
+  /** 正文文字样式已移入 RichTextAppearance（2.5 三主题各一套，素笺 17fp） */
 
   /** 标题变更拦截（R-ENTRY-07）：换行拒绝；超 40 字拒绝（原文已注入，按现长度算） */
   private titleWillChange(value: RichEditorChangeValue): boolean {
@@ -320,11 +315,10 @@ export struct EditEntryView {
         this.titleEditor.addTextSpan(restored, { style: this.titleTextStyle() });
       }
     }
-    if (this.bodyEditorReady && !this.injectedBody) {
+    if (this.bodyReady && !this.injectedBody) {
       this.injectedBody = true;
-      if (this.bodyText.length > 0) {
-        this.bodyEditor.addTextSpan(this.bodyText, { style: this.bodyTextStyle() });
-      }
+      // 原文文档整篇装载（格式 / 分段随 span 注入）
+      this.bodyController.loadDocument(this.originalDoc ?? new RichEditorDocument());
     }
   }
 
@@ -343,7 +337,8 @@ export struct EditEntryView {
       }
       this.entry = loaded;
       this.title = loaded.title;
-      this.bodyText = loaded.content;
+      // 正文按块转成编辑器文档（格式 / 分段随文档装载恢复）
+      this.originalDoc = editorDocumentFromBlocks(loaded.contentBlocks);
       this.moodName = loaded.mood;
       this.moodColorHex = loaded.moodColorHex ?? '';
       this.selectedNotebookName = loaded.tags.length > 0 ? loaded.tags[0] : '';
@@ -374,8 +369,10 @@ export struct EditEntryView {
     entry.mood = this.moodName;
     entry.moodColorHex = this.moodColorHex.length > 0 ? this.moodColorHex : undefined;
     entry.tags = this.selectedNotebookName.length > 0 ? [this.selectedNotebookName] : [];
+    // 正文读回 → 块（2.5：格式随 TextStyleRun 存盘；照片 / 录音锚点 2.6/2.7 接）
     const blocks = composeCleanedBlocks(
-      [ContentBlock.makeText(generateUuid(), this.bodyText)], generateUuid);
+      blocksWithEditorDocument(this.bodyController.currentDocument(),
+        new Map<string, ContentBlock>(), generateUuid), generateUuid);
     entry.setContentBlocks(blocks, now); // 唯一写入口：content / wordCount / audioURLs / updatedAt 同步派生
     try {
       await EntryRepository.updateEntry(store, entry);

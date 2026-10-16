@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 2,
+  "status": "ok",
+  "producer": {
+    "tool": "recognize_ui_components",
+    "model": "Qwen3_VL_235B_A22B_Instruct",
+    "invocationId": "853c89f2-3f36-432d-9811-89bd1bf38812",
+    "createdAt": "2026-10-16T23:11:54.006Z"
+  },
+  "inputs": {
+    "image": {
+      "path": "docs/screenshots/notes-reference/note_home.jpeg",
+      "sha256": "2d217539c68a0bbbb172b890f493b5baa6e41c34cd2b549c431538f55b7fb7af"
+    },
+    "requirements": {
+      "text": "这是华为备忘录首页截图（1080x2440 像素，竖屏手机）。请描述：1) 页面整体布局结构（标题栏、笔记列表、底部按钮）；2) 新建笔记按钮的位置（中心点大约在屏幕宽度的百分之多少、高度的百分之多少，给出像素坐标估算）；3) 若有底部标签栏，描述其结构。",
+      "sha256": "455cbe2dd9cbc81d99404ee510c5d93ce05d4f87fec5815f6fcb8f9a378e3251"
+    }
+  },
+  "analysis": {
+    "canvas": {
+      "width": 1080,
+      "height": 2440
+    },
+    "visible_components": [
+      {
+        "id": "component-1",
+        "name": "标题栏",
+        "visual_evidence": "顶部显示时间 '07:11' 和状态图标，左侧有返回箭头按钮",
+        "component_candidates": [
+          {
+            "name": "NavBar",
+            "confidence": 0.9,
+            "reason": "标准顶部导航栏，包含返回按钮和状态信息"
+          }
+        ]
+      },
+      {
+        "id": "component-2",
+        "name": "标题输入框",
+        "visual_evidence": "大号字体显示 '标题'，位于页面上部，可编辑",
+        "component_candidates": [
+          {
+            "name": "TextInput",
+            "confidence": 0.85,
+            "reason": "用于输入标题的文本框，字体较大，位于内容区顶部"
+          }
+        ]
+      },
+      {
+        "id": "component-3",
+        "name": "标签选择器",
+        "visual_evidence": "黄色按钮显示 '默认' 和下拉箭头",
+        "component_candidates": [
+          {
+            "name": "Dropdown",
+            "confidence": 0.8,
+            "reason": "带下拉箭头的标签选择控件，用于分类或标记"
+          }
+        ]
+      },
+      {
+        "id": "component-4",
+        "name": "时间戳",
+        "visual_evidence": "灰色文字显示 '今天 06:49'",
+        "component_candidates": [
+          {
+            "name": "Text",
+            "confidence": 0.9,
+            "reason": "静态文本显示创建或修改时间"
+          }
+        ]
+      },
+      {
+        "id": "component-5",
+        "name": "编辑工具栏",
+        "visual_evidence": "底部浮动工具栏，包含格式、图片、附件等图标",
+        "component_candidates": [
+          {
+            "name": "Toolbar",
+            "confidence": 0.85,
+            "reason": "横向排列的图标工具栏，提供富文本编辑功能"
+          }
+        ]
+      },
+      {
+        "id": "component-6",
+        "name": "虚拟键盘",
+        "visual_evidence": "屏幕下半部分显示 QWERTY 布局键盘",
+        "component_candidates": [
+          {
+            "name": "TextInput",
+            "confidence": 0.75,
+            "reason": "系统级输入法键盘，用于文本输入"
+          }
+        ]
+      },
+      {
+        "id": "component-7",
+        "name": "顶部操作按钮组",
+        "visual_evidence": "顶部右侧有撤销、重做、更多、确认四个圆形按钮",
+        "component_candidates": [
+          {
+            "name": "Button",
+            "confidence": 0.8,
+            "reason": "圆形图标按钮，用于执行编辑操作"
+          }
+        ]
+      }
+    ],
+    "global_observations": [],
+    "uncertainties": []
+  }
+}

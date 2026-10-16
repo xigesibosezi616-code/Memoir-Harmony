@@ -9,7 +9,9 @@
  *   R-ENTRY-02/03）；全空直接退出
  * - 进页面恢复草稿（全局一份，R-ENTRY-04/05），顶部提示「接着上次没写完的」
  * - 日期自动取当下、不可改（R-ENTRY-06）；标题 ≤40、去换行、最多三行（R-ENTRY-07）
- * - v1 不做：照片 / 录音 / 天气地点 / 格式工具条（2.5~2.10 各自的卡片）
+ * - 正文富文本（2.5）：块 ↔ 文档双向转换 + 底部格式工具条（加粗 / 斜体 /
+ *   小标题 / 荧光笔）+ 选中菜单「荧光笔 / 擦掉荧光笔」
+ * - v1 不做：照片 / 录音 / 天气地点（2.6~2.10 各自的卡片）
  */
 import { relationalStore } from '@kit.ArkData';
 import { KeyboardAvoidMode } from '@kit.ArkUI';
@@ -31,12 +33,21 @@ import { EntryRepository } from '../../data/EntryRepository';
 import { NotebookRepository } from '../../data/NotebookRepository';
 import { MoodRepository } from '../../data/MoodRepository';
 import {
-  bodyTextFromBlocks,
   composeCleanedBlocks,
   restoredNotebookSelection
 } from '../../data/ComposeLogic';
 import { JournalEntry } from '../../models/JournalEntry';
-import { ContentBlock, blocksAudioPaths } from '../../models/ContentBlock';
+import {
+  ContentBlock,
+  blocksAudioPaths
+} from '../../models/ContentBlock';
+import {
+  RichEditorDocument,
+  blocksWithEditorDocument,
+  editorDocumentFromBlocks
+} from '../../models/RichDocument';
+import { RichBodyController, RichBodyEditor } from '../components/richtext/RichBodyEditor';
+import { RichFormatToolbar } from '../components/richtext/RichFormatToolbar';
 import { MoodTag } from '../../models/Mood';
 import { Notebook, cleanedName, nameKey, nextSortOrder } from '../../models/Notebook';
 import { DraftEntry } from '../../models/Draft';
@@ -95,23 +106,31 @@ export struct ComposeView {
   /** 恢复进来的草稿；保存 / 转正 / 丢弃都以它为准 */
   private draft: DraftEntry | undefined = undefined;
   /**
-   * 标题 / 正文用 RichEditor 而非 TextArea：真机实测 TextArea 空态光标是
+   * 标题用 RichEditor 而非 TextArea：真机实测 TextArea 空态光标是
    * 纺锤形 + 前 ~3s 选择手柄引导（caretColor / caretStyle 均不改形状），
    * RichEditor 空态是标准 2vp 竖线光标（已像素级验证），与 iOS 一致。
    */
   private titleEditor: RichEditorController = new RichEditorController();
-  private bodyEditor: RichEditorController = new RichEditorController();
-  /** controller 就绪标志：setTypingStyle / addTextSpan 必须在组件绑定后调用 */
+  /** 正文富文本控制器（2.5：格式灯 / 选中菜单 / 文档装载读回都在它身上） */
+  private bodyController: RichBodyController = new RichBodyController();
+  /** controller 就绪标志：setTypingStyle / loadDocument 必须在组件绑定后调用 */
   private titleEditorReady: boolean = false;
-  private bodyEditorReady: boolean = false;
+  private bodyReady: boolean = false;
   /** 草稿文本只注入一次（onReady 与 loadPageData 谁后到谁触发） */
   private draftInjectedTitle: boolean = false;
   private draftInjectedBody: boolean = false;
+  /** 草稿的编辑器文档（loadPageData 建好，bodyReady 后装载） */
+  private draftDoc: RichEditorDocument | undefined = undefined;
 
   aboutToAppear(): void {
     // 键盘避让：压缩页面跟随光标（默认 OFFSET 只保证聚焦输入框可见，
     // 心情/日记本会被键盘盖住；RESIZE_WITH_CARET 让内容收到键盘上方、可滚动）
     this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE_WITH_CARET);
+    // 富文本回调：文本变化镜像到页面状态（驱动字数、✓）；
+    // 灯态由工具条自己订阅 controller（onFlagsChange），页面不再整页重渲染
+    this.bodyController.onTextChange = (text: string): void => {
+      this.bodyText = text;
+    };
     const context = this.getUIContext().getHostContext();
     if (context !== undefined) {
       this.loadPageData(context);
@@ -123,7 +142,8 @@ export struct ComposeView {
       // Navigation 自定义标题栏：沉浸光感 Button 的官方生效范围（API 26，
       // 《沉浸光感常见问题》）；标题栏自动避让状态栏
       Navigation() {
-        Scroll() {
+        Column() {
+          Scroll() {
           Column({ space: 16 }) {
             // 日期 + 星期 + 字数（有字才显示，R-ENTRY-06）
             Row() {
@@ -194,34 +214,15 @@ export struct ComposeView {
                 this.title = this.titleEditor.toStyledString({}).getString();
               })
 
-            // 正文（v1 多行纯文本；占位符与正文同字号，落在光标位置）
-            // 初始只占一行，换行 / 写满自动长高，心情与日记本随之依次下移（对齐 iOS 自适应高度）
-            RichEditor({ controller: this.bodyEditor })
-              .placeholder($r('app.string.s_74bd07ef78'), {
-                font: {
-                  size: this.theme.bodyFont.size,
-                  weight: this.theme.bodyFont.weight,
-                  family: this.theme.bodyFont.family
-                },
-                fontColor: this.theme.textTertiary
-              })
-              .caretColor(this.theme.accent)
-              .backgroundColor(Color.Transparent)
-              // 上下内边距：RESIZE_WITH_CARET 只保证光标点进视口，
-              // padding(0) 时光标紧贴组件底缘 → 末行下半截留在键盘底下
-              // （「颜色在上文字在下」）；左右显式 0 防回退默认缩进
-              .padding({ left: 0, right: 0, top: 2, bottom: 4 })
-              // 空文档时高度自适应可能塌陷，保底一行（14fp × 1.5）
-              .constraintSize({ minHeight: 26 })
-              .width('100%')
-              .onReady((): void => {
-                this.bodyEditorReady = true;
-                this.bodyEditor.setTypingStyle(this.bodyTextStyle());
+            // 正文（2.5 富文本；初始一行高，写满自动长高，心情与日记本随之下移）
+            RichBodyEditor({
+              controller: this.bodyController,
+              editable: true,
+              onReady: (): void => {
+                this.bodyReady = true;
                 this.injectDraftIntoEditors();
-              })
-              .onDidChange((): void => {
-                this.bodyText = this.bodyEditor.toStyledString({}).getString();
-              })
+              }
+            })
 
             // 心情（单选、只读预设，R-ENTRY-09）
             Column({ space: 8 }) {
@@ -278,14 +279,20 @@ export struct ComposeView {
             left: 20,
             right: 20,
             top: 16,
-            bottom: this.safeAreaBottomVp + 24
+            bottom: 24
           })
+          }
+          .layoutWeight(1)
+          .width('100%')
+          .align(Alignment.Top)
+          .scrollBar(BarState.Off)
+          .edgeEffect(EdgeEffect.Spring)
+
+          // 底部格式工具条（2.5）：初版通栏样式；贴键盘间距与灯态镜像由工具条自管
+          RichFormatToolbar({ controller: this.bodyController })
         }
-        .height('100%')
         .width('100%')
-        .align(Alignment.Top)
-        .scrollBar(BarState.Off)
-        .edgeEffect(EdgeEffect.Spring)
+        .height('100%')
       }
       .title(this.topBar)
       .mode(NavigationMode.Stack)
@@ -369,17 +376,7 @@ export struct ComposeView {
     };
   }
 
-  /** 正文文字样式：14fp × 1.43 ≈ 20fp 行高，理由同上 */
-  private bodyTextStyle(): RichEditorTextStyle {
-    return {
-      fontSize: this.theme.bodyFont.size,
-      fontWeight: this.theme.bodyFont.weight,
-      fontFamily: this.theme.bodyFont.family,
-      fontColor: this.theme.textPrimary,
-      lineHeight: 20,
-      halfLeading: true
-    };
-  }
+  /** 正文文字样式已移入 RichTextAppearance（2.5 三主题各一套，素笺 17fp） */
 
   /**
    * 标题变更拦截（R-ENTRY-07）：换行直接拒绝；超出 40 字拒绝。
@@ -413,11 +410,11 @@ export struct ComposeView {
         this.titleEditor.addTextSpan(restored, { style: this.titleTextStyle() });
       }
     }
-    if (this.bodyEditorReady && !this.draftInjectedBody) {
+    if (this.bodyReady && !this.draftInjectedBody) {
       this.draftInjectedBody = true;
-      if (this.bodyText.length > 0) {
-        this.bodyEditor.addTextSpan(this.bodyText, { style: this.bodyTextStyle() });
-      }
+      // 草稿文档整篇装载（格式随 span 注入；没草稿也装载一次空文档，
+      // 把接下来打的字置成主题基础样式）
+      this.bodyController.loadDocument(this.draftDoc ?? new RichEditorDocument());
     }
   }
 
@@ -432,7 +429,9 @@ export struct ComposeView {
       if (draft !== null) {
         this.draft = draft;
         this.title = draft.title;
-        this.bodyText = bodyTextFromBlocks(draft.contentBlocks);
+        // 草稿正文按块转成编辑器文档（格式 / 分段随文档装载恢复）
+        this.draftDoc = editorDocumentFromBlocks(draft.contentBlocks);
+        this.bodyText = this.draftDoc.text;
         this.moodName = draft.mood;
         this.moodColorHex = draft.moodColorHex ?? '';
         const restored = restoredNotebookSelection(draft.tags, []);
@@ -493,8 +492,10 @@ export struct ComposeView {
     if (this.selectedNotebookName.length > 0) {
       entry.tags = [this.selectedNotebookName];
     }
+    // 正文读回 → 块（2.5：格式随 TextStyleRun 存盘；照片 / 录音锚点 2.6/2.7 接）
     const blocks = composeCleanedBlocks(
-      [ContentBlock.makeText(generateUuid(), this.bodyText)], generateUuid);
+      blocksWithEditorDocument(this.bodyController.currentDocument(),
+        new Map<string, ContentBlock>(), generateUuid), generateUuid);
     entry.setContentBlocks(blocks, now); // 唯一写入口：content / wordCount / audioURLs 同步派生
     try {
       await EntryRepository.insertEntry(store, entry);
@@ -533,7 +534,8 @@ export struct ComposeView {
     const draft = this.draft ?? new DraftEntry(generateUuid(), now, now);
     draft.title = this.title;
     const blocks = composeCleanedBlocks(
-      [ContentBlock.makeText(generateUuid(), this.bodyText)], generateUuid);
+      blocksWithEditorDocument(this.bodyController.currentDocument(),
+        new Map<string, ContentBlock>(), generateUuid), generateUuid);
     draft.setContentBlocks(blocks, now);
     draft.mood = this.moodName;
     draft.moodColorHex = this.moodColorHex.length > 0 ? this.moodColorHex : undefined;

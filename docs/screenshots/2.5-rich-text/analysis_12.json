@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 2,
+  "status": "ok",
+  "producer": {
+    "tool": "recognize_ui_components",
+    "model": "Qwen3_VL_235B_A22B_Instruct",
+    "invocationId": "24479583-1615-4359-9c25-8645252b726e",
+    "createdAt": "2026-10-16T12:41:31.928Z"
+  },
+  "inputs": {
+    "image": {
+      "path": "docs/screenshots/2.5-rich-text/screenshot_12.jpeg",
+      "sha256": "4856c5a65a8e7a6b464dd314e7cb721b9b1ea4a03f26731b7a1657c9d0fc16df"
+    },
+    "requirements": {
+      "text": "这是鸿蒙日记详情页截图。请重点核对：1) 正文是否显示「测试1」；2) 其中一个字符是否带荧光笔色块（黄色系底色）；3) 排版是否正常（无重叠、无截断、无白屏）；4) 页面结构（日期、标题区、分割线）是否完整。",
+      "sha256": "9f081f9ba930f9368ee7846ae54421a25ec6fa3514823cd084edad3a37cb0b8d"
+    }
+  },
+  "analysis": {
+    "canvas": {
+      "width": 720,
+      "height": 1626
+    },
+    "visible_components": [
+      {
+        "id": "component-1",
+        "name": "正文文本「测试1」",
+        "visual_evidence": "截图中正文区域显示文字「测试1」，其中字符「1」带有黄色系荧光笔底色",
+        "component_candidates": [
+          {
+            "name": "Text",
+            "confidence": 0.9,
+            "reason": "用于显示静态文本内容，支持部分字符高亮样式"
+          }
+        ]
+      },
+      {
+        "id": "component-2",
+        "name": "日期标题「10月16日 星期五」",
+        "visual_evidence": "截图顶部显示日期与星期文字，位于分割线上方",
+        "component_candidates": [
+          {
+            "name": "Text",
+            "confidence": 0.85,
+            "reason": "用于显示标题类静态文本，通常配合布局组件使用"
+          }
+        ]
+      },
+      {
+        "id": "component-3",
+        "name": "顶部左侧返回按钮",
+        "visual_evidence": "左上角圆形按钮内含左箭头图标",
+        "component_candidates": [
+          {
+            "name": "Button",
+            "confidence": 0.8,
+            "reason": "标准导航返回控件，常用于页面跳转"
+          }
+        ]
+      },
+      {
+        "id": "component-4",
+        "name": "顶部右侧编辑按钮",
+        "visual_evidence": "右上角圆形按钮内含铅笔图标",
+        "component_candidates": [
+          {
+            "name": "Button",
+            "confidence": 0.8,
+            "reason": "用于触发编辑操作的图标按钮"
+          }
+        ]
+      },
+      {
+        "id": "component-5",
+        "name": "顶部右侧删除按钮",
+        "visual_evidence": "右上角圆形按钮内含垃圾桶图标",
+        "component_candidates": [
+          {
+            "name": "Button",
+            "confidence": 0.8,
+            "reason": "用于触发删除操作的图标按钮"
+          }
+        ]
+      },
+      {
+        "id": "component-6",
+        "name": "底部导航栏",
+        "visual_evidence": "底部横向排列四个带图标和文字的导航项：记录、日记本、邮筒、设置",
+        "component_candidates": [
+          {
+            "name": "Tabs",
+            "confidence": 0.85,
+            "reason": "用于底部主导航切换，支持图标+文字组合"
+          }
+        ]
+      },
+      {
+        "id": "component-7",
+        "name": "分割线",
+        "visual_evidence": "日期下方有一条细横线，分隔标题区与正文区",
+        "component_candidates": [
+          {
+            "name": "Divider",
+            "confidence": 0.9,
+            "reason": "用于视觉分隔不同内容区域的标准组件"
+          }
+        ]
+      }
+    ],
+    "global_observations": [
+      "页面结构完整，包含日期、标题区、分割线、正文、顶部操作按钮及底部导航栏",
+      "正文「测试1」中字符「1」带有黄色荧光笔底色，符合高亮标记特征",
+      "排版正常，无文字重叠、截断或白屏现象"
+    ],
+    "uncertainties": []
+  }
+}

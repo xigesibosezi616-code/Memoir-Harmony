@@ -59,20 +59,6 @@ export function composeCleanedBlocks(blocks: ContentBlock[], makeId: () => strin
 }
 
 /**
- * 草稿恢复成 v1 的整段正文输入框：文本块（去掉划掉的字）用 `\n\n` 连接。
- * v1 写日记页只有纯文本，照片 / 录音块不进输入框（v1 也产生不了它们）。
- */
-export function bodyTextFromBlocks(blocks: ContentBlock[]): string {
-  const parts: string[] = [];
-  for (const block of blocks) {
-    if (block.type === ContentBlockType.Text) {
-      parts.push(block.visibleText());
-    }
-  }
-  return parts.join('\n\n');
-}
-
-/**
  * 恢复草稿时的日记本选择（R-ENTRY-05）：草稿里选过的（单本规则整理后恰好一本）优先；
  * 没选过才用「从哪本点进来写」带进来的那本。v1 的入口不带日记本上下文，初值恒为空。
  * 草稿里存了多本的（单本规则之前存的）视同没选（iOS `restoreDraftIfNeeded` 同款）。

@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 2,
+  "status": "ok",
+  "producer": {
+    "tool": "recognize_ui_components",
+    "model": "Qwen3_VL_235B_A22B_Instruct",
+    "invocationId": "70b546ee-bdfd-4dca-89fe-0e85e22ac551",
+    "createdAt": "2026-10-16T23:13:35.372Z"
+  },
+  "inputs": {
+    "image": {
+      "path": "docs/screenshots/notes-reference/crop_toolbar.jpeg",
+      "sha256": "3eb6ddb0122ea2945e930b9bcce08384c8fefef14e707f24b2bffa55ea7a7e1e"
+    },
+    "requirements": {
+      "text": "这是华为备忘录编辑页底部区域的横向裁剪条（原图 1080x2440，本图是原图 y=1300~1600 的区域，本图宽 1080 高 300）。图中应该有正文最后几行 + 底部工具栏 + 键盘顶部。请精确回答：1) 工具栏在本图中的像素范围（从本图顶部往下数：工具栏上边缘在第几像素行、下边缘在第几像素行）；2) 工具栏里有哪几个图标按钮（从左到右），每个按钮中心的大致 x 坐标；3) 工具栏背景是什么颜色/材质（纯色、半透明、毛玻璃？取一个按钮间隙处的背景色描述）；4) 工具栏与键盘之间的间距（有没有黑色或内容色的缝隙，多高）；5) 按钮是什么形状（圆形/方形/有无底色）。",
+      "sha256": "40b0bbc4c12fe3f52750c5ee053919f2b9d16397578c3dd4328bfcebd78c13ef"
+    }
+  },
+  "analysis": {
+    "canvas": {
+      "width": 1080,
+      "height": 300
+    },
+    "visible_components": [
+      {
+        "id": "component-1",
+        "name": "底部工具栏",
+        "visual_evidence": "横向排列的多个图标按钮，包括文本格式、勾选、画笔、图片、回形针、AI助手和魔法笔图标，位于截图上半部分。",
+        "component_candidates": [
+          {
+            "name": "Row",
+            "confidence": 0.9,
+            "reason": "用于水平排列多个子组件，符合工具栏布局。"
+          },
+          {
+            "name": "Button",
+            "confidence": 0.85,
+            "reason": "每个图标按钮可由 Button 组件实现，支持图标和点击事件。"
+          },
+          {
+            "name": "Image",
+            "confidence": 0.8,
+            "reason": "图标内容可通过 Image 组件渲染。"
+          }
+        ]
+      },
+      {
+        "id": "component-2",
+        "name": "键盘区域",
+        "visual_evidence": "截图下半部分显示键盘相关图标，包括键盘切换、麦克风和收起按钮。",
+        "component_candidates": [
+          {
+            "name": "Row",
+            "confidence": 0.9,
+            "reason": "用于水平排列键盘控制按钮。"
+          },
+          {
+            "name": "Button",
+            "confidence": 0.85,
+            "reason": "每个键盘控制图标可由 Button 组件实现。"
+          },
+          {
+            "name": "Image",
+            "confidence": 0.8,
+            "reason": "图标内容可通过 Image 组件渲染。"
+          }
+        ]
+      }
+    ],
+    "global_observations": [],
+    "uncertainties": []
+  }
+}

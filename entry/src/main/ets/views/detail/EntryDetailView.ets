@@ -10,9 +10,8 @@
  *   其余主题普通版式：日期星期 + 心情徽标 + 此时此地 + 标题 + 标签 + 分割线 + 正文
  * - 「补记 N 次」行不渲染：addendumDays 依赖块级时间戳（Ink），2.5 富文本
  *   之前恒为空 —— 与 R-ENTRY-14「没补记过不显示」一致，偏差记 09 Q24
- * - 正文颜色 textPrimary（iOS `RichTextAppearance.textColor`），与写日记页同一套排版；
- *   两种版式都内联在 build() 里（@Builder 参数传值不响应状态刷新，且
- *   `this.entry!` 非空断言被 ArkTS 禁用——build 内的 if 收窄是唯一安全写法）
+ * - 正文富文本只读展示（2.5，R-ENTRY-12）：RichBodyEditor editable=false，
+ *   与写日记 / 编辑页同一套排版（素笺 17fp）—— 加粗 / 斜体 / 小标题 / 荧光笔原样渲染
  * - 右上编辑（push 2.4 编辑页）+ 删除（官方 AlertDialog 确认 + 先媒体后库记录，
  *   R-DATA-07）；从编辑页返回由 Index.onPageShow 广播的 reload tick 驱动重查
  */
@@ -40,6 +39,11 @@ import {
 } from '../../services/AppDateFormatters';
 import { JournalEntry } from '../../models/JournalEntry';
 import { isDefaultMoodKey } from '../../models/Mood';
+import {
+  RichEditorDocument,
+  editorDocumentFromBlocks
+} from '../../models/RichDocument';
+import { RichBodyController, RichBodyEditor } from '../components/richtext/RichBodyEditor';
 import { CircleIconButton } from '../compose/CircleIconButton';
 import { MoodBadge, moodLabelRes } from '../components/MoodBadge';
 import { TagPill } from '../components/TagPill';
@@ -70,6 +74,11 @@ export struct EntryDetailView {
   reloadTick: number = 0;
 
   @State entry: JournalEntry | undefined = undefined;
+
+  /** 正文富文本只读控制器（2.5：与编辑页同一套排版渲染） */
+  private bodyController: RichBodyController = new RichBodyController();
+  private bodyReady: boolean = false;
+  private detailDoc: RichEditorDocument | undefined = undefined;
 
   /** 路由参数：日记 id（onReady 从 NavDestinationContext.pathInfo 取） */
   private entryId: string = '';
@@ -190,14 +199,18 @@ export struct EntryDetailView {
                 .height(0.5)
                 .backgroundColor(0x80D4C9B8)
 
-              // 正文（与写日记页同一套排版；紧接全宽分割线）
+              // 正文（富文本只读，2.5；紧接全宽分割线）
               if (this.entry.content.length > 0) {
-                Text(this.entry.content)
-                  .fontSize(this.theme.bodyFont.size)
-                  .fontWeight(this.theme.bodyFont.weight)
-                  .fontFamily(this.theme.bodyFont.family)
-                  .fontColor(this.theme.textPrimary)
-                  .lineHeight(this.theme.bodyFont.size * 1.43)
+                RichBodyEditor({
+                  controller: this.bodyController,
+                  editable: false,
+                  onReady: (): void => {
+                    this.bodyReady = true;
+                    if (this.detailDoc !== undefined) {
+                      this.bodyController.loadDocument(this.detailDoc);
+                    }
+                  }
+                })
                   .padding({ top: 6 })
               }
             }
@@ -261,14 +274,18 @@ export struct EntryDetailView {
                 .strokeWidth(0.5)
                 .color(this.theme.border)
 
-              // 正文（只读；照片 / 录音块在 2.5~2.8 的卡片渲染）
+              // 正文（富文本只读，2.5；照片 / 录音块在 2.6~2.8 的卡片渲染）
               if (this.entry.content.length > 0) {
-                Text(this.entry.content)
-                  .fontSize(this.theme.bodyFont.size)
-                  .fontWeight(this.theme.bodyFont.weight)
-                  .fontFamily(this.theme.bodyFont.family)
-                  .fontColor(this.theme.textPrimary)
-                  .lineHeight(this.theme.bodyFont.size * 1.43)
+                RichBodyEditor({
+                  controller: this.bodyController,
+                  editable: false,
+                  onReady: (): void => {
+                    this.bodyReady = true;
+                    if (this.detailDoc !== undefined) {
+                      this.bodyController.loadDocument(this.detailDoc);
+                    }
+                  }
+                })
               }
             }
             .width('100%')
@@ -427,6 +444,13 @@ export struct EntryDetailView {
       this.store = store;
       const loaded = await EntryRepository.fetchEntryById(store, this.entryId);
       this.entry = loaded ?? undefined;
+      // 正文块 → 富文本文档（块格式随 span 渲染）；编辑返回 reload tick 重查时整篇重载
+      if (loaded !== null) {
+        this.detailDoc = editorDocumentFromBlocks(loaded.contentBlocks);
+        if (this.bodyReady) {
+          this.bodyController.loadDocument(this.detailDoc);
+        }
+      }
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'loadEntry failed id=%{public}s: %{public}s', this.entryId, JSON.stringify(err));
     }

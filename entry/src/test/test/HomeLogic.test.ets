@@ -71,10 +71,11 @@ export default function homeLogicTest() {
 
     it('adjacentMonthsBecomeGroupsInOrder', 0, () => {
       // 已按 date 倒序：10 月组在前、9 月组在后（最近月在最前）
+      // （month 参数 0 基：9=10 月、8=9 月；8 月 31 日不存在会滚进 10 月，用 30）
       const entries = [
         makeEntry(noon(2026, 9, 30)),
         makeEntry(noon(2026, 9, 2)),
-        makeEntry(noon(2026, 8, 31)),
+        makeEntry(noon(2026, 8, 30)),
         makeEntry(noon(2026, 8, 1))
       ];
       const groups = groupedEntries(entries, 'zh-Hans');

@@ -7,7 +7,6 @@ import { describe, it, expect } from '@ohos/hypium';
 import { ContentBlock, ContentBlockType, PaperStyle, PhotoPosition } from '../../main/ets/models/ContentBlock';
 import { nameKey } from '../../main/ets/models/Notebook';
 import {
-  bodyTextFromBlocks,
   composeCharCount,
   composeCleanedBlocks,
   composeHasContent,
@@ -84,17 +83,6 @@ export default function composeLogicTest() {
       const cleaned = composeCleanedBlocks([], makeId);
       expect(cleaned.length).assertEqual(1);
       expect(cleaned[0].text).assertEqual('');
-    })
-
-    // ---- bodyTextFromBlocks（草稿恢复进输入框） ----
-
-    it('bodyTextJoinsTextBlocksWithBlankLine', 0, () => {
-      const text = bodyTextFromBlocks([textBlock('第一段'), textBlock('第二段')]);
-      expect(text).assertEqual('第一段\n\n第二段');
-    })
-
-    it('bodyTextEmptyWhenNoTextBlocks', 0, () => {
-      expect(bodyTextFromBlocks([])).assertEqual('');
     })
 
     // ---- 草稿恢复的日记本选择（R-ENTRY-05） ----

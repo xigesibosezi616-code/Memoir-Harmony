@@ -29,6 +29,9 @@
 | Q20 | 🟡 | **智感握姿实现路径**：`HdsTabs` 不在本 SDK（26），自行用 motion `operatingHandChanged` + `ACTIVITY_MOTION` 实现 | 1.6 主框架 · 真机验收 | 鸿蒙 | 2026-10-15 整体移除：Tabs 系统底栏无横移落点，且 SDK 权限清单证实 `DETECT_GESTURE`（normal + system_grant）后 `holdingHandChanged` 也只是普通权限——智感握姿收益存疑，服务、权限声明、理由文案全部删除（git 历史可寻回），真机验收 `operatingHand` 授权率与灵敏度后若确需再重启 |
 | Q21 | ⚪ | 全局 toast 的 kind：文档卡片只写两种，iOS 源码是三种（error/info/success） | — | — | 2026-10-14 照 iOS 三种 |
 | Q22 | ⚪ | 2.1 卡片写心情「单选**可取消**」，iOS `MoodSelector` 点已选心情**不取消**（点了始终选中） | 2.1 写日记页 | 产品 | 2026-10-15 按 iOS 源码不可取消实现（CLAUDE.md：iOS 源码优先；用户已确认）。产品若想要「再点一下取消」，iOS 侧要一起改 |
+| Q23 | 🟡 | **文字绕排做不到**：RichEditor 无 exclusion 机制，锚点图片无法让文字绕排（iOS `Text` + `imageTextInitializer` 可以）；**荧光笔画法偏差**：`textBackgroundStyle` 只能整块色底，画不出 iOS 「只压文字中下部的圆头条」 | 2.6 照片相纸 · 2.5 荧光笔观感 | 产品 | 2026-10-16 spike 静态验证：绕排 ❌（2.6 照片退化为「整行卡片 + 上下独立段落」，等产品确认）；荧光笔先用整块色底（每主题配 iOS 同款色 + 圆角），真机验收不满意再议 |
+| Q24 | ⚪ | 详情页「补记 N 次」行**暂不渲染**：块级 writtenAt 在 2.5 编辑器读不回（RichEditor 样式装不下自定义时间戳），编辑保存一轮后补记信息会丢 | 2.5 详情页 | 产品 + 鸿蒙 | 先按 R-ENTRY-14「没补记过不显示」实现（恒不显示）；2.8 墨迹会干接交互时在保存链路合并回 writtenAt / struckAt |
+| Q25 | ⚪ | **老日记录音补进正文**（R-RICH-09）：2026-10-10 之前的日记录音在正文外面（audioURLs 列），打开编辑时要就地转成正文里的录音块 | 2.8 录音 | 鸿蒙 | 纯逻辑已备好（`blocksWithLooseAudio` + 单测）；2.8 接录音块渲染时挂进 EditEntryView 装载链路 |
 
 ---
 
@@ -163,3 +166,35 @@ HarmonyOS 6 官方「智感握姿」推荐用 `HdsTabs`（HDS 组件库），但
 10_BUILD_MANUAL.md 1.6 卡片只写了 error / info 两种；iOS `ErrorPresenter.Kind` 实际是
 error / info / success 三种（`ErrorToastView` 三色：赭红 / 墨灰蓝 / 橄榄绿）。
 以 iOS 源码为准做三种（冲突时 iOS 源码 > 文档），`ErrorToastKind` 枚举三值齐全。
+
+### Q23 🟡 文字绕排做不到 / 荧光笔画法偏差
+
+2.5 开工前技术验证（2026-10-16，静态 + SDK 源码核实）：
+
+- **文字绕排**：ArkUI `RichEditor` 没有 iOS `NSTextLayoutManager.exclusionPaths`
+  等价的绕排机制；`addBuilderSpan` / 图片 span 都是**行内占位**，做不到「文字绕着照片流」。
+  影响 2.6 照片相纸：iOS 的「照片嵌在文字流里、左右绕排」退化为
+  **照片整行卡片 + 上下独立文字段**（贴近华为备忘录的插入卡片）。
+  需要产品确认退化方案，或 2.6 换自绘排版（成本高）。
+- **荧光笔画法**：RichEditor 的 `textBackgroundStyle`（色底 + 圆角）作用于整个行框，
+  画不出 iOS 「只压文字中下部、随字流断段的圆头条」。2.5 先用整块色底
+  （三主题各配 iOS 同款荧光色，圆角随字号推导），真机观感不满意再议
+  （候选：2.8 后用自绘渲染层重画荧光条）。
+
+### Q24 ⚪ 详情页「补记 N 次」暂不渲染
+
+补记判定依赖块级 `writtenAt`（`Ink.isAddendum`），而 2.5 的编辑器读回链路
+（`RichBodyController.currentDocument`）从 RichEditor span 还原不出 writtenAt——
+RichEditor 的文字样式模型装不下自定义时间戳。经编辑页保存一轮后块上的
+writtenAt / struckAt 会丢（正文文字不丢）。
+
+- 2.5 范围内：详情页按 R-ENTRY-14「没补记过不显示」恒不渲染该行（与现状一致）；
+- 2.8 墨迹会干接交互时：编辑器侧存活动态格式映射，保存链路把 writtenAt / struckAt
+  合并回块，补记行恢复渲染。
+
+### Q25 ⚪ 老日记录音补进正文（R-RICH-09）
+
+2026-10-10 之前的日记（含 iOS 互导的包）录音都在正文外面的 `audioURLs` 列里。
+R-RICH-09 要求打开编辑时就地转成正文里的录音块。纯逻辑已就位
+（`ContentBlock.blocksWithLooseAudio` + `ContentBlock.test.ets` 单测），
+2.8 做录音块渲染时挂进 `EditEntryView` 的装载链路即可。
