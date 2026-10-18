@@ -19,7 +19,7 @@
 | Q10 | ⚪ | iOS 设置里的**三个死设置** | 6.1 设置 | 产品 | |
 | Q11 | 🟡 | 会员四样专属里**三样 iOS 也还没做** | 7.3 | 产品 | |
 | Q12 | 🔴 | **隐私协议 / 用户协议的鸿蒙版** | 1.5 首启 · 8 上架 | 法务 | |
-| Q13 | 🟡 | **动态照片**跨端互通 | 2.9 相机 · 6.4 导入 | 鸿蒙调研 | 鸿蒙侧 2.9 已实现（相机拍 / 相册选 / 原样配对落盘 photo_<uuid8>[_full].jpg+.mp4 / 全屏按住播放，链路假设待真机验证见 Q28）；跨端互通仍待 6.4 导入时验证 |
+| Q13 | 🟡 | **动态照片**跨端互通 | 2.9 相机 · 6.4 导入 | 鸿蒙 | 鸿蒙侧 2.9 真机验收全过 ✅（2026-10-19：拍/选/原样配对落盘/全屏按住播放，链路假设见 Q28 结案）；跨端互通（iOS 包导入/鸿蒙包导出）仍待 6.4 验证 |
 | Q14 | ⚪ | 测试开关（来信不设限、假开通会员） | 8 上架 | — | 上架前关 |
 | Q15 | ⚪ | 后端域名 | 4.1 | 运维 | |
 | Q16 | ⚪ | 「内容审核没过」**后端没有专门的错误码** | 5.3 | 后端 | |
@@ -35,7 +35,7 @@
 | Q26 | 🟡 | 2.8 墨迹三处小偏差：补记段标不做（RichEditor 无段前距）；scissors/strikethrough 符号不存在（痕迹行纯文字、菜单项无图标）；sys.symbol 离线不可枚举 | 2.8 墨迹 | 产品拍板 + 鸿蒙 | 见下 Q26 详述 |
 | Q26 | 🔴 | **bindContentCover 真机「隐形挂载」**：全屏照片查看用 bindContentCover，真机出现 appear 日志齐全但零渲染、吞掉整页触摸（dt=163552ms）的幽灵态；且 EditEntryView 同时 bindSheet+bindContentCover 双绑属 API 违规用法 | 2.6 全屏查看 | 鸿蒙 | 2026-10-17 弃用 bindContentCover：三页改**页面内条件浮层**（根 Stack 末位 if(showPhotoFullscreen)，同层最高）。根因未深挖（疑模态子窗口层丢失）；教训：模态类 API（bindContentCover/bindSheet）同一节点只绑一个，全屏沉浸浮层优先用页面内浮层（可嵌自定义转场、可与其他 UI 联动，如 Tab 栏 barOpacity） |
 | Q27 | ⚪ | **真机验证方法论教训（「关全屏白屏」疑云结案）**：曾判定「关闭全屏后整页白屏」并二分删除 transition/barOpacity/hideTitleBar——全部误报 | 验收流程 | 鸿蒙 | 2026-10-17 结案：**像素采样伪象**。`sips` 转 BMP 是负高度 top-down 行序，采样脚本按 bottom-up 公式翻转导致所有采样点垂直镜像（页面照片/Tab 栏位置全采错成背景白区）；dumpLayout 组件树一直完好。教训：①截图判位必须先用已知参照物（状态栏文字、照片区域）校验采样坐标映射；②「白屏」类结论需 dumpLayout（树）+ 像素分布对比（与正常帧 white/dark/colored 占比一致=同页）+ 无诱导语的模型看图三重交叉；③真机注入双击用单次调用链式 down/up（`uinput -T -d x y -u x y -d x y -u x y`，实测间隔 ~45ms；两次独立 uinput ~350ms、uitest doubleClick ~640ms，都超 280ms 双击窗）；④长 E2E 前先 `power-shell timeout -o 600000` 防自动锁屏（锁屏后 dump 有树但截屏全黑） |
-| Q28 | 🟡 | **2.9 相机/动态照片的三条官方链路假设待真机验证**：① `requestMovingPhoto`/`requestImageData`/`saveCameraPhoto` d.ts 权限标注与官方文档用法相悖；② `PhotoViewPicker` IMAGE_TYPE（'image/*'）是否包含动态照片资产可选；③ `loadMovingPhoto`+`MovingPhotoView` 沙箱文件播放可用性 | 2.9 相机 | 鸿蒙 | 见下 Q28 详述 |
+| Q28 | ✅ | **2.9 相机/动态照片的三条官方链路假设**：① `requestMovingPhoto`/`requestImageData`/`saveCameraPhoto` d.ts 权限标注与官方文档用法相悖；② `PhotoViewPicker` IMAGE_TYPE（'image/*'）是否包含动态照片资产可选；③ `loadMovingPhoto`+`MovingPhotoView` 沙箱文件播放可用性 | 2.9 相机 | 鸿蒙 | **2026-10-19 真机实证三条全过，结案**（详述见下 Q28） |
 
 ---
 
@@ -121,11 +121,11 @@ iOS 的 Live Photo = 静态图 + `.mov`，靠图片元数据里的标识配对�
 **最低要求**：iOS 导出的包在鸿蒙上至少能显示静态图（R-PHOTO-04）；鸿蒙导出的动态照片在 iOS 上至少显示静态图。
 能不能互相播放，鸿蒙调研后定。
 
-**鸿蒙侧现状（2026-10-18，2.9）**：相机拍 / 相册选的动态照片按「原样字节配对」落盘——
+**鸿蒙侧现状（2026-10-18，2.9；2026-10-19 真机验收全过）**：相机拍 / 相册选的动态照片按「原样字节配对」落盘——
 显示图 `photo_<uuid8>.jpg`（相机=方形裁切重编码；相册=原图原样字节）+ 相机专属未裁原图
 `photo_<uuid8>_full.jpg` + 视频 `photo_<uuid8>.mp4`（均 saveData 原样，R-PHOTO-03）；
 全屏 `loadMovingPhoto` + `MovingPhotoView` 长按播放，失败退静态图（R-PHOTO-04）。
-链路假设见 Q28（真机验证待做）；跨端互通（iOS 包导入 / 鸿蒙包导出）留 6.4 验证。
+链路假设真机实证结案（Q28，2026-10-19）；跨端互通（iOS 包导入 / 鸿蒙包导出）留 6.4 验证。
 
 ### Q14 ⚪ 测试开关
 
@@ -327,7 +327,7 @@ R-RICH-09 要求打开编辑时就地转成正文里的录音块。纯逻辑已�
 - **沉淀**：今后任何「拦截删除后引导下一次退格」的交互都要按此铁律设计，
   不能依赖 setCaretOffset 改变引擎 DEL 判定位置。
 
-### Q28 🟡 2.9 相机/动态照片的三条官方链路假设（2026-10-18，待真机验证）
+### Q28 ✅ 2.9 相机/动态照片的三条官方链路假设（2026-10-19 真机实证结案）
 
 - **① d.ts 权限标注与官方文档用法相悖**：`MediaAssetManager.requestMovingPhoto`/
   `requestImageData`（d.ts 标 `ohos.permission.READ_IMAGEVIDEO`）、
@@ -350,3 +350,16 @@ R-RICH-09 要求打开编辑时就地转成正文里的录音块。纯逻辑已�
 - **验证时机**：2.9 真机验收（相机拍动态照片 → 按住播放 → 相册选动态照片 →
   全屏播放 → 存相册多一张 → 配对失败退化普通照片）时逐条过。任何一条不过走
   上述兜底，均不阻塞 2.9 静态照片链路。
+- **结案（2026-10-19，Mate X6 真机）三条全过**：
+  - **① 过**：相机 `photoAssetAvailable` 回调上下文里 `requestMovingPhoto`/
+    `saveCameraPhoto` 免权限可用（编译期有 READ/WRITE_IMAGEVIDEO 告警但不拦执行）。
+    实测发现的真坑不是权限而是**资产两阶段写入竞态**：`requestMovingPhoto` 在资产
+    未就绪时秒回 14000011 或 resolve undefined——BALANCE 模式失败快适合密集探针
+    轮询（waits [300..5000] 八档）+still 跨尝试保留+HIGH_QUALITY 背水一战+
+    still-only 兜底；夜拍 50MP 从「22s 全败」修到 1.0-3.6s 交付（解法详见
+    PROGRESS 2.9 追记）。
+  - **② 过**：`IMAGE_TYPE`（'image/*'）相册能列出并选中动态照片，`getAssets` 查
+    `PHOTO_SUBTYPE === MOVING_PHOTO(3)` 分流正常（相册选动态→插入→全屏播放真机过）。
+  - **③ 过**：`loadMovingPhoto`+`MovingPhotoView` 沙箱 fileUri 配对长按播放可用；
+    实测约束记录：MovingPhotoView 不支持动态属性、不支持 expandSafeArea、
+    AVPlayer 并发 ≤3；`onError` 退化静态图路径保持。

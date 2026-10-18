@@ -6,7 +6,8 @@ import { describe, it, expect } from '@ohos/hypium';
 import {
   vpFromPx,
   perceivedLuminance,
-  systemBarContentColorFor
+  systemBarContentColorFor,
+  IslandBodyGeometry
 } from '../../main/ets/services/ImmersiveChrome';
 
 export default function immersiveChromeTest() {
@@ -44,6 +45,38 @@ export default function immersiveChromeTest() {
       expect(systemBarContentColorFor(0xFFFAF7F2)).assertEqual('#000000');
       // 深底 → 白字
       expect(systemBarContentColorFor(0xFF202020)).assertEqual('#FFFFFF');
+    })
+
+    it('islandGeometryHugsCutout', 0, () => {
+      // 典型居中挖孔：机身顶 = 挖孔顶 - 2；顶黑边 = 越过挖孔底再留 9
+      const g = IslandBodyGeometry.compute(360, 175, 13, 10, 9);
+      expect(g.bodyTop).assertEqual(11);
+      expect(g.topBezel).assertEqual(13 + 9 + 9 - 11);
+      // 药丸整圈包住挖孔（四周各 4）
+      expect(g.pillTop).assertEqual(9);
+      expect(g.pillHeight).assertEqual(17);
+      expect(g.pillWidth).assertEqual(18);
+      // 药丸水平居中在挖孔上
+      expect(g.pillLeft + g.pillWidth / 2).assertEqual(175 + 10 / 2);
+    })
+
+    it('islandGeometryClampsToScreenEdges', 0, () => {
+      // 挖孔贴屏幕顶：机身顶 / 药丸顶都不出屏
+      const top = IslandBodyGeometry.compute(360, 175, 0, 10, 9);
+      expect(top.bodyTop).assertEqual(0);
+      expect(top.pillTop).assertEqual(0);
+      // 挖孔贴屏幕左缘：药丸左边不出屏（居中被夹回 0）
+      const left = IslandBodyGeometry.compute(360, 0, 13, 10, 9);
+      expect(left.pillLeft).assertEqual(0);
+      // 挖孔贴右缘：药丸右边不出屏
+      const right = IslandBodyGeometry.compute(360, 350, 13, 10, 9);
+      expect(right.pillLeft + right.pillWidth <= 360).assertTrue();
+    })
+
+    it('islandGeometryKeepsMinimumTopBezel', 0, () => {
+      // 极端扁挖孔（高 0）：顶黑边保底 12，不允许比侧黑边还薄出离谱
+      const g = IslandBodyGeometry.compute(360, 175, 0, 2, 0);
+      expect(g.topBezel >= 12).assertTrue();
     })
   })
 }

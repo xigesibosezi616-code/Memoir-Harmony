@@ -4,6 +4,8 @@
  * - `setWindowLayoutFullScreen(true)`：内容延伸到状态栏 / 手势条下面
  * - 避让区（状态栏、手势条）换算成 vp 发布到 AppStorage，页面自行让位
  *   （px / `display.densityPixels`，避让区回调时重算——折叠屏密度会变）
+ * - 挖孔（灵动岛）矩形单独查 `display.getCutoutInfo` 发布（挖孔不属于避让区，
+ *   faqs-arkui-1244；相机等异形屏页面按精确矩形贴合，faqs-arkui-274）
  * - 系统栏背景全透明、内容色随主题背景的感知亮度推导（BT.601，R-HOME-06 同法）
  *
  * EntryAbility 拿主窗口构造；Index 观察主题变化时调 `syncSystemBarColors`。
@@ -13,7 +15,7 @@
 import { window, display } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../theme/AppTheme';
-import { SuppressWarnings, SuppressWarningsType } from '@kit.BasicServicesKit';
+import { BusinessError, SuppressWarnings, SuppressWarningsType } from '@kit.BasicServicesKit';
 
 const DOMAIN = 0x0000;
 const TAG = 'ImmersiveChrome';
@@ -26,6 +28,14 @@ export const STORAGE_KEY_SAFE_AREA_BOTTOM_VP = 'safeAreaBottomVp';
 export const STORAGE_KEY_SAFE_AREA_LEFT_VP = 'safeAreaLeftVp';
 /** AppStorage key：右侧避让宽度（vp） */
 export const STORAGE_KEY_SAFE_AREA_RIGHT_VP = 'safeAreaRightVp';
+/** AppStorage key：挖孔（灵动岛）左边（vp，距屏幕左；无挖孔 = 0） */
+export const STORAGE_KEY_CUTOUT_LEFT_VP = 'cutoutLeftVp';
+/** AppStorage key：挖孔顶边（vp，距屏幕顶；无挖孔 = 0） */
+export const STORAGE_KEY_CUTOUT_TOP_VP = 'cutoutTopVp';
+/** AppStorage key：挖孔宽（vp；无挖孔 = 0） */
+export const STORAGE_KEY_CUTOUT_WIDTH_VP = 'cutoutWidthVp';
+/** AppStorage key：挖孔高（vp；无挖孔 = 0。>0 即灵动岛机型） */
+export const STORAGE_KEY_CUTOUT_HEIGHT_VP = 'cutoutHeightVp';
 /**
  * AppStorage key：照片全屏查看期间藏主框架浮动 Tab 栏。
  * 页面内浮层（弃用 bindContentCover 后）盖不住 HdsTabs 的 barOverlap 层，
@@ -55,6 +65,54 @@ export function systemBarContentColorFor(backgroundArgb: number): string {
   // 直接比较会算成 127.999…→ 误判白字
   return Math.round(perceivedLuminance(backgroundArgb)) < 128 ? '#FFFFFF' : '#000000';
 }
+
+/**
+ * 挖孔（灵动岛）相机机身几何（全 vp，纯计算。iOS `PaperCameraView.swift` 同款逻辑）：
+ * 机身顶边只比挖孔顶高 2（框沿高过岛沿，岛不可能凸出来）、
+ * 画面顶边越过挖孔底再留 9、悬浮机身、收起态药丸整圈包住挖孔。
+ * 无挖孔机型（平板等）不构这个类，调用方走普通布局。
+ */
+export class IslandBodyGeometry {
+  /** 展开态机身顶边（距屏幕顶） */
+  readonly bodyTop: number;
+  /** 顶黑边（机身顶边 → 画面顶边） */
+  readonly topBezel: number;
+  /** 收起态药丸顶边（距屏幕顶） */
+  readonly pillTop: number;
+  /** 收起态药丸左边（距屏幕左） */
+  readonly pillLeft: number;
+  readonly pillWidth: number;
+  readonly pillHeight: number;
+
+  private constructor(bodyTop: number, topBezel: number, pillTop: number,
+    pillLeft: number, pillWidth: number, pillHeight: number) {
+    this.bodyTop = bodyTop;
+    this.topBezel = topBezel;
+    this.pillTop = pillTop;
+    this.pillLeft = pillLeft;
+    this.pillWidth = pillWidth;
+    this.pillHeight = pillHeight;
+  }
+
+  static compute(screenWidthVp: number, cutoutLeftVp: number, cutoutTopVp: number,
+    cutoutWidthVp: number, cutoutHeightVp: number): IslandBodyGeometry {
+    // 机身顶边高出挖孔顶 2（iOS frameTopNudge -2 同款）
+    const bodyTop = Math.max(0, cutoutTopVp - 2);
+    // 画面顶边越过挖孔底再留 9（iOS topBezel 余量同款）；极端扁挖孔也保底不窄于侧黑边
+    const topBezel = Math.max(cutoutTopVp + cutoutHeightVp + 9 - bodyTop, VIEWFINDER_MIN_TOP_BEZEL);
+    // 药丸整圈包住挖孔：上下左右各留 4 黑边（Apple 药丸 = 岛大小，我们挖孔小，贴身包即可）
+    const pillWidth = cutoutWidthVp + 8;
+    const pillHeight = cutoutHeightVp + 8;
+    const pillTop = Math.max(0, cutoutTopVp - 4);
+    // 挖孔贴边时药丸不出屏（左右夹取）
+    const pillLeft = Math.min(Math.max(0, cutoutLeftVp + cutoutWidthVp / 2 - pillWidth / 2),
+      Math.max(0, screenWidthVp - pillWidth));
+    return new IslandBodyGeometry(bodyTop, topBezel, pillTop, pillLeft, pillWidth, pillHeight);
+  }
+}
+
+/** 顶黑边保底（vp）：极端几何下顶黑边不允许薄过它 */
+const VIEWFINDER_MIN_TOP_BEZEL: number = 12;
 
 @SuppressWarnings({ rules: [SuppressWarningsType.SYSCAP] })
 export class ImmersiveChrome {
@@ -117,8 +175,42 @@ export class ImmersiveChrome {
       AppStorage.setOrCreate(STORAGE_KEY_SAFE_AREA_BOTTOM_VP, vpFromPx(indicatorArea.bottomRect.height, density));
       AppStorage.setOrCreate(STORAGE_KEY_SAFE_AREA_LEFT_VP, vpFromPx(systemArea.leftRect.width, density));
       AppStorage.setOrCreate(STORAGE_KEY_SAFE_AREA_RIGHT_VP, vpFromPx(systemArea.rightRect.width, density));
+      this.publishCutout(density);
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'publishAvoidAreas failed: %{public}s', JSON.stringify(err));
+    }
+  }
+
+  /**
+   * 挖孔（灵动岛）矩形发布（faqs-arkui-274 官方范式：display.getCoutoutInfo 拿精确矩形）。
+   * 挖孔不属于窗口避让区（faqs-arkui-1244），避让区高度≠挖孔位置——必须单独查。
+   * 无挖孔设备四个值全 0（调用方据此走普通布局）。
+   */
+  private publishCutout(density: number): void {
+    try {
+      display.getDefaultDisplaySync().getCutoutInfo()
+        .then((info: display.CutoutInfo): void => {
+          let left = 0;
+          let top = 0;
+          let width = 0;
+          let height = 0;
+          if (info.boundingRects.length > 0) {
+            const rect: display.Rect = info.boundingRects[0];
+            left = vpFromPx(rect.left, density);
+            top = vpFromPx(rect.top, density);
+            width = vpFromPx(rect.width, density);
+            height = vpFromPx(rect.height, density);
+          }
+          AppStorage.setOrCreate(STORAGE_KEY_CUTOUT_LEFT_VP, left);
+          AppStorage.setOrCreate(STORAGE_KEY_CUTOUT_TOP_VP, top);
+          AppStorage.setOrCreate(STORAGE_KEY_CUTOUT_WIDTH_VP, width);
+          AppStorage.setOrCreate(STORAGE_KEY_CUTOUT_HEIGHT_VP, height);
+        })
+        .catch((err: BusinessError): void => {
+          hilog.error(DOMAIN, TAG, 'getCutoutInfo rejected: %{public}d %{public}s', err.code, err.message);
+        });
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'getCutoutInfo failed: %{public}s', JSON.stringify(err));
     }
   }
 }

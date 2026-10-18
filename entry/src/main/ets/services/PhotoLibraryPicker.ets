@@ -54,17 +54,20 @@ export class PickedLibraryPhoto {
   }
 }
 
-/** `requestMovingPhoto` 的数据回调 → Promise 收口 */
-class MovingPhotoDataHandler implements photoAccessHelper.MediaAssetDataHandler<photoAccessHelper.MovingPhoto> {
-  private deliver: (movingPhoto: photoAccessHelper.MovingPhoto) => void;
-
-  constructor(deliver: (movingPhoto: photoAccessHelper.MovingPhoto) => void) {
-    this.deliver = deliver;
-  }
-
-  onDataPrepared(data: photoAccessHelper.MovingPhoto): void {
-    this.deliver(data);
-  }
+/**
+ * `requestMovingPhoto` 的数据回调 → Promise 收口。
+ * ⚠️ 实测真机 jscrash：native 侧回调 `onDataPrepared` 时接收者丢失
+ * （this === undefined），类字段写法（this.deliver）直接崩进程。
+ * 回调体必须不碰 this —— 用闭包捕获 deliver 交付。
+ */
+function movingPhotoHandlerOf(deliver: (movingPhoto: photoAccessHelper.MovingPhoto) => void):
+  photoAccessHelper.MediaAssetDataHandler<photoAccessHelper.MovingPhoto> {
+  const handler: photoAccessHelper.MediaAssetDataHandler<photoAccessHelper.MovingPhoto> = {
+    onDataPrepared: (data: photoAccessHelper.MovingPhoto): void => {
+      deliver(data);
+    }
+  };
+  return handler;
 }
 
 function readFileOrNull(path: string): ArrayBuffer | undefined {
@@ -166,7 +169,7 @@ export class PhotoLibraryPicker {
       movingPhoto = await new Promise<photoAccessHelper.MovingPhoto>(
         (resolve: (movingPhoto: photoAccessHelper.MovingPhoto) => void,
           reject: (reason: BusinessError) => void): void => {
-          const handler = new MovingPhotoDataHandler(resolve);
+          const handler = movingPhotoHandlerOf(resolve);
           const options: photoAccessHelper.RequestOptions = {
             deliveryMode: photoAccessHelper.DeliveryMode.BALANCE_MODE
           };
