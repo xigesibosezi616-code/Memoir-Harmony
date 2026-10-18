@@ -1,31 +1,34 @@
 /**
- * 富文本正文编辑器（10_BUILD_MANUAL.md 2.5/2.6）。对应 iOS `Views/Components/RichText/RichTextView.swift`。
+ * 富文本正文编辑器（10_BUILD_MANUAL.md 2.5/2.6/2.7）。对应 iOS `Views/Components/RichText/RichTextView.swift`。
  *
  * - `RichBodyController`：包一层 RichEditorController —— 文档装载 / 读回、
  *   四盏格式灯（加粗 / 斜体 / 小标题 / 荧光笔）状态、切换（选区逐 span 应用、
  *   无选区改接下来打的字）、选中菜单「荧光笔 / 擦掉荧光笔」、
- *   照片锚点注册表（2.6）
+ *   照片 / 录音锚点注册表（2.6/2.7）
  * - `RichBodyEditor`：渲染组件。`editable=false`（详情页）只读展示同一套排版
  *
  * 灯的语义与 iOS 一致：选中区间内**全部**有该格式才算亮；toggle 翻转 = 全亮→关，否则→开；
  * 小标题整段生效（getParagraphs）；无选区改 typingStyle（接下来打的字）。
  *
- * 2.6 照片锚点（Q23 退化方案：builder span 整行卡片，宽 46%）：
+ * 2.6/2.7 锚点（Q23 退化方案：builder span 整行卡片）：
  * - builder span 内容 getSpans 拿不到（官方 FAQ「使用RichEditor实现@用户名效果」），
- *   锚点 ↔ 照片块映射自维护：`photoBlocks`（id → 本体，页面当 anchored 侧表）+
- *   `photoOrder`（正文顺序）
+ *   锚点 ↔ 块本体映射自维护：`photoBlocks` / `audioBlocks`（id → 本体，页面当
+ *   anchored 侧表）+ `anchorOrder`（照片 + 录音在正文里的混合顺序）
  * - 锚点在 getSpans 里表现为无 value 的 span、占 1 个偏移（同图片 span），
- *   读回时按顺序与 photoOrder 配对；个数对不上打诊断日志（真机 spike 重点）
+ *   读回时按顺序与 anchorOrder 配对；个数对不上打诊断日志（真机 spike 重点）
  * - 退格两段式（R-RICH-05）：aboutToDelete 拦截 —— 第一次重建该卡带选中态并
- *   return false，第二次自行 deleteSpans；范围删除连文字带锚点放行，
- *   onDeleteComplete 同步注册表并通知页面清文件
+ *   return false，第二次自行 deleteSpans（照片删锚点；录音连后随换行一起删，
+ *   退到录音后那个换行也归录音管，iOS shouldChangeTextIn 同款）；
+ *   范围删除连文字带锚点放行，onDeleteComplete 同步注册表并通知页面清文件
  */
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../../../theme/AppTheme';
 import { BambooTheme } from '../../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../../theme/ThemeManager';
 import {
+  AUDIO_LIMIT_PER_ENTRY,
   ContentBlock,
+  ContentBlockType,
   PHOTO_LIMIT_PER_ENTRY
 } from '../../../models/ContentBlock';
 import {
@@ -33,10 +36,12 @@ import {
   RichEditorDocument,
   RichFormatFlags,
   RichSpan,
+  audioInsertionPlan,
   mergeAdjacentRichSpans,
   photoInsertionPlan
 } from '../../../models/RichDocument';
 import { PhotoAnchorCard } from '../photo/PhotoAnchorCard';
+import { AudioPlayerCard } from '../audio/AudioPlayerCard';
 import { RichTextAppearance, isTransparentColor } from './RichTextAppearance';
 
 const DOMAIN = 0x0000;
@@ -117,10 +122,12 @@ export class RichBodyController {
   /** 文本变化（给页面同步 bodyText / 字数） */
   onTextChange: (text: string) => void = (): void => {};
 
-  // ---- 2.6 照片锚点（builder span 注册表，官方最佳实践自维护） ----
+  // ---- 2.6/2.7 锚点（builder span 注册表，官方最佳实践自维护） ----
 
-  /** 照片块本体（id → block）。页面读它当 `blocksWithEditorDocument` 的 anchored 侧表 */
+  /** 照片块本体（id → block）。页面读它当 `blocksWithEditorDocument` 的照片侧表 */
   photoBlocks: Map<string, ContentBlock> = new Map<string, ContentBlock>();
+  /** 录音块本体（id → block），2.7 */
+  audioBlocks: Map<string, ContentBlock> = new Map<string, ContentBlock>();
   /** 正文照片被长按（打开全屏查看；轻点已让位给功能条） */
   onPhotoTap: (blockId: string) => void = (_blockId: string): void => {};
   /** 功能条：放左 / 右侧互换（blockId 定位，双击秒换边同路） */
@@ -133,17 +140,22 @@ export class RichBodyController {
   onPhotoDelete: (blockId: string) => void = (_blockId: string): void => {};
   /** 照片被移出正文（菜单删除 / 两段式退格 / 范围删除）——页面清落盘文件 */
   onPhotoRemoved: (blockId: string) => void = (_blockId: string): void => {};
+  /** 录音被移出正文（卡片 ✕ / 两段式退格 / 范围删除）——页面清落盘文件 */
+  onAudioRemoved: (blockId: string) => void = (_blockId: string): void => {};
   /**
-   * 锚点卡内容工厂（组件 aboutToAppear 注入 —— addBuilderSpan 的 builder
+   * 照片锚点卡内容工厂（组件 aboutToAppear 注入 —— addBuilderSpan 的 builder
    * 必须在组件上下文里建，controller 是纯类拿不到 @Builder）
    */
   anchorCardBuilderFactory:
     ((block: ContentBlock, armed: boolean) => CustomBuilder) | undefined = undefined;
+  /** 录音锚点卡内容工厂（同上，2.7） */
+  audioCardBuilderFactory:
+    ((block: ContentBlock, armed: boolean) => CustomBuilder) | undefined = undefined;
 
-  /** 正文里的照片按出现顺序排的 id（读回时与 getSpans 的无 value span 顺序配对） */
-  private photoOrder: string[] = [];
-  /** 第一次退格选中的照片（R-RICH-05 两段式） */
-  private armedPhotoId: string | undefined = undefined;
+  /** 正文里的锚点（照片 + 录音）按出现顺序排的 id（读回时与 getSpans 的无 value span 顺序配对） */
+  private anchorOrder: string[] = [];
+  /** 第一次退格选中的锚点（R-RICH-05 两段式，照片 / 录音共用） */
+  private armedAnchorId: string | undefined = undefined;
   /** 自发的 deleteSpans 不拦（防两段式 / 更新重插时递归触发 aboutToDelete） */
   private selfDeleting: boolean = false;
   /** 范围删除放行后、等 onDeleteComplete 同步出表的锚点 id */
@@ -159,25 +171,43 @@ export class RichBodyController {
 
   /** 正文照片张数（上限 5，05 §3.6） */
   photoCount(): number {
-    return this.photoOrder.length;
+    return this.photoBlocks.size;
+  }
+
+  /** 正文录音段数（上限 3，R-ENTRY-08） */
+  audioCount(): number {
+    return this.audioBlocks.size;
+  }
+
+  /** 全部锚点本体（照片 + 录音合并侧表，`blocksWithEditorDocument` 拆块用） */
+  anchoredSideTable(): Map<string, ContentBlock> {
+    const merged = new Map<string, ContentBlock>();
+    this.photoBlocks.forEach((block: ContentBlock, id: string): void => {
+      merged.set(id, block);
+    });
+    this.audioBlocks.forEach((block: ContentBlock, id: string): void => {
+      merged.set(id, block);
+    });
+    return merged;
   }
 
   /**
-   * 装载文档：清空 → 逐 span 注入（照片锚点按侧表建 builder span）→ 重置接下来打的字。
+   * 装载文档：清空 → 逐 span 注入（照片 / 录音锚点按侧表建 builder span）→ 重置接下来打的字。
    * `anchored`：照片 / 录音 / 痕迹块本体（id → block）；侧表里没有的锚点不进正文。
    */
   loadDocument(doc: RichEditorDocument,
     anchored: Map<string, ContentBlock> = new Map<string, ContentBlock>()): void {
     this.editor.deleteSpans({});
     this.photoBlocks.clear();
-    this.photoOrder = [];
-    this.armedPhotoId = undefined;
+    this.audioBlocks.clear();
+    this.anchorOrder = [];
+    this.armedAnchorId = undefined;
     this.pendingRemovedIds = [];
     for (const span of doc.spans) {
       if (span.anchorBlockId !== undefined) {
         const block = anchored.get(span.anchorBlockId);
         if (block !== undefined) {
-          this.appendPhotoAnchor(block);
+          this.appendAnchor(block);
         }
         continue; // 找不到本体的锚点不画（iOS 同款）
       }
@@ -188,8 +218,8 @@ export class RichBodyController {
   }
 
   /**
-   * 读回文档。照片锚点 = getSpans 里的无 value span（builder span 内容拿不到，
-   * 官方 FAQ 配方：按出现顺序与 photoOrder 配对），个数对不上打诊断日志。
+   * 读回文档。照片 / 录音锚点 = getSpans 里的无 value span（builder span 内容拿不到，
+   * 官方 FAQ 配方：按出现顺序与 anchorOrder 配对），个数对不上打诊断日志。
    */
   currentDocument(): RichEditorDocument {
     const doc = new RichEditorDocument();
@@ -199,9 +229,9 @@ export class RichBodyController {
       // getSpans 返回 Image|Text 联合：锚点 span 没有 value / textStyle（运行时 undefined）
       const span = raw as RichEditorTextSpanResult;
       if (span.value === undefined || span.textStyle === undefined) {
-        if (anchorCursor < this.photoOrder.length) {
-          const blockId = this.photoOrder[anchorCursor];
-          const block = this.photoBlocks.get(blockId);
+        if (anchorCursor < this.anchorOrder.length) {
+          const blockId = this.anchorOrder[anchorCursor];
+          const block = this.photoBlocks.get(blockId) ?? this.audioBlocks.get(blockId);
           if (block !== undefined) {
             spans.push(new RichSpan(RICH_ANCHOR, new RichFormatFlags(), blockId, block.type));
           } else {
@@ -215,9 +245,9 @@ export class RichBodyController {
       }
       spans.push(new RichSpan(span.value, flagsFromTextStyle(this.appearance, span.textStyle)));
     }
-    if (anchorCursor !== this.photoOrder.length) {
+    if (anchorCursor !== this.anchorOrder.length) {
       hilog.warn(DOMAIN, TAG, 'anchor/registry mismatch: spans=%{public}d registry=%{public}d',
-        anchorCursor, this.photoOrder.length);
+        anchorCursor, this.anchorOrder.length);
     }
     doc.spans = mergeAdjacentRichSpans(spans);
     let text = '';
@@ -235,7 +265,7 @@ export class RichBodyController {
    * 返回 false = 超上限 5 张或组件还没注入内容工厂（兜底，页面正常不该走到）。
    */
   insertPhoto(block: ContentBlock): boolean {
-    if (this.photoOrder.length >= PHOTO_LIMIT_PER_ENTRY ||
+    if (this.photoBlocks.size >= PHOTO_LIMIT_PER_ENTRY ||
       this.anchorCardBuilderFactory === undefined) {
       return false;
     }
@@ -250,7 +280,7 @@ export class RichBodyController {
       anchorOffset += 1;
     }
     this.photoBlocks.set(block.id, block);
-    this.photoOrder.splice(this.anchorIndexAt(anchorOffset), 0, block.id);
+    this.anchorOrder.splice(this.anchorIndexAt(anchorOffset), 0, block.id);
     this.editor.addBuilderSpan(this.anchorCardBuilderFactory(block, false), { offset: anchorOffset });
     this.editor.setCaretOffset(plan.caretAfter);
     hilog.info(DOMAIN, TAG, 'insertPhoto id=%{public}s file=%{public}s anchorOffset=%{public}d',
@@ -260,9 +290,44 @@ export class RichBodyController {
     return true;
   }
 
+  /**
+   * 在光标所在段下面插录音（R-RICH-04 `audioInsertionPlan`：锚点 + 后随换行自成一段）。
+   * 返回 false = 超上限 3 段（R-ENTRY-08）或组件还没注入内容工厂。
+   */
+  insertAudio(block: ContentBlock): boolean {
+    if (this.audioBlocks.size >= AUDIO_LIMIT_PER_ENTRY ||
+      this.audioCardBuilderFactory === undefined) {
+      return false;
+    }
+    const plan = audioInsertionPlan(this.liveText(), this.editor.getCaretOffset());
+    let anchorOffset = plan.insertOffset;
+    if (plan.needsNewlineBefore) {
+      // 录在文末且最后一段没换行：先补一个换行隔开这段话
+      this.editor.addTextSpan('\n', {
+        offset: plan.insertOffset,
+        style: this.appearance.baseTextStyle()
+      });
+      anchorOffset += 1;
+    }
+    this.audioBlocks.set(block.id, block);
+    this.anchorOrder.splice(this.anchorIndexAt(anchorOffset), 0, block.id);
+    this.editor.addBuilderSpan(this.audioCardBuilderFactory(block, false), { offset: anchorOffset });
+    // 后随换行：录音自成一段（iOS AudioAnchorAttachment 同款）
+    this.editor.addTextSpan('\n', {
+      offset: anchorOffset + 1,
+      style: this.appearance.baseTextStyle()
+    });
+    this.editor.setCaretOffset(plan.caretAfter);
+    hilog.info(DOMAIN, TAG, 'insertAudio id=%{public}s file=%{public}s anchorOffset=%{public}d',
+      block.id, block.audioFilename ?? 'nil', anchorOffset);
+    this.refreshFlags(); // 工具条 mic 键置灰镜像靠 onFlagsChange
+    this.notifyTextChange();
+    return true;
+  }
+
   /** 照片块更新（换相纸 / 换边 / 设为封面）：替换注册表本体，同偏移删旧卡重插新卡 */
   updatePhoto(block: ContentBlock): void {
-    const index = this.photoOrder.indexOf(block.id);
+    const index = this.anchorOrder.indexOf(block.id);
     if (index < 0 || this.anchorCardBuilderFactory === undefined) {
       return;
     }
@@ -274,13 +339,13 @@ export class RichBodyController {
     this.photoBlocks.set(block.id, block);
     this.deleteRangeSelf(offsets[index], offsets[index] + 1);
     this.editor.addBuilderSpan(this.anchorCardBuilderFactory(block, false), { offset: offsets[index] });
-    this.armedPhotoId = undefined;
+    this.armedAnchorId = undefined;
     this.refreshFlags();
   }
 
   /** 从正文删除指定照片（全屏菜单「删除照片」），出表 + 通知页面清文件 */
   deletePhoto(blockId: string): void {
-    const index = this.photoOrder.indexOf(blockId);
+    const index = this.anchorOrder.indexOf(blockId);
     if (index < 0) {
       return;
     }
@@ -289,13 +354,25 @@ export class RichBodyController {
       hilog.warn(DOMAIN, TAG, 'deletePhoto offset missing, id=%{public}s', blockId);
       return;
     }
-    this.photoOrder.splice(index, 1);
-    this.photoBlocks.delete(blockId);
-    this.deleteRangeSelf(offsets[index], offsets[index] + 1);
-    this.armedPhotoId = undefined;
-    this.onPhotoRemoved(blockId);
-    this.refreshFlags();
-    this.notifyTextChange();
+    this.removeAnchorAt(index, offsets[index] + 1);
+  }
+
+  /**
+   * 从正文删除指定录音（卡片 ✕ / 两段式退格第二下），出表 + 通知页面清文件。
+   * 连锚点后随的换行一起删（iOS `removeAudio` 同款，录音自成一段）。
+   */
+  deleteAudio(blockId: string): void {
+    const index = this.anchorOrder.indexOf(blockId);
+    if (index < 0) {
+      return;
+    }
+    const offsets = this.anchorOffsets();
+    if (index >= offsets.length) {
+      hilog.warn(DOMAIN, TAG, 'deleteAudio offset missing, id=%{public}s', blockId);
+      return;
+    }
+    const end = this.audioDeleteEnd(this.liveText(), offsets[index]);
+    this.removeAnchorAt(index, end);
   }
 
   /** 正文照片被长按（锚点卡 → 组件注入的 builder → 这里转给页面开全屏） */
@@ -323,6 +400,8 @@ export class RichBodyController {
   /**
    * 退格 / 删除拦截（R-RICH-05 两段式）：
    * - 删除范围恰好盖住一个锚点：第一次选中（重建该卡带高亮）并拦下，第二次才删
+   * - 退到录音后随的换行也归录音管（iOS `shouldChangeTextIn` 同款）：进两段式，
+   *   第二次连锚点带换行删 2 字符
    * - 范围删除连文字带锚点：放行（返回 true），onDeleteComplete 里同步注册表
    * - 自发的 deleteSpans（两段式第二下 / 更新重插）不进这
    */
@@ -330,8 +409,15 @@ export class RichBodyController {
     if (this.selfDeleting) {
       return true;
     }
-    const start = value.direction === RichEditorDeleteDirection.BACKWARD
+    const start0 = value.direction === RichEditorDeleteDirection.BACKWARD
       ? value.offset - value.length : value.offset;
+    hilog.info(DOMAIN, TAG, 'delete req dir=%{public}d offset=%{public}d len=%{public}d calcStart=%{public}d armed=%{public}s',
+      value.direction, value.offset, value.length, start0, this.armedAnchorId ?? '-');
+    // ARM 后 caret 可能停在武装 span 起点（offset=0）：此时编辑器报的是
+    // 「删除 [0, len)」而非「caret-len」，BACKWARD 差值下溢为负会导致 hits
+    // 落空、放行裸删 span 绕过出表 —— 夹到 0 与编辑器实际删除区间对齐
+    const start = value.direction === RichEditorDeleteDirection.BACKWARD
+      ? Math.max(0, value.offset - value.length) : value.offset;
     const end = start + value.length;
     const offsets = this.anchorOffsets();
     const hits: number[] = [];
@@ -341,27 +427,41 @@ export class RichBodyController {
       }
     }
     if (hits.length === 0) {
+      // 退格删的恰好是录音锚点后随的换行：整个录音块进两段式
+      if (value.direction === RichEditorDeleteDirection.BACKWARD && value.length === 1) {
+        for (let i = 0; i < offsets.length; i++) {
+          if (start === offsets[i] + 1 && this.audioBlocks.has(this.anchorOrder[i])) {
+            const text = this.liveText();
+            if (start < text.length && text.charCodeAt(start) === 0x0A) {
+              const blockId = this.anchorOrder[i];
+              if (this.armedAnchorId !== blockId) {
+                this.armAnchorAt(i, offsets[i]);
+                return false; // 第一次：选中，拦下
+              }
+              this.removeAnchorAt(i, this.audioDeleteEnd(text, offsets[i]));
+              return false; // 第二次：连锚点带换行删
+            }
+          }
+        }
+      }
       return true; // 纯文字删除：照常
     }
     if (hits.length === 1 && start === offsets[hits[0]] && end === offsets[hits[0]] + 1) {
-      const blockId = this.photoOrder[hits[0]];
-      if (this.armedPhotoId !== blockId) {
-        this.armPhotoAt(hits[0], blockId, offsets[hits[0]]);
+      const blockId = this.anchorOrder[hits[0]];
+      const isAudio = this.audioBlocks.has(blockId);
+      if (this.armedAnchorId !== blockId) {
+        this.armAnchorAt(hits[0], offsets[hits[0]]);
         return false; // 第一次：选中，拦下
       }
-      // 第二次：删
-      this.photoOrder.splice(hits[0], 1);
-      this.photoBlocks.delete(blockId);
-      this.deleteRangeSelf(offsets[hits[0]], offsets[hits[0]] + 1);
-      this.armedPhotoId = undefined;
-      this.onPhotoRemoved(blockId);
-      this.refreshFlags();
-      this.notifyTextChange();
+      // 第二次：删（录音连后随换行一起）
+      const text = this.liveText();
+      this.removeAnchorAt(hits[0], isAudio
+        ? this.audioDeleteEnd(text, offsets[hits[0]]) : offsets[hits[0]] + 1);
       return false;
     }
     // 范围删除含锚点：放行，完成回调里按 pending 列表出表
     for (const hit of hits) {
-      this.pendingRemovedIds.push(this.photoOrder[hit]);
+      this.pendingRemovedIds.push(this.anchorOrder[hit]);
     }
     return true;
   }
@@ -372,29 +472,67 @@ export class RichBodyController {
       return;
     }
     for (const blockId of this.pendingRemovedIds) {
-      const index = this.photoOrder.indexOf(blockId);
+      const index = this.anchorOrder.indexOf(blockId);
       if (index >= 0) {
-        this.photoOrder.splice(index, 1);
+        this.anchorOrder.splice(index, 1);
       }
-      this.photoBlocks.delete(blockId);
-      this.onPhotoRemoved(blockId);
+      if (this.audioBlocks.has(blockId)) {
+        this.audioBlocks.delete(blockId);
+        this.onAudioRemoved(blockId);
+      } else {
+        this.photoBlocks.delete(blockId);
+        this.onPhotoRemoved(blockId);
+      }
     }
     this.pendingRemovedIds = [];
-    this.armedPhotoId = undefined;
+    this.armedAnchorId = undefined;
     this.refreshFlags();
     this.notifyTextChange();
   }
 
   /** 第一次退格的选中态：同偏移重建该卡（armed 高亮），光标落在卡后（下一次退格再删它） */
-  private armPhotoAt(index: number, blockId: string, offset: number): void {
-    const block = this.photoBlocks.get(blockId);
-    if (block === undefined || this.anchorCardBuilderFactory === undefined) {
+  private armAnchorAt(index: number, offset: number): void {
+    const blockId = this.anchorOrder[index];
+    hilog.info(DOMAIN, TAG, 'ARM index=%{public}d offset=%{public}d id=%{public}s', index, offset, blockId);
+    const block = this.photoBlocks.get(blockId) ?? this.audioBlocks.get(blockId);
+    const factory = this.audioBlocks.has(blockId)
+      ? this.audioCardBuilderFactory : this.anchorCardBuilderFactory;
+    if (block === undefined || factory === undefined) {
       return;
     }
-    this.armedPhotoId = blockId;
+    this.armedAnchorId = blockId;
     this.deleteRangeSelf(offset, offset + 1);
-    this.editor.addBuilderSpan(this.anchorCardBuilderFactory(block, true), { offset: offset });
-    this.editor.setCaretOffset(offset + 1);
+    this.editor.addBuilderSpan(factory(block, true), { offset: offset });
+  }
+
+  /** 录音的删除终点：锚点 + 后随换行（有就）一起删 */
+  private audioDeleteEnd(text: string, anchorOffset: number): number {
+    return text.length > anchorOffset + 1 && text.charCodeAt(anchorOffset + 1) === 0x0A
+      ? anchorOffset + 2 : anchorOffset + 1;
+  }
+
+  /** 出表 + 定点删除 + 通知页面（照片 / 录音共用；end 是删除终点偏移） */
+  private removeAnchorAt(index: number, end: number): void {
+    const blockId = this.anchorOrder[index];
+    const start = this.anchorOffsets()[index];
+    hilog.info(DOMAIN, TAG, 'REMOVE index=%{public}d start=%{public}d end=%{public}d id=%{public}s',
+      index, start, end, blockId);
+    const isAudio = this.audioBlocks.has(blockId);
+    this.anchorOrder.splice(index, 1);
+    if (isAudio) {
+      this.audioBlocks.delete(blockId);
+    } else {
+      this.photoBlocks.delete(blockId);
+    }
+    this.deleteRangeSelf(start, end);
+    this.armedAnchorId = undefined;
+    if (isAudio) {
+      this.onAudioRemoved(blockId);
+    } else {
+      this.onPhotoRemoved(blockId);
+    }
+    this.refreshFlags();
+    this.notifyTextChange();
   }
 
   /** 活文本：照片锚点各占 1 个 U+FFFC（与编辑器偏移一一对齐，photoInsertionPlan 用） */
@@ -441,15 +579,21 @@ export class RichBodyController {
     return index;
   }
 
-  /** 文档装载路径：锚点 builder span 追加到当前末尾（spans 本来就是顺序装的） */
-  private appendPhotoAnchor(block: ContentBlock): void {
-    if (this.anchorCardBuilderFactory === undefined) {
-      hilog.warn(DOMAIN, TAG, 'anchorCardBuilderFactory missing, photo %{public}s dropped', block.id);
+  /** 文档装载路径：锚点 builder span 追加到当前末尾（照片 / 录音按块类型分发） */
+  private appendAnchor(block: ContentBlock): void {
+    const isAudio = block.type === ContentBlockType.Audio;
+    const factory = isAudio ? this.audioCardBuilderFactory : this.anchorCardBuilderFactory;
+    if (factory === undefined) {
+      hilog.warn(DOMAIN, TAG, 'anchor card factory missing, block %{public}s dropped', block.id);
       return;
     }
-    this.photoBlocks.set(block.id, block);
-    this.photoOrder.push(block.id);
-    this.editor.addBuilderSpan(this.anchorCardBuilderFactory(block, false));
+    if (isAudio) {
+      this.audioBlocks.set(block.id, block);
+    } else {
+      this.photoBlocks.set(block.id, block);
+    }
+    this.anchorOrder.push(block.id);
+    this.editor.addBuilderSpan(factory(block, false));
   }
 
   /** 自发的定点删除（不进 aboutToDelete 拦截） */
@@ -704,13 +848,31 @@ export struct RichBodyEditor {
   aboutToAppear(): void {
     this.controller.setAppearance(RichTextAppearance.forTheme(this.theme));
     // 锚点卡内容工厂：builder 闭包必须在组件上下文里建（addBuilderSpan 官方配方），
-    // controller 是纯类，拿不到 @Builder —— 页面侧的插照片 / 装载都经它取内容
+    // controller 是纯类，拿不到 @Builder —— 页面侧的插照片 / 插录音 / 装载都经它取内容
     this.controller.anchorCardBuilderFactory =
       (block: ContentBlock, armed: boolean): CustomBuilder => {
         return (): void => {
           this.PhotoAnchorCardBuilder(block, armed);
         };
       };
+    this.controller.audioCardBuilderFactory =
+      (block: ContentBlock, armed: boolean): CustomBuilder => {
+        return (): void => {
+          this.AudioAnchorCardBuilder(block, armed);
+        };
+      };
+  }
+
+  /** builder span 内容：一张录音锚点卡（编辑态 ✕ 可删；只读态（详情页）纯试听卡） */
+  @Builder
+  AudioAnchorCardBuilder(block: ContentBlock, armed: boolean) {
+    AudioPlayerCard({
+      block: block,
+      armed: armed,
+      onDelete: this.editable ? (blockId: string): void => {
+        this.controller.deleteAudio(blockId);
+      } : undefined
+    })
   }
 
   /** builder span 内容：一张相纸锚点卡（编辑态：轻点弹功能条 / 双击秒换边 /

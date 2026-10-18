@@ -2711,6 +2711,22 @@
     {
       "name": "s_9b5c1d3f",
       "value": "Right"
+    },
+    {
+      "name": "s_7126a0f54e",
+      "value": "Cannot access the microphone"
+    },
+    {
+      "name": "s_094be81a60",
+      "value": "Could not start recording"
+    },
+    {
+      "name": "s_e4c4ff3b29",
+      "value": "Could not play the recording"
+    },
+    {
+      "name": "s_966b6def6c",
+      "value": "memoir needs the microphone to record voice notes for your journal. Recordings are kept only on your device."
     }
   ]
 }

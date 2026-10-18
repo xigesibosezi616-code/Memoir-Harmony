@@ -2711,6 +2711,22 @@
     {
       "name": "s_9b5c1d3f",
       "value": "Derecha"
+    },
+    {
+      "name": "s_7126a0f54e",
+      "value": "No se puede acceder al micrófono"
+    },
+    {
+      "name": "s_094be81a60",
+      "value": "No se pudo iniciar la grabación"
+    },
+    {
+      "name": "s_e4c4ff3b29",
+      "value": "No se pudo reproducir la grabación"
+    },
+    {
+      "name": "s_966b6def6c",
+      "value": "Añoranza necesita el micrófono para grabar notas de voz en tu diario. Las grabaciones se guardan solo en tu dispositivo."
     }
   ]
 }

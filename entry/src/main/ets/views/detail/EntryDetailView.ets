@@ -14,11 +14,15 @@
  *   备忘录式——绕排连环平台缺陷后产品拍板，见 09 Q23）：照片整行锚点卡
  *   （纯预览，轻点/长按开全屏）+ 文字上下独立段；加粗 / 斜体 / 小标题 /
  *   荧光笔原样渲染（素笺 17fp）；不响应触摸，父级 Scroll 可滚
+ * - 照片大图（全屏）带「⋯」编辑菜单：移到左/右侧 / 更换相纸样式 / 删除照片
+ *   （iOS 详情页同款，无「设为封面」）；编辑直接改已保存日记并落库
+ *   （唯一写入口 setContentBlocks，R-RICH-10）
  * - 右上编辑（push 2.4 编辑页）+ 删除（官方 AlertDialog 确认 + 先媒体后库记录，
  *   R-DATA-07）；从编辑页返回由 Index.onPageShow 广播的 reload tick 驱动重查
  */
 import { relationalStore } from '@kit.ArkData';
 import { common } from '@kit.AbilityKit';
+import { image } from '@kit.ImageKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
@@ -41,14 +45,23 @@ import {
   dayOnes
 } from '../../services/AppDateFormatters';
 import { JournalEntry } from '../../models/JournalEntry';
-import { ContentBlock, ContentBlockType } from '../../models/ContentBlock';
+import {
+  ContentBlock,
+  ContentBlockType,
+  PaperStyle,
+  PhotoPosition,
+  blocksWithLooseAudio
+} from '../../models/ContentBlock';
 import { isDefaultMoodKey } from '../../models/Mood';
+import { generateUuid } from '../../models/Uuid';
 import { RichBodyController, RichBodyEditor } from '../components/richtext/RichBodyEditor';
 import {
   anchoredBlocksOf,
   editorDocumentFromBlocks
 } from '../../models/RichDocument';
 import { CircleIconButton } from '../compose/CircleIconButton';
+import { PhotoPaperIO } from '../../services/PhotoPaperIO';
+import { PaperStylePickerSheet } from '../components/photo/PaperStylePickerSheet';
 import { PhotoFullScreenCover } from '../components/photo/PhotoFullScreenCover';
 import { MoodBadge, moodLabelRes } from '../components/MoodBadge';
 import { TagPill } from '../components/TagPill';
@@ -79,9 +92,14 @@ export struct EntryDetailView {
   reloadTick: number = 0;
 
   @State entry: JournalEntry | undefined = undefined;
-  // ---- 2.6 照片全屏预览（R-ENTRY-13：详情页只看，不给编辑菜单） ----
+  // ---- 2.6 照片全屏（大图「⋯」编辑菜单：换边 / 换相纸 / 删除 —— iOS 详情页同款，
+  // 无「设为封面」；编辑直接改已保存的日记并落库） ----
   @State @Watch('onPhotoFullscreenChanged') showPhotoFullscreen: boolean = false;
   @State fullscreenPhoto: ContentBlock | undefined = undefined;
+  // 相纸选择（大图「更换相纸样式」用）：半高 sheet
+  @State showPaperSheet: boolean = false;
+  @State paperSheetPixelMap: image.PixelMap | undefined = undefined;
+  private restylePhotoId: string | undefined = undefined;
 
   /** 正文只读控制器（2.5 RichBodyEditor editable=false，回退备忘录式） */
   private bodyController: RichBodyController = new RichBodyController();
@@ -98,13 +116,16 @@ export struct EntryDetailView {
   /**
    * 正文装载：entry 就绪 + 编辑器 onReady 双信号；从编辑页返回重查时
    * entry 整篇替换，这里跟着重装（loadDocument 全量重置，幂等）。
+   * 散在 audioURLs 里没进过正文的录音补成块挂末尾（R-RICH-09，只读展示层
+   * 的兜底，不改库；写回只在编辑页保存时发生）。
    */
   private loadBodyIntoEditor(): void {
     const entry = this.entry;
     if (this.bodyEditorReady && entry !== undefined) {
+      const blocks = blocksWithLooseAudio(entry.contentBlocks, entry.audioURLs, generateUuid);
       this.bodyController.loadDocument(
-        editorDocumentFromBlocks(entry.contentBlocks),
-        anchoredBlocksOf(entry.contentBlocks));
+        editorDocumentFromBlocks(blocks),
+        anchoredBlocksOf(blocks));
     }
   }
 
@@ -258,8 +279,10 @@ export struct EntryDetailView {
                 .backgroundColor(0x80D4C9B8)
 
               // 正文（富文本只读，2.5 RichBodyEditor：备忘录式整行照片卡 +
-              // 文字上下独立段；照片纯预览轻点开全屏；紧接全宽分割线）
-              if (this.entry.content.length > 0 || this.entry.photoCount > 0) {
+              // 文字上下独立段；照片纯预览轻点开全屏；紧接全宽分割线）。
+              // 纯录音日记（无文字无照片）也要挂编辑器：录音卡在编辑器里渲染
+              if (this.entry.content.length > 0 || this.entry.photoCount > 0 ||
+                this.entry.audioURLs.length > 0) {
                 RichBodyEditor({
                   controller: this.bodyController,
                   editable: false,
@@ -332,8 +355,10 @@ export struct EntryDetailView {
                 .color(this.theme.border)
 
               // 正文（富文本只读，2.5 RichBodyEditor：备忘录式整行照片卡 +
-              // 文字上下独立段；照片纯预览轻点开全屏）
-              if (this.entry.content.length > 0 || this.entry.photoCount > 0) {
+              // 文字上下独立段；照片纯预览轻点开全屏）。
+              // 纯录音日记（无文字无照片）也要挂编辑器：录音卡在编辑器里渲染
+              if (this.entry.content.length > 0 || this.entry.photoCount > 0 ||
+                this.entry.audioURLs.length > 0) {
                 RichBodyEditor({
                   controller: this.bodyController,
                   editable: false,
@@ -370,6 +395,15 @@ export struct EntryDetailView {
       }
       .width('100%')
       .height('100%')
+      // 相纸选择（大图「更换相纸样式」）：半高 sheet，iOS medium 同款
+      .bindSheet(this.showPaperSheet, this.PaperSheetBuilder(), {
+        detents: [SheetSize.MEDIUM],
+        showClose: false,
+        onDisappear: (): void => {
+          this.paperSheetPixelMap = undefined;
+          this.restylePhotoId = undefined;
+        }
+      })
     }
     // 112vp 大标题区（NavDestinationCustomTitle；builder 必须内联在调用点传
     // this 引用——捕获进字段会丢掉 @Builder 作用域装置，渲染时崩溃
@@ -410,7 +444,7 @@ export struct EntryDetailView {
     })
   }
 
-  /** 照片全屏预览内容（详情页只看：编辑回调全不给，⋯ 菜单不显示） */
+  /** 照片全屏内容：大图「⋯」编辑菜单（换边 / 换相纸 / 删除），iOS 详情页同款 */
   @Builder
   PhotoFullscreenBuilder() {
     if (this.fullscreenPhoto !== undefined) {
@@ -419,8 +453,154 @@ export struct EntryDetailView {
         onDismiss: (): void => {
           this.showPhotoFullscreen = false;
           this.fullscreenPhoto = undefined;
+        },
+        onTogglePosition: (): void => {
+          this.toggleFullscreenPosition();
+        },
+        onRestyle: (): void => {
+          this.startFullscreenRestyle();
+        },
+        onDelete: (): void => {
+          this.deleteFullscreenPhoto();
         }
       })
+    }
+  }
+
+  /** 相纸选择 sheet 内容（大图「更换相纸样式」专用：无选边分段，iOS openStyleChange 同款） */
+  @Builder
+  PaperSheetBuilder() {
+    if (this.paperSheetPixelMap !== undefined) {
+      PaperStylePickerSheet({
+        pixelMap: this.paperSheetPixelMap,
+        showPositionPicker: false,
+        onSelect: (style: PaperStyle, _position: PhotoPosition): void => {
+          this.applyFullscreenRestyle(style);
+        },
+        onCancel: (): void => {
+          this.showPaperSheet = false;
+        }
+      })
+    }
+  }
+
+  // ---- 大图「⋯」动作（iOS EntryDetailView.togglePhotoPosition / openStyleChange /
+  //      applyStyleChange / deletePhoto 同款；落库走唯一写入口 R-RICH-10） ----
+
+  /** 在当前正文块里找这张照片（contentBlocks 每次解码都是新副本，动作前后都用它） */
+  private indexOfPhotoBlock(blocks: ContentBlock[], blockId: string): number {
+    for (let i = 0; i < blocks.length; i++) {
+      if (blocks[i].id === blockId && blocks[i].type === ContentBlockType.Photo) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+  /** 照片编辑落库 + 正文重装（失败记日志留在页内，本地库更新几乎不失败） */
+  private async persistPhotoBlocks(blocks: ContentBlock[]): Promise<void> {
+    const entry = this.entry;
+    const store = this.store;
+    if (entry === undefined || store === undefined) {
+      return;
+    }
+    entry.setContentBlocks(blocks, Date.now());
+    try {
+      await EntryRepository.updateEntry(store, entry);
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'persist photo edit failed: %{public}s', JSON.stringify(err));
+      return;
+    }
+    this.loadBodyIntoEditor();
+  }
+
+  /** 大图「移到左/右侧」：翻 position → 落库 → 正文重装 */
+  private async toggleFullscreenPosition(): Promise<void> {
+    const block = this.fullscreenPhoto;
+    const entry = this.entry;
+    if (block === undefined || entry === undefined) {
+      return;
+    }
+    const blocks = entry.contentBlocks;
+    const idx = this.indexOfPhotoBlock(blocks, block.id);
+    if (idx < 0) {
+      return;
+    }
+    blocks[idx].position = blocks[idx].position === PhotoPosition.Left ?
+      PhotoPosition.Right : PhotoPosition.Left;
+    await this.persistPhotoBlocks(blocks);
+  }
+
+  /** 大图「更换相纸样式」：加载缩略图重开相纸 sheet */
+  private async startFullscreenRestyle(): Promise<void> {
+    const block = this.fullscreenPhoto;
+    if (block === undefined) {
+      return;
+    }
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const pixelMap = await PhotoPaperIO.forFilesDir(context.filesDir).loadImage(block.photoFilename);
+    if (pixelMap === undefined) {
+      hilog.warn(DOMAIN, TAG, 'restyle load failed %{public}s', block.photoFilename);
+      return;
+    }
+    this.restylePhotoId = block.id;
+    this.paperSheetPixelMap = pixelMap;
+    this.showPaperSheet = true;
+  }
+
+  /** 相纸选定：改 paperStyle → 落库 → 正文重装（文件不动） */
+  private async applyFullscreenRestyle(style: PaperStyle): Promise<void> {
+    this.showPaperSheet = false;
+    const entry = this.entry;
+    const id = this.restylePhotoId;
+    this.restylePhotoId = undefined;
+    if (entry === undefined || id === undefined) {
+      return;
+    }
+    const blocks = entry.contentBlocks;
+    const idx = this.indexOfPhotoBlock(blocks, id);
+    if (idx < 0) {
+      return;
+    }
+    blocks[idx].paperStyle = style;
+    await this.persistPhotoBlocks(blocks);
+  }
+
+  /** 大图「删除照片」（组件内已过确认弹窗）：先出块落库，成功再删文件 */
+  private async deleteFullscreenPhoto(): Promise<void> {
+    const block = this.fullscreenPhoto;
+    const entry = this.entry;
+    if (block === undefined || entry === undefined) {
+      return;
+    }
+    const blocks = entry.contentBlocks;
+    const idx = this.indexOfPhotoBlock(blocks, block.id);
+    if (idx < 0) {
+      return;
+    }
+    const target = blocks[idx];
+    const names: string[] = [];
+    if (target.photoFilename !== undefined) {
+      names.push(target.photoFilename);
+    }
+    if (target.livePhotoVideoFilename !== undefined) {
+      names.push(target.livePhotoVideoFilename);
+    }
+    if (target.livePhotoStillFilename !== undefined) {
+      names.push(target.livePhotoStillFilename);
+    }
+    blocks.splice(idx, 1);
+    await this.persistPhotoBlocks(blocks);
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const io = PhotoPaperIO.forFilesDir(context.filesDir);
+    for (const name of names) {
+      io.deleteImage(name);
     }
   }
 

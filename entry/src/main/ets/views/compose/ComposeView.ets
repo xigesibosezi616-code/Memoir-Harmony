@@ -12,11 +12,12 @@
  * - 正文富文本（2.5 RichBodyEditor，2026-10-18 回退备忘录式——绕排连环平台
  *   缺陷后产品拍板，见 09 Q23）：照片整行锚点卡 + 文字上下独立段；底部四灯
  *   工具条（加粗/斜体/小标题/荧光笔）+ 照片键（≤5 张，R-RICH-03/05）
- * - v1 不做：录音 / 天气地点（2.7~2.10 各自的卡片）
+ *   + 录音键（≤3 段，2.7：权限 → 录音面板 → 光标所在段下面插录音卡）
+ * - v1 不做：天气地点（2.8+ 各自的卡片）
  */
 import { relationalStore } from '@kit.ArkData';
 import { KeyboardAvoidMode } from '@kit.ArkUI';
-import { common } from '@kit.AbilityKit';
+import { abilityAccessCtrl, common } from '@kit.AbilityKit';
 import { image } from '@kit.ImageKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../../theme/AppTheme';
@@ -56,8 +57,10 @@ import {
 } from '../../models/RichDocument';
 import { PhotoLibraryPicker } from '../../services/PhotoLibraryPicker';
 import { PhotoPaperIO } from '../../services/PhotoPaperIO';
+import { deleteAudioFile } from '../../services/AudioRecorderManager';
 import { PaperStylePickerSheet } from '../components/photo/PaperStylePickerSheet';
 import { PhotoFullScreenCover } from '../components/photo/PhotoFullScreenCover';
+import { VoiceRecordingSheet } from '../components/audio/VoiceRecordingSheet';
 import { MoodTag } from '../../models/Mood';
 import { Notebook, cleanedName, nameKey, nextSortOrder } from '../../models/Notebook';
 import { DraftEntry } from '../../models/Draft';
@@ -108,6 +111,17 @@ export struct ComposeView {
   private insertedMediaNames: Set<string> = new Set<string>();
   /** 草稿带进来的照片文件（删掉时清没被新草稿引用的，iOS restoredPhotoNames） */
   private restoredPhotoNames: Set<string> = new Set<string>();
+  // ---- 2.7 录音 ----
+  /** 正文录音段数镜像（✓ 判定：只有录音没有文字也算写了） */
+  @State bodyAudioCount: number = 0;
+  /** 录音面板 sheet（工具条 mic 键 → 先申请麦克风权限再开） */
+  @State showRecordingSheet: boolean = false;
+  /** 麦克风权限被拒（面板渲染「去设置」引导态） */
+  @State recordingMicDenied: boolean = false;
+  /** 本次进页面新落盘的录音文件（存盘 / 放弃时清没被引用的） */
+  private insertedAudioPaths: Set<string> = new Set<string>();
+  /** 草稿带进来的录音文件（删掉时清没被新草稿引用的） */
+  private restoredAudioPaths: Set<string> = new Set<string>();
   /** 系统返回信号（路由页 onBackPress 拦截后 +1） */
   @StorageProp(STORAGE_KEY_COMPOSE_BACK_TICK) @Watch('onSystemBackTick')
   systemBackTick: number = 0;
@@ -187,6 +201,10 @@ export struct ComposeView {
     this.bodyController.onPhotoRemoved = (_blockId: string): void => {
       // 两段式退格 / 范围删除出的照片（页面方法外路径）：张数镜像跟着走
       this.bodyPhotoCount = this.bodyController.photoCount();
+    };
+    this.bodyController.onAudioRemoved = (_blockId: string): void => {
+      // 卡片 ✕ / 两段式退格 / 范围删除出的录音（文件存盘时统一清）
+      this.bodyAudioCount = this.bodyController.audioCount();
     };
     const context = this.getUIContext().getHostContext();
     if (context !== undefined) {
@@ -352,6 +370,9 @@ export struct ComposeView {
             controller: this.bodyController,
             onPhotoButtonTap: (): void => {
               this.startPhotoPick();
+            },
+            onMicButtonTap: (): void => {
+              this.startRecordingFlow();
             }
           })
         }
@@ -362,6 +383,15 @@ export struct ComposeView {
       .mode(NavigationMode.Stack)
       .width('100%')
       .height('100%')
+      // 录音面板（2.7）：挂 Navigation（相纸 sheet 已占根 Stack 的 bindSheet，
+      // 同节点双 sheet 有覆盖风险，分开挂）
+      .bindSheet(this.showRecordingSheet, this.RecordingSheetBuilder(), {
+        detents: [SheetSize.MEDIUM],
+        showClose: false,
+        onDisappear: (): void => {
+          this.showRecordingSheet = false;
+        }
+      })
 
       // 返回确认弹窗（官方 @CustomDialog，CustomDialogController 挂窗口层，
       // 遮罩连顶栏一起盖住）；新建日记本弹窗（撞名判定在 createNotebook 里）
@@ -699,6 +729,105 @@ export struct ComposeView {
     }
   }
 
+  // ---- 2.7 录音：权限 → 面板 → 光标所在段下面插入（R-ENTRY-08 / R-RICH-04） ----
+
+  /** 录音面板 sheet 内容（录制 / 试听 / 插入由组件自持，页面只接结果） */
+  @Builder
+  RecordingSheetBuilder() {
+    VoiceRecordingSheet({
+      micDenied: this.recordingMicDenied,
+      onInsert: (relativePath: string): void => {
+        this.onRecordingInserted(relativePath);
+      },
+      onCancel: (): void => {
+        this.showRecordingSheet = false;
+      }
+    })
+  }
+
+  /**
+   * 工具条 mic 键：先申请麦克风权限（系统弹窗，首次 / 每次拒绝后再试都走它），
+   * 授权与否都开面板 —— 被拒时面板渲染「去设置」引导态（iOS requestRecordingPermission 同款）
+   */
+  private async startRecordingFlow(): Promise<void> {
+    if (this.bodyController.audioCount() >= 3) {
+      return; // 满 3 段（键已置灰，兜底）
+    }
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    let granted = false;
+    try {
+      const atManager = abilityAccessCtrl.createAtManager();
+      const result = await atManager.requestPermissionsFromUser(context,
+        ['ohos.permission.MICROPHONE']);
+      granted = result.authResults.length > 0 && result.authResults[0] === 0;
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'request mic permission failed: %{public}s', JSON.stringify(err));
+      granted = false;
+    }
+    this.recordingMicDenied = !granted;
+    this.showRecordingSheet = true;
+  }
+
+  /** 面板「插入」：落好盘的录音（"audio/xxx.m4a"）插到光标所在段下面 */
+  private onRecordingInserted(relativePath: string): void {
+    const block = ContentBlock.makeAudio(generateUuid(), relativePath);
+    if (!this.bodyController.insertAudio(block)) {
+      // 插不进（理论上不可达：面板开着就不可能满 3 段）：文件不留孤儿
+      const context = this.getUIContext().getHostContext();
+      if (context !== undefined) {
+        deleteAudioFile(context.filesDir, relativePath);
+      }
+      this.showRecordingSheet = false;
+      return;
+    }
+    this.insertedAudioPaths.add(relativePath);
+    this.bodyAudioCount = this.bodyController.audioCount();
+    this.showRecordingSheet = false;
+  }
+
+  /** 存盘 / 存草稿时清没被引用的录音文件（照片 cleanupUnreferencedPhotos 同款） */
+  private cleanupUnreferencedAudios(keptBlocks: ContentBlock[]): void {
+    const referenced = new Set<string>(blocksAudioPaths(keptBlocks));
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const tracked = new Set<string>();
+    this.insertedAudioPaths.forEach((path: string): void => {
+      tracked.add(path);
+    });
+    this.restoredAudioPaths.forEach((path: string): void => {
+      tracked.add(path);
+    });
+    for (const path of tracked) {
+      if (!referenced.has(path)) {
+        deleteAudioFile(context.filesDir, path);
+      }
+    }
+    this.insertedAudioPaths = new Set<string>();
+  }
+
+  /** 放弃：本次新落盘的录音全清（草稿自己的文件走 deleteDraftMedia） */
+  private deleteAllInsertedAudios(): void {
+    const context = this.getUIContext().getHostContext();
+    if (context !== undefined) {
+      for (const path of this.insertedAudioPaths) {
+        deleteAudioFile(context.filesDir, path);
+      }
+    }
+    this.insertedAudioPaths = new Set<string>();
+  }
+
+  /** 草稿带进来的录音路径记账（存盘清理用） */
+  private collectRestoredAudioPaths(blocks: ContentBlock[]): void {
+    for (const path of blocksAudioPaths(blocks)) {
+      this.restoredAudioPaths.add(path);
+    }
+  }
+
   /** 顶栏（Navigation 标题栏内）：左上返回、右上完成
    * （同一种分量；能不能点由 enabled 表达） */
   @Builder
@@ -716,8 +845,9 @@ export struct ComposeView {
         iconRes: $r('sys.symbol.checkmark'),
         iconSize: 14,
         // 直接引用 @State 的表达式（@Prop 依赖分析跟不进方法体），
-        // 与 hasContent() 等价：文字或照片任一有就算写了（iOS hasContent）
-        pressEnabled: this.bodyText.trim().length > 0 || this.bodyPhotoCount > 0,
+        // 与 hasContent() 等价：文字 / 照片 / 录音任一有就算写了（iOS hasContent）
+        pressEnabled: this.bodyText.trim().length > 0 || this.bodyPhotoCount > 0 ||
+          this.bodyAudioCount > 0,
         onTap: (): void => {
           this.saveEntryAndClose();
         }
@@ -729,9 +859,10 @@ export struct ComposeView {
 
   // ---- 判定（V1 组件不许用 getter，全部普通方法） ----
 
-  /** 正文有没有内容（✓ 能不能点）。照片也算（iOS hasContent）；只有标题不算 */
+  /** 正文有没有内容（✓ 能不能点）。照片 / 录音也算（iOS hasContent）；只有标题不算 */
   private hasContent(): boolean {
-    return this.bodyText.trim().length > 0 || this.bodyPhotoCount > 0;
+    return this.bodyText.trim().length > 0 || this.bodyPhotoCount > 0 ||
+      this.bodyAudioCount > 0;
   }
 
   /** 顶部字数 */
@@ -755,6 +886,17 @@ export struct ComposeView {
     let count = 0;
     for (const block of blocks) {
       if (block.type === ContentBlockType.Photo) {
+        count++;
+      }
+    }
+    return count;
+  }
+
+  /** 块列表 → 录音段数（✓ 判定镜像） */
+  private audioCountOf(blocks: ContentBlock[]): number {
+    let count = 0;
+    for (const block of blocks) {
+      if (block.type === ContentBlockType.Audio) {
         count++;
       }
     }
@@ -827,6 +969,7 @@ export struct ComposeView {
         editorDocumentFromBlocks(this.draftBlocks),
         anchoredBlocksOf(this.draftBlocks));
       this.bodyPhotoCount = this.bodyController.photoCount();
+      this.bodyAudioCount = this.bodyController.audioCount();
     }
   }
 
@@ -844,8 +987,10 @@ export struct ComposeView {
         // 草稿正文按块备好（injectDraftIntoBody 装载编辑器，格式 / 分段 / 照片随块恢复）
         this.draftBlocks = draft.contentBlocks;
         this.collectRestoredPhotoNames(draft.contentBlocks);
+        this.collectRestoredAudioPaths(draft.contentBlocks);
         this.bodyText = this.bodyTextOf(draft.contentBlocks);
         this.bodyPhotoCount = this.photoCountOf(draft.contentBlocks);
+        this.bodyAudioCount = this.audioCountOf(draft.contentBlocks);
         this.moodName = draft.mood;
         this.moodColorHex = draft.moodColorHex ?? '';
         const restored = restoredNotebookSelection(draft.tags, []);
@@ -909,10 +1054,10 @@ export struct ComposeView {
     if (this.selectedNotebookName.length > 0) {
       entry.tags = [this.selectedNotebookName];
     }
-    // 正文块（编辑器文档读回 + 照片侧表拆回，2.5 保存链路）
+    // 正文块（编辑器文档读回 + 照片/录音侧表拆回，2.5 保存链路）
     const blocks = composeCleanedBlocks(
       blocksWithEditorDocument(this.bodyController.currentDocument(),
-        this.bodyController.photoBlocks, generateUuid),
+        this.bodyController.anchoredSideTable(), generateUuid),
       generateUuid);
     entry.setContentBlocks(blocks, now); // 唯一写入口：content / wordCount / audioURLs 同步派生
     try {
@@ -922,6 +1067,7 @@ export struct ComposeView {
       }
       // 转正的文件归日记了；这次新落盘又没进正文的清掉（iOS removeUnusedMedia）
       this.cleanupUnreferencedPhotos(blocks);
+      this.cleanupUnreferencedAudios(blocks);
       // 保存成功后主页刷新由 Index.onPageShow 的 reload tick 驱动
       //（主页被本页盖住时赋值不渲染，写入侧通知不可用，见 HomeLogic 注释）
     } catch (err) {
@@ -953,21 +1099,22 @@ export struct ComposeView {
     const now = Date.now();
     const draft = this.draft ?? new DraftEntry(generateUuid(), now, now);
     draft.title = this.title;
-    // 正文块（编辑器文档读回 + 照片侧表拆回，2.5 保存链路）
+    // 正文块（编辑器文档读回 + 照片/录音侧表拆回，2.5 保存链路）
     const blocks = composeCleanedBlocks(
       blocksWithEditorDocument(this.bodyController.currentDocument(),
-        this.bodyController.photoBlocks, generateUuid),
+        this.bodyController.anchoredSideTable(), generateUuid),
       generateUuid);
     draft.setContentBlocks(blocks, now);
     draft.mood = this.moodName;
     draft.moodColorHex = this.moodColorHex.length > 0 ? this.moodColorHex : undefined;
     draft.tags = this.selectedNotebookName.length > 0 ? [this.selectedNotebookName] : [];
-    draft.audioURLs = blocksAudioPaths(blocks); // v1 恒为空，录音在 2.7
+    draft.audioURLs = blocksAudioPaths(blocks); // 录音从块派生（2.7）
     try {
       await DraftRepository.saveDraft(store, draft);
       this.draft = draft;
       // 草稿还引用的文件留给草稿；这次删掉没进草稿的清掉（iOS removeUnusedMedia）
       this.cleanupUnreferencedPhotos(blocks);
+      this.cleanupUnreferencedAudios(blocks);
       return true;
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'saveDraft failed: %{public}s', JSON.stringify(err));
@@ -994,8 +1141,9 @@ export struct ComposeView {
         hilog.error(DOMAIN, TAG, 'discard draft failed: %{public}s', JSON.stringify(err));
       }
     }
-    // 本次新落盘又没进草稿的照片文件一并清掉（不留孤儿文件）
+    // 本次新落盘又没进草稿的照片 / 录音文件一并清掉（不留孤儿文件）
     this.deleteAllInsertedPhotos();
+    this.deleteAllInsertedAudios();
     this.getUIContext().getRouter().back();
   }
 

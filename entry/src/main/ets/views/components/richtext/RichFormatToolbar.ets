@@ -17,7 +17,7 @@ import { AppTheme } from '../../../theme/AppTheme';
 import { BambooTheme } from '../../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../../theme/ThemeManager';
 import { STORAGE_KEY_SAFE_AREA_BOTTOM_VP } from '../../../services/ImmersiveChrome';
-import { PHOTO_LIMIT_PER_ENTRY } from '../../../models/ContentBlock';
+import { PHOTO_LIMIT_PER_ENTRY, AUDIO_LIMIT_PER_ENTRY } from '../../../models/ContentBlock';
 import { RichBodyController, RichFormatKind } from './RichBodyEditor';
 import { colorWithAlpha } from './RichTextAppearance';
 
@@ -29,8 +29,10 @@ const PRESS_CURVE = curves.springCurve(0, 1, 420, 28);
 struct RichFormatButton {
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
   @Prop isOn: boolean;
-  /** 不可用（如照片满 5 张）：降透明度、不响应；成员不能叫 enabled（撞 .enabled() 属性方法） */
-  buttonEnabled: boolean = true;
+  /** 不可用（如照片满 5 张 / 录音满 3 段）：降透明度、不响应；成员不能叫 enabled（撞 .enabled() 属性方法）。
+   * 必须 @Prop：父级 photoEnabled / audioEnabled 是 @State，普通成员只在构建时取一次值，
+   * 满 3 段后 mic 键不置灰（真机实测回归） */
+  @Prop buttonEnabled: boolean = true;
   @State pressed: boolean = false;
   iconRes: Resource = $r('sys.symbol.bold');
   labelRes: Resource = $r('app.string.s_f670b2adc0');
@@ -88,8 +90,12 @@ export struct RichFormatToolbar {
   @State isHighlightOn: boolean = false;
   /** 照片按钮可否按（满 5 张置灰，05 §3.6） */
   @State photoEnabled: boolean = true;
+  /** 录音按钮可否按（满 3 段置灰，R-ENTRY-08） */
+  @State audioEnabled: boolean = true;
   /** 点照片按钮（页面接相册选图 → 选相纸，2.6） */
   onPhotoButtonTap: () => void = (): void => {};
+  /** 点录音按钮（页面先申请麦克风权限 → 开录音面板，2.7） */
+  onMicButtonTap: () => void = (): void => {};
   /** 主窗口句柄（键盘高度监听用；aboutToDisappear 注销） */
   private mainWindow: window.Window | undefined = undefined;
 
@@ -126,6 +132,7 @@ export struct RichFormatToolbar {
     this.isHeadingOn = this.controller.isHeading;
     this.isHighlightOn = this.controller.isHighlighted;
     this.photoEnabled = this.controller.photoCount() < PHOTO_LIMIT_PER_ENTRY;
+    this.audioEnabled = this.controller.audioCount() < AUDIO_LIMIT_PER_ENTRY;
   }
 
   build() {
@@ -180,6 +187,16 @@ export struct RichFormatToolbar {
           buttonEnabled: this.photoEnabled,
           onTap: (): void => {
             this.onPhotoButtonTap();
+          }
+        })
+        // 录音（2.7）：照片键右边（iOS 工具条顺序 photo → mic）
+        RichFormatButton({
+          iconRes: $r('sys.symbol.mic'),
+          labelRes: $r('app.string.s_3ba60ad590'),
+          isOn: false,
+          buttonEnabled: this.audioEnabled,
+          onTap: (): void => {
+            this.onMicButtonTap();
           }
         })
       }

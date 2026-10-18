@@ -49,6 +49,11 @@ export function coverFilenameFor(uuid: string): string {
   return `cover_${uuid}.jpg`;
 }
 
+/** 日记录音：`audio_<UUID>_<Unix 秒>.m4a`（iOS `AudioRecorderManager.saveRecording` 同款命名） */
+export function audioFilenameFor(uuid: string, timestampSeconds: number): string {
+  return `audio_${uuid}_${timestampSeconds}.m4a`;
+}
+
 // ---- 占用概况 ----
 
 /** 媒体占用概况（iOS `MediaStorage.Usage`） */

@@ -11,11 +11,12 @@
  *   底部四灯工具条 + 照片键与写日记页同款
  * - 保存必须走 entry.setContentBlocks（派生 content / wordCount / updatedAt，
  *   R-RICH-10 —— iOS 在这页出过「直接写 content 被静默丢弃」的 bug）
- * - 老日记录音补进正文（R-RICH-09）：v1 无录音，2.8 接（09 Q25）
+ * - 老日记录音补进正文（R-RICH-09）：散在 audioURLs 里没进过正文的录音
+ *   打开编辑时补成块挂末尾（blocksWithLooseAudio，2.7）
  */
 import { relationalStore } from '@kit.ArkData';
 import { KeyboardAvoidMode } from '@kit.ArkUI';
-import { common } from '@kit.AbilityKit';
+import { abilityAccessCtrl, common } from '@kit.AbilityKit';
 import { image } from '@kit.ImageKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../../theme/AppTheme';
@@ -38,7 +39,9 @@ import {
   ContentBlock,
   ContentBlockType,
   PaperStyle,
-  PhotoPosition
+  PhotoPosition,
+  blocksAudioPaths,
+  blocksWithLooseAudio
 } from '../../models/ContentBlock';
 import { RichBodyController, RichBodyEditor } from '../components/richtext/RichBodyEditor';
 import { RichFormatToolbar } from '../components/richtext/RichFormatToolbar';
@@ -49,8 +52,10 @@ import {
 } from '../../models/RichDocument';
 import { PhotoLibraryPicker } from '../../services/PhotoLibraryPicker';
 import { PhotoPaperIO } from '../../services/PhotoPaperIO';
+import { deleteAudioFile } from '../../services/AudioRecorderManager';
 import { PaperStylePickerSheet } from '../components/photo/PaperStylePickerSheet';
 import { PhotoFullScreenCover } from '../components/photo/PhotoFullScreenCover';
+import { VoiceRecordingSheet } from '../components/audio/VoiceRecordingSheet';
 import { MoodTag } from '../../models/Mood';
 import { Notebook, cleanedName, nameKey, nextSortOrder } from '../../models/Notebook';
 import { generateUuid } from '../../models/Uuid';
@@ -91,6 +96,15 @@ export struct EditEntryView {
   private insertedMediaNames: Set<string> = new Set<string>();
   /** 进页面时日记已有的照片文件（正文里删掉的，✓ 时才真删文件） */
   private originalPhotoNames: Set<string> = new Set<string>();
+  // ---- 2.7 录音 ----
+  /** 录音面板 sheet（工具条 mic 键 → 先申请麦克风权限再开） */
+  @State showRecordingSheet: boolean = false;
+  /** 麦克风权限被拒（面板渲染「去设置」引导态） */
+  @State recordingMicDenied: boolean = false;
+  /** 本次编辑新落盘的录音文件（✕ 不留；✓ 后没被引用的清掉） */
+  private insertedAudioPaths: Set<string> = new Set<string>();
+  /** 进页面时日记已有的录音文件（正文里删掉的，✓ 时才真删文件） */
+  private originalAudioPaths: Set<string> = new Set<string>();
   /** ✓ 存过了：离开页面不再清这次新加的文件（iOS didSave） */
   private didSave: boolean = false;
 
@@ -124,8 +138,8 @@ export struct EditEntryView {
   aboutToDisappear(): void {
     // 全屏浮层没关就被路由弹走（边滑返回）时，别把主框架 Tab 栏一直藏着
     AppStorage.setOrCreate(STORAGE_KEY_HIDE_TAB_BAR, false);
-    // 没保存就离开（✕）：这次新加的照片文件不留（iOS onDisappear 同款）
-    if (this.didSave || this.insertedMediaNames.size === 0) {
+    // 没保存就离开（✕）：这次新加的照片 / 录音文件不留（iOS onDisappear 同款）
+    if (this.didSave || (this.insertedMediaNames.size === 0 && this.insertedAudioPaths.size === 0)) {
       return;
     }
     const context = this.getUIContext().getHostContext();
@@ -137,6 +151,10 @@ export struct EditEntryView {
       io.deleteImage(name);
     }
     this.insertedMediaNames = new Set<string>();
+    for (const path of this.insertedAudioPaths) {
+      deleteAudioFile(context.filesDir, path);
+    }
+    this.insertedAudioPaths = new Set<string>();
   }
 
   aboutToAppear(): void {
@@ -291,11 +309,14 @@ export struct EditEntryView {
           .scrollBar(BarState.Off)
           .edgeEffect(EdgeEffect.Spring)
 
-          // 底部格式工具条（2.5 回退恢复）：四灯 + 照片键；与写日记页同款
+          // 底部格式工具条（2.5 回退恢复）：四灯 + 照片键 + 录音键；与写日记页同款
           RichFormatToolbar({
             controller: this.bodyController,
             onPhotoButtonTap: (): void => {
               this.startPhotoPick();
+            },
+            onMicButtonTap: (): void => {
+              this.startRecordingFlow();
             }
           })
         }
@@ -306,6 +327,14 @@ export struct EditEntryView {
       .mode(NavigationMode.Stack)
       .width('100%')
       .height('100%')
+      // 录音面板（2.7）：挂 Navigation（相纸 sheet 已占根 Stack 的 bindSheet）
+      .bindSheet(this.showRecordingSheet, this.RecordingSheetBuilder(), {
+        detents: [SheetSize.MEDIUM],
+        showClose: false,
+        onDisappear: (): void => {
+          this.showRecordingSheet = false;
+        }
+      })
 
       // 新建日记本弹窗（与写日记页同款；撞名判定在 createNotebook 里）
       if (this.showCreateNotebook) {
@@ -679,10 +708,11 @@ export struct EditEntryView {
       this.entry = loaded;
       this.title = loaded.title;
       this.entryLoaded = true;
-      // 正文按块备好（injectOriginalIntoBody 装载编辑器，格式 / 分段 / 照片随块恢复）；
-      // 原照片文件名记账，✓ 后清理用
-      this.originalBlocks = loaded.contentBlocks;
-      this.collectOriginalPhotoNames(loaded.contentBlocks);
+      // 正文按块备好（injectOriginalIntoBody 装载编辑器，格式 / 分段 / 照片录音随块恢复）；
+      // 散在 audioURLs 里没进过正文的录音补成块挂末尾（R-RICH-09）；原媒体文件记账，✓ 后清理用
+      this.originalBlocks = blocksWithLooseAudio(loaded.contentBlocks, loaded.audioURLs, generateUuid);
+      this.collectOriginalPhotoNames(this.originalBlocks);
+      this.collectOriginalAudioPaths(this.originalBlocks);
       this.moodName = loaded.mood;
       this.moodColorHex = loaded.moodColorHex ?? '';
       this.selectedNotebookName = loaded.tags.length > 0 ? loaded.tags[0] : '';
@@ -713,10 +743,10 @@ export struct EditEntryView {
     entry.mood = this.moodName;
     entry.moodColorHex = this.moodColorHex.length > 0 ? this.moodColorHex : undefined;
     entry.tags = this.selectedNotebookName.length > 0 ? [this.selectedNotebookName] : [];
-    // 正文块（编辑器文档读回 + 照片侧表拆回，2.5 保存链路）
+    // 正文块（编辑器文档读回 + 照片/录音侧表拆回，2.5 保存链路）
     const blocks = composeCleanedBlocks(
       blocksWithEditorDocument(this.bodyController.currentDocument(),
-        this.bodyController.photoBlocks, generateUuid),
+        this.bodyController.anchoredSideTable(), generateUuid),
       generateUuid);
     entry.setContentBlocks(blocks, now); // 唯一写入口：content / wordCount / audioURLs / updatedAt 同步派生
     try {
@@ -727,8 +757,9 @@ export struct EditEntryView {
       return;
     }
     this.didSave = true;
-    // 正文里删掉的照片（原有的、这次新加又删的）这时才真删文件（iOS save 同款）
+    // 正文里删掉的照片 / 录音（原有的、这次新加又删的）这时才真删文件（iOS save 同款）
     this.cleanupUnreferencedPhotos(blocks);
+    this.cleanupUnreferencedAudios(blocks);
     this.getUIContext().getRouter().back();
   }
 
@@ -778,6 +809,90 @@ export struct EditEntryView {
           this.originalPhotoNames.add(name);
         }
       }
+    }
+  }
+
+  // ---- 2.7 录音：权限 → 面板 → 光标所在段下面插入（与写日记页同款） ----
+
+  /** 录音面板 sheet 内容（录制 / 试听 / 插入由组件自持，页面只接结果） */
+  @Builder
+  RecordingSheetBuilder() {
+    VoiceRecordingSheet({
+      micDenied: this.recordingMicDenied,
+      onInsert: (relativePath: string): void => {
+        this.onRecordingInserted(relativePath);
+      },
+      onCancel: (): void => {
+        this.showRecordingSheet = false;
+      }
+    })
+  }
+
+  /** 工具条 mic 键：先申请麦克风权限（系统弹窗），授权与否都开面板（被拒渲染引导态） */
+  private async startRecordingFlow(): Promise<void> {
+    if (this.bodyController.audioCount() >= 3) {
+      return; // 满 3 段（键已置灰，兜底）
+    }
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    let granted = false;
+    try {
+      const atManager = abilityAccessCtrl.createAtManager();
+      const result = await atManager.requestPermissionsFromUser(context,
+        ['ohos.permission.MICROPHONE']);
+      granted = result.authResults.length > 0 && result.authResults[0] === 0;
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'request mic permission failed: %{public}s', JSON.stringify(err));
+      granted = false;
+    }
+    this.recordingMicDenied = !granted;
+    this.showRecordingSheet = true;
+  }
+
+  /** 面板「插入」：落好盘的录音插到光标所在段下面 */
+  private onRecordingInserted(relativePath: string): void {
+    const block = ContentBlock.makeAudio(generateUuid(), relativePath);
+    if (!this.bodyController.insertAudio(block)) {
+      // 插不进（理论上不可达）：文件不留孤儿
+      const context = this.getUIContext().getHostContext();
+      if (context !== undefined) {
+        deleteAudioFile(context.filesDir, relativePath);
+      }
+      this.showRecordingSheet = false;
+      return;
+    }
+    this.insertedAudioPaths.add(relativePath);
+    this.showRecordingSheet = false;
+  }
+
+  /** ✓ 后清没被引用的录音文件：原有 ∪ 这次新加（照片 cleanup 同款） */
+  private cleanupUnreferencedAudios(keptBlocks: ContentBlock[]): void {
+    const referenced = new Set<string>(blocksAudioPaths(keptBlocks));
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const tracked = new Set<string>();
+    this.originalAudioPaths.forEach((path: string): void => {
+      tracked.add(path);
+    });
+    this.insertedAudioPaths.forEach((path: string): void => {
+      tracked.add(path);
+    });
+    for (const path of tracked) {
+      if (!referenced.has(path)) {
+        deleteAudioFile(context.filesDir, path);
+      }
+    }
+    this.insertedAudioPaths = new Set<string>();
+  }
+
+  /** 进页面时日记已有的录音路径记账（正文里删掉的，✓ 时才真删） */
+  private collectOriginalAudioPaths(blocks: ContentBlock[]): void {
+    for (const path of blocksAudioPaths(blocks)) {
+      this.originalAudioPaths.add(path);
     }
   }
 

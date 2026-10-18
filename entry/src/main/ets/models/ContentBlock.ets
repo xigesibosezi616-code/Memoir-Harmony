@@ -35,6 +35,9 @@ export enum PaperStyle {
 /** 每篇正文照片上限（05 §3.6，iOS `canInsertPaperPhoto` 同款 5 张） */
 export const PHOTO_LIMIT_PER_ENTRY: number = 5;
 
+/** 每篇正文录音上限（R-ENTRY-08，iOS `blocks.audioPaths.count < 3` 同款 3 段） */
+export const AUDIO_LIMIT_PER_ENTRY: number = 3;
+
 export function contentBlockTypeFromRaw(raw: string): ContentBlockType | undefined {
   switch (raw) {
     case 'text': return ContentBlockType.Text;

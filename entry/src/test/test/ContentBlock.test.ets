@@ -8,6 +8,7 @@
  */
 import { describe, it, expect } from '@ohos/hypium';
 import { ContentBlock, ContentBlockType, Ink, TextStyleRun, PhotoPosition, PaperStyle,
+  PHOTO_LIMIT_PER_ENTRY, AUDIO_LIMIT_PER_ENTRY,
   decodeContentBlocks, encodeContentBlocks, blocksAudioPaths, blocksWithLooseAudio,
   isSameLocalDay, isMemberPaperStyle, effectivePaperStyle } from '../../main/ets/models/ContentBlock';
 
@@ -170,6 +171,13 @@ export default function contentBlockTest() {
       expect(result[1].type).assertEqual(ContentBlockType.Audio);
       expect(result[1].audioFilename).assertEqual('audio/two.m4a');
       expect(result[1].id).assertEqual('newId');
+    })
+
+    // ---- 每篇上限（05 §3.6 照片 5 张 / R-ENTRY-08 录音 3 段） ----
+
+    it('perEntryLimitsMatchSpec', 0, () => {
+      expect(PHOTO_LIMIT_PER_ENTRY).assertEqual(5);
+      expect(AUDIO_LIMIT_PER_ENTRY).assertEqual(3);
     })
 
     // ---- 旋转角：创建时定死，跨启动一致 ----

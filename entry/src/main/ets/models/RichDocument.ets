@@ -404,6 +404,50 @@ export function photoInsertionPlan(text: string, caretRaw: number): PhotoInserti
   return new PhotoInsertionPlan(caret, true, caret + 2);
 }
 
+/**
+ * R-RICH-04 在光标处插录音的落点计划（iOS `RichTextView.insertAudio` 同款规则）：
+ * 录音插在光标所在段**下面**、自成一段（锚点 + 后随换行），不拆开这段话。
+ * `text` 是编辑器活文本（照片 / 录音锚点各占 1 个 RICH_ANCHOR 字符）。
+ */
+export class AudioInsertionPlan {
+  /** 锚点插入处（相对活文本的 UTF-16 偏移；前置换行（若有）也从这里开始 */
+  readonly insertOffset: number;
+  /** 录在最后一段且段尾没换行时，先补一个换行把录音与这段隔开 */
+  readonly needsNewlineBefore: boolean;
+  /** 插入完成后的光标落点（录在文末时落到录音下一行，否则光标不动） */
+  readonly caretAfter: number;
+
+  constructor(insertOffset: number, needsNewlineBefore: boolean, caretAfter: number) {
+    this.insertOffset = insertOffset;
+    this.needsNewlineBefore = needsNewlineBefore;
+    this.caretAfter = caretAfter;
+  }
+}
+
+/** R-RICH-04 的纯函数实现 */
+export function audioInsertionPlan(text: string, caretRaw: number): AudioInsertionPlan {
+  const len = text.length;
+  const caret = Math.min(Math.max(caretRaw, 0), len);
+  // 光标所在段的段尾（含收尾换行）：从光标往后找第一个换行
+  let paragraphEnd = len;
+  for (let i = caret; i < len; i++) {
+    if (text.charCodeAt(i) === 0x0A) {
+      paragraphEnd = i + 1;
+      break;
+    }
+  }
+  const atEnd = paragraphEnd >= len;
+  // 段尾有换行：录音插在换行后面（下一段开头处自成一段）；
+  // 录在最后一段且没有收尾换行：先补一个，再挂录音
+  const needsNewlineBefore = atEnd && len > 0 && text.charCodeAt(len - 1) !== 0x0A;
+  const insertOffset = atEnd ? len : paragraphEnd;
+  // 光标：录在文末时移到录音下一行（前置换行 + 锚点 + 后随换行之后），否则不动
+  const caretAfter = atEnd
+    ? insertOffset + (needsNewlineBefore ? 1 : 0) + 2
+    : caret;
+  return new AudioInsertionPlan(insertOffset, needsNewlineBefore, caretAfter);
+}
+
 /** 相邻且格式相同的文本 span 合并（编辑器读回的区间可能切得比格式细） */
 export function mergeAdjacentRichSpans(spans: RichSpan[]): RichSpan[] {
   const merged: RichSpan[] = [];

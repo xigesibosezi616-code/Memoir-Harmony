@@ -15,6 +15,7 @@ import {
   RichFormatFlags,
   RichSpan,
   TextBlockRange,
+  audioInsertionPlan,
   blocksWithEditorDocument,
   editorDocumentFromBlocks,
   mergeAdjacentRichSpans,
@@ -513,6 +514,84 @@ export default function richDocumentTest() {
       // 段首分支：左一字符是换行 → 挂这段开头（锚点前面）
       expect(planAtAnchorStart.insertOffset).assertEqual(3);
       expect(planAtAnchorStart.needsNewlineBefore).assertFalse();
+    })
+
+    // ---- R-RICH-04 录音落点（audioInsertionPlan，iOS insertAudio 同款规则） ----
+
+    it('audioMidParagraphInsertsBelowIt', 0, () => {
+      // 光标在段中：录音插到这一段下面（换行后自成一段），光标不动
+      const text = '第一段\n第二段';
+      const plan = audioInsertionPlan(text, 2);
+      expect(plan.insertOffset).assertEqual(4); // 第一段的换行后（第二段开头前）
+      expect(plan.needsNewlineBefore).assertFalse();
+      expect(plan.caretAfter).assertEqual(2); // 光标留在原地
+    })
+
+    it('audioAtParagraphEndFollowsNewline', 0, () => {
+      // 光标在段尾（右一字符是换行）：录音挂换行后面，光标不动
+      const plan = audioInsertionPlan('ab\ncd', 2);
+      expect(plan.insertOffset).assertEqual(3);
+      expect(plan.needsNewlineBefore).assertFalse();
+      expect(plan.caretAfter).assertEqual(2);
+    })
+
+    it('audioAtDocumentEndWithoutNewlinePrependsOne', 0, () => {
+      // 录在最后一段且段尾没换行：先补换行隔开，光标落到录音下一行
+      const plan = audioInsertionPlan('abcdef', 6);
+      expect(plan.insertOffset).assertEqual(6);
+      expect(plan.needsNewlineBefore).assertTrue();
+      expect(plan.caretAfter).assertEqual(9); // 6 + 前置换行 1 + 锚点 1 + 后随换行 1
+    })
+
+    it('audioAtDocumentEndWithTrailingNewlineNeedsNoPrefix', 0, () => {
+      // 文档末尾已有收尾换行：直接挂末尾，光标落到录音下一行
+      const plan = audioInsertionPlan('abc\n', 4);
+      expect(plan.insertOffset).assertEqual(4);
+      expect(plan.needsNewlineBefore).assertFalse();
+      expect(plan.caretAfter).assertEqual(6);
+    })
+
+    it('audioIntoEmptyDocument', 0, () => {
+      // 空文档：录音直接挂开头，光标落到录音下一行
+      const plan = audioInsertionPlan('', 0);
+      expect(plan.insertOffset).assertEqual(0);
+      expect(plan.needsNewlineBefore).assertFalse();
+      expect(plan.caretAfter).assertEqual(2);
+    })
+
+    it('audioCaretIsClamped', 0, () => {
+      // 光标越界先夹回 [0, len]：超长落到文末（补换行挂录音），负数落到段首（挂本段换行后）
+      const planOver = audioInsertionPlan('ab\ncd', 99);
+      expect(planOver.insertOffset).assertEqual(5);
+      expect(planOver.needsNewlineBefore).assertTrue();
+      const planUnder = audioInsertionPlan('ab\ncd', -1);
+      expect(planUnder.insertOffset).assertEqual(3);
+      expect(planUnder.needsNewlineBefore).assertFalse();
+    })
+
+    it('roundTripMixedPhotoAndAudioKeepsOrderAndIds', 0, () => {
+      // 照片 + 录音混排：文档拼装 → 拆回，顺序与锚点 id 全保留（2.7 统一锚点）；
+      // 文本块每次拆装拿新 id（实现如此），只比对文字内容
+      const t1 = textBlock('前文');
+      const photo = photoBlock();
+      const t2 = textBlock('中间');
+      const audio = audioBlock();
+      const t3 = textBlock('后文');
+      const blocks = [t1, photo, t2, audio, t3];
+      const doc = editorDocumentFromBlocks(blocks);
+      const out = blocksWithEditorDocument(doc, anchoredMap(blocks), makeId);
+      expect(out.length).assertEqual(5);
+      expect(out[0].type).assertEqual(ContentBlockType.Text);
+      expect(out[0].text).assertEqual('前文');
+      expect(out[1].id).assertEqual(photo.id);
+      expect(out[1].type).assertEqual(ContentBlockType.Photo);
+      expect(out[2].type).assertEqual(ContentBlockType.Text);
+      expect(out[2].text).assertEqual('中间');
+      expect(out[3].id).assertEqual(audio.id);
+      expect(out[3].type).assertEqual(ContentBlockType.Audio);
+      expect(out[4].type).assertEqual(ContentBlockType.Text);
+      expect(out[4].text).assertEqual('后文');
+      expectRangesConsistent(out);
     })
   })
 

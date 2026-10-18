@@ -2711,6 +2711,22 @@
     {
       "name": "s_9b5c1d3f",
       "value": "Droite"
+    },
+    {
+      "name": "s_7126a0f54e",
+      "value": "Impossible d'accéder au micro"
+    },
+    {
+      "name": "s_094be81a60",
+      "value": "Impossible de démarrer l'enregistrement"
+    },
+    {
+      "name": "s_e4c4ff3b29",
+      "value": "Impossible de lire l'enregistrement"
+    },
+    {
+      "name": "s_966b6def6c",
+      "value": "Déjà Vu a besoin du micro pour enregistrer des notes vocales dans votre journal. Les enregistrements restent uniquement sur votre appareil."
     }
   ]
 }
