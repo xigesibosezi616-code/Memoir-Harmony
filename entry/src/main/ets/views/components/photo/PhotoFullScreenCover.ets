@@ -1,16 +1,22 @@
 /**
- * 照片全屏查看页（10_BUILD_MANUAL.md 2.6）。对应 iOS `Views/Components/PhotoPaper/PhotoFullScreenView.swift`。
+ * 照片全屏查看页（10_BUILD_MANUAL.md 2.6 / 2.9）。对应 iOS `Views/Components/PhotoPaper/PhotoFullScreenView.swift`。
  *
- * - 点击任意处或下拉关闭（下拉 >120vp）；双指缩放 0.9x–4x，松手小于 1 弹回
+ * - 点击任意处或下拉关闭（下拉 >120vp）；双指缩放 0.9x–4x，松手小于 1 弹回（静态图；
+ *   动态照片不支持动态属性，不参与缩放）
+ * - 动态照片（2.9，iOS `LivePhotoView` 同款意图）：`loadMovingPhoto` 用配对静态图
+ *   （相机 _full / 相册原图）+ 视频构造 `MovingPhoto`，`MovingPhotoView` 长按播放；
+ *   加载 / 播放出错退静态图（R-PHOTO-04 兜底）
  * - 右上「⋯」编辑菜单（R-PHOTO-01 / 2.6 卡片）：靠左 / 靠右、设为封面、换相纸、删除
  *   —— 回调全可选：详情页进全屏是纯预览，不给编辑入口（iOS 同款 `hasEditActions`）
  * - 删除先确认（「删除这张照片？」，R-ENTRY-13 之外唯一的整块照片删除路径）
- * - 全屏也用 600px 正文缩略图（iOS 同款 `loadImage`；600px 在手机屏上足够）
- * - 动态照片按住播放属 2.9（LivePhotoView），这里只做静态图
+ * - 静态全屏也用 600px 正文缩略图（iOS 同款 `loadImage`；600px 在手机屏上足够）
  */
 import { image } from '@kit.ImageKit';
 import { curves, SymbolGlyphModifier } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { photoAccessHelper, MovingPhotoView, MovingPhotoViewController } from '@kit.MediaLibraryKit';
+import { fileUri } from '@kit.CoreFileKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 import { AppTheme } from '../../../theme/AppTheme';
 import { BambooTheme } from '../../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../../theme/ThemeManager';
@@ -52,10 +58,16 @@ export struct PhotoFullScreenCover {
 
   @State private pixelMap: image.PixelMap | undefined = undefined;
   @State private photoAspect: number = FALLBACK_PHOTO_ASPECT;
+  /** 动态照片对象（loadMovingPhoto 构造；非动态照片 / 加载失败为 undefined） */
+  @State private movingPhoto: photoAccessHelper.MovingPhoto | undefined = undefined;
+  /** 动态照片加载 / 播放失败 → 退静态图（R-PHOTO-04 兜底） */
+  @State private movingPhotoFailed: boolean = false;
   /** 缩放倍数；成员不能叫 scale（撞 .scale() 属性方法） */
   @State private zoomScale: number = 1.0;
   @State private lastZoom: number = 1.0;
   @State private dragOffsetY: number = 0;
+  /** 动态照片播放控制器（MovingPhotoView 长按播放用） */
+  private movingPhotoController: MovingPhotoViewController = new MovingPhotoViewController();
   /** 打开时刻（ms）：dismiss 日志计时用 */
   private openedAtMs: number = 0;
 
@@ -63,6 +75,7 @@ export struct PhotoFullScreenCover {
     this.openedAtMs = Date.now();
     hilog.info(DOMAIN, TAG, 'cover appear id=%{public}s', this.photo.id);
     this.loadPhoto();
+    this.loadMovingPhoto();
   }
 
   private hasEditActions(): boolean {
@@ -79,7 +92,22 @@ export struct PhotoFullScreenCover {
         .backgroundColor(Color.Black)
         .expandSafeArea([SafeAreaType.SYSTEM])
 
-      if (this.pixelMap !== undefined) {
+      // 动态照片：MovingPhotoView 长按播放（组件不支持动态属性，不参与缩放/拖拽）
+      if (this.movingPhoto !== undefined && !this.movingPhotoFailed) {
+        MovingPhotoView({
+          movingPhoto: this.movingPhoto,
+          controller: this.movingPhotoController
+        })
+          .objectFit(ImageFit.Contain)
+          .muted(false)
+          .width('100%')
+          .height('100%')
+          .onError((): void => {
+            // 播放出错：退静态图（R-PHOTO-04）
+            hilog.error(DOMAIN, TAG, 'MovingPhotoView onError, fallback to still');
+            this.movingPhotoFailed = true;
+          })
+      } else if (this.pixelMap !== undefined) {
         Image(this.pixelMap)
           .objectFit(ImageFit.Contain)
           .width('100%')
@@ -270,5 +298,38 @@ export struct PhotoFullScreenCover {
     }).catch((): void => {
       // 失败保持占位文案
     });
+  }
+
+  /**
+   * 动态照片加载（2.9）：配对静态图（相机 `_full` / 相册原图）+ 视频构造 `MovingPhoto`。
+   * 非动态照片 / 任一文件缺失 / loadMovingPhoto 失败 → 不设置（静态图兜底，R-PHOTO-04）。
+   */
+  private loadMovingPhoto(): void {
+    if (!this.photo.isLivePhoto) {
+      return;
+    }
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const stillName = this.photo.pairingStillFilename;
+    const videoName = this.photo.livePhotoVideoFilename;
+    if (stillName === undefined || videoName === undefined) {
+      return;
+    }
+    const io = PhotoPaperIO.forFilesDir(context.filesDir);
+    photoAccessHelper.MediaAssetManager.loadMovingPhoto(context,
+      fileUri.getUriFromPath(`${io.photosDir}/${stillName}`),
+      fileUri.getUriFromPath(`${io.photosDir}/${videoName}`))
+      .then((movingPhoto: photoAccessHelper.MovingPhoto): void => {
+        this.movingPhoto = movingPhoto;
+        hilog.info(DOMAIN, TAG, 'loadMovingPhoto ok');
+      })
+      .catch((err: BusinessError): void => {
+        // 失败退静态图（静态 pixelMap 照常显示）
+        hilog.error(DOMAIN, TAG, 'loadMovingPhoto failed %{public}d %{public}s',
+          err.code, err.message);
+        this.movingPhotoFailed = true;
+      });
   }
 }

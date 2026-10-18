@@ -50,11 +50,14 @@ import {
   blocksWithEditorDocument,
   editorDocumentFromBlocks
 } from '../../models/RichDocument';
-import { PhotoLibraryPicker } from '../../services/PhotoLibraryPicker';
+import { PhotoLibraryPicker, PickedLibraryPhoto } from '../../services/PhotoLibraryPicker';
 import { PhotoPaperIO } from '../../services/PhotoPaperIO';
+import { CameraShot } from '../../services/CameraSession';
+import { saveCameraShot } from '../../services/CameraPhotoFiles';
 import { deleteAudioFile } from '../../services/AudioRecorderManager';
 import { PaperStylePickerSheet } from '../components/photo/PaperStylePickerSheet';
 import { PhotoFullScreenCover } from '../components/photo/PhotoFullScreenCover';
+import { PaperCameraView } from '../camera/PaperCameraView';
 import { VoiceRecordingSheet } from '../components/audio/VoiceRecordingSheet';
 import { MoodTag } from '../../models/Mood';
 import { Notebook, cleanedName, nameKey, nextSortOrder } from '../../models/Notebook';
@@ -87,11 +90,16 @@ export struct EditEntryView {
   /** 相纸选择 sheet（新照片选相纸 / 给已插照片换相纸共用） */
   @State showPaperSheet: boolean = false;
   @State paperSheetPixelMap: image.PixelMap | undefined = undefined;
+  /** 相册选完待落盘的产物（动态照片带原样字节，选完相纸才落盘） */
+  private pendingPickedPhoto: PickedLibraryPhoto | undefined = undefined;
   /** 照片全屏查看（页面内浮层；长按正文照片打开） */
   @State @Watch('onPhotoFullscreenChanged') showPhotoFullscreen: boolean = false;
   @State fullscreenPhoto: ContentBlock | undefined = undefined;
   /** 换相纸的目标照片 id（undefined = sheet 是「新照片选相纸」） */
   private restylePhotoId: string | undefined = undefined;
+  // ---- 2.9 尺素相机 ----
+  /** 相机浮层（页面内条件浮层，全屏照片同款挂法；开/关联动藏 Tab 栏） */
+  @State @Watch('onCameraOverlayChanged') showCamera: boolean = false;
   /** 本次编辑新落盘的照片文件（✕ 不留；✓ 后没被引用的清掉，iOS insertedMediaNames） */
   private insertedMediaNames: Set<string> = new Set<string>();
   /** 进页面时日记已有的照片文件（正文里删掉的，✓ 时才真删文件） */
@@ -312,6 +320,9 @@ export struct EditEntryView {
           // 底部格式工具条（2.5 回退恢复）：四灯 + 照片键 + 录音键；与写日记页同款
           RichFormatToolbar({
             controller: this.bodyController,
+            onCameraButtonTap: (): void => {
+              this.startCameraFlow();
+            },
             onPhotoButtonTap: (): void => {
               this.startPhotoPick();
             },
@@ -357,6 +368,11 @@ export struct EditEntryView {
       if (this.showPhotoFullscreen) {
         this.PhotoFullscreenBuilder()
       }
+
+      // 尺素相机（2.9）：页面内条件浮层（全屏照片同款挂法；自带转场与触摸）
+      if (this.showCamera) {
+        this.CameraBuilder()
+      }
     }
     .width('100%')
     .height('100%')
@@ -367,6 +383,7 @@ export struct EditEntryView {
       showClose: false,
       onDisappear: (): void => {
         this.paperSheetPixelMap = undefined;
+        this.pendingPickedPhoto = undefined;
         this.restylePhotoId = undefined;
       }
     })
@@ -374,17 +391,22 @@ export struct EditEntryView {
 
   // ---- 2.6 照片：相册选图 → 选相纸 → 光标处插入（R-RICH-03 / R-PHOTO-01） ----
 
-  /** 工具条照片键：拉系统图库（免权限）选一张 → 弹相纸选择 */
+  /** 工具条照片键：拉系统图库（免权限）选一张 → 弹相纸选择（2.9 起动态照片也走这里） */
   private async startPhotoPick(): Promise<void> {
     if (this.bodyController.photoCount() >= 5) {
       return; // 满 5 张（键已置灰，兜底）
     }
-    const pixelMap = await PhotoLibraryPicker.pick();
-    if (pixelMap === undefined) {
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const picked = await PhotoLibraryPicker.pick(context);
+    if (picked === undefined) {
       return; // 用户取消 / 解码失败：静默收场
     }
+    this.pendingPickedPhoto = picked;
     this.restylePhotoId = undefined;
-    this.paperSheetPixelMap = pixelMap;
+    this.paperSheetPixelMap = picked.pixelMap;
     this.showPaperSheet = true;
   }
 
@@ -408,11 +430,7 @@ export struct EditEntryView {
   /** 选定相纸：换相纸（已有照片）或落盘新照片按所选边插到光标处 */
   private async onPaperStylePicked(style: PaperStyle, position: PhotoPosition): Promise<void> {
     this.showPaperSheet = false;
-    const pixelMap = this.paperSheetPixelMap;
     const restyleId = this.restylePhotoId;
-    if (pixelMap === undefined) {
-      return;
-    }
     if (restyleId !== undefined) {
       // 换相纸：只改块字段，文件不动
       const block = this.bodyController.photoBlocks.get(restyleId);
@@ -422,14 +440,22 @@ export struct EditEntryView {
       }
       return;
     }
-    // 新照片：JPEG q85 原子落盘 photo_xxxxxxxx.jpg（iOS 同款命名）→ 光标处插入
+    const picked = this.pendingPickedPhoto;
+    if (picked === undefined) {
+      return;
+    }
+    // 新照片 → 光标处插入；动态照片原样字节落盘（R-PHOTO-03），普通照片重编码 q85
     const context = this.getUIContext().getHostContext();
     if (context === undefined) {
       return;
     }
     const io = PhotoPaperIO.forFilesDir(context.filesDir);
+    if (picked.isMovingPhoto) {
+      await this.insertPickedMovingPhoto(picked, io, position, style);
+      return;
+    }
     const filename = `photo_${generateUuid().substring(0, 8)}.jpg`;
-    const saved = await io.saveImage(pixelMap, filename);
+    const saved = await io.saveImage(picked.pixelMap, filename);
     if (!saved) {
       // iOS failed() 同款：落盘失败静默收场（不打断书写）
       hilog.error(DOMAIN, TAG, 'photo save failed %{public}s', filename);
@@ -442,6 +468,42 @@ export struct EditEntryView {
       io.deleteImage(filename);
       this.insertedMediaNames.delete(filename);
       return;
+    }
+  }
+
+  /**
+   * 相册动态照片落盘插入：原图 + 视频原样字节 `photo_<uuid8>.jpg` / `.mp4`
+   * （R-PHOTO-03，无 _full —— 相机动态照片才有配对未裁原图）；视频落盘失败
+   * 退普通照片（原图原样字节还在，只是丢了动态）。
+   */
+  private async insertPickedMovingPhoto(picked: PickedLibraryPhoto, io: PhotoPaperIO,
+    position: PhotoPosition, style: PaperStyle): Promise<void> {
+    const still = picked.stillBuffer;
+    const video = picked.videoBuffer;
+    if (still === undefined || video === undefined) {
+      return;
+    }
+    const base = generateUuid().substring(0, 8);
+    const stillName = `photo_${base}.jpg`;
+    const videoName = `photo_${base}.mp4`;
+    if (!await io.saveData(still, stillName)) {
+      hilog.error(DOMAIN, TAG, 'moving photo still save failed %{public}s', stillName);
+      return;
+    }
+    this.insertedMediaNames.add(stillName);
+    const videoSaved = await io.saveData(video, videoName);
+    if (!videoSaved) {
+      hilog.error(DOMAIN, TAG, 'moving photo video save failed %{public}s', videoName);
+    } else {
+      this.insertedMediaNames.add(videoName);
+    }
+    const block = ContentBlock.makePhoto(generateUuid(), stillName,
+      videoSaved ? videoName : undefined, position, style);
+    if (!this.bodyController.insertPhoto(block)) {
+      io.deleteImage(stillName);
+      io.deleteImage(videoName);
+      this.insertedMediaNames.delete(stillName);
+      this.insertedMediaNames.delete(videoName);
     }
   }
 
@@ -498,6 +560,68 @@ export struct EditEntryView {
   /** 全屏浮层开/关 → 联动藏/显主框架浮动 Tab 栏（@Watch） */
   private onPhotoFullscreenChanged(): void {
     AppStorage.setOrCreate(STORAGE_KEY_HIDE_TAB_BAR, this.showPhotoFullscreen);
+  }
+
+  // ---- 2.9 尺素相机：拍照 → 落盘链 → 光标处插入（与写日记页同款） ----
+
+  /** 工具条拍照键：满 5 张不开（键已置灰，兜底）；权限申请在相机浮层内（被拒有引导态） */
+  private startCameraFlow(): void {
+    if (this.bodyController.photoCount() >= 5) {
+      return;
+    }
+    this.showCamera = true;
+  }
+
+  /** 相机浮层开/关 → 联动藏/显主框架浮动 Tab 栏（全屏照片同款） */
+  private onCameraOverlayChanged(): void {
+    AppStorage.setOrCreate(STORAGE_KEY_HIDE_TAB_BAR, this.showCamera);
+  }
+
+  /** 相机浮层内容（页面内条件浮层） */
+  @Builder
+  private CameraBuilder() {
+    PaperCameraView({
+      onCapture: (shot: CameraShot, squarePixelMap: image.PixelMap, style: PaperStyle): void => {
+        this.showCamera = false;
+        this.onCameraCaptured(shot, squarePixelMap, style);
+      },
+      onCancel: (): void => {
+        this.showCamera = false;
+      }
+    })
+  }
+
+  /**
+   * 相机拍完「写下这一刻」：落盘链（显示图重编码 q85 + 动态配对原样字节，
+   * R-PHOTO-03）→ 光标处插入（iOS `PhotoInsertFlow.insert` 相机分支同款）。
+   * 配对落盘失败自动退化普通照片（saveCameraShot 内处理）。
+   */
+  private async onCameraCaptured(shot: CameraShot, squarePixelMap: image.PixelMap,
+    style: PaperStyle): Promise<void> {
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const io = PhotoPaperIO.forFilesDir(context.filesDir);
+    const files = await saveCameraShot(io, shot, squarePixelMap);
+    if (files === undefined) {
+      hilog.error(DOMAIN, TAG, 'camera shot save failed');
+      return;
+    }
+    const names = files.allFilenames();
+    for (const name of names) {
+      this.insertedMediaNames.add(name);
+    }
+    const block = ContentBlock.makePhoto(generateUuid(), files.displayFilename,
+      files.videoFilename, PhotoPosition.Right, style);
+    block.livePhotoStillFilename = files.fullStillFilename;
+    if (!this.bodyController.insertPhoto(block)) {
+      for (const name of names) {
+        io.deleteImage(name);
+        this.insertedMediaNames.delete(name);
+      }
+      return;
+    }
   }
 
   /** 靠左 / 靠右互换（功能条 / 双击秒换边 / 全屏菜单同路；blockId 定位） */

@@ -23,6 +23,19 @@
           ],
           "when": "inuse"
         }
+      },
+      {
+        "name": "ohos.permission.CAMERA",
+        "reason": "$string:s_e15f73bdc6",
+        "usedScene": {
+          "abilities": [
+            "EntryAbility"
+          ],
+          "when": "inuse"
+        }
+      },
+      {
+        "name": "ohos.permission.VIBRATE"
       }
     ],
     "abilities": [

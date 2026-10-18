@@ -24,6 +24,8 @@ import homeLogicTest from './test/HomeLogic.test'
 import wrapFlowTest from './test/WrapFlow.test'
 import richDocEditorTest from './test/RichDocEditor.test'
 import inkLedgerTest from './test/InkLedger.test'
+import cameraSessionTest from './test/CameraSession.test'
+import cameraPhotoFilesTest from './test/CameraPhotoFiles.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -52,4 +54,6 @@ export default function testsuite() {
   wrapFlowTest()
   richDocEditorTest()
   inkLedgerTest()
+  cameraSessionTest()
+  cameraPhotoFilesTest()
 }

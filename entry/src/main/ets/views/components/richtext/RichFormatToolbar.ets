@@ -92,6 +92,8 @@ export struct RichFormatToolbar {
   @State photoEnabled: boolean = true;
   /** 录音按钮可否按（满 3 段置灰，R-ENTRY-08） */
   @State audioEnabled: boolean = true;
+  /** 点拍照按钮（页面开尺素相机，2.9） */
+  onCameraButtonTap: () => void = (): void => {};
   /** 点照片按钮（页面接相册选图 → 选相纸，2.6） */
   onPhotoButtonTap: () => void = (): void => {};
   /** 点录音按钮（页面先申请麦克风权限 → 开录音面板，2.7） */
@@ -173,13 +175,23 @@ export struct RichFormatToolbar {
             this.controller.toggle(RichFormatKind.Highlight);
           }
         })
-        // 照片（2.6）：四灯右侧加分隔线再放照片键（iOS ComposeView 同位置）
+        // 拍照（2.9）：四灯右侧分隔线后先拍照键再相册键（iOS 工具条顺序 camera → photo → mic）
         Divider()
           .vertical(true)
           .strokeWidth(0.5)
           .color(colorWithAlpha(this.theme.textTertiary, 0x40))
           .height(20)
           .margin({ left: 10, right: 10 })
+        RichFormatButton({
+          iconRes: $r('sys.symbol.camera'),
+          labelRes: $r('app.string.s_3da4b3651a'),
+          isOn: false,
+          buttonEnabled: this.photoEnabled,
+          onTap: (): void => {
+            this.onCameraButtonTap();
+          }
+        })
+        // 相册（2.6）
         RichFormatButton({
           iconRes: $r('sys.symbol.picture'),
           labelRes: $r('app.string.s_7945500987'),
