@@ -8,8 +8,9 @@
  *   基线对齐 + 心情印章（R-ENTRY-16：中文界面 + 预设心情 + 显示名 ≤ 2 字）
  *   + 星期 + 此时此地 + 短分割线 + 标题 + 和纸色标签药丸 + 全宽分割线 + 正文；
  *   其余主题普通版式：日期星期 + 心情徽标 + 此时此地 + 标题 + 标签 + 分割线 + 正文
- * - 「补记 N 次」行不渲染：addendumDays 依赖块级时间戳（Ink），2.5 富文本
- *   之前恒为空 —— 与 R-ENTRY-14「没补记过不显示」一致，偏差记 09 Q24
+ * - 「补记 N 次 · 最近某月某日」行（R-INK-04 / R-ENTRY-14，2.8 接通）：素笺在
+ *   星期行与短分割线之间（12fp #8B7E6A），普通版式在此时此地与标题之间；
+ *   没补记过不显示
  * - 正文富文本只读展示（2.5 RichBodyEditor editable=false，2026-10-18 回退
  *   备忘录式——绕排连环平台缺陷后产品拍板，见 09 Q23）：照片整行锚点卡
  *   （纯预览，轻点/长按开全屏）+ 文字上下独立段；加粗 / 斜体 / 小标题 /
@@ -38,6 +39,7 @@ import { STORAGE_KEY_HOME_RELOAD_TICK } from '../../data/HomeLogic';
 import { MediaStorageService } from '../../services/MediaStorageService';
 import {
   dayAndWeekday,
+  inkDay,
   isChineseLanguage,
   monthYearUppercased,
   weekdayString,
@@ -122,11 +124,25 @@ export struct EntryDetailView {
   private loadBodyIntoEditor(): void {
     const entry = this.entry;
     if (this.bodyEditorReady && entry !== undefined) {
+      // 墨迹干湿基准 = 日记写下时刻（2.8；只读展示，无编辑会话）
+      this.bodyController.setInkContext(entry.createdAt / 1000, undefined);
       const blocks = blocksWithLooseAudio(entry.contentBlocks, entry.audioURLs, generateUuid);
       this.bodyController.loadDocument(
         editorDocumentFromBlocks(blocks),
         anchoredBlocksOf(blocks));
     }
+  }
+
+  /** 跨过 24 小时补写过吗（补记行渲染判据，R-INK-04） */
+  private hasAddendumNote(): boolean {
+    return this.entry !== undefined && this.entry.addendumDays.length > 0;
+  }
+
+  /** 「补记 N 次 · 最近某月某日」（iOS `addendumNote` 同款） */
+  private addendumNoteRes(): Resource {
+    const days = this.entry?.addendumDays ?? [];
+    return $r('app.string.s_33736fe5a5', days.length,
+      inkDay(new Date(days[days.length - 1]), this.appLanguage));
   }
 
   /** 全屏浮层开/关（@Watch 联动隐藏主框架 Tab 栏，见 MainTabsView barOpacity） */
@@ -232,6 +248,14 @@ export struct EntryDetailView {
               }
               .padding({ bottom: 16 })
 
+              // 补记行（2.8：跨过 24 小时补写过的日子；iOS 素笺 12fp #8B7E6A 同款）
+              if (this.hasAddendumNote()) {
+                Text(this.addendumNoteRes())
+                  .fontSize(12)
+                  .fontColor('#8B7E6A')
+                  .padding({ bottom: 14 })
+              }
+
               // 短分割线
               Row()
                 .width(32)
@@ -329,6 +353,14 @@ export struct EntryDetailView {
                 fontColor: this.theme.textTertiary,
                 iconSize: 11
               })
+
+              // 补记行（2.8，iOS 普通版式 weather 后同款位置）
+              if (this.hasAddendumNote()) {
+                Text(this.addendumNoteRes())
+                  .fontSize(this.theme.labelFont.size)
+                  .fontFamily(this.theme.labelFont.family)
+                  .fontColor(this.theme.textTertiary)
+              }
 
               // 标题
               if (this.entry.title.length > 0) {

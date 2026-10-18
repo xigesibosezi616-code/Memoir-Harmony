@@ -23,6 +23,7 @@ import richDocumentTest from './test/RichDocument.test'
 import homeLogicTest from './test/HomeLogic.test'
 import wrapFlowTest from './test/WrapFlow.test'
 import richDocEditorTest from './test/RichDocEditor.test'
+import inkLedgerTest from './test/InkLedger.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -50,4 +51,5 @@ export default function testsuite() {
   homeLogicTest()
   wrapFlowTest()
   richDocEditorTest()
+  inkLedgerTest()
 }

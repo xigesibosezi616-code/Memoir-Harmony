@@ -41,6 +41,9 @@ export class BambooTheme implements AppTheme {
 
   readonly destructive: ResourceColor = 0xFFE8453A;
 
+  /** Tab 栏划动光感：素笺浅纸底白光融底 → 官方系统蓝 #007DFF（官方沉浸光感样例同款） */
+  readonly tabLightColor: ResourceColor = 0xFF007DFF;
+
   readonly colorMode: 'dark' | 'unset' = 'unset';
   readonly mailboxImage: Resource = $r('app.media.mailbox_bamboo');
 

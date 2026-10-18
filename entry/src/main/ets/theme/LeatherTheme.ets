@@ -39,6 +39,9 @@ export class LeatherTheme implements AppTheme {
 
   readonly destructive: ResourceColor = 0xFFE8453A;
 
+  /** Tab 栏划动光感：深色底白光层次清晰，保持系统默认观感 */
+  readonly tabLightColor: ResourceColor = 0xFFFFFFFF;
+
   readonly colorMode: 'dark' | 'unset' = 'dark';
   readonly mailboxImage: Resource = $r('app.media.mailbox_leather');
 

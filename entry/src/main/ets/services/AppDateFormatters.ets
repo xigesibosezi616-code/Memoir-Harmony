@@ -78,6 +78,20 @@ export function shortDate(date: Date, appLanguage: string): string {
   return `${monthShort(date, appLanguage)} ${date.getDate()}`;
 }
 
+/**
+ * 「10月12日」/「Oct 12」——墨迹痕迹与「补记 · 最近」的日期（2.8，iOS `InkText.day`）：
+ * 不是今年的带上年份（「2025年10月12日」/「Oct 12, 2025」）。
+ */
+export function inkDay(date: Date, appLanguage: string): string {
+  const sameYear = date.getFullYear() === new Date().getFullYear();
+  if (isChineseLanguage(appLanguage)) {
+    const base = shortDate(date, appLanguage);
+    return sameYear ? base : `${date.getFullYear()}年${base}`;
+  }
+  const base = `${monthShort(date, appLanguage)} ${date.getDate()}`;
+  return sameYear ? base : `${base}, ${date.getFullYear()}`;
+}
+
 /** 「APRIL 2026」/「2026年4月」——月历大标题（中文无大小写，原样返回） */
 export function monthYearUppercased(date: Date, appLanguage: string): string {
   return yearMonthKey(date, appLanguage).toUpperCase();

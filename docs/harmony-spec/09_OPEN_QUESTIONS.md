@@ -30,8 +30,9 @@
 | Q21 | ⚪ | 全局 toast 的 kind：文档卡片只写两种，iOS 源码是三种（error/info/success） | — | — | 2026-10-14 照 iOS 三种 |
 | Q22 | ⚪ | 2.1 卡片写心情「单选**可取消**」，iOS `MoodSelector` 点已选心情**不取消**（点了始终选中） | 2.1 写日记页 | 产品 | 2026-10-15 按 iOS 源码不可取消实现（CLAUDE.md：iOS 源码优先；用户已确认）。产品若想要「再点一下取消」，iOS 侧要一起改 |
 | Q23 | 🔴 | **文字绕排做不到**：RichEditor 无 exclusion 机制，锚点图片无法让文字绕排（iOS `Text` + `imageTextInitializer` 可以）；**荧光笔画法偏差**：`textBackgroundStyle` 只能整块色底，画不出 iOS 「只压文字中下部的圆头条」 | 2.6 照片相纸 · 2.5 荧光笔观感 | 产品 | 2026-10-17 **绕排破局**：graphics.text `headIndents/tailIndents`（API 26）逐行缩进 + 自研 `WrapFlowEngine`（单测全绿）；**详情页阅读态真机验证通过**（绕排/两端对齐/荧光/照片全屏，CustomSpan invalidate 不重测须换新 span、punctuationOverflow SDK 缺席两条实测）。**编辑态方案已定：B1 隐形输入层**（2026-10-17 用户拍板——编辑页实测整行卡换行推下移体验割裂；1px 透明 RichEditor 承接 IME + 自绘光标/选区，任务卡 10 手册 2.5b）；**M1 组件级已完成**（RichDocEditor/diffTextEdit/textBlockRangesOfBlocks/WrapFlowEditor，单测 272 全绿，2026-10-17；**勘误**：`getGlyphPositionAtCoordinate`（since 12）存在，此前「graphics.text 无坐标→偏移 API」结论有误，命中查询无需自算字形）；**M1 收官（2026-10-17）**：页面接入+真机 E2E ✓、光标「落 0」疑案结案（verify_ui 注入例程「全选→清除→输入」×锚点保护交互，非 bug）、空态塌缩补修（max 高度+占位段+空文档光标）、**平台缺陷实证+追修**：`orphanCharOptimization` × `strutStyle` 时恰好 2 行的段落 `paint()` 零输出（1/3/4 行正常，探针矩阵二分实证，查无已知限制）——移除 orphanCharOptimization 规避，真机 2 行态回归 ✓；**M1 追修三（2026-10-18）**：heading `\n` 行段拆分（TextPart/BuiltItems sidecar/caret 区间映射重写）真机 ✓（H 段 21.12vp / B 段 16.32vp 分段正确），顺带双修 EditEntryView 日期行过期（`@State entry`）与标题注入竞态（双信号）；荧光笔圆头条（Run 字形自绘）真机观感后议。**结案（2026-10-18 产品拍板）：三页回退华为备忘录式，绕排下线保留**——平台缺陷连环修不见底（orphanCharOptimization×strut 两行零输出、strut 实测行高 16.32≠20vp 需探针自愈、heading 编辑器合并污染拆段追修三轮），ComposeView/EditEntryView/EntryDetailView 全部换回 2.5/2.6 备忘录形态（RichBodyEditor+工具条+照片链路，真机三页冒烟 ✓）；WrapFlow 全家桶+278 单测下线保留（页面零引用未删）；未建成功能与恢复条件建档 `11_UNBUILT_FEATURES.md`。本问状态改 🔴（回退定型，备忘录式=终态方案） |
-| Q24 | ⚪ | 详情页「补记 N 次」行**暂不渲染**：块级 writtenAt 在 2.5 编辑器读不回（RichEditor 样式装不下自定义时间戳），编辑保存一轮后补记信息会丢 | 2.5 详情页 | 产品 + 鸿蒙 | 先按 R-ENTRY-14「没补记过不显示」实现（恒不显示）；2.8 墨迹会干接交互时在保存链路合并回 writtenAt / struckAt |
+| Q24 | 🟢 | ~~详情页「补记 N 次」行暂不渲染~~ 影子台账（InkLedger）解决：writtenAt/struckAt 全链路保留，补记行 2.8 已接通 | 2.8 墨迹 | 鸿蒙 | 2026-10-18 落地（见下 Q24 详述） |
 | Q25 | ⚪ | **老日记录音补进正文**（R-RICH-09）：2026-10-10 之前的日记录音在正文外面（audioURLs 列），打开编辑时要就地转成正文里的录音块 | 2.8 录音 | 鸿蒙 | 纯逻辑已备好（`blocksWithLooseAudio` + 单测）；2.8 接录音块渲染时挂进 EditEntryView 装载链路 |
+| Q26 | 🟡 | 2.8 墨迹三处小偏差：补记段标不做（RichEditor 无段前距）；scissors/strikethrough 符号不存在（痕迹行纯文字、菜单项无图标）；sys.symbol 离线不可枚举 | 2.8 墨迹 | 产品拍板 + 鸿蒙 | 见下 Q26 详述 |
 | Q26 | 🔴 | **bindContentCover 真机「隐形挂载」**：全屏照片查看用 bindContentCover，真机出现 appear 日志齐全但零渲染、吞掉整页触摸（dt=163552ms）的幽灵态；且 EditEntryView 同时 bindSheet+bindContentCover 双绑属 API 违规用法 | 2.6 全屏查看 | 鸿蒙 | 2026-10-17 弃用 bindContentCover：三页改**页面内条件浮层**（根 Stack 末位 if(showPhotoFullscreen)，同层最高）。根因未深挖（疑模态子窗口层丢失）；教训：模态类 API（bindContentCover/bindSheet）同一节点只绑一个，全屏沉浸浮层优先用页面内浮层（可嵌自定义转场、可与其他 UI 联动，如 Tab 栏 barOpacity） |
 | Q27 | ⚪ | **真机验证方法论教训（「关全屏白屏」疑云结案）**：曾判定「关闭全屏后整页白屏」并二分删除 transition/barOpacity/hideTitleBar——全部误报 | 验收流程 | 鸿蒙 | 2026-10-17 结案：**像素采样伪象**。`sips` 转 BMP 是负高度 top-down 行序，采样脚本按 bottom-up 公式翻转导致所有采样点垂直镜像（页面照片/Tab 栏位置全采错成背景白区）；dumpLayout 组件树一直完好。教训：①截图判位必须先用已知参照物（状态栏文字、照片区域）校验采样坐标映射；②「白屏」类结论需 dumpLayout（树）+ 像素分布对比（与正常帧 white/dark/colored 占比一致=同页）+ 无诱导语的模型看图三重交叉；③真机注入双击用单次调用链式 down/up（`uinput -T -d x y -u x y -d x y -u x y`，实测间隔 ~45ms；两次独立 uinput ~350ms、uitest doubleClick ~640ms，都超 280ms 双击窗）；④长 E2E 前先 `power-shell timeout -o 600000` 防自动锁屏（锁屏后 dump 有树但截屏全黑） |
 
@@ -268,16 +269,20 @@ Date.now() 后永不刷新（编辑历史日记恒显当天）；改 `@State ent
 遗留：M2 选区/手柄/双击选词/工具条四灯，M3 照片编辑态联动+保存链路，M4 全量验收
 （10 手册 2.5b）。
 
-### Q24 ⚪ 详情页「补记 N 次」暂不渲染
+### Q24 🟢→⚪ 块级 writtenAt 编辑后丢（影子台账解决，2.8 落地）
 
 补记判定依赖块级 `writtenAt`（`Ink.isAddendum`），而 2.5 的编辑器读回链路
 （`RichBodyController.currentDocument`）从 RichEditor span 还原不出 writtenAt——
 RichEditor 的文字样式模型装不下自定义时间戳。经编辑页保存一轮后块上的
 writtenAt / struckAt 会丢（正文文字不丢）。
 
-- 2.5 范围内：详情页按 R-ENTRY-14「没补记过不显示」恒不渲染该行（与现状一致）；
-- 2.8 墨迹会干接交互时：编辑器侧存活动态格式映射，保存链路把 writtenAt / struckAt
-  合并回块，补记行恢复渲染。
+**2026-10-18 已解决**：`models/InkLedger.ets` 的影子台账——`writtenAt[]` / `struckAt[]`
+与活文本（锚点占 1 字符）逐字符对齐，`onDidChange` 单点 diff 同步
+（插入记编辑会话时刻，`diffTextEdit`），`currentDocument` 读回时
+`overlayInkOntoSpans` 把台账叠回纯视觉 spans，保存链路从此带上
+writtenAt / struckAt；详情页「补记 N 次」行（R-INK-04）同日接通渲染。
+单测 `InkLedger.test.ets`（台账 diff / 删除计划 / overlay）+ `RichDocument.test.ets`
+（blocks→doc→blocks 墨迹与痕迹往返）覆盖。
 
 ### Q25 ⚪ 老日记录音补进正文（R-RICH-09）
 
@@ -285,3 +290,32 @@ writtenAt / struckAt 会丢（正文文字不丢）。
 R-RICH-09 要求打开编辑时就地转成正文里的录音块。纯逻辑已就位
 （`ContentBlock.blocksWithLooseAudio` + `ContentBlock.test.ets` 单测），
 2.8 做录音块渲染时挂进 `EditEntryView` 的装载链路即可。
+
+### Q26 🟡 2.8 墨迹三处小偏差（2026-10-18）
+
+- **「补记 · 某月某日」段标不做**：iOS 补记段前有 `addendumNote` 小字段标
+  （段前距 + 12fp 标签）。ArkUI RichEditor 段落模型拿不到段前距（API 26），
+  且无法在正文中可靠定位「补记段起点」（非模型级锚点，需污染存盘格式才能画）。
+  决定：段标省略，补记的墨色变化（laterInkColor）已足够传达；详情页顶部
+  「补记 N 次」行不受影响。产品拍板（2026-10-18）。
+- **痕迹行 / 菜单图标缺失**：`sys.symbol.scissors`、`sys.symbol.strikethrough`
+  均不在系统符号集（编译期资源校验报错）。痕迹行退化为纯文字
+  （12fp 三级色）；「取消划掉」菜单项无图标（只文字）。
+- **`sys.symbol` 离线不可枚举**：hm_symbol_config.json 只有分组名，
+  预判只能靠编译期报错兜底（本次 scissors 即此路径发现）。
+
+### Q27 🟢 RichEditor 引擎退格判定光标铁律（2026-10-18 真机实证，已绕开）
+
+- **现象**：`aboutToDelete` 拦截（返回 false）后，引擎对下一次退格（DEL）
+  的判定光标固定停在**被取消范围的起点**。`setCaretOffset` 同步调用、
+  `setTimeout(0)` 延迟、两次 toggle 三轮实测**均改不了它**（AceRichText
+  `RecordOperation` 内部状态，`caret:26->27` 日志铁证）。可视光标引擎会
+  自动移对位置，与 DEL 判定光标是两套。
+- **影响**：两段式取下（ARM 后第二下退格）在直接命中路径上，第二下范围
+  变 [锚点-1, 锚点) 而非锚点本身，被引擎单锚点分支吞掉。尾随换行路径
+  因被取消范围恰从锚点起而侥幸命中——先验证录音成功是路径运气非逻辑完备。
+- **绕开**：`handleAboutToDelete` 开头加武装分支——`armedAnchorId` 在位
+  且 BACKWARD len=1 且 end=锚点 offset → 直走取下/删除，不动锚点前字符。
+  2.8 已落地并真机验证（照片/录音取下均过）。
+- **沉淀**：今后任何「拦截删除后引导下一次退格」的交互都要按此铁律设计，
+  不能依赖 setCaretOffset 改变引擎 DEL 判定位置。

@@ -106,6 +106,10 @@ export struct MainTabsView {
         barBottomMargin: this.safeAreaBottomVp,
         adaptToHandedness: true,
         gradientMask: { maskColor: Color.Transparent },
+        // 划动光感高亮色（官方 HdsTabsFloatingStyle.lightColor）：浅色纸面
+        // 主题（素笺/肯特）默认白光融进纸底看不出层次 → 主题补记墨蓝
+        // （theme.tabLightColor，2026-10-18 真机反馈后换色；皮革保持白）
+        lightColor: this.theme.tabLightColor,
         // 照片全屏浮层开着 → 整条 Tab 栏透明（barOverlap 悬浮胶囊层在
         // NavDestination 之上，页面内浮层盖不住，HdsTabs 又无 hideBar API，
         // 只能用 barOpacity 归零；三页 @Watch 联动，关浮层/页面销毁恢复 1）

@@ -6,12 +6,32 @@
  * 素笺正文升 17fp（R-ENTRY-12）后按同一比例放大。
  */
 import { AppTheme } from '../../../theme/AppTheme';
+import { Ink } from '../../../models/ContentBlock';
 import { RichFormatFlags } from '../../../models/RichDocument';
 
 /** 主题主文字色加透明度（工具条按钮亮灯底色用）。非数字色原样返回 */
 export function colorWithAlpha(color: ResourceColor, alpha: number): ResourceColor {
   if (typeof color === 'number') {
     return (color & 0xFFFFFF) | ((alpha & 0xFF) << 24);
+  }
+  return color;
+}
+
+/**
+ * 墨色加透明度（0~1）：划掉的字变淡用（iOS `withAlphaComponent(0.42)`）。
+ * 支持 '#RRGGBB' / '#AARRGGBB' 字符串与 0xAARRGGBB 数字色；其余形态原样返回。
+ */
+export function inkColorWithAlpha(color: ResourceColor, alpha: number): ResourceColor {
+  const byte = Math.round(Math.min(Math.max(alpha, 0), 1) * 255);
+  if (typeof color === 'number') {
+    return (color & 0xFFFFFF) | (byte << 24);
+  }
+  if (typeof color === 'string') {
+    const hex = color.slice(1);
+    if (color.startsWith('#') && (hex.length === 6 || hex.length === 8)) {
+      const rgb = hex.length === 6 ? hex : hex.slice(2);
+      return '#' + byte.toString(16).padStart(2, '0') + rgb;
+    }
   }
   return color;
 }
@@ -49,6 +69,12 @@ export class RichTextAppearance {
   textColor: ResourceColor;
   /** 字体族（Q6 未定：先系统衬线占位） */
   fontFamily: string;
+  /** 补记的墨色（R-INK-04：之后添的字换一种墨）。三主题 iOS 同款，默认肯特 */
+  laterInkColor: ResourceColor = '#34507A';
+  /** 痕迹行 / 补记段标的小字颜色（iOS `labelColor` = theme.textTertiary） */
+  labelColor: ResourceColor = Color.Gray;
+  /** 墨迹干湿的基准时刻（日记写下时刻，Unix 秒）。undefined = 还在写的新稿（一律不干） */
+  inkBaseSec: number | undefined = undefined;
 
   constructor(fontSize: number, lineSpacing: number, highlightColor: ResourceColor,
     textColor: ResourceColor, fontFamily: string) {
@@ -64,18 +90,34 @@ export class RichTextAppearance {
 
   /** 素笺 / 皮革 / 肯特各自的排版参数（字号与荧光笔色是 iOS 主题同款） */
   static forTheme(theme: AppTheme): RichTextAppearance {
+    let appearance: RichTextAppearance;
     switch (theme.id) {
       case 'bamboo':
-        return new RichTextAppearance(17, 10, '#99F4D46A', theme.textPrimary, theme.bodyFont.family);
+        appearance = new RichTextAppearance(17, 10, '#99F4D46A', theme.textPrimary, theme.bodyFont.family);
+        break;
       case 'leather':
-        return new RichTextAppearance(14, 8, '#8CB8862B', theme.textPrimary, theme.bodyFont.family);
+        appearance = new RichTextAppearance(14, 8, '#8CB8862B', theme.textPrimary, theme.bodyFont.family);
+        break;
       case 'kent':
-        return new RichTextAppearance(14, 8, '#B3FFE15A', theme.textPrimary, theme.bodyFont.family);
+        appearance = new RichTextAppearance(14, 8, '#B3FFE15A', theme.textPrimary, theme.bodyFont.family);
+        break;
       default:
         // 未配排版参数的主题：按正文字号推导，荧光笔暂用强调色打底
-        return new RichTextAppearance(theme.bodyFont.size, theme.bodyLineSpacing,
+        appearance = new RichTextAppearance(theme.bodyFont.size, theme.bodyLineSpacing,
           theme.accentBackground, theme.textPrimary, theme.bodyFont.family);
+        break;
     }
+    // 墨迹 2.8：补记墨色三主题 iOS 同款（素笺 #3E5470 / 皮革 #A9B9CC / 肯特 #34507A），
+    // 痕迹小字色 = theme.textTertiary（iOS labelColor）
+    if (theme.id === 'bamboo') {
+      appearance.laterInkColor = '#3E5470';
+    } else if (theme.id === 'leather') {
+      appearance.laterInkColor = '#A9B9CC';
+    } else {
+      appearance.laterInkColor = '#34507A';
+    }
+    appearance.labelColor = theme.textTertiary;
+    return appearance;
   }
 
   /** 编辑器基础样式（typingStyle / 装载空文档 / 占位符字号共用） */
@@ -98,13 +140,23 @@ export class RichTextAppearance {
    * 一组格式 → 编辑器文字样式。
    * **恒带 textBackgroundStyle**（没荧光笔也写透明色）：
    * updateSpanStyle 按区间整体替换样式，不带它擦不掉已划的荧光笔。
+   * 墨迹（2.8）：补记的字换 laterInkColor（R-INK-04）；划掉的字变淡 + 删除线
+   * （iOS `StyledText`：isAddendum ? laterInkColor : textColor，struck → 0.42 + 删除线）。
    */
   textStyleFor(flags: RichFormatFlags): RichEditorTextStyle {
-    return {
+    let ink: ResourceColor = this.textColor;
+    if (flags.writtenAt !== undefined && this.inkBaseSec !== undefined &&
+      Ink.isAddendum(flags.writtenAt, this.inkBaseSec)) {
+      ink = this.laterInkColor;
+    }
+    if (flags.struckAt !== undefined) {
+      ink = inkColorWithAlpha(ink, 0.42);
+    }
+    const style: RichEditorTextStyle = {
       fontSize: flags.heading ? this.headingFontSize : this.fontSize,
       fontWeight: flags.heading || flags.bold ? FontWeight.Bold : FontWeight.Normal,
       fontFamily: this.fontFamily,
-      fontColor: this.textColor,
+      fontColor: ink,
       lineHeight: flags.heading ? this.headingLineHeight : this.bodyLineHeight,
       halfLeading: true,
       fontStyle: flags.italic ? FontStyle.Italic : FontStyle.Normal,
@@ -113,5 +165,12 @@ export class RichTextAppearance {
         radius: this.highlightRadius
       }
     };
+    if (flags.struckAt !== undefined) {
+      style.decoration = {
+        type: TextDecorationType.LineThrough,
+        color: ink
+      };
+    }
+    return style;
   }
 }

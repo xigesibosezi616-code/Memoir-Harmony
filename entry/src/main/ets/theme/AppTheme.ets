@@ -78,6 +78,16 @@ export interface AppTheme {
   /** 删除 / 错误。整个主题仅这一处用红（04_DESIGN_LANGUAGE.md） */
   destructive: ResourceColor;
 
+  // ---- Tab 栏划动光感（1）----
+  /**
+   * HdsTabs `barFloatingStyle.lightColor`：浮动胶囊划动光感的颜色
+   * （官方 HdsTabsFloatingStyle API，未设置时系统默认白）。
+   * 浅色纸面主题（素笺/肯特）上白光融进纸底看不出层次 → 官方系统蓝
+   * `#007DFF`（官方沉浸光感典型场景样例同款，2026-10-18 真机反馈）；
+   * 深色皮革白光本就清晰，保持系统默认观感（0xFFFFFFFF）。
+   */
+  tabLightColor: ResourceColor;
+
   // ---- 系统明暗（必填；值表达浅色）----
   /**
    * 这个主题要求 App 整体走哪种系统明暗（R-THEME-03）：

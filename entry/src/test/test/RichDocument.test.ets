@@ -593,6 +593,27 @@ export default function richDocumentTest() {
       expect(out[4].text).assertEqual('后文');
       expectRangesConsistent(out);
     })
+
+    it('roundTripTraceKeepsIdAndMetadata', 0, () => {
+      // 痕迹块（2.8）：干了的照片取下后留在原处的记录 ——
+      // 拼装 → 拆回 id / traceOf / removedAt 全保留，普通文本不受影响
+      const t1 = textBlock('前文');
+      const trace = ContentBlock.makeTrace(makeId(), ContentBlockType.Photo, 12345);
+      const t2 = textBlock('后文');
+      const blocks = [t1, trace, t2];
+      const doc = editorDocumentFromBlocks(blocks);
+      const out = blocksWithEditorDocument(doc, anchoredMap(blocks), makeId);
+      expect(out.length).assertEqual(3);
+      expect(out[0].type).assertEqual(ContentBlockType.Text);
+      expect(out[0].text).assertEqual('前文');
+      expect(out[1].id).assertEqual(trace.id);
+      expect(out[1].type).assertEqual(ContentBlockType.Trace);
+      expect(out[1].traceOf).assertEqual(ContentBlockType.Photo as string);
+      expect(out[1].removedAt).assertEqual(12345);
+      expect(out[2].type).assertEqual(ContentBlockType.Text);
+      expect(out[2].text).assertEqual('后文');
+      expectRangesConsistent(out);
+    })
   })
 
   describe('textBlockRangesOfBlocks', () => {

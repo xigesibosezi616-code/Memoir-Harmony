@@ -708,6 +708,9 @@ export struct EditEntryView {
       this.entry = loaded;
       this.title = loaded.title;
       this.entryLoaded = true;
+      // 墨迹上下文（2.8）：干湿基准 = 原日记写下时刻，本次编辑会话 = 现在
+      // （之后新打的字记此刻，24h 内算补记、跨天干掉）
+      this.bodyController.setInkContext(loaded.createdAt / 1000, Date.now() / 1000);
       // 正文按块备好（injectOriginalIntoBody 装载编辑器，格式 / 分段 / 照片录音随块恢复）；
       // 散在 audioURLs 里没进过正文的录音补成块挂末尾（R-RICH-09）；原媒体文件记账，✓ 后清理用
       this.originalBlocks = blocksWithLooseAudio(loaded.contentBlocks, loaded.audioURLs, generateUuid);
