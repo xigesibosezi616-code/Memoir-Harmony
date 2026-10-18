@@ -9,13 +9,15 @@
  *   R-ENTRY-02/03）；全空直接退出
  * - 进页面恢复草稿（全局一份，R-ENTRY-04/05），顶部提示「接着上次没写完的」
  * - 日期自动取当下、不可改（R-ENTRY-06）；标题 ≤40、去换行、最多三行（R-ENTRY-07）
- * - 正文富文本（2.5）：块 ↔ 文档双向转换 + 底部格式工具条（加粗 / 斜体 /
- *   小标题 / 荧光笔）+ 选中菜单「荧光笔 / 擦掉荧光笔」
- * - v1 不做：照片 / 录音 / 天气地点（2.6~2.10 各自的卡片）
+ * - 正文富文本（2.5 RichBodyEditor，2026-10-18 回退备忘录式——绕排连环平台
+ *   缺陷后产品拍板，见 09 Q23）：照片整行锚点卡 + 文字上下独立段；底部四灯
+ *   工具条（加粗/斜体/小标题/荧光笔）+ 照片键（≤5 张，R-RICH-03/05）
+ * - v1 不做：录音 / 天气地点（2.7~2.10 各自的卡片）
  */
 import { relationalStore } from '@kit.ArkData';
 import { KeyboardAvoidMode } from '@kit.ArkUI';
 import { common } from '@kit.AbilityKit';
+import { image } from '@kit.ImageKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
@@ -23,7 +25,8 @@ import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
 import { STORAGE_KEY_APP_LANGUAGE } from '../../services/LanguageManager';
 import { dayAndWeekday } from '../../services/AppDateFormatters';
 import {
-  STORAGE_KEY_SAFE_AREA_BOTTOM_VP
+  STORAGE_KEY_SAFE_AREA_BOTTOM_VP,
+  STORAGE_KEY_HIDE_TAB_BAR
 } from '../../services/ImmersiveChrome';
 import { AppEnvironment, STORAGE_KEY_APP_ENVIRONMENT } from '../../environment/AppEnvironment';
 import { ErrorToastKind, createDefaultErrorPresenter } from '../../environment/ErrorPresenter';
@@ -39,15 +42,22 @@ import {
 import { JournalEntry } from '../../models/JournalEntry';
 import {
   ContentBlock,
+  ContentBlockType,
+  PaperStyle,
+  PhotoPosition,
   blocksAudioPaths
 } from '../../models/ContentBlock';
+import { RichBodyController, RichBodyEditor } from '../components/richtext/RichBodyEditor';
+import { RichFormatToolbar } from '../components/richtext/RichFormatToolbar';
 import {
-  RichEditorDocument,
+  anchoredBlocksOf,
   blocksWithEditorDocument,
   editorDocumentFromBlocks
 } from '../../models/RichDocument';
-import { RichBodyController, RichBodyEditor } from '../components/richtext/RichBodyEditor';
-import { RichFormatToolbar } from '../components/richtext/RichFormatToolbar';
+import { PhotoLibraryPicker } from '../../services/PhotoLibraryPicker';
+import { PhotoPaperIO } from '../../services/PhotoPaperIO';
+import { PaperStylePickerSheet } from '../components/photo/PaperStylePickerSheet';
+import { PhotoFullScreenCover } from '../components/photo/PhotoFullScreenCover';
 import { MoodTag } from '../../models/Mood';
 import { Notebook, cleanedName, nameKey, nextSortOrder } from '../../models/Notebook';
 import { DraftEntry } from '../../models/Draft';
@@ -82,6 +92,22 @@ export struct ComposeView {
   @State moods: MoodTag[] = [];
   @State notebooks: Notebook[] = [];
   @State showCreateNotebook: boolean = false;
+  // ---- 2.6 照片 ----
+  /** 正文照片张数镜像（✓ 判定 / 退出判定：只有照片没有文字也算写了，iOS hasContent） */
+  @State bodyPhotoCount: number = 0;
+  /** 相纸选择 sheet（新照片选相纸 / 给已插照片换相纸共用） */
+  @State showPaperSheet: boolean = false;
+  @State paperSheetPixelMap: image.PixelMap | undefined = undefined;
+  /** 照片全屏查看（页面内浮层；长按正文照片打开） */
+  /** 照片全屏查看（页面内浮层；长按正文照片打开） */
+  @State @Watch('onPhotoFullscreenChanged') showPhotoFullscreen: boolean = false;
+  @State fullscreenPhoto: ContentBlock | undefined = undefined;
+  /** 换相纸的目标照片 id（undefined = sheet 是「新照片选相纸」） */
+  private restylePhotoId: string | undefined = undefined;
+  /** 本次进页面新落盘的照片文件（存盘 / 放弃时清没被引用的，iOS insertedMediaNames） */
+  private insertedMediaNames: Set<string> = new Set<string>();
+  /** 草稿带进来的照片文件（删掉时清没被新草稿引用的，iOS restoredPhotoNames） */
+  private restoredPhotoNames: Set<string> = new Set<string>();
   /** 系统返回信号（路由页 onBackPress 拦截后 +1） */
   @StorageProp(STORAGE_KEY_COMPOSE_BACK_TICK) @Watch('onSystemBackTick')
   systemBackTick: number = 0;
@@ -111,25 +137,56 @@ export struct ComposeView {
    * RichEditor 空态是标准 2vp 竖线光标（已像素级验证），与 iOS 一致。
    */
   private titleEditor: RichEditorController = new RichEditorController();
-  /** 正文富文本控制器（2.5：格式灯 / 选中菜单 / 文档装载读回都在它身上） */
+  /**
+   * 正文控制器（2.5，2026-10-18 回退备忘录式恢复接线）：驱动 RichBodyEditor；
+   * 照片编辑方法（startPhotoPick / togglePhotoPosition 等）经工具条与锚点卡可达。
+   */
   private bodyController: RichBodyController = new RichBodyController();
   /** controller 就绪标志：setTypingStyle / loadDocument 必须在组件绑定后调用 */
   private titleEditorReady: boolean = false;
-  private bodyReady: boolean = false;
-  /** 草稿文本只注入一次（onReady 与 loadPageData 谁后到谁触发） */
+  /** 草稿标题只注入一次（onReady 与 loadPageData 谁后到谁触发） */
   private draftInjectedTitle: boolean = false;
+  /** 正文编辑器就绪（RichBodyEditor onReady；与 pageDataLoaded 双信号装载） */
+  private bodyEditorReady: boolean = false;
+  /** 草稿正文只注入一次（onReady 与 loadPageData 谁后到谁触发） */
   private draftInjectedBody: boolean = false;
-  /** 草稿的编辑器文档（loadPageData 建好，bodyReady 后装载） */
-  private draftDoc: RichEditorDocument | undefined = undefined;
+  /** loadPageData 已备好草稿数据（无草稿 = 空正文，也算就绪） */
+  private pageDataLoaded: boolean = false;
+  /** 草稿块（装载正文编辑器用；无草稿 = 空数组） */
+  private draftBlocks: ContentBlock[] = [];
+
+  aboutToDisappear(): void {
+    // 全屏浮层没关就被路由弹走（边滑返回）时，别把主框架 Tab 栏一直藏着
+    AppStorage.setOrCreate(STORAGE_KEY_HIDE_TAB_BAR, false);
+  }
 
   aboutToAppear(): void {
     // 键盘避让：压缩页面跟随光标（默认 OFFSET 只保证聚焦输入框可见，
     // 心情/日记本会被键盘盖住；RESIZE_WITH_CARET 让内容收到键盘上方、可滚动）
     this.getUIContext().setKeyboardAvoidMode(KeyboardAvoidMode.RESIZE_WITH_CARET);
-    // 富文本回调：文本变化镜像到页面状态（驱动字数、✓）；
-    // 灯态由工具条自己订阅 controller（onFlagsChange），页面不再整页重渲染
+    // 正文控制器回调接线（2.5/2.6 回退备忘录式恢复）：
+    // 文本镜像（✓ 判定 / 字数）+ 照片锚点卡五路动作（长按全屏 / 功能条四项）
     this.bodyController.onTextChange = (text: string): void => {
       this.bodyText = text;
+    };
+    this.bodyController.onPhotoTap = (blockId: string): void => {
+      this.openPhotoFullscreen(blockId);
+    };
+    this.bodyController.onPhotoTogglePosition = (blockId: string): void => {
+      this.togglePhotoPosition(blockId);
+    };
+    this.bodyController.onPhotoToggleCover = (blockId: string): void => {
+      this.togglePhotoCover(blockId);
+    };
+    this.bodyController.onPhotoRestyle = (blockId: string): void => {
+      this.restylePhoto(blockId);
+    };
+    this.bodyController.onPhotoDelete = (blockId: string): void => {
+      this.confirmDeletePhoto(blockId);
+    };
+    this.bodyController.onPhotoRemoved = (_blockId: string): void => {
+      // 两段式退格 / 范围删除出的照片（页面方法外路径）：张数镜像跟着走
+      this.bodyPhotoCount = this.bodyController.photoCount();
     };
     const context = this.getUIContext().getHostContext();
     if (context !== undefined) {
@@ -214,13 +271,14 @@ export struct ComposeView {
                 this.title = this.titleEditor.toStyledString({}).getString();
               })
 
-            // 正文（2.5 富文本；初始一行高，写满自动长高，心情与日记本随之下移）
+            // 正文（2.5 RichBodyEditor，备忘录式：照片整行锚点卡 + 文字上下独立段；
+            // 草稿装载走 onReady + pageDataLoaded 双信号，见 injectDraftIntoBody）
             RichBodyEditor({
               controller: this.bodyController,
               editable: true,
               onReady: (): void => {
-                this.bodyReady = true;
-                this.injectDraftIntoEditors();
+                this.bodyEditorReady = true;
+                this.injectDraftIntoBody();
               }
             })
 
@@ -288,8 +346,14 @@ export struct ComposeView {
           .scrollBar(BarState.Off)
           .edgeEffect(EdgeEffect.Spring)
 
-          // 底部格式工具条（2.5）：初版通栏样式；贴键盘间距与灯态镜像由工具条自管
-          RichFormatToolbar({ controller: this.bodyController })
+          // 底部格式工具条（2.5 回退恢复）：四灯 + 照片键；键盘 RESIZE_WITH_CARET
+          // 弹出时贴键盘顶（keyboardHeightChange 组件内自处理），收起落回安全区
+          RichFormatToolbar({
+            controller: this.bodyController,
+            onPhotoButtonTap: (): void => {
+              this.startPhotoPick();
+            }
+          })
         }
         .width('100%')
         .height('100%')
@@ -312,10 +376,327 @@ export struct ComposeView {
           }
         })
       }
+
+      // 照片全屏查看（2.6）：页面内条件浮层（Stack 末位 = 最顶层）。
+      // 2026-10-17 真机定位弃用 bindContentCover：设为封面等 updatePhoto 序列后
+      // 模态会进入「隐形挂载」态——aboutToAppear 有日志、零像素渲染、整页触摸
+      // 被吞（12:38 干净复现，tap 穿透导致误存）；浮层自控层级与触摸，结构上
+      // 消灭隐形模态层。转场在 PhotoFullScreenCover 根节点内置。
+      if (this.showPhotoFullscreen) {
+        this.PhotoFullscreenBuilder()
+      }
     }
     .width('100%')
     .height('100%')
     .backgroundColor(this.theme.background)
+    // 相纸选择（2.6）：新照片选相纸 / 给已插照片换相纸共用（半高 sheet，iOS medium 同款）
+    .bindSheet(this.showPaperSheet, this.PaperSheetBuilder(), {
+      detents: [SheetSize.MEDIUM],
+      showClose: false,
+      onDisappear: (): void => {
+        this.paperSheetPixelMap = undefined;
+        this.restylePhotoId = undefined;
+      }
+    })
+  }
+
+  // ---- 2.6 照片：相册选图 → 选相纸 → 光标处插入（R-RICH-03 / R-PHOTO-01） ----
+
+  /** 工具条照片键：拉系统图库（免权限）选一张 → 弹相纸选择 */
+  private async startPhotoPick(): Promise<void> {
+    if (this.bodyController.photoCount() >= 5) {
+      return; // 满 5 张（键已置灰，兜底）
+    }
+    const pixelMap = await PhotoLibraryPicker.pick();
+    if (pixelMap === undefined) {
+      return; // 用户取消 / 解码失败：静默收场
+    }
+    this.restylePhotoId = undefined;
+    this.paperSheetPixelMap = pixelMap;
+    this.showPaperSheet = true;
+  }
+
+  /** 相纸选择 sheet 内容（选完即插 / 换，无二次确认，iOS 同款；新照片带「放在左/右」分段） */
+  @Builder
+  PaperSheetBuilder() {
+    if (this.paperSheetPixelMap !== undefined) {
+      PaperStylePickerSheet({
+        pixelMap: this.paperSheetPixelMap,
+        showPositionPicker: this.restylePhotoId === undefined,
+        onSelect: (style: PaperStyle, position: PhotoPosition): void => {
+          this.onPaperStylePicked(style, position);
+        },
+        onCancel: (): void => {
+          this.showPaperSheet = false;
+        }
+      })
+    }
+  }
+
+  /** 选定相纸：换相纸（已有照片）或落盘新照片按所选边插到光标处 */
+  private async onPaperStylePicked(style: PaperStyle, position: PhotoPosition): Promise<void> {
+    this.showPaperSheet = false;
+    const pixelMap = this.paperSheetPixelMap;
+    const restyleId = this.restylePhotoId;
+    if (pixelMap === undefined) {
+      return;
+    }
+    if (restyleId !== undefined) {
+      // 换相纸：只改块字段，文件不动
+      const block = this.bodyController.photoBlocks.get(restyleId);
+      if (block !== undefined) {
+        block.paperStyle = style;
+        this.bodyController.updatePhoto(block);
+      }
+      return;
+    }
+    // 新照片：JPEG q85 原子落盘 photo_xxxxxxxx.jpg（iOS 同款命名）→ 光标处插入
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const io = PhotoPaperIO.forFilesDir(context.filesDir);
+    const filename = `photo_${generateUuid().substring(0, 8)}.jpg`;
+    const saved = await io.saveImage(pixelMap, filename);
+    if (!saved) {
+      // iOS failed() 同款：落盘失败静默收场（不打断书写）
+      hilog.error(DOMAIN, TAG, 'photo save failed %{public}s', filename);
+      return;
+    }
+    this.insertedMediaNames.add(filename);
+    const block = ContentBlock.makePhoto(generateUuid(), filename, undefined,
+      position, style);
+    if (!this.bodyController.insertPhoto(block)) {
+      io.deleteImage(filename);
+      this.insertedMediaNames.delete(filename);
+      return;
+    }
+    this.bodyPhotoCount = this.bodyController.photoCount();
+  }
+
+  // ---- 2.6 照片：全屏查看与编辑（R-PHOTO-01 / R-RICH-05） ----
+
+  /** 全屏查看内容：⚠️ 菜单编辑回调全给（写日记页可编辑）；删除确认在组件内 */
+  @Builder
+  PhotoFullscreenBuilder() {
+    if (this.fullscreenPhoto !== undefined) {
+      PhotoFullScreenCover({
+        photo: this.fullscreenPhoto,
+        onDismiss: (): void => {
+          this.closePhotoFullscreen();
+        },
+        onTogglePosition: (): void => {
+          this.toggleFullscreenPosition();
+        },
+        onToggleCover: (): void => {
+          this.toggleFullscreenCover();
+        },
+        onRestyle: (): void => {
+          this.startFullscreenRestyle();
+        },
+        onDelete: (): void => {
+          this.deleteFullscreenPhoto();
+        }
+      })
+    }
+  }
+
+  private openPhotoFullscreen(blockId: string): void {
+    const block = this.photoBlockById(blockId);
+    if (block === undefined) {
+      return;
+    }
+    hilog.info(DOMAIN, TAG, 'open fullscreen id=%{public}s', blockId);
+    this.fullscreenPhoto = block;
+    this.showPhotoFullscreen = true;
+  }
+
+  /** 当前正文里找照片（onPhotoTap 的 blockId → 本体；侧表直查） */
+  private photoBlockById(blockId: string): ContentBlock | undefined {
+    const block = this.bodyController.photoBlocks.get(blockId);
+    if (block !== undefined && block.type === ContentBlockType.Photo) {
+      return block;
+    }
+    return undefined;
+  }
+
+  private closePhotoFullscreen(): void {
+    hilog.info(DOMAIN, TAG, 'close fullscreen requested');
+    this.showPhotoFullscreen = false;
+    this.fullscreenPhoto = undefined;
+  }
+
+  /** 全屏浮层开/关 → 联动藏/显主框架浮动 Tab 栏（@Watch） */
+  private onPhotoFullscreenChanged(): void {
+    AppStorage.setOrCreate(STORAGE_KEY_HIDE_TAB_BAR, this.showPhotoFullscreen);
+  }
+
+  /** 靠左 / 靠右互换（功能条 / 双击秒换边 / 全屏菜单同路；blockId 定位） */
+  private togglePhotoPosition(blockId: string): void {
+    const block = this.bodyController.photoBlocks.get(blockId);
+    if (block === undefined) {
+      return;
+    }
+    block.position = block.position === PhotoPosition.Left ? PhotoPosition.Right : PhotoPosition.Left;
+    this.bodyController.updatePhoto(block);
+  }
+
+  /** 设为 / 取消封面（一篇最多一张：开新的先清别的） */
+  private togglePhotoCover(blockId: string): void {
+    const block = this.bodyController.photoBlocks.get(blockId);
+    if (block === undefined) {
+      return;
+    }
+    const turningOn = block.isCover !== true;
+    this.bodyController.photoBlocks.forEach((other: ContentBlock): void => {
+      if (other.id !== block.id) {
+        other.isCover = undefined;
+      }
+    });
+    block.isCover = turningOn ? true : undefined;
+    this.bodyController.updatePhoto(block);
+  }
+
+  /** 换相纸：加载这张照片的缩略图重开相纸 sheet */
+  private async restylePhoto(blockId: string): Promise<void> {
+    const block = this.bodyController.photoBlocks.get(blockId);
+    if (block === undefined) {
+      return;
+    }
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const pixelMap = await PhotoPaperIO.forFilesDir(context.filesDir).loadImage(block.photoFilename);
+    if (pixelMap === undefined) {
+      hilog.warn(DOMAIN, TAG, 'restyle load failed %{public}s', block.photoFilename);
+      return;
+    }
+    this.restylePhotoId = block.id;
+    this.paperSheetPixelMap = pixelMap;
+    this.showPaperSheet = true;
+  }
+
+  /** 功能条「删除」：先确认（AlertDialog，destructive 语义）再删 */
+  private confirmDeletePhoto(blockId: string): void {
+    this.getUIContext().showAlertDialog({
+      title: $r('app.string.s_c488684daf'),
+      message: $r('app.string.s_223d9e4e74'),
+      primaryButton: {
+        value: $r('app.string.s_4d0b4688c7'),
+        action: (): void => {
+        }
+      },
+      secondaryButton: {
+        value: $r('app.string.s_c488684daf'),
+        fontColor: '#B5473A',
+        action: (): void => {
+          this.deletePhotoById(blockId);
+        }
+      },
+      cancel: (): void => {
+      }
+    });
+  }
+
+  /** 删除照片：出正文、清文件等存盘时统一做（全屏菜单已过组件内确认） */
+  private deletePhotoById(blockId: string): void {
+    this.bodyController.deletePhoto(blockId);
+    this.bodyPhotoCount = this.bodyController.photoCount();
+  }
+
+  // ---- 全屏菜单旧入口 → blockId 化（fullscreenPhoto 只是定位用） ----
+
+  private toggleFullscreenPosition(): void {
+    const block = this.fullscreenPhoto;
+    if (block !== undefined) {
+      this.togglePhotoPosition(block.id);
+    }
+  }
+
+  private toggleFullscreenCover(): void {
+    const block = this.fullscreenPhoto;
+    if (block !== undefined) {
+      this.togglePhotoCover(block.id);
+    }
+  }
+
+  private async startFullscreenRestyle(): Promise<void> {
+    const block = this.fullscreenPhoto;
+    if (block !== undefined) {
+      await this.restylePhoto(block.id);
+    }
+  }
+
+  private deleteFullscreenPhoto(): void {
+    const block = this.fullscreenPhoto;
+    if (block !== undefined) {
+      this.deletePhotoById(block.id);
+    }
+  }
+
+  /**
+   * 存盘 / 放弃时清没被引用的照片文件（iOS removeUnusedMedia）：
+   * 本次新落盘的 + 草稿带进来的，凡不在最终块里的删掉；文件真删（不留撤销余地，
+   * 摇一摇撤销是 iOS 独有，鸿蒙 2.x 不做）。
+   */
+  private cleanupUnreferencedPhotos(keptBlocks: ContentBlock[]): void {
+    const referenced = new Set<string>();
+    for (const block of keptBlocks) {
+      const names = [block.photoFilename, block.livePhotoVideoFilename, block.livePhotoStillFilename];
+      for (const name of names) {
+        if (name !== undefined) {
+          referenced.add(name);
+        }
+      }
+    }
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const io = PhotoPaperIO.forFilesDir(context.filesDir);
+    const tracked = new Set<string>();
+    this.insertedMediaNames.forEach((name: string): void => {
+      tracked.add(name);
+    });
+    this.restoredPhotoNames.forEach((name: string): void => {
+      tracked.add(name);
+    });
+    for (const name of tracked) {
+      if (!referenced.has(name)) {
+        io.deleteImage(name);
+      }
+    }
+    this.insertedMediaNames = new Set<string>(); // restored 留着跨多次存盘用（iOS 同款）
+  }
+
+  /** 放弃：本次新落盘的文件全清（草稿自己的文件走 deleteDraftMedia） */
+  private deleteAllInsertedPhotos(): void {
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined || this.insertedMediaNames.size === 0) {
+      this.insertedMediaNames = new Set<string>();
+      return;
+    }
+    const io = PhotoPaperIO.forFilesDir(context.filesDir);
+    for (const name of this.insertedMediaNames) {
+      io.deleteImage(name);
+    }
+    this.insertedMediaNames = new Set<string>();
+  }
+
+  /** 草稿带进来的照片文件名记账（存盘清理时认「草稿原有、这次删掉的」） */
+  private collectRestoredPhotoNames(blocks: ContentBlock[]): void {
+    for (const block of blocks) {
+      if (block.type !== ContentBlockType.Photo) {
+        continue;
+      }
+      const names = [block.photoFilename, block.livePhotoVideoFilename, block.livePhotoStillFilename];
+      for (const name of names) {
+        if (name !== undefined) {
+          this.restoredPhotoNames.add(name);
+        }
+      }
+    }
   }
 
   /** 顶栏（Navigation 标题栏内）：左上返回、右上完成
@@ -334,9 +715,9 @@ export struct ComposeView {
       CircleIconButton({
         iconRes: $r('sys.symbol.checkmark'),
         iconSize: 14,
-        // 直接引用 @State bodyText 的表达式（@Prop 依赖分析跟不进方法体），
-        // 与 hasContent() 等价：v1 正文就是全部内容
-        pressEnabled: this.bodyText.trim().length > 0,
+        // 直接引用 @State 的表达式（@Prop 依赖分析跟不进方法体），
+        // 与 hasContent() 等价：文字或照片任一有就算写了（iOS hasContent）
+        pressEnabled: this.bodyText.trim().length > 0 || this.bodyPhotoCount > 0,
         onTap: (): void => {
           this.saveEntryAndClose();
         }
@@ -348,14 +729,36 @@ export struct ComposeView {
 
   // ---- 判定（V1 组件不许用 getter，全部普通方法） ----
 
-  /** 正文有没有内容（✓ 能不能点）。标题不算 —— 只有标题没有正文，✓ 仍不可点 */
+  /** 正文有没有内容（✓ 能不能点）。照片也算（iOS hasContent）；只有标题不算 */
   private hasContent(): boolean {
-    return this.bodyText.trim().length > 0;
+    return this.bodyText.trim().length > 0 || this.bodyPhotoCount > 0;
   }
 
   /** 顶部字数 */
   private charCount(): number {
     return this.bodyText.length;
+  }
+
+  /** 块列表 → 正文纯文本（字数 / ✓ 判定镜像，2.5b） */
+  private bodyTextOf(blocks: ContentBlock[]): string {
+    let text = '';
+    for (const block of blocks) {
+      if (block.type === ContentBlockType.Text && block.text !== undefined) {
+        text += block.text;
+      }
+    }
+    return text;
+  }
+
+  /** 块列表 → 照片张数（✓ 判定镜像） */
+  private photoCountOf(blocks: ContentBlock[]): number {
+    let count = 0;
+    for (const block of blocks) {
+      if (block.type === ContentBlockType.Photo) {
+        count++;
+      }
+    }
+    return count;
   }
 
   // ---- RichEditor（标题 / 正文） ----
@@ -398,8 +801,9 @@ export struct ComposeView {
   }
 
   /**
-   * 草稿文本注入编辑器：onReady 与 loadPageData 谁后到谁触发，各自只注一次。
+   * 草稿标题注入标题编辑器：onReady 与 loadPageData 谁后到谁触发，只注一次。
    * 历史草稿标题可能超 40 / 带换行（旧版本存入），注入前就地清洗。
+   * （正文走 injectDraftIntoBody 双信号装载。）
    */
   private injectDraftIntoEditors(): void {
     if (this.titleEditorReady && !this.draftInjectedTitle) {
@@ -410,11 +814,19 @@ export struct ComposeView {
         this.titleEditor.addTextSpan(restored, { style: this.titleTextStyle() });
       }
     }
-    if (this.bodyReady && !this.draftInjectedBody) {
+  }
+
+  /**
+   * 草稿正文装载：编辑器 onReady 与 loadPageData 双信号到齐才装一次
+   * （格式 / 分段 / 照片锚点随块恢复，2.5 装载语义）。
+   */
+  private injectDraftIntoBody(): void {
+    if (this.bodyEditorReady && this.pageDataLoaded && !this.draftInjectedBody) {
       this.draftInjectedBody = true;
-      // 草稿文档整篇装载（格式随 span 注入；没草稿也装载一次空文档，
-      // 把接下来打的字置成主题基础样式）
-      this.bodyController.loadDocument(this.draftDoc ?? new RichEditorDocument());
+      this.bodyController.loadDocument(
+        editorDocumentFromBlocks(this.draftBlocks),
+        anchoredBlocksOf(this.draftBlocks));
+      this.bodyPhotoCount = this.bodyController.photoCount();
     }
   }
 
@@ -429,17 +841,22 @@ export struct ComposeView {
       if (draft !== null) {
         this.draft = draft;
         this.title = draft.title;
-        // 草稿正文按块转成编辑器文档（格式 / 分段随文档装载恢复）
-        this.draftDoc = editorDocumentFromBlocks(draft.contentBlocks);
-        this.bodyText = this.draftDoc.text;
+        // 草稿正文按块备好（injectDraftIntoBody 装载编辑器，格式 / 分段 / 照片随块恢复）
+        this.draftBlocks = draft.contentBlocks;
+        this.collectRestoredPhotoNames(draft.contentBlocks);
+        this.bodyText = this.bodyTextOf(draft.contentBlocks);
+        this.bodyPhotoCount = this.photoCountOf(draft.contentBlocks);
         this.moodName = draft.mood;
         this.moodColorHex = draft.moodColorHex ?? '';
         const restored = restoredNotebookSelection(draft.tags, []);
         this.selectedNotebookName = restored.length > 0 ? restored[0] : '';
         this.didRestoreDraft = true;
-        // RichEditor 不能用 text 参数绑定，草稿文本在 controller 就绪后注入
+        // RichEditor 不能用 text 参数绑定，草稿标题在 controller 就绪后注入
         this.injectDraftIntoEditors();
       }
+      // 有无草稿都算数据就绪（空数组 = 空正文），装载信号二
+      this.pageDataLoaded = true;
+      this.injectDraftIntoBody();
       this.moods = await MoodRepository.fetchAllMoods(store);
       this.notebooks = await NotebookRepository.fetchAllNotebooks(store);
     } catch (err) {
@@ -492,16 +909,19 @@ export struct ComposeView {
     if (this.selectedNotebookName.length > 0) {
       entry.tags = [this.selectedNotebookName];
     }
-    // 正文读回 → 块（2.5：格式随 TextStyleRun 存盘；照片 / 录音锚点 2.6/2.7 接）
+    // 正文块（编辑器文档读回 + 照片侧表拆回，2.5 保存链路）
     const blocks = composeCleanedBlocks(
       blocksWithEditorDocument(this.bodyController.currentDocument(),
-        new Map<string, ContentBlock>(), generateUuid), generateUuid);
+        this.bodyController.photoBlocks, generateUuid),
+      generateUuid);
     entry.setContentBlocks(blocks, now); // 唯一写入口：content / wordCount / audioURLs 同步派生
     try {
       await EntryRepository.insertEntry(store, entry);
       if (this.draft !== undefined) {
         await DraftRepository.deleteDraftRecord(store, this.draft.id);
       }
+      // 转正的文件归日记了；这次新落盘又没进正文的清掉（iOS removeUnusedMedia）
+      this.cleanupUnreferencedPhotos(blocks);
       // 保存成功后主页刷新由 Index.onPageShow 的 reload tick 驱动
       //（主页被本页盖住时赋值不渲染，写入侧通知不可用，见 HomeLogic 注释）
     } catch (err) {
@@ -533,9 +953,11 @@ export struct ComposeView {
     const now = Date.now();
     const draft = this.draft ?? new DraftEntry(generateUuid(), now, now);
     draft.title = this.title;
+    // 正文块（编辑器文档读回 + 照片侧表拆回，2.5 保存链路）
     const blocks = composeCleanedBlocks(
       blocksWithEditorDocument(this.bodyController.currentDocument(),
-        new Map<string, ContentBlock>(), generateUuid), generateUuid);
+        this.bodyController.photoBlocks, generateUuid),
+      generateUuid);
     draft.setContentBlocks(blocks, now);
     draft.mood = this.moodName;
     draft.moodColorHex = this.moodColorHex.length > 0 ? this.moodColorHex : undefined;
@@ -544,6 +966,8 @@ export struct ComposeView {
     try {
       await DraftRepository.saveDraft(store, draft);
       this.draft = draft;
+      // 草稿还引用的文件留给草稿；这次删掉没进草稿的清掉（iOS removeUnusedMedia）
+      this.cleanupUnreferencedPhotos(blocks);
       return true;
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'saveDraft failed: %{public}s', JSON.stringify(err));
@@ -570,6 +994,8 @@ export struct ComposeView {
         hilog.error(DOMAIN, TAG, 'discard draft failed: %{public}s', JSON.stringify(err));
       }
     }
+    // 本次新落盘又没进草稿的照片文件一并清掉（不留孤儿文件）
+    this.deleteAllInsertedPhotos();
     this.getUIContext().getRouter().back();
   }
 

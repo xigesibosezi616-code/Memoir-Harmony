@@ -1,10 +1,6 @@
 {
   "string": [
     {
-      "name": "EntryAbility_label",
-      "value": "Déjà Vu"
-    },
-    {
       "name": "lang_name_zh_hans",
       "value": "简体中文"
     },
@@ -31,6 +27,10 @@
     {
       "name": "lang_name_es",
       "value": "Español"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "Déjà Vu"
     },
     {
       "name": "s_00360964eb",
@@ -2699,6 +2699,18 @@
     {
       "name": "s_e15f73bdc6",
       "value": "Déjà Vu utilise l’appareil photo pour ajouter des photos à vos entrées."
+    },
+    {
+      "name": "s_7c3f9e2a",
+      "value": "Placer à"
+    },
+    {
+      "name": "s_2e8d4f6b",
+      "value": "Gauche"
+    },
+    {
+      "name": "s_9b5c1d3f",
+      "value": "Droite"
     }
   ]
 }

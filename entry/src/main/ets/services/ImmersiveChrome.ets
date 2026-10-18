@@ -26,6 +26,12 @@ export const STORAGE_KEY_SAFE_AREA_BOTTOM_VP = 'safeAreaBottomVp';
 export const STORAGE_KEY_SAFE_AREA_LEFT_VP = 'safeAreaLeftVp';
 /** AppStorage key：右侧避让宽度（vp） */
 export const STORAGE_KEY_SAFE_AREA_RIGHT_VP = 'safeAreaRightVp';
+/**
+ * AppStorage key：照片全屏查看期间藏主框架浮动 Tab 栏。
+ * 页面内浮层（弃用 bindContentCover 后）盖不住 HdsTabs 的 barOverlap 层，
+ * 全屏打开的页面置 true、关闭置 false，MainTabsView 读它把 barOpacity 置 0。
+ */
+export const STORAGE_KEY_HIDE_TAB_BAR = 'hideTabBar';
 
 /** px → vp（`display.densityPixels`；密度非法时返回 0 兜底。纯函数） */
 export function vpFromPx(px: number, densityPixels: number): number {

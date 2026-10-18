@@ -10,8 +10,10 @@
  *   其余主题普通版式：日期星期 + 心情徽标 + 此时此地 + 标题 + 标签 + 分割线 + 正文
  * - 「补记 N 次」行不渲染：addendumDays 依赖块级时间戳（Ink），2.5 富文本
  *   之前恒为空 —— 与 R-ENTRY-14「没补记过不显示」一致，偏差记 09 Q24
- * - 正文富文本只读展示（2.5，R-ENTRY-12）：RichBodyEditor editable=false，
- *   与写日记 / 编辑页同一套排版（素笺 17fp）—— 加粗 / 斜体 / 小标题 / 荧光笔原样渲染
+ * - 正文富文本只读展示（2.5 RichBodyEditor editable=false，2026-10-18 回退
+ *   备忘录式——绕排连环平台缺陷后产品拍板，见 09 Q23）：照片整行锚点卡
+ *   （纯预览，轻点/长按开全屏）+ 文字上下独立段；加粗 / 斜体 / 小标题 /
+ *   荧光笔原样渲染（素笺 17fp）；不响应触摸，父级 Scroll 可滚
  * - 右上编辑（push 2.4 编辑页）+ 删除（官方 AlertDialog 确认 + 先媒体后库记录，
  *   R-DATA-07）；从编辑页返回由 Index.onPageShow 广播的 reload tick 驱动重查
  */
@@ -23,7 +25,8 @@ import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
 import { STORAGE_KEY_APP_LANGUAGE } from '../../services/LanguageManager';
 import {
-  STORAGE_KEY_SAFE_AREA_BOTTOM_VP
+  STORAGE_KEY_SAFE_AREA_BOTTOM_VP,
+  STORAGE_KEY_HIDE_TAB_BAR
 } from '../../services/ImmersiveChrome';
 import { AppDatabase } from '../../data/Database';
 import { EntryRepository } from '../../data/EntryRepository';
@@ -38,13 +41,15 @@ import {
   dayOnes
 } from '../../services/AppDateFormatters';
 import { JournalEntry } from '../../models/JournalEntry';
+import { ContentBlock, ContentBlockType } from '../../models/ContentBlock';
 import { isDefaultMoodKey } from '../../models/Mood';
+import { RichBodyController, RichBodyEditor } from '../components/richtext/RichBodyEditor';
 import {
-  RichEditorDocument,
+  anchoredBlocksOf,
   editorDocumentFromBlocks
 } from '../../models/RichDocument';
-import { RichBodyController, RichBodyEditor } from '../components/richtext/RichBodyEditor';
 import { CircleIconButton } from '../compose/CircleIconButton';
+import { PhotoFullScreenCover } from '../components/photo/PhotoFullScreenCover';
 import { MoodBadge, moodLabelRes } from '../components/MoodBadge';
 import { TagPill } from '../components/TagPill';
 import { StampView } from '../components/StampView';
@@ -74,11 +79,63 @@ export struct EntryDetailView {
   reloadTick: number = 0;
 
   @State entry: JournalEntry | undefined = undefined;
+  // ---- 2.6 照片全屏预览（R-ENTRY-13：详情页只看，不给编辑菜单） ----
+  @State @Watch('onPhotoFullscreenChanged') showPhotoFullscreen: boolean = false;
+  @State fullscreenPhoto: ContentBlock | undefined = undefined;
 
-  /** 正文富文本只读控制器（2.5：与编辑页同一套排版渲染） */
+  /** 正文只读控制器（2.5 RichBodyEditor editable=false，回退备忘录式） */
   private bodyController: RichBodyController = new RichBodyController();
-  private bodyReady: boolean = false;
-  private detailDoc: RichEditorDocument | undefined = undefined;
+  /** 正文编辑器就绪（onReady；与 entry 加载双信号装载，重查时重装） */
+  private bodyEditorReady: boolean = false;
+
+  /** 只读态照片轻点 / 长按 → 开全屏（PhotoAnchorCard 纯预览路径） */
+  private wireBodyController(): void {
+    this.bodyController.onPhotoTap = (blockId: string): void => {
+      this.openPhotoFullscreen(blockId);
+    };
+  }
+
+  /**
+   * 正文装载：entry 就绪 + 编辑器 onReady 双信号；从编辑页返回重查时
+   * entry 整篇替换，这里跟着重装（loadDocument 全量重置，幂等）。
+   */
+  private loadBodyIntoEditor(): void {
+    const entry = this.entry;
+    if (this.bodyEditorReady && entry !== undefined) {
+      this.bodyController.loadDocument(
+        editorDocumentFromBlocks(entry.contentBlocks),
+        anchoredBlocksOf(entry.contentBlocks));
+    }
+  }
+
+  /** 全屏浮层开/关（@Watch 联动隐藏主框架 Tab 栏，见 MainTabsView barOpacity） */
+  private onPhotoFullscreenChanged(): void {
+    AppStorage.setOrCreate(STORAGE_KEY_HIDE_TAB_BAR, this.showPhotoFullscreen);
+  }
+
+  /** 正文照片轻点 / 长按 → 从正文块里找本体开全屏（R-ENTRY-13 纯预览） */
+  private openPhotoFullscreen(blockId: string): void {
+    const entry = this.entry;
+    if (entry === undefined) {
+      return;
+    }
+    for (const block of entry.contentBlocks) {
+      if (block.id === blockId && block.type === ContentBlockType.Photo) {
+        this.fullscreenPhoto = block;
+        this.showPhotoFullscreen = true;
+        return;
+      }
+    }
+  }
+
+  aboutToAppear(): void {
+    this.wireBodyController();
+  }
+
+  aboutToDisappear(): void {
+    // 全屏浮层没关就被路由弹走（边滑返回）时，别把主框架 Tab 栏一直藏着
+    AppStorage.setOrCreate(STORAGE_KEY_HIDE_TAB_BAR, false);
+  }
 
   /** 路由参数：日记 id（onReady 从 NavDestinationContext.pathInfo 取） */
   private entryId: string = '';
@@ -91,8 +148,9 @@ export struct EntryDetailView {
     // 其他组件仅在 Navigation/NavDestination 标题栏或底部 TabBar 生效，
     // 《沉浸光感常见问题》）。标题栏自动避让状态栏，无需手动 safeAreaTop。
     NavDestination() {
-      if (this.entry !== undefined) {
-        Scroll() {
+      Stack() {
+        if (this.entry !== undefined) {
+          Scroll() {
           if (this.theme.id === 'bamboo') {
             // ---- 和纸版式（素笺；用自己的色板，不走 theme token） ----
             Column() {
@@ -199,16 +257,15 @@ export struct EntryDetailView {
                 .height(0.5)
                 .backgroundColor(0x80D4C9B8)
 
-              // 正文（富文本只读，2.5；紧接全宽分割线）
-              if (this.entry.content.length > 0) {
+              // 正文（富文本只读，2.5 RichBodyEditor：备忘录式整行照片卡 +
+              // 文字上下独立段；照片纯预览轻点开全屏；紧接全宽分割线）
+              if (this.entry.content.length > 0 || this.entry.photoCount > 0) {
                 RichBodyEditor({
                   controller: this.bodyController,
                   editable: false,
                   onReady: (): void => {
-                    this.bodyReady = true;
-                    if (this.detailDoc !== undefined) {
-                      this.bodyController.loadDocument(this.detailDoc);
-                    }
+                    this.bodyEditorReady = true;
+                    this.loadBodyIntoEditor();
                   }
                 })
                   .padding({ top: 6 })
@@ -274,16 +331,15 @@ export struct EntryDetailView {
                 .strokeWidth(0.5)
                 .color(this.theme.border)
 
-              // 正文（富文本只读，2.5；照片 / 录音块在 2.6~2.8 的卡片渲染）
-              if (this.entry.content.length > 0) {
+              // 正文（富文本只读，2.5 RichBodyEditor：备忘录式整行照片卡 +
+              // 文字上下独立段；照片纯预览轻点开全屏）
+              if (this.entry.content.length > 0 || this.entry.photoCount > 0) {
                 RichBodyEditor({
                   controller: this.bodyController,
                   editable: false,
                   onReady: (): void => {
-                    this.bodyReady = true;
-                    if (this.detailDoc !== undefined) {
-                      this.bodyController.loadDocument(this.detailDoc);
-                    }
+                    this.bodyEditorReady = true;
+                    this.loadBodyIntoEditor();
                   }
                 })
               }
@@ -303,7 +359,17 @@ export struct EntryDetailView {
         .align(Alignment.Top)
         .scrollBar(BarState.Off)
         .edgeEffect(EdgeEffect.Spring)
+        }
+
+        // 照片全屏预览（2.6）：页面内条件浮层（Stack 末位 = 最顶层）。详情页
+        // 纯查看；弃用 bindContentCover 理由同写/编页（真机「隐形挂载」吞触摸），
+        // 且浮层需与标题栏联动隐藏，避免 112vp 标题栏盖在全屏图上。
+        if (this.showPhotoFullscreen) {
+          this.PhotoFullscreenBuilder()
+        }
       }
+      .width('100%')
+      .height('100%')
     }
     // 112vp 大标题区（NavDestinationCustomTitle；builder 必须内联在调用点传
     // this 引用——捕获进字段会丢掉 @Builder 作用域装置，渲染时崩溃
@@ -319,6 +385,8 @@ export struct EntryDetailView {
     // 大标题结构：112vp 栏 + 内容下移 56vp（遮挡区之下）+ hideBackButton 改用
     // 自带沉浸光感返回钮（与书写页一致）。
     .hideBackButton(true)
+    // 照片全屏时隐藏整个自定义标题栏（112vp），黑底照片延伸到顶
+    .hideTitleBar(this.showPhotoFullscreen)
     .backgroundColor(this.theme.background)
     // onReady：取真导航栈 + 路由参数（日记 id）并首查；
     // 之后从编辑页返回由 Index.onPageShow 广播的 reload tick 重查
@@ -340,6 +408,20 @@ export struct EntryDetailView {
         this.loadEntry(context);
       }
     })
+  }
+
+  /** 照片全屏预览内容（详情页只看：编辑回调全不给，⋯ 菜单不显示） */
+  @Builder
+  PhotoFullscreenBuilder() {
+    if (this.fullscreenPhoto !== undefined) {
+      PhotoFullScreenCover({
+        photo: this.fullscreenPhoto,
+        onDismiss: (): void => {
+          this.showPhotoFullscreen = false;
+          this.fullscreenPhoto = undefined;
+        }
+      })
+    }
   }
 
   /** 顶栏（NavDestination 标题栏内）：左返回、右编辑 + 删除
@@ -443,14 +525,10 @@ export struct EntryDetailView {
       const store = await AppDatabase.open(context);
       this.store = store;
       const loaded = await EntryRepository.fetchEntryById(store, this.entryId);
+      // 整篇替换（entry @State → 版式重渲染）；正文编辑器跟着重装
+      //（loadBodyIntoEditor 全量装载，编辑返回 reload tick 重查时同样成立）
       this.entry = loaded ?? undefined;
-      // 正文块 → 富文本文档（块格式随 span 渲染）；编辑返回 reload tick 重查时整篇重载
-      if (loaded !== null) {
-        this.detailDoc = editorDocumentFromBlocks(loaded.contentBlocks);
-        if (this.bodyReady) {
-          this.bodyController.loadDocument(this.detailDoc);
-        }
-      }
+      this.loadBodyIntoEditor();
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'loadEntry failed id=%{public}s: %{public}s', this.entryId, JSON.stringify(err));
     }

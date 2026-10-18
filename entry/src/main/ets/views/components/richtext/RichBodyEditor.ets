@@ -1,24 +1,46 @@
 /**
- * 富文本正文编辑器（10_BUILD_MANUAL.md 2.5）。对应 iOS `Views/Components/RichText/RichTextView.swift`。
+ * 富文本正文编辑器（10_BUILD_MANUAL.md 2.5/2.6）。对应 iOS `Views/Components/RichText/RichTextView.swift`。
  *
  * - `RichBodyController`：包一层 RichEditorController —— 文档装载 / 读回、
  *   四盏格式灯（加粗 / 斜体 / 小标题 / 荧光笔）状态、切换（选区逐 span 应用、
- *   无选区改接下来打的字）、选中菜单「荧光笔 / 擦掉荧光笔」
+ *   无选区改接下来打的字）、选中菜单「荧光笔 / 擦掉荧光笔」、
+ *   照片锚点注册表（2.6）
  * - `RichBodyEditor`：渲染组件。`editable=false`（详情页）只读展示同一套排版
  *
  * 灯的语义与 iOS 一致：选中区间内**全部**有该格式才算亮；toggle 翻转 = 全亮→关，否则→开；
  * 小标题整段生效（getParagraphs）；无选区改 typingStyle（接下来打的字）。
+ *
+ * 2.6 照片锚点（Q23 退化方案：builder span 整行卡片，宽 46%）：
+ * - builder span 内容 getSpans 拿不到（官方 FAQ「使用RichEditor实现@用户名效果」），
+ *   锚点 ↔ 照片块映射自维护：`photoBlocks`（id → 本体，页面当 anchored 侧表）+
+ *   `photoOrder`（正文顺序）
+ * - 锚点在 getSpans 里表现为无 value 的 span、占 1 个偏移（同图片 span），
+ *   读回时按顺序与 photoOrder 配对；个数对不上打诊断日志（真机 spike 重点）
+ * - 退格两段式（R-RICH-05）：aboutToDelete 拦截 —— 第一次重建该卡带选中态并
+ *   return false，第二次自行 deleteSpans；范围删除连文字带锚点放行，
+ *   onDeleteComplete 同步注册表并通知页面清文件
  */
+import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../../../theme/AppTheme';
 import { BambooTheme } from '../../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../../theme/ThemeManager';
 import {
+  ContentBlock,
+  PHOTO_LIMIT_PER_ENTRY
+} from '../../../models/ContentBlock';
+import {
+  RICH_ANCHOR,
   RichEditorDocument,
   RichFormatFlags,
   RichSpan,
-  mergeAdjacentRichSpans
+  mergeAdjacentRichSpans,
+  photoInsertionPlan
 } from '../../../models/RichDocument';
+import { PhotoAnchorCard } from '../photo/PhotoAnchorCard';
 import { RichTextAppearance, isTransparentColor } from './RichTextAppearance';
+
+const DOMAIN = 0x0000;
+const TAG = 'RichBodyEditor';
 
 /** 四种可切换的格式（工具条 + 选中菜单共用） */
 export enum RichFormatKind {
@@ -95,6 +117,38 @@ export class RichBodyController {
   /** 文本变化（给页面同步 bodyText / 字数） */
   onTextChange: (text: string) => void = (): void => {};
 
+  // ---- 2.6 照片锚点（builder span 注册表，官方最佳实践自维护） ----
+
+  /** 照片块本体（id → block）。页面读它当 `blocksWithEditorDocument` 的 anchored 侧表 */
+  photoBlocks: Map<string, ContentBlock> = new Map<string, ContentBlock>();
+  /** 正文照片被长按（打开全屏查看；轻点已让位给功能条） */
+  onPhotoTap: (blockId: string) => void = (_blockId: string): void => {};
+  /** 功能条：放左 / 右侧互换（blockId 定位，双击秒换边同路） */
+  onPhotoTogglePosition: (blockId: string) => void = (_blockId: string): void => {};
+  /** 功能条：设为 / 取消封面（清旧由页面保证） */
+  onPhotoToggleCover: (blockId: string) => void = (_blockId: string): void => {};
+  /** 功能条：换相纸（页面重开相纸选择器） */
+  onPhotoRestyle: (blockId: string) => void = (_blockId: string): void => {};
+  /** 功能条：删除照片（页面负责确认弹窗） */
+  onPhotoDelete: (blockId: string) => void = (_blockId: string): void => {};
+  /** 照片被移出正文（菜单删除 / 两段式退格 / 范围删除）——页面清落盘文件 */
+  onPhotoRemoved: (blockId: string) => void = (_blockId: string): void => {};
+  /**
+   * 锚点卡内容工厂（组件 aboutToAppear 注入 —— addBuilderSpan 的 builder
+   * 必须在组件上下文里建，controller 是纯类拿不到 @Builder）
+   */
+  anchorCardBuilderFactory:
+    ((block: ContentBlock, armed: boolean) => CustomBuilder) | undefined = undefined;
+
+  /** 正文里的照片按出现顺序排的 id（读回时与 getSpans 的无 value span 顺序配对） */
+  private photoOrder: string[] = [];
+  /** 第一次退格选中的照片（R-RICH-05 两段式） */
+  private armedPhotoId: string | undefined = undefined;
+  /** 自发的 deleteSpans 不拦（防两段式 / 更新重插时递归触发 aboutToDelete） */
+  private selfDeleting: boolean = false;
+  /** 范围删除放行后、等 onDeleteComplete 同步出表的锚点 id */
+  private pendingRemovedIds: string[] = [];
+
   private appearance: RichTextAppearance = new RichTextAppearance(14, 8, Color.Transparent,
     Color.Black, 'serif');
 
@@ -103,13 +157,29 @@ export class RichBodyController {
     this.appearance = appearance;
   }
 
-  /** 装载文档：清空 → 逐 span 注入样式 → 重置接下来打的字为基础样式 */
-  loadDocument(doc: RichEditorDocument): void {
+  /** 正文照片张数（上限 5，05 §3.6） */
+  photoCount(): number {
+    return this.photoOrder.length;
+  }
+
+  /**
+   * 装载文档：清空 → 逐 span 注入（照片锚点按侧表建 builder span）→ 重置接下来打的字。
+   * `anchored`：照片 / 录音 / 痕迹块本体（id → block）；侧表里没有的锚点不进正文。
+   */
+  loadDocument(doc: RichEditorDocument,
+    anchored: Map<string, ContentBlock> = new Map<string, ContentBlock>()): void {
     this.editor.deleteSpans({});
+    this.photoBlocks.clear();
+    this.photoOrder = [];
+    this.armedPhotoId = undefined;
+    this.pendingRemovedIds = [];
     for (const span of doc.spans) {
       if (span.anchorBlockId !== undefined) {
-        // 2.5 页面只装纯文本文档；锚点由 2.6（照片）/2.7（录音）接自定义块时处理
-        continue;
+        const block = anchored.get(span.anchorBlockId);
+        if (block !== undefined) {
+          this.appendPhotoAnchor(block);
+        }
+        continue; // 找不到本体的锚点不画（iOS 同款）
       }
       this.editor.addTextSpan(span.text, { style: this.appearance.textStyleFor(span.flags) });
     }
@@ -118,19 +188,36 @@ export class RichBodyController {
   }
 
   /**
-   * 读回文档。**限制**：RichEditor 样式装不下墨迹时刻（writtenAt / struckAt），
-   * 读回恒为空 —— 2.5 页面只有纯文本，2.8 接墨迹交互时在调用侧把锚点 / 墨迹合并回去。
+   * 读回文档。照片锚点 = getSpans 里的无 value span（builder span 内容拿不到，
+   * 官方 FAQ 配方：按出现顺序与 photoOrder 配对），个数对不上打诊断日志。
    */
   currentDocument(): RichEditorDocument {
     const doc = new RichEditorDocument();
     const spans: RichSpan[] = [];
+    let anchorCursor = 0;
     for (const raw of this.editor.getSpans({})) {
-      // getSpans 返回 Image|Text 联合：图片 span 没有 value / textStyle（运行时 undefined）
+      // getSpans 返回 Image|Text 联合：锚点 span 没有 value / textStyle（运行时 undefined）
       const span = raw as RichEditorTextSpanResult;
       if (span.value === undefined || span.textStyle === undefined) {
+        if (anchorCursor < this.photoOrder.length) {
+          const blockId = this.photoOrder[anchorCursor];
+          const block = this.photoBlocks.get(blockId);
+          if (block !== undefined) {
+            spans.push(new RichSpan(RICH_ANCHOR, new RichFormatFlags(), blockId, block.type));
+          } else {
+            hilog.warn(DOMAIN, TAG, 'anchor #%d id %s missing body', anchorCursor, blockId);
+          }
+        } else {
+          hilog.warn(DOMAIN, TAG, 'anchor span #%d exceeds registry', anchorCursor);
+        }
+        anchorCursor++;
         continue;
       }
       spans.push(new RichSpan(span.value, flagsFromTextStyle(this.appearance, span.textStyle)));
+    }
+    if (anchorCursor !== this.photoOrder.length) {
+      hilog.warn(DOMAIN, TAG, 'anchor/registry mismatch: spans=%{public}d registry=%{public}d',
+        anchorCursor, this.photoOrder.length);
     }
     doc.spans = mergeAdjacentRichSpans(spans);
     let text = '';
@@ -141,9 +228,239 @@ export class RichBodyController {
     return doc;
   }
 
+  // ---- 2.6 照片锚点操作（插入 / 更新 / 删除 / 两段式退格） ----
+
+  /**
+   * 在光标处插照片（R-RICH-03 三分支由 `photoInsertionPlan` 纯函数算好）。
+   * 返回 false = 超上限 5 张或组件还没注入内容工厂（兜底，页面正常不该走到）。
+   */
+  insertPhoto(block: ContentBlock): boolean {
+    if (this.photoOrder.length >= PHOTO_LIMIT_PER_ENTRY ||
+      this.anchorCardBuilderFactory === undefined) {
+      return false;
+    }
+    const plan = photoInsertionPlan(this.liveText(), this.editor.getCaretOffset());
+    let anchorOffset = plan.insertOffset;
+    if (plan.needsNewlineBefore) {
+      // 段中：先断成两段（基础样式），照片挂后一段开头
+      this.editor.addTextSpan('\n', {
+        offset: plan.insertOffset,
+        style: this.appearance.baseTextStyle()
+      });
+      anchorOffset += 1;
+    }
+    this.photoBlocks.set(block.id, block);
+    this.photoOrder.splice(this.anchorIndexAt(anchorOffset), 0, block.id);
+    this.editor.addBuilderSpan(this.anchorCardBuilderFactory(block, false), { offset: anchorOffset });
+    this.editor.setCaretOffset(plan.caretAfter);
+    hilog.info(DOMAIN, TAG, 'insertPhoto id=%{public}s file=%{public}s anchorOffset=%{public}d',
+      block.id, block.photoFilename ?? 'nil', anchorOffset);
+    this.refreshFlags(); // 工具条照片键置灰镜像靠 onFlagsChange
+    this.notifyTextChange();
+    return true;
+  }
+
+  /** 照片块更新（换相纸 / 换边 / 设为封面）：替换注册表本体，同偏移删旧卡重插新卡 */
+  updatePhoto(block: ContentBlock): void {
+    const index = this.photoOrder.indexOf(block.id);
+    if (index < 0 || this.anchorCardBuilderFactory === undefined) {
+      return;
+    }
+    const offsets = this.anchorOffsets();
+    if (index >= offsets.length) {
+      hilog.warn(DOMAIN, TAG, 'updatePhoto offset missing, id=%{public}s', block.id);
+      return;
+    }
+    this.photoBlocks.set(block.id, block);
+    this.deleteRangeSelf(offsets[index], offsets[index] + 1);
+    this.editor.addBuilderSpan(this.anchorCardBuilderFactory(block, false), { offset: offsets[index] });
+    this.armedPhotoId = undefined;
+    this.refreshFlags();
+  }
+
+  /** 从正文删除指定照片（全屏菜单「删除照片」），出表 + 通知页面清文件 */
+  deletePhoto(blockId: string): void {
+    const index = this.photoOrder.indexOf(blockId);
+    if (index < 0) {
+      return;
+    }
+    const offsets = this.anchorOffsets();
+    if (index >= offsets.length) {
+      hilog.warn(DOMAIN, TAG, 'deletePhoto offset missing, id=%{public}s', blockId);
+      return;
+    }
+    this.photoOrder.splice(index, 1);
+    this.photoBlocks.delete(blockId);
+    this.deleteRangeSelf(offsets[index], offsets[index] + 1);
+    this.armedPhotoId = undefined;
+    this.onPhotoRemoved(blockId);
+    this.refreshFlags();
+    this.notifyTextChange();
+  }
+
+  /** 正文照片被长按（锚点卡 → 组件注入的 builder → 这里转给页面开全屏） */
+  requestOpenPhoto(blockId: string): void {
+    this.onPhotoTap(blockId);
+  }
+
+  /** 功能条动作转发（锚点卡 → 页面；blockId 定位，不依赖全屏态） */
+  requestTogglePosition(blockId: string): void {
+    this.onPhotoTogglePosition(blockId);
+  }
+
+  requestToggleCover(blockId: string): void {
+    this.onPhotoToggleCover(blockId);
+  }
+
+  requestRestyle(blockId: string): void {
+    this.onPhotoRestyle(blockId);
+  }
+
+  requestDelete(blockId: string): void {
+    this.onPhotoDelete(blockId);
+  }
+
+  /**
+   * 退格 / 删除拦截（R-RICH-05 两段式）：
+   * - 删除范围恰好盖住一个锚点：第一次选中（重建该卡带高亮）并拦下，第二次才删
+   * - 范围删除连文字带锚点：放行（返回 true），onDeleteComplete 里同步注册表
+   * - 自发的 deleteSpans（两段式第二下 / 更新重插）不进这
+   */
+  handleAboutToDelete(value: RichEditorDeleteValue): boolean {
+    if (this.selfDeleting) {
+      return true;
+    }
+    const start = value.direction === RichEditorDeleteDirection.BACKWARD
+      ? value.offset - value.length : value.offset;
+    const end = start + value.length;
+    const offsets = this.anchorOffsets();
+    const hits: number[] = [];
+    for (let i = 0; i < offsets.length; i++) {
+      if (offsets[i] >= start && offsets[i] < end) {
+        hits.push(i);
+      }
+    }
+    if (hits.length === 0) {
+      return true; // 纯文字删除：照常
+    }
+    if (hits.length === 1 && start === offsets[hits[0]] && end === offsets[hits[0]] + 1) {
+      const blockId = this.photoOrder[hits[0]];
+      if (this.armedPhotoId !== blockId) {
+        this.armPhotoAt(hits[0], blockId, offsets[hits[0]]);
+        return false; // 第一次：选中，拦下
+      }
+      // 第二次：删
+      this.photoOrder.splice(hits[0], 1);
+      this.photoBlocks.delete(blockId);
+      this.deleteRangeSelf(offsets[hits[0]], offsets[hits[0]] + 1);
+      this.armedPhotoId = undefined;
+      this.onPhotoRemoved(blockId);
+      this.refreshFlags();
+      this.notifyTextChange();
+      return false;
+    }
+    // 范围删除含锚点：放行，完成回调里按 pending 列表出表
+    for (const hit of hits) {
+      this.pendingRemovedIds.push(this.photoOrder[hit]);
+    }
+    return true;
+  }
+
+  /** 删除完成：放行的范围删除在这同步注册表 + 通知页面清文件 */
+  handleDeleteComplete(): void {
+    if (this.pendingRemovedIds.length === 0) {
+      return;
+    }
+    for (const blockId of this.pendingRemovedIds) {
+      const index = this.photoOrder.indexOf(blockId);
+      if (index >= 0) {
+        this.photoOrder.splice(index, 1);
+      }
+      this.photoBlocks.delete(blockId);
+      this.onPhotoRemoved(blockId);
+    }
+    this.pendingRemovedIds = [];
+    this.armedPhotoId = undefined;
+    this.refreshFlags();
+    this.notifyTextChange();
+  }
+
+  /** 第一次退格的选中态：同偏移重建该卡（armed 高亮），光标落在卡后（下一次退格再删它） */
+  private armPhotoAt(index: number, blockId: string, offset: number): void {
+    const block = this.photoBlocks.get(blockId);
+    if (block === undefined || this.anchorCardBuilderFactory === undefined) {
+      return;
+    }
+    this.armedPhotoId = blockId;
+    this.deleteRangeSelf(offset, offset + 1);
+    this.editor.addBuilderSpan(this.anchorCardBuilderFactory(block, true), { offset: offset });
+    this.editor.setCaretOffset(offset + 1);
+  }
+
+  /** 活文本：照片锚点各占 1 个 U+FFFC（与编辑器偏移一一对齐，photoInsertionPlan 用） */
+  private liveText(): string {
+    let text = '';
+    for (const raw of this.editor.getSpans({})) {
+      const span = raw as RichEditorTextSpanResult;
+      text += span.value === undefined ? RICH_ANCHOR : span.value;
+    }
+    return text;
+  }
+
+  /** 全部照片锚点在活文本里的偏移（升序；下标与 photoOrder 一一对应） */
+  private anchorOffsets(): number[] {
+    const offsets: number[] = [];
+    let cursor = 0;
+    for (const raw of this.editor.getSpans({})) {
+      const span = raw as RichEditorTextSpanResult;
+      if (span.value === undefined) {
+        offsets.push(cursor);
+        cursor += 1;
+      } else {
+        cursor += span.value.length;
+      }
+    }
+    return offsets;
+  }
+
+  /** 现有锚点里排在 offset 之前的个数（新锚点在 photoOrder 里的插入位） */
+  private anchorIndexAt(offset: number): number {
+    let index = 0;
+    let cursor = 0;
+    for (const raw of this.editor.getSpans({})) {
+      const span = raw as RichEditorTextSpanResult;
+      if (span.value === undefined) {
+        if (cursor < offset) {
+          index++;
+        }
+        cursor += 1;
+      } else {
+        cursor += span.value.length;
+      }
+    }
+    return index;
+  }
+
+  /** 文档装载路径：锚点 builder span 追加到当前末尾（spans 本来就是顺序装的） */
+  private appendPhotoAnchor(block: ContentBlock): void {
+    if (this.anchorCardBuilderFactory === undefined) {
+      hilog.warn(DOMAIN, TAG, 'anchorCardBuilderFactory missing, photo %{public}s dropped', block.id);
+      return;
+    }
+    this.photoBlocks.set(block.id, block);
+    this.photoOrder.push(block.id);
+    this.editor.addBuilderSpan(this.anchorCardBuilderFactory(block, false));
+  }
+
+  /** 自发的定点删除（不进 aboutToDelete 拦截） */
+  private deleteRangeSelf(start: number, end: number): void {
+    this.selfDeleting = true;
+    this.editor.deleteSpans({ start: start, end: end });
+    this.selfDeleting = false;
+  }
+
   /** 光标处（光标左一字符）的格式组；文档开头 = 全灭 */
-  cursorFlags(): RichFormatFlags {
-    const selection = this.editor.getSelection();
+  cursorFlags(): RichFormatFlags {    const selection = this.editor.getSelection();
     const end = selection.selection[1];
     if (end === 0) {
       return new RichFormatFlags();
@@ -347,9 +664,27 @@ export class RichBodyController {
     return false;
   }
 
-  /** 文本变化：读全文通知页面（bodyText / 字数 / ✓ 判定） */
+  /** 文本变化：读全文通知页面（bodyText / 字数 / ✓ 判定）——照片锚点不外漏 */
   notifyTextChange(): void {
-    this.onTextChange(this.editor.toStyledString({}).getString());
+    // getSpans 读法（与 liveText 同款，真机验证过锚点定位）：builder span 的 value
+    // 为 undefined，整段跳过。不能用 toStyledString：builder span 在里面是**占位
+    // 空格**（0x20，真机日志证实 split(U+FFFC) 剥离是空操作 → 纯照片正文「1 字」）。
+    let text = '';
+    for (const rawSpan of this.editor.getSpans({})) {
+      const span = rawSpan as RichEditorTextSpanResult;
+      if (span.value !== undefined) {
+        text += span.value;
+      }
+    }
+    // 段落分隔换行不算内容字符：iOS 文本块不含块间 \n（totalCharCount 只算内容），
+    // 拆回时补的换行也丢掉（RichDocument 双向规则同款）
+    const content = text.split('\n').join('');
+    // 诊断（真机）：两种读法对照（短文本才打，避免刷屏）
+    if (content.length <= 8) {
+      hilog.info(DOMAIN, TAG, 'notify spans=%{public}d styled=%{public}d content=%{public}d',
+        text.length, this.editor.toStyledString({}).getString().length, content.length);
+    }
+    this.onTextChange(content);
   }
 }
 
@@ -368,6 +703,39 @@ export struct RichBodyEditor {
 
   aboutToAppear(): void {
     this.controller.setAppearance(RichTextAppearance.forTheme(this.theme));
+    // 锚点卡内容工厂：builder 闭包必须在组件上下文里建（addBuilderSpan 官方配方），
+    // controller 是纯类，拿不到 @Builder —— 页面侧的插照片 / 装载都经它取内容
+    this.controller.anchorCardBuilderFactory =
+      (block: ContentBlock, armed: boolean): CustomBuilder => {
+        return (): void => {
+          this.PhotoAnchorCardBuilder(block, armed);
+        };
+      };
+  }
+
+  /** builder span 内容：一张相纸锚点卡（编辑态：轻点弹功能条 / 双击秒换边 /
+   *  长按开全屏；只读态（详情页）：四个编辑回调不给 = 纯预览卡，轻点即开全屏） */
+  @Builder
+  PhotoAnchorCardBuilder(block: ContentBlock, armed: boolean) {
+    PhotoAnchorCard({
+      block: block,
+      armed: armed,
+      onOpen: (blockId: string): void => {
+        this.controller.requestOpenPhoto(blockId);
+      },
+      onTogglePosition: this.editable ? (blockId: string): void => {
+        this.controller.requestTogglePosition(blockId);
+      } : undefined,
+      onToggleCover: this.editable ? (blockId: string): void => {
+        this.controller.requestToggleCover(blockId);
+      } : undefined,
+      onRestyle: this.editable ? (blockId: string): void => {
+        this.controller.requestRestyle(blockId);
+      } : undefined,
+      onDelete: this.editable ? (blockId: string): void => {
+        this.controller.requestDelete(blockId);
+      } : undefined
+    })
   }
 
   build() {
@@ -398,6 +766,12 @@ export struct RichBodyEditor {
       .onDidChange((): void => {
         this.controller.refreshFlags();
         this.controller.notifyTextChange();
+      })
+      // 退格两段式（R-RICH-05）：第一次选中照片拦下，第二次才删；范围删除放行后同步注册表
+      .aboutToDelete((value: RichEditorDeleteValue): boolean =>
+        this.controller.handleAboutToDelete(value))
+      .onDeleteComplete((): void => {
+        this.controller.handleDeleteComplete();
       })
       .editMenuOptions({
         onCreateMenu: (menuItems: Array<TextMenuItem>): Array<TextMenuItem> =>

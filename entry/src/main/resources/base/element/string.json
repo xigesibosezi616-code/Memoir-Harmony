@@ -9,10 +9,6 @@
       "value": "description"
     },
     {
-      "name": "EntryAbility_label",
-      "value": "尺素"
-    },
-    {
       "name": "lang_name_zh_hans",
       "value": "简体中文"
     },
@@ -39,6 +35,10 @@
     {
       "name": "lang_name_es",
       "value": "Español"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "尺素"
     },
     {
       "name": "s_00360964eb",
@@ -2707,6 +2707,18 @@
     {
       "name": "s_e15f73bdc6",
       "value": "尺素需要相机权限来为日记添加照片"
+    },
+    {
+      "name": "s_7c3f9e2a",
+      "value": "放在"
+    },
+    {
+      "name": "s_2e8d4f6b",
+      "value": "左边"
+    },
+    {
+      "name": "s_9b5c1d3f",
+      "value": "右边"
     }
   ]
 }

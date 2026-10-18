@@ -32,6 +32,9 @@ export enum PaperStyle {
   LetterAttached = 'letterAttached'
 }
 
+/** 每篇正文照片上限（05 §3.6，iOS `canInsertPaperPhoto` 同款 5 张） */
+export const PHOTO_LIMIT_PER_ENTRY: number = 5;
+
 export function contentBlockTypeFromRaw(raw: string): ContentBlockType | undefined {
   switch (raw) {
     case 'text': return ContentBlockType.Text;
@@ -60,6 +63,23 @@ export function paperStyleFromRaw(raw: string): PaperStyle | undefined {
     case 'letterAttached': return PaperStyle.LetterAttached;
     default: return undefined;
   }
+}
+
+/** 相纸是不是会员款（05 §3.5：原图 / 宝丽来免费，其余四种会员） */
+export function isMemberPaperStyle(style: PaperStyle): boolean {
+  return style === PaperStyle.WashiSticker || style === PaperStyle.MinimalCard ||
+    style === PaperStyle.FilmFrame || style === PaperStyle.LetterAttached;
+}
+
+/**
+ * 实际渲染用的相纸（05 §3.5）：存的是会员款而当前不是会员 → 按宝丽来渲染，
+ * **存的值不改写**。`isMember` 由 7.2 的会员判定接上；2.6 先全放开（判定恒放开）。
+ */
+export function effectivePaperStyle(style: PaperStyle, isMember: boolean): PaperStyle {
+  if (!isMember && isMemberPaperStyle(style)) {
+    return PaperStyle.Polaroid;
+  }
+  return style;
 }
 
 /** 两个 Unix 秒是否本地日历同一天（补记判定用；时区取设备本地） */

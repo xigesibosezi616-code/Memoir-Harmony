@@ -22,6 +22,8 @@ export const PREF_KEY_ACCEPTED_LEGAL_VERSION = 'acceptedLegalVersion';
 export const PREF_KEY_PEN_PAL_NAME = 'penPalName';
 /** 开场封面开关（对应 iOS `showSplashAnimation`，默认开） */
 export const PREF_KEY_SHOW_SPLASH_ANIMATION = 'showSplashAnimation';
+/** 插照片预选的相纸（对应 iOS `defaultPaperStyle`，默认 polaroid；05 §3.5） */
+export const PREF_KEY_DEFAULT_PAPER_STYLE = 'defaultPaperStyle';
 
 // ---- AppStorage 镜像 key（EntryAbility 启动时由偏好算好写入，UI 用 @StorageLink/@StorageProp 观察）----
 

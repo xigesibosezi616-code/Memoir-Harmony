@@ -2811,6 +2811,21 @@
       "zh": "尺素需要相机权限来为日记添加照片",
       "source": "InfoPlist",
       "comment": "Privacy - Camera Usage Description"
+    },
+    "s_7c3f9e2a": {
+      "zh": "放在",
+      "source": "Localizable",
+      "comment": "相纸选择：插入位置分段标签"
+    },
+    "s_2e8d4f6b": {
+      "zh": "左边",
+      "source": "Localizable",
+      "comment": "相纸选择：放在左边"
+    },
+    "s_9b5c1d3f": {
+      "zh": "右边",
+      "source": "Localizable",
+      "comment": "相纸选择：放在右边"
     }
   }
 }

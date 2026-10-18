@@ -17,6 +17,7 @@ import { AppTheme } from '../../../theme/AppTheme';
 import { BambooTheme } from '../../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../../theme/ThemeManager';
 import { STORAGE_KEY_SAFE_AREA_BOTTOM_VP } from '../../../services/ImmersiveChrome';
+import { PHOTO_LIMIT_PER_ENTRY } from '../../../models/ContentBlock';
 import { RichBodyController, RichFormatKind } from './RichBodyEditor';
 import { colorWithAlpha } from './RichTextAppearance';
 
@@ -28,6 +29,8 @@ const PRESS_CURVE = curves.springCurve(0, 1, 420, 28);
 struct RichFormatButton {
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
   @Prop isOn: boolean;
+  /** 不可用（如照片满 5 张）：降透明度、不响应；成员不能叫 enabled（撞 .enabled() 属性方法） */
+  buttonEnabled: boolean = true;
   @State pressed: boolean = false;
   iconRes: Resource = $r('sys.symbol.bold');
   labelRes: Resource = $r('app.string.s_f670b2adc0');
@@ -50,11 +53,17 @@ struct RichFormatButton {
       : (this.pressed ? colorWithAlpha(this.theme.textPrimary, 0x0F) : Color.Transparent))
     .scale({ x: this.pressed ? 0.92 : 1, y: this.pressed ? 0.92 : 1 })
     .animation({ curve: PRESS_CURVE })
+    .opacity(this.buttonEnabled ? 1 : 0.3)
     .accessibilityText(this.labelRes)
     .onClick((): void => {
-      this.onTap();
+      if (this.buttonEnabled) {
+        this.onTap();
+      }
     })
     .onTouch((event: TouchEvent): void => {
+      if (!this.buttonEnabled) {
+        return;
+      }
       if (event.type === TouchType.Down) {
         this.pressed = true;
       } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
@@ -77,6 +86,10 @@ export struct RichFormatToolbar {
   @State isItalicOn: boolean = false;
   @State isHeadingOn: boolean = false;
   @State isHighlightOn: boolean = false;
+  /** 照片按钮可否按（满 5 张置灰，05 §3.6） */
+  @State photoEnabled: boolean = true;
+  /** 点照片按钮（页面接相册选图 → 选相纸，2.6） */
+  onPhotoButtonTap: () => void = (): void => {};
   /** 主窗口句柄（键盘高度监听用；aboutToDisappear 注销） */
   private mainWindow: window.Window | undefined = undefined;
 
@@ -112,6 +125,7 @@ export struct RichFormatToolbar {
     this.isItalicOn = this.controller.isItalic;
     this.isHeadingOn = this.controller.isHeading;
     this.isHighlightOn = this.controller.isHighlighted;
+    this.photoEnabled = this.controller.photoCount() < PHOTO_LIMIT_PER_ENTRY;
   }
 
   build() {
@@ -150,6 +164,22 @@ export struct RichFormatToolbar {
           isOn: this.isHighlightOn,
           onTap: (): void => {
             this.controller.toggle(RichFormatKind.Highlight);
+          }
+        })
+        // 照片（2.6）：四灯右侧加分隔线再放照片键（iOS ComposeView 同位置）
+        Divider()
+          .vertical(true)
+          .strokeWidth(0.5)
+          .color(colorWithAlpha(this.theme.textTertiary, 0x40))
+          .height(20)
+          .margin({ left: 10, right: 10 })
+        RichFormatButton({
+          iconRes: $r('sys.symbol.picture'),
+          labelRes: $r('app.string.s_7945500987'),
+          isOn: false,
+          buttonEnabled: this.photoEnabled,
+          onTap: (): void => {
+            this.onPhotoButtonTap();
           }
         })
       }

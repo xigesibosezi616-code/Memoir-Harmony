@@ -14,9 +14,12 @@ import {
   RICH_ANCHOR,
   RichFormatFlags,
   RichSpan,
+  TextBlockRange,
   blocksWithEditorDocument,
   editorDocumentFromBlocks,
-  mergeAdjacentRichSpans
+  mergeAdjacentRichSpans,
+  photoInsertionPlan,
+  textBlockRangesOfBlocks
 } from '../../main/ets/models/RichDocument';
 
 let idCounter = 0;
@@ -47,6 +50,45 @@ function anchoredMap(blocks: ContentBlock[]): Map<string, ContentBlock> {
     }
   }
   return map;
+}
+
+/**
+ * textBlockRangesOfBlocks 一致性不变量（与 editorDocumentFromBlocks 同步推演）：
+ * 1. 区间数 = 文本块数，每个区间在 doc.text 里的切片 === 块原文
+ * 2. 不属于任何区间的字符（间隙）全部是 '\n' 或 RICH_ANCHOR
+ */
+function expectRangesConsistent(blocks: ContentBlock[]): void {
+  const doc = editorDocumentFromBlocks(blocks);
+  const ranges = textBlockRangesOfBlocks(blocks);
+  let textBlockCount = 0;
+  for (const block of blocks) {
+    if (block.type === ContentBlockType.Text) {
+      textBlockCount++;
+    }
+  }
+  expect(ranges.length).assertEqual(textBlockCount);
+  const covered = new Array<boolean>(doc.text.length).fill(false);
+  let r = 0;
+  for (const block of blocks) {
+    if (block.type !== ContentBlockType.Text) {
+      continue;
+    }
+    const range = ranges[r];
+    r++;
+    expect(range.blockIndex).assertEqual(blocks.indexOf(block));
+    const slice = doc.text.substring(range.start, range.start + range.length);
+    expect(slice).assertEqual(block.text ?? '');
+    for (let i = range.start; i < range.start + range.length; i++) {
+      covered[i] = true;
+    }
+  }
+  for (let i = 0; i < doc.text.length; i++) {
+    if (covered[i]) {
+      continue;
+    }
+    const ch = doc.text[i];
+    expect(ch === '\n' || ch === RICH_ANCHOR).assertTrue();
+  }
 }
 
 /** doc.spans 的文本拼起来必须等于 doc.text（区间连续且覆盖满全篇） */
@@ -401,6 +443,110 @@ export default function richDocumentTest() {
       expect(merged[0].text).assertEqual('ab');
       expect(merged[1].anchorBlockId).assertEqual('p1');
       expect(merged[2].text).assertEqual('cd');
+    })
+
+    // ---- R-RICH-03 插照落点（photoInsertionPlan） ----
+
+    it('insertAtParagraphEndHangsOnNextParagraph', 0, () => {
+      // 光标在段尾（右一字符是换行）：挂到下一段开头，光标不动
+      const text = '第一段\n第二段';
+      const plan = photoInsertionPlan(text, 3);
+      expect(plan.insertOffset).assertEqual(4);
+      expect(plan.needsNewlineBefore).assertFalse();
+      expect(plan.caretAfter).assertEqual(3);
+    })
+
+    it('insertAtParagraphStartHangsOnThisParagraph', 0, () => {
+      // 光标在段首（左一字符是换行）：挂这一段开头，光标落到照片后
+      const text = '第一段\n第二段';
+      const plan = photoInsertionPlan(text, 4);
+      expect(plan.insertOffset).assertEqual(4);
+      expect(plan.needsNewlineBefore).assertFalse();
+      expect(plan.caretAfter).assertEqual(5);
+    })
+
+    it('insertAtDocumentStartHangsOnFirstParagraph', 0, () => {
+      // 文档开头：挂第一段开头
+      const plan = photoInsertionPlan('正文', 0);
+      expect(plan.insertOffset).assertEqual(0);
+      expect(plan.needsNewlineBefore).assertFalse();
+      expect(plan.caretAfter).assertEqual(1);
+    })
+
+    it('insertMidParagraphSplitsIntoTwo', 0, () => {
+      // 段中：断成两段，照片挂后一段开头，光标跟在照片后
+      const text = 'abcdef';
+      const plan = photoInsertionPlan(text, 3);
+      expect(plan.insertOffset).assertEqual(3);
+      expect(plan.needsNewlineBefore).assertTrue();
+      expect(plan.caretAfter).assertEqual(5);
+    })
+
+    it('insertAtDocumentEndAppendsAfterSplit', 0, () => {
+      // 全文末尾（左一字符不是换行）：同段中分支，末尾断段追加
+      const plan = photoInsertionPlan('abcdef', 6);
+      expect(plan.insertOffset).assertEqual(6);
+      expect(plan.needsNewlineBefore).assertTrue();
+      expect(plan.caretAfter).assertEqual(8);
+    })
+
+    it('insertCaretIsClamped', 0, () => {
+      // 光标越界先夹回 [0, len]，不抛不炸
+      const plan = photoInsertionPlan('abc', 99);
+      expect(plan.insertOffset).assertEqual(3);
+      const planBefore = photoInsertionPlan('abc', -1);
+      expect(planBefore.insertOffset).assertEqual(0);
+    })
+
+    it('insertAfterTrailingAnchorAtEndSplits', 0, () => {
+      // 末尾已是照片锚点、光标在其后：走段中分支，新照片另起一段
+      const text = `一段话\n${RICH_ANCHOR}`;
+      const plan = photoInsertionPlan(text, text.length);
+      expect(plan.insertOffset).assertEqual(text.length);
+      expect(plan.needsNewlineBefore).assertTrue();
+    })
+
+    it('insertWhenNextCharIsAnchorFollowsParagraphRule', 0, () => {
+      // 光标右一字符是锚点（不是换行）：不属段尾分支，按段中/段首规则走
+      const text = `ab\n${RICH_ANCHOR}cd`;
+      const planAtAnchorStart = photoInsertionPlan(text, 3);
+      // 段首分支：左一字符是换行 → 挂这段开头（锚点前面）
+      expect(planAtAnchorStart.insertOffset).assertEqual(3);
+      expect(planAtAnchorStart.needsNewlineBefore).assertFalse();
+    })
+  })
+
+  describe('textBlockRangesOfBlocks', () => {
+    it('rangesMatchPlainParagraphs', 0, () => {
+      expectRangesConsistent([textBlock('第一段'), textBlock('第二段')]);
+    })
+
+    it('rangesMatchPhotoBetweenTexts', 0, () => {
+      expectRangesConsistent([textBlock('前文'), photoBlock(), textBlock('后文')]);
+    })
+
+    it('rangesMatchAudioAndTrace', 0, () => {
+      const trace = ContentBlock.makeTrace(makeId(), ContentBlockType.Photo, 12);
+      expectRangesConsistent([textBlock('a'), audioBlock(), textBlock('b'), trace, textBlock('c')]);
+    })
+
+    it('rangesMatchEmptyAndNewlineEnding', 0, () => {
+      expectRangesConsistent([textBlock('段尾换行\n'), textBlock(''), textBlock('x')]);
+    })
+
+    it('rangesMatchAnchorOnlyAndEmptyDoc', 0, () => {
+      expectRangesConsistent([photoBlock()]);
+      expectRangesConsistent([]);
+      expectRangesConsistent([textBlock('')]);
+    })
+
+    it('rangesStableAfterEditRoundtrip', 0, () => {
+      // 编辑后拆回的块，区间表仍然一致（光标映射在编辑中途不失准）
+      const blocks = [textBlock('第一段'), photoBlock(), textBlock('第二段')];
+      const doc = editorDocumentFromBlocks(blocks);
+      doc.text = doc.text.substring(0, 2) + '插入' + doc.text.substring(2);
+      const out = blocksWithEditorDocument(doc, anchoredMap(blocks), makeId);
+      expectRangesConsistent(out);
     })
   })
 }

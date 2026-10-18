@@ -232,6 +232,122 @@ agent 的通用开场提示词见 **附录 A**；鸿蒙仓库的 `CLAUDE.md` 模
   4. 每篇 ≤5 张（R-ENTRY-08）；会员锁先留钩子（7.2 接上）
 - **验收**：大图、竖图、全景图都不会撑破版面；退格先选中再删
 
+### 2.5b 编辑态绕排：隐形输入层（B1，2026-10-17 产品拍板）
+
+> ⚠️ **本章已回退作废（2026-10-18 产品拍板）**：绕排平台缺陷连环修不见底
+> （orphanCharOptimization×strut 两行零输出 / strut 行高实测不生效需探针自愈 /
+> heading 编辑器合并污染拆段追修三轮），三页全部回退华为备忘录式
+> （`RichBodyEditor` + `RichFormatToolbar` + 照片链路，真机三页冒烟 ✓）。
+> WrapFlow 全家桶 + 278 单测**下线保留**（页面零引用未删）；未建成功能与恢复
+> 条件见 **`11_UNBUILT_FEATURES.md`**。M2/M3/M4 任务随之作废，本章仅作
+> 攻坚史料保留——里面沉淀的平台实测结论（strut/orphan/pitch/invalidate）
+> 重启绕排时仍是第一手资料。
+>
+> 背景：2.6 追记的绕排攻坚阶段一（详情页阅读态 `WrapFlowView`）已真机验收；编辑态
+> （写/编页）实测整行卡换行推下移、体验割裂，用户拍板做 **B1 隐形输入层方案**。
+
+- **目标**：写/编页正文编辑态与阅读态**同构绕排**——照片浮动、打字实时绕排、光标/
+  选区/拼音组合正确，替代 `RichBodyEditor`。
+- **先读**：R-RICH-02/03/05/06/08；Q23（09，含真机实测两条硬约束）；2.5/2.6 的
+  PROGRESS 追记；`WrapFlowModel/Engine/TextAdapter/View` 四文件 + `WrapFlow.test.ets`；
+  `RichDocument.ets`（2.5 块↔文档转换，**拼接/拆回逻辑复用它**）；iOS
+  `Views/Components/RichText/RichTextView.swift`（编辑/阅读一体参照）。
+- **架构（定案，不再议）**
+  1. **渲染**：复用 `WrapFlowView`（graphics.text 自绘 + 照片卡组件叠放）
+  2. **输入**：1px 透明 `RichEditor` 隐形层承接输入法——内容与自绘文档同构
+     （`RichDocument` 拼接、照片锚点 U+FFFC 占位保持偏移一致）；`aboutToIMEInput`
+     （含 `previewText` 拼音组合）/ `aboutToDelete` 拦截（返回 false 阻止系统落字），
+     事件流入自研编辑模型 → relayout → 自绘重渲
+  3. **光标/选区**：graphics.text 无坐标→偏移 API，命中查询自算
+     （`getLineMetrics` 行定位 + `Run.getAdvances/getPositions` 行内最近字形）；
+     光标竖线/选区高亮/手柄全部自绘；`getRectsForRange` 画选区框、`getWordBoundary`
+     双击选词
+- **要做**
+  1. **M1 骨架** ✅（2026-10-17 全毕，含页面接入+真机 E2E）：编辑算子
+     `models/RichDocEditor.ets`（insert 继承左一字符/deleteRange 锚点保护/
+     insertAnchor/applyFlags(offset,length) 整段替换/flagsAt）+ diff 算子
+     `diffTextEdit`（隐形层单点 diff，拼音逐键即单点）+ 区间表
+     `textBlockRangesOfBlocks`（文本块↔全文档偏移映射，与 fromBlocks 同步推演）；
+     编辑组件 `richtext/WrapFlowEditor.ets`（渲染同构 WrapFlowView + 1px 透明隐形
+     RichEditor **diff 模式**：onDidChange→getSpans→diff→模型→拆回→relayout；
+     锚点保护两道闸 aboutToDelete 预判 + diff 兜底恢复；光标自绘闪烁
+     getRectsForRange(TIGHT,STRUT)；命中 getGlyphPositionAtCoordinate——**勘误：
+     该 API 存在（since 12），无需自算字形**；点击落光标/焦点 requestFocus）。
+      单测 272 全绿（258→272）。**页面接入+真机 E2E ✓（2026-10-17）**：
+      ComposeView/EditEntryView 换装 WrapFlowEditor（bodyLoaded 条件渲染防未装载
+      闪烁；新建日记 draftBlocks=[]）；光标落点三例日志全对（点正文 hit=6→插入@6、
+      点绕排区 hit=16→@16、uitest inputText(700,900) hit=22→@22；注入通道
+      `uitest uiInput text/inputText`，`uinput -K` 按键注入此设备实测无效弃用）；
+      **光标「落 0」疑案结案（非 bug）**：verify_ui 注入例程「全选→清除→输入」×
+      锚点保护交互——全选删除被 aboutToDelete 正确拦截（否则整篇+照片被删）→
+      选区塌缩 0→插入落 0，人工链路 4 次验证全对，后续 E2E 断言不可依赖 verify_ui
+      的注入位置；**补修空态塌缩真缺陷**：`layout([])` totalHeight=0 → 新建日记/
+      删光正文后正文 0 高度不可点——spanMeasure 高度 max(totalHeight, 3×正文行高)
+      + 空文档占位段（复用 s_74bd07ef78）+ 空文档光标 (0,0) 一行高
+      （WrapFlowTextAdapter 新增 buildPlaceholderParagraph），真机新建全链路
+      （占位→点→输入→渲染）✓、非空回归零影响；5 点诊断日志保留（M2 调试用）；
+      **真机缺陷「首段恰好两行整段消失」根因锁定+修复（2026-10-17）**：
+      平台缺陷——`ParagraphStyle.orphanCharOptimization: true` × `strutStyle`
+      同时存在时，**恰好排版成 2 行**的 `Paragraph.paint()` 零输出（1/3/4 行正常，
+      去掉任一开关即恢复；逐项二分实证：strut+orphan ✗ / strut+trailingSpace ✓ /
+      strut+autoSpace ✓；且为段落内禀，与文档态/偏移无关——固定样本探针矩阵
+      g1/h1 实证）。修复：buildParagraph 移除 `orphanCharOptimization`
+      （trailingSpaceOptimized/autoSpace 保留），真机 31 字 2 行态回归
+      A 段 12335 暗px（修复前 0）✓、1/3/4 行态不受影响。排查方法沉淀：
+      spanDraw 内联变体矩阵（mkVariant 闭包画同一样本不同 ParagraphStyle 于
+      不同 y 偏移）+ 区域暗px统计二分定位；剪贴板建议条（屏幕 1462-1599）/卡片
+      区/文档 A 自身 ink 是三大墨污染源，实验槽位须避开；
+      **绕排坐标链追修（2026-10-18，照片漂移+遮字）**：引擎行带几何按参数行高
+      （20vp）推演而实绘 16.32vp——**strutStyle.forceHeight 与
+      TextStyle.heightScale/halfLeading 平台实测均不生效**（探针段落 51px/行
+      铁证）→ 照片与上文空隙逐行累积（被「推走」）、跨段遮挡行带与实绘错位
+      （底缘遮字）。修复：`TextLayoutAdapter.measurePitch(isHeading)` 实测行距
+       （单字探针+缓存，测不到回退参数）+ 引擎 y 推进/遮挡带/照片锚定全消费实测
+       （平台修复 strut 后自动回 20vp 自愈）；单测 +6 例，真机 w1/w4 像素回归
+       （照片随打字恰移一行实绘 pitch、gap 恒 4vp、让位带 0 渗漏）。
+       **heading 行段拆分追修（2026-10-18，编辑态 B 段整段 heading 污染）**：
+       编辑器 doc 相邻文本块 \n 合并成单块渲染，块内 heading 样式整段生效
+       （真机 u1：106 字 B 段全 heading pitch；DB 实况——heading 是独立文本块、
+       块内无 \n，\n 合并只发生在 blocksWithEditorDocument 拼接）。修复=「\n 行
+       拆分+sidecar 映射」：`WrapFlowModel.TextPart`/`textPartsOfBlock`（\n 拆段
+       +runs 切片平移全量拷贝+逐段 isHeading）→ 适配器 `segmentsOf/
+       styleForSegment` heading 分支（headingFontPx/headingLinePx）→ 编辑器
+       `BuiltItems` sidecar（items/parts/blockIdxs 平行数组按 itemIndex 直查，
+       防多段块计数漂移）+ `RenderParagraph.length` 语义（modelStart=块区间起点
+       +行段起点）+ caret/hitTest 区间映射重写（rp.modelStart..+length）；
+       `WrapFlowView.buildItems` 同步拆段（阅读态块独立无 \n 零影响）。单测 +6
+       （278 全绿）。真机回归：LAYOUT-ITEMS 拆 5 项（T"夏日的午后"H 独立、
+       body B）、LAYOUT-PARAS lh 21.12/16.32vp、光标 hit=35 映射 ✓、hidden
+       len=181 ✓；部分行内 heading 一行内混排几何近似，观感后议。**顺带双修
+       EditEntryView（回归中发现的既有缺陷）**：① 日期行过期——`this.entry`
+       普通字段不进 build 依赖追踪，日期 Text 初帧取 Date.now() 后永不刷新
+       （编辑历史日记恒显当天）；改 `@State entry`（详情页同款）+
+       `dateLineText()` 空串守卫（加载前不闪「今天」）。② 标题注入竞态——
+       `injectedTitle` 单边（onReady/loadEntry）先到即消费、空标题锁死真标题
+       （本机 onReady 恒先到）；改双信号到齐（`entryLoaded`）才注入；测试条目
+       8B704EE9 的 DB title 列本为空（「验证绕排测试」是正文首块），编辑页标题
+       占位符是正确行为勿误判。
+       **编辑器测试注意**：点击照片卡会触发 onPhotoOpen 全屏预览（不夺焦点，
+       uitest text 仍进编辑器，截图却是预览页——dump 里找 Button [37,193][137,293]
+       点 (87,243) 关闭）；暗像素分析前先确认页面内容（全页轮廓扫描）；
+       **像素取证三坑（2026-10-18）**：阈值采样恰漏浅色文字（textTertiary
+       min153 vs 常用阈值 150）+ 粗行距采样漏窄文字带 →「部分渲染」误判
+       （实际正常，多模态识别证实）——正解=逐行 min 亮度无阈值全扫 +
+       `recognize_ui_components` 多模态交叉验证；装机后旧进程可能存活（HAP 被换
+       进程不死）→ `aa force-stop` + `aa start` 必做；`snapshot_tool` 会消失，
+       备选 `snapshot_display` / `uitest screenCap`（实测一致）
+  2. **M2 选区**：高亮 + 手柄拖拽；双击选词；格式工具条四灯接线
+     （bold/italic/heading/highlight 的灯态与 apply 走编辑模型）
+  3. **M3 联动**：长按自定义菜单（复制/粘贴/全选，系统菜单对不上自绘层不用）；
+     照片插入/删除/换边/双击换边在编辑态实时重排；保存链路（编辑模型 →
+     `ContentBlock[]`，writtenAt 语义同 2.5 的 Q24 处理）
+  4. **M4 验收**：真机 E2E——打字实时绕排（光标在照片旁、文字不跳）；拼音组合/
+     删除/换行/光标移动；照片全操作；保存后阅读态一致；中文/英文混排
+- **不要**：不要动阅读态（WrapFlowView 详情页路径已验收）；不要用系统 editMenu /
+  系统光标（排版不一致必然错位）；**不要**让隐形层真实渲染可见内容（透明、1px）
+- **验收**：编辑态打字时照片不被推下移、文字实时绕排；光标点击/移动/选区/组合输入
+  全对；保存 → 详情页阅读态排版一致；单测覆盖命中查询与编辑模型纯逻辑
+
 ### 2.7 录音
 
 - **先读**：R-RICH-04/05/09；iOS `Views/Compose/VoiceRecordingSheet.swift`、`AudioPlayerCard.swift`、`Services/AudioRecorderManager.swift`

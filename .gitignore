@@ -27,3 +27,6 @@ Thumbs.db
 
 # CLI 缓存
 .cache/
+
+# 本地调试截图/dump（不进仓库）
+.tmp_shots/

@@ -9,7 +9,7 @@
 import { describe, it, expect } from '@ohos/hypium';
 import { ContentBlock, ContentBlockType, Ink, TextStyleRun, PhotoPosition, PaperStyle,
   decodeContentBlocks, encodeContentBlocks, blocksAudioPaths, blocksWithLooseAudio,
-  isSameLocalDay } from '../../main/ets/models/ContentBlock';
+  isSameLocalDay, isMemberPaperStyle, effectivePaperStyle } from '../../main/ets/models/ContentBlock';
 
 /** 本地某天正午（Unix 秒）。用本地日历构造，任何时区跑结果一致 */
 function localNoonSec(dayOffset: number): number {
@@ -179,6 +179,29 @@ export default function contentBlockTest() {
       const a2 = ContentBlock.rotationAngleFor('same-id');
       expect(a1).assertEqual(a2);
       expect(a1 >= -3.0 && a1 <= 2.9).assertTrue();
+    })
+
+    // ---- 相纸会员规则（05 §3.5；会员判定 7.2 接上） ----
+
+    it('memberPaperStylesAreTheFourPaidOnes', 0, () => {
+      expect(isMemberPaperStyle(PaperStyle.Original)).assertFalse();
+      expect(isMemberPaperStyle(PaperStyle.Polaroid)).assertFalse();
+      expect(isMemberPaperStyle(PaperStyle.WashiSticker)).assertTrue();
+      expect(isMemberPaperStyle(PaperStyle.MinimalCard)).assertTrue();
+      expect(isMemberPaperStyle(PaperStyle.FilmFrame)).assertTrue();
+      expect(isMemberPaperStyle(PaperStyle.LetterAttached)).assertTrue();
+    })
+
+    it('nonMemberDegradesMemberPaperToPolaroid', 0, () => {
+      // 非会员存了会员款 → 实际按宝丽来渲染（存值不改写由调用方保证，这里只管渲染映射）
+      expect(effectivePaperStyle(PaperStyle.FilmFrame, false)).assertEqual(PaperStyle.Polaroid);
+      expect(effectivePaperStyle(PaperStyle.LetterAttached, false)).assertEqual(PaperStyle.Polaroid);
+      // 免费款原样
+      expect(effectivePaperStyle(PaperStyle.Original, false)).assertEqual(PaperStyle.Original);
+      expect(effectivePaperStyle(PaperStyle.Polaroid, false)).assertEqual(PaperStyle.Polaroid);
+      // 会员身份下全部原样
+      expect(effectivePaperStyle(PaperStyle.FilmFrame, true)).assertEqual(PaperStyle.FilmFrame);
+      expect(effectivePaperStyle(PaperStyle.WashiSticker, true)).assertEqual(PaperStyle.WashiSticker);
     })
   })
 }

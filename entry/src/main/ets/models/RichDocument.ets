@@ -152,6 +152,80 @@ function appendTextBlockToDoc(doc: RichEditorDocument, text: string, styles: Tex
 }
 
 /**
+ * 块列表里的非文本块（照片 / 录音 / 痕迹本体）按 id 建侧表：
+ * `loadDocument(doc, anchored)` 装锚点、页面恢复草稿 / 日记时用它。
+ */
+export function anchoredBlocksOf(blocks: ContentBlock[]): Map<string, ContentBlock> {
+  const map = new Map<string, ContentBlock>();
+  for (const block of blocks) {
+    if (block.type !== ContentBlockType.Text) {
+      map.set(block.id, block);
+    }
+  }
+  return map;
+}
+
+/**
+ * 文本块在 `editorDocumentFromBlocks` 产出的 doc.text 里的区间
+ * （编辑态光标 / 命中查询用：段内偏移 + 区间起点 = 全文档偏移）。
+ */
+export class TextBlockRange {
+  /** 对应 blocks 下标（文本块） */
+  blockIndex: number;
+  /** 块文本在 doc.text 里的起点 */
+  start: number;
+  /** 块文本长度 */
+  length: number;
+
+  constructor(blockIndex: number, start: number, length: number) {
+    this.blockIndex = blockIndex;
+    this.start = start;
+    this.length = length;
+  }
+}
+
+/**
+ * 与 `editorDocumentFromBlocks` 同步推演的文本块区间表（只算偏移，不建文档）。
+ * 规则逐条对应：文本块前按需补 `\n`（段间 / 不以换行结尾且不在照片锚点后）、
+ * 锚点块前补 `\n`、录音 / 痕迹锚点后补 `\n`。单测对二者做一致性校验。
+ */
+export function textBlockRangesOfBlocks(blocks: ContentBlock[]): TextBlockRange[] {
+  const ranges: TextBlockRange[] = [];
+  let cursor = 0; // 镜像 doc.text.length
+  let endsWithNewline = false;
+  let endsWithPhotoAnchor = false;
+  for (let i = 0; i < blocks.length; i++) {
+    const block = blocks[i];
+    if (block.type === ContentBlockType.Text) {
+      const text = block.text ?? '';
+      if (cursor > 0 && !endsWithNewline && !endsWithPhotoAnchor && text.length > 0) {
+        cursor += 1; // 补段间 \n
+      }
+      ranges.push(new TextBlockRange(i, cursor, text.length));
+      cursor += text.length;
+      // 空文本块不改 doc.text 末字符状态（fromBlocks 的 docEndsWithNewline 看全局末字符）
+      if (text.length > 0) {
+        endsWithNewline = text.charCodeAt(text.length - 1) === 0x0A;
+      }
+      endsWithPhotoAnchor = false;
+      continue;
+    }
+    if (cursor > 0 && !endsWithNewline) {
+      cursor += 1; // 锚点前补 \n
+    }
+    cursor += 1; // RICH_ANCHOR
+    if (block.type === ContentBlockType.Audio || block.type === ContentBlockType.Trace) {
+      cursor += 1; // 录音 / 痕迹后补 \n
+      endsWithNewline = true;
+    } else {
+      endsWithNewline = false;
+    }
+    endsWithPhotoAnchor = block.type === ContentBlockType.Photo;
+  }
+  return ranges;
+}
+
+/**
  * 内容块 → 编辑器文档。照片 / 录音 / 痕迹块变成锚点字符，
  * 本体不进文字流（编辑器里怎么画是 2.6/2.7 的事，这层只管占位）。
  */
@@ -290,6 +364,44 @@ export function blocksWithEditorDocument(doc: RichEditorDocument,
     blocks.push(ContentBlock.makeText(makeId(), ''));
   }
   return blocks;
+}
+
+/**
+ * R-RICH-03 在光标处插照片的落点计划。
+ * `text` 是编辑器活文本（照片锚点各占 1 个 RICH_ANCHOR 字符），`caret` 先夹到 [0, len]：
+ * - 光标在段尾（光标右一字符是换行）→ 锚点插到下一段开头，光标不动 —— 不凭空多出空行
+ * - 光标在段首（文档开头 / 左一字符是换行）→ 挂这一段开头，光标落到照片后
+ * - 段中 / 全文末尾 → 先断成两段（needsNewlineBefore），照片挂后一段开头
+ */
+export class PhotoInsertionPlan {
+  /** 锚点插入处（相对活文本的 UTF-16 偏移；前置换行（若有）也从这里开始 */
+  readonly insertOffset: number;
+  /** 段中插入时先补一个换行把这段话断开 */
+  readonly needsNewlineBefore: boolean;
+  /** 插入完成后的光标落点（照片后接着写） */
+  readonly caretAfter: number;
+
+  constructor(insertOffset: number, needsNewlineBefore: boolean, caretAfter: number) {
+    this.insertOffset = insertOffset;
+    this.needsNewlineBefore = needsNewlineBefore;
+    this.caretAfter = caretAfter;
+  }
+}
+
+/** R-RICH-03 三分支的纯函数实现（iOS `RichTextView.insertPhoto` 同款规则） */
+export function photoInsertionPlan(text: string, caretRaw: number): PhotoInsertionPlan {
+  const len = text.length;
+  const caret = Math.min(Math.max(caretRaw, 0), len);
+  if (caret < len && text.charCodeAt(caret) === 0x0A) {
+    // 段尾：挂在下一段开头（换行后），光标不动
+    return new PhotoInsertionPlan(caret + 1, false, caret);
+  }
+  if (caret === 0 || text.charCodeAt(caret - 1) === 0x0A) {
+    // 段首（含文档开头）：挂这一段开头，光标落到照片后面
+    return new PhotoInsertionPlan(caret, false, caret + 1);
+  }
+  // 段中 / 全文末尾：断成两段，照片挂后一段开头，光标跟在照片后
+  return new PhotoInsertionPlan(caret, true, caret + 2);
 }
 
 /** 相邻且格式相同的文本 span 合并（编辑器读回的区间可能切得比格式细） */

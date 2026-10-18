@@ -21,7 +21,8 @@ import { ToastData, STORAGE_KEY_CURRENT_TOAST } from '../../environment/ErrorPre
 import { AppEnvironment } from '../../environment/AppEnvironment';
 import {
   STORAGE_KEY_SAFE_AREA_TOP_VP,
-  STORAGE_KEY_SAFE_AREA_BOTTOM_VP
+  STORAGE_KEY_SAFE_AREA_BOTTOM_VP,
+  STORAGE_KEY_HIDE_TAB_BAR
 } from '../../services/ImmersiveChrome';
 import { HomeView } from '../home/HomeView';
 import { ErrorToastView } from './ErrorToastView';
@@ -46,6 +47,8 @@ export struct MainTabsView {
   @StorageProp(STORAGE_KEY_CURRENT_TOAST) currentToast: ToastData | null = null;
   @StorageProp(STORAGE_KEY_SAFE_AREA_TOP_VP) safeAreaTopVp: number = 0;
   @StorageProp(STORAGE_KEY_SAFE_AREA_BOTTOM_VP) safeAreaBottomVp: number = 0;
+  /** 照片全屏查看期间藏浮动 Tab 栏（barOverlap 层在 NavDestination 之上，只有透明度能压它） */
+  @StorageProp(STORAGE_KEY_HIDE_TAB_BAR) hideTabBar: boolean = false;
   @State currentTab: number = 0;
   @State containerWidthVp: number = 0;
 
@@ -103,6 +106,10 @@ export struct MainTabsView {
         barBottomMargin: this.safeAreaBottomVp,
         adaptToHandedness: true,
         gradientMask: { maskColor: Color.Transparent },
+        // 照片全屏浮层开着 → 整条 Tab 栏透明（barOverlap 悬浮胶囊层在
+        // NavDestination 之上，页面内浮层盖不住，HdsTabs 又无 hideBar API，
+        // 只能用 barOpacity 归零；三页 @Watch 联动，关浮层/页面销毁恢复 1）
+        barOpacity: this.hideTabBar ? 0 : 1,
         // materialLevel ADAPTIVE：官方最佳实践推荐绝大多数场景用自适应档，
         // 系统按设备算力/用户系统设置自动选 SMOOTH/GENTLE/EXQUISITE；
         // 浅色主题（素笺/肯特）下动效弱是玻璃材质浅色物理特性 + 系统档位策略，
