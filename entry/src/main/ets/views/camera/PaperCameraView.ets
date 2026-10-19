@@ -86,6 +86,10 @@ const ZOOM_BAR_TINT: string = '#59000000';
 const ZOOM_BAR_TEXT: string = '#E8E1D7';
 /** 拖动自由变焦：横向拖 80vp 倍率翻一倍（乘法映射，系统相机同款跟手感） */
 const ZOOM_DRAG_VP_PER_OCTAVE: number = 80;
+/** 变焦 UI 上限：档位最大 10×，拖动 / 捏合同沿（超出档位的纯数码段不做） */
+const ZOOM_UI_MAX_RATIO: number = 10;
+/** 平滑变焦走数轮询周期（ms）：真值轮询驱动悬浮数字泡，与画面帧率同量级 */
+const SMOOTH_ZOOM_POLL_MS: number = 32;
 /** 相纸落到手里的轻微倾斜幅度（±°，iOS ±2.5） */
 const PAPER_TILT_DEGREES: number = 2.5;
 /** 机身从药丸展开的弹簧（iOS spring(response 0.45, dampingFraction 0.84) 同款） */
@@ -170,7 +174,12 @@ export struct PaperCameraView {
   @State private showPaperStrip: boolean = false;
   /** 闪光三选托盘展开中（与相纸抽屉互斥，一次只开一个） */
   @State private flashTrayOpen: boolean = false;
-  @State private zoomRatio: number = 1;
+  /** 当前倍率（非渲染态：全精度记账，UI 只看下面两个渲染态，避免逐 0.1 重渲染整条） */
+  private zoomRatio: number = 1;
+  /** 落位档（±0.05 内算落位；高亮对应档位圆钮）；自由倍率（如 2.4×）为 -1，由数字泡显示 */
+  @State private zoomSettledPreset: number = 1;
+  /** 变焦数字泡文案（拖动 / 捏合 / 平滑变焦中的实时倍率；空串 = 隐藏） */
+  @State private zoomBubbleLabel: string = '';
   /**
    * 变焦档位缓存：会话起来 / 翻转后刷一次（范围查询离热路径——
    * 拖动每个手势更新都重渲染，逐次查 `getZoomRatioRange` 会卡 UI）
@@ -185,6 +194,10 @@ export struct PaperCameraView {
   private continuousZoomTarget: number = 1;
   /** 最近一次跨过的预设档（跨档轻震用） */
   private lastNearestPreset: number = 1;
+  /** 平滑变焦走数轮询定时器（-1 = 无）；新交互 / 组件卸载时收口 */
+  private smoothZoomPollTimer: number = -1;
+  /** 平滑变焦走数目标倍率（-1 = 无进行中的走数；与轮询定时器配套） */
+  private smoothZoomTargetRatio: number = -1;
   /** 相纸落下时的轻微倾斜（每次拍照随机，避免每次一模一样） */
   @State private paperTilt: number = 0;
   /** 取景画面宽高比（Profile 实测值；XComponent 按它定高防拉伸） */
@@ -234,6 +247,7 @@ export struct PaperCameraView {
   }
 
   aboutToDisappear(): void {
+    this.cancelSmoothZoomCount();
     clearTimeout(this.swapReleaseTimer);
     this.swapReleaseTimer = -1;
     this.releasePreviewFrame();
@@ -599,9 +613,10 @@ export struct PaperCameraView {
    */
   private refreshZoomModel(): void {
     const range = this.session.zoomRange();
+    // UI 上限沿 10×：设备范围上探到 100× 的纯数码段没有档位支撑，拖 / 捏 / 档位同沿
     this.zoomMinCached = Math.min(1, range[0]);
-    this.zoomMaxCached = Math.max(1, range[1]);
-    const presets = zoomPresetsForRange(range[0], range[1]);
+    this.zoomMaxCached = Math.min(Math.max(1, range[1]), ZOOM_UI_MAX_RATIO);
+    const presets = zoomPresetsForRange(this.zoomMinCached, this.zoomMaxCached);
     this.zoomPresetList = presets.length > 0 ? presets : [1];
   }
 
@@ -615,64 +630,145 @@ export struct PaperCameraView {
       return;
     }
     this.haptic('haptic.effect.soft');
-    // 华为相机同款：档位芯片立即点亮，画面走官方平滑变焦（setSmoothZoom 贝塞尔曲线）缓过去
-    this.zoomRatio = preset;
     this.lastNearestPreset = preset;
-    this.session.smoothZoomTo(preset);
+    // 华为相机同款：画面走官方平滑变焦（setSmoothZoom 贝塞尔曲线）缓过去，
+    // 数字泡轮询真值跟着走（1×→5× 中间的 1.2× / 4.7×…全有）；不支持才同步跳
+    const smooth: boolean = this.session.smoothZoomTo(preset);
+    if (smooth) {
+      this.startSmoothZoomCount(preset);
+    } else {
+      this.cancelSmoothZoomCount();
+      this.setZoomUiValue(preset);
+    }
+  }
+
+  /**
+   * 平滑变焦走数：官方 `setSmoothZoom` 没有逐帧倍率回调
+   * （`smoothZoomInfoAvailable` 只报总时长），32ms 轮询同步 `getZoomRatio()`
+   * 真值驱动数字泡——数字与画面逐帧同走；到位 / 超时 / 失败按目标收口。
+   */
+  private startSmoothZoomCount(target: number): void {
+    this.cancelSmoothZoomCount();
+    this.smoothZoomTargetRatio = target;
+    let ticks: number = 0;
+    const tick = (): void => {
+      if (this.smoothZoomTargetRatio !== target) {
+        return; // 已被拖动 / 新档位 / 翻转接管
+      }
+      ticks += 1;
+      const current: number = this.session.getCurrentZoom();
+      if (current <= 0 || Math.abs(current - target) < 0.03 || ticks >= 90) {
+        this.cancelSmoothZoomCount();
+        this.setZoomUiValue(target);
+        return;
+      }
+      this.setZoomUiValue(current);
+      this.smoothZoomPollTimer = setTimeout(tick, SMOOTH_ZOOM_POLL_MS);
+    };
+    this.smoothZoomPollTimer = setTimeout(tick, SMOOTH_ZOOM_POLL_MS);
+  }
+
+  /** 停掉平滑变焦走数轮询（新交互接管 / 组件卸载） */
+  private cancelSmoothZoomCount(): void {
+    this.smoothZoomTargetRatio = -1;
+    if (this.smoothZoomPollTimer >= 0) {
+      clearTimeout(this.smoothZoomPollTimer);
+      this.smoothZoomPollTimer = -1;
+    }
+  }
+
+  /**
+   * 变焦 UI 单一写口：倍率落位（±0.05）点亮对应档位圆钮、收起数字泡；
+   * 自由倍率（2.4×）圆钮全灰、数字泡显示实时值——两个渲染态都只在变化时写，
+   * 拖动 / 走数的高频更新不再逐 0.1 重渲染整条磨砂胶囊。
+   */
+  private setZoomUiValue(ratio: number): void {
+    this.zoomRatio = ratio;
+    const settled: number = this.settledZoomPreset(ratio);
+    if (settled !== this.zoomSettledPreset) {
+      this.zoomSettledPreset = settled;
+    }
+    const label: string = settled >= 0 ? '' : formatZoomLabel(ratio);
+    if (label !== this.zoomBubbleLabel) {
+      this.zoomBubbleLabel = label;
+    }
+  }
+
+  /** 落位档（±0.05 内算落位）；自由倍率返回 -1 */
+  private settledZoomPreset(ratio: number): number {
+    const presets: number[] = this.zoomPresetList;
+    for (let i = 0; i < presets.length; i++) {
+      if (Math.abs(presets[i] - ratio) < 0.05) {
+        return presets[i];
+      }
+    }
+    return -1;
   }
 
   /**
    * 变焦条（华为相机式磨砂胶囊）：档位点按切换；整条横向拖动自由变焦，
-   * 最近档高亮并实时显示当前倍率，跨档轻震；上限跟随机型能力。
+   * 跨档轻震；上限跟随机型能力。变焦中（拖动 / 平滑走数）胶囊上方悬浮
+   * 数字泡实时走数（自由倍率常驻，落位档位才收起）——数字不再在档位格间跳。
    */
   @Builder
   private zoomRow() {
-    // 磨砂挂外层 Stack 背景，黑罩挂内层 Row 背景：同一组件上材质层会盖住 backgroundColor，
-    // 拆两层才能「磨砂在下、黑罩在上」；Stack 只包 Row 一个子节点，尺寸不会跑
-    Stack() {
-      Row({ space: 4 }) {
-        ForEach(this.zoomPresets(), (preset: number) => {
-          if (Math.abs(this.zoomRatio - preset) < 0.05) {
-            this.zoomSelectedPill(`${this.zoomPresetLabel(preset)}×`)
-          } else if (nearestZoomPreset(this.zoomRatio, this.zoomPresets()) === preset) {
-            this.zoomSelectedPill(`${formatZoomLabel(this.zoomRatio)}×`)
-          } else {
-            Text(`${this.zoomPresetLabel(preset)}×`)
-              .fontSize(12)
-              .fontWeight(FontWeight.Medium)
-              .fontColor(ZOOM_BAR_TEXT)
-              .padding({ left: 9, right: 9, top: 9, bottom: 9 })
-              .onClick((): void => {
-                this.selectZoomPreset(preset);
-              })
-          }
-        }, (preset: number) => `${preset}`)
+    Stack({ alignContent: Alignment.Bottom }) {
+      // 磨砂挂内层 Stack 背景，黑罩挂 Row 背景：同一组件上材质层会盖住 backgroundColor，
+      // 拆两层才能「磨砂在下、黑罩在上」；拖动手势挂胶囊本体
+      Stack() {
+        Row({ space: 4 }) {
+          ForEach(this.zoomPresets(), (preset: number) => {
+            if (this.zoomSettledPreset === preset) {
+              this.zoomSelectedPill(`${this.zoomPresetLabel(preset)}×`)
+            } else {
+              Text(`${this.zoomPresetLabel(preset)}×`)
+                .fontSize(12)
+                .fontWeight(FontWeight.Medium)
+                .fontColor(ZOOM_BAR_TEXT)
+                .padding({ left: 9, right: 9, top: 9, bottom: 9 })
+                .onClick((): void => {
+                  this.selectZoomPreset(preset);
+                })
+            }
+          }, (preset: number) => `${preset}`)
+        }
+        .padding({ left: 6, right: 6, top: 4, bottom: 4 })
+        .backgroundColor(ZOOM_BAR_TINT)
+        .borderRadius(20)
       }
-      .padding({ left: 6, right: 6, top: 4, bottom: 4 })
-      .backgroundColor(ZOOM_BAR_TINT)
+      .backgroundBlurStyle(BlurStyle.COMPONENT_THICK)
       .borderRadius(20)
+      .gesture(
+        PanGesture({ fingers: 1, direction: PanDirection.Horizontal, distance: 2 })
+          .onActionStart((): void => {
+            this.gestureStartZoomRatio = this.zoomRatio;
+          })
+          .onActionUpdate((event: GestureEvent): void => {
+            // 乘法映射（80vp 一倍程）：起点倍率 × 2^(位移/80)，细腻不跳段
+            this.applyContinuousZoom(
+              this.gestureStartZoomRatio *
+              Math.pow(2, event.offsetX / ZOOM_DRAG_VP_PER_OCTAVE));
+          })
+          .onActionEnd((): void => {
+            this.endContinuousZoom();
+          })
+          .onActionCancel((): void => {
+            this.endContinuousZoom();
+          })
+      )
+      if (this.zoomBubbleLabel !== '') {
+        Text(`${this.zoomBubbleLabel}×`)
+          .fontSize(13)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(ZOOM_BAR_TEXT)
+          .backgroundColor(ZOOM_BAR_TINT)
+          .borderRadius(14)
+          .padding({ left: 9, right: 9, top: 4, bottom: 4 })
+          .offset({ y: -46 })
+          .transition(TransitionEffect.OPACITY.animation({ duration: 140 }))
+      }
     }
-    .backgroundBlurStyle(BlurStyle.COMPONENT_THICK)
-    .borderRadius(20)
     .margin({ top: 69 })
-    .gesture(
-      PanGesture({ fingers: 1, direction: PanDirection.Horizontal, distance: 2 })
-        .onActionStart((): void => {
-          this.gestureStartZoomRatio = this.zoomRatio;
-        })
-        .onActionUpdate((event: GestureEvent): void => {
-          // 乘法映射（80vp 一倍程）：起点倍率 × 2^(位移/80)，细腻不跳段
-          this.applyContinuousZoom(
-            this.gestureStartZoomRatio *
-            Math.pow(2, event.offsetX / ZOOM_DRAG_VP_PER_OCTAVE));
-        })
-        .onActionEnd((): void => {
-          this.endContinuousZoom();
-        })
-        .onActionCancel((): void => {
-          this.endContinuousZoom();
-        })
-    )
   }
 
   /** 选中档圆钮：磨砂底上的亮钮，底色反深字（华为相机式） */
@@ -700,11 +796,15 @@ export struct PaperCameraView {
     const clamped: number = Math.min(Math.max(target, this.zoomMinCached), this.zoomMaxCached);
     this.continuousZoomTarget = clamped;
     this.session.setZoom(clamped);
+    // 拖动接管：停掉平滑变焦走数轮询（若有），数字泡改由拖动真值驱动
+    if (this.smoothZoomPollTimer >= 0 || this.smoothZoomTargetRatio >= 0) {
+      this.cancelSmoothZoomCount();
+    }
     const rounded: number = Math.round(clamped * 10) / 10;
     if (Math.abs(rounded - this.zoomRatio) < 0.001) {
       return;
     }
-    this.zoomRatio = rounded;
+    this.setZoomUiValue(rounded);
     const nearest: number = nearestZoomPreset(rounded, this.zoomPresetList);
     if (nearest !== this.lastNearestPreset) {
       this.lastNearestPreset = nearest;
@@ -1250,10 +1350,11 @@ export struct PaperCameraView {
       this.session.setFlash(this.flashSetting);
       // 新镜头范围不同：刷缓存档位，倍率回 1×（系统相机同款）
       this.refreshZoomModel();
-      this.zoomRatio = 1;
+      this.cancelSmoothZoomCount();
       this.continuousZoomTarget = 1;
       this.lastNearestPreset = 1;
       this.session.setZoom(1);
+      this.setZoomUiValue(1);
     }).catch((): void => {
       // 翻转失败保持原样
     });

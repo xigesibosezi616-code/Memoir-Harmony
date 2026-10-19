@@ -379,23 +379,43 @@ export class CameraSession {
   }
 
   /**
-   * 华为相机式平滑变焦：官方 `setSmoothZoom`（贝塞尔曲线缓动），点档位用它缓过去；
-   * 机型 / 会话不支持时退普通 `setZoomRatio`（跳变，保功能）。
+   * 华为相机式平滑变焦：官方 `setSmoothZoom`（贝塞尔曲线缓动），点档位用它缓过去。
+   * 返回是否平滑启动：true = 画面在缓动（走数轮询可以开跑）；
+   * false = 机型 / 会话不支持，已退普通 `setZoomRatio`（画面跳变，UI 数字同步跳）。
    */
-  smoothZoomTo(ratio: number): void {
+  smoothZoomTo(ratio: number): boolean {
     const session = this.session;
     if (session === undefined) {
-      return;
+      return false;
     }
     let target = ratio;
     try {
       // 直接读缓存范围（不走 zoomRange() 的逐次数组分配，热路径零开销）
       target = clampZoomRatio(ratio, this.zoomRangeCache);
       session.setSmoothZoom(target);
+      return true;
     } catch (err) {
       hilog.warn(DOMAIN, TAG, 'setSmoothZoom failed, fallback setZoom: %{public}s',
         JSON.stringify(err));
       this.setZoom(target);
+      return false;
+    }
+  }
+
+  /**
+   * 当前倍率真值（同步 `getZoomRatio`）：平滑变焦走数轮询用——
+   * 官方 `smoothZoomInfoAvailable` 只报总时长没有逐帧倍率，轮询真值才能让
+   * 数字与画面逐帧同走；会话未起 / 异常返回 -1（调用方按到位收口）。
+   */
+  getCurrentZoom(): number {
+    const session = this.session;
+    if (session === undefined) {
+      return -1;
+    }
+    try {
+      return session.getZoomRatio();
+    } catch (err) {
+      return -1;
     }
   }
 
