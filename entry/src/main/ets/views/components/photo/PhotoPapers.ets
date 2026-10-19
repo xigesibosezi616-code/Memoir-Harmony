@@ -333,99 +333,108 @@ export struct PhotoPaperCard {
 }
 
 /**
- * 相纸选择器里的预览卡（固定 120×160 外框，iOS `PaperPreviewCard`）。
+ * 相纸选择器里的预览卡（默认 120×160 外框，iOS `PaperPreviewCard`）。
  * 与正文渲染的区别：预览横排视觉一致 → 外框固定、照片按各样式固定尺寸 Cover 裁剪。
+ * cardWidth 可等比缩放整卡（相机横条传小号 96，书写页 sheet 用默认 120）。
  */
 @Component
 export struct PaperPreviewCard {
   style: PaperStyle = PaperStyle.Polaroid;
   pixelMap: image.PixelMap | undefined = undefined;
+  cardWidth: number = 120;
+
+  /** 内部尺寸按 cardWidth/120 等比缩放（边框、阴影等描边类不缩放） */
+  private scaleDim(v: number): number {
+    return v * this.cardWidth / 120;
+  }
 
   build() {
     Stack() {
       if (this.style === PaperStyle.Original) {
         // 原图：108×130，仅 4vp 圆角
-        PhotoPaperGrid({ pixelMap: this.pixelMap, aspect: 108 / 130, cornerRadius: 4 })
-          .width(108)
+        PhotoPaperGrid({ pixelMap: this.pixelMap, aspect: 108 / 130, cornerRadius: this.scaleDim(4) })
+          .width(this.scaleDim(108))
       } else if (this.style === PaperStyle.Polaroid) {
         // 宝丽来：104×104 + 底部 32 白边 + 四周 8 白边
         Column({ space: 0 }) {
           PhotoPaperGrid({ pixelMap: this.pixelMap, aspect: 1.0 })
-            .width(104)
-          Column().width(104).height(32).backgroundColor(Color.White)
+            .width(this.scaleDim(104))
+          Column().width(this.scaleDim(104)).height(this.scaleDim(32)).backgroundColor(Color.White)
         }
-        .padding(8)
+        .padding(this.scaleDim(8))
         .backgroundColor(Color.White)
         .shadow({ radius: 3, color: '#1F000000', offsetY: 2 })
       } else if (this.style === PaperStyle.WashiSticker) {
         // 和风贴纸：照片 108×120 + 棕边 + 相角（12）
         Stack() {
           PhotoPaperGrid({ pixelMap: this.pixelMap, aspect: 108 / 120 })
-            .width(108)
-            .padding(6)
+            .width(this.scaleDim(108))
+            .padding(this.scaleDim(6))
             .backgroundColor(WASHI_BG)
             .border({ width: 0.8, color: WASHI_BORDER })
-          PaperCorners({ cornerSize: 12 })
+          PaperCorners({ cornerSize: this.scaleDim(12) })
         }
-        .width(120)
-        .height(132)
+        .width(this.scaleDim(120))
+        .height(this.scaleDim(132))
         .shadow({ radius: 3, color: '#14000000', offsetY: 2 })
       } else if (this.style === PaperStyle.MinimalCard) {
         // 极简卡片：108×130 + 8vp 圆角细边
-        PhotoPaperGrid({ pixelMap: this.pixelMap, aspect: 108 / 130, cornerRadius: 8 })
-          .width(108)
-          .border({ width: 0.5, color: MINIMAL_BORDER, radius: 8 })
+        PhotoPaperGrid({ pixelMap: this.pixelMap, aspect: 108 / 130, cornerRadius: this.scaleDim(8) })
+          .width(this.scaleDim(108))
+          .border({ width: 0.5, color: MINIMAL_BORDER, radius: this.scaleDim(8) })
           .shadow({ radius: 2, color: '#0F000000', offsetY: 1 })
       } else if (this.style === PaperStyle.FilmFrame) {
         // 胶片帧：齿孔条（7 孔）+ 照片 76×110
-        Flex({ direction: FlexDirection.Row, space: { main: LengthMetrics.vp(4) }, alignItems: ItemAlign.Stretch }) {
-          PreviewPerforationStrip()
+        Flex({ direction: FlexDirection.Row, space: { main: LengthMetrics.vp(this.scaleDim(4)) }, alignItems: ItemAlign.Stretch }) {
+          PreviewPerforationStrip({ stripWidth: this.scaleDim(12) })
           PhotoPaperGrid({ pixelMap: this.pixelMap, aspect: 76 / 110 })
-            .width(76)
-          PreviewPerforationStrip()
+            .width(this.scaleDim(76))
+          PreviewPerforationStrip({ stripWidth: this.scaleDim(12) })
         }
-        .height(122)
-        .padding(6)
+        .height(this.scaleDim(122))
+        .padding(this.scaleDim(6))
         .backgroundColor(FILM_BG)
         .shadow({ radius: 4, color: '#2E000000', offsetY: 2 })
       } else {
         // 信纸附照：照片 104×128 + 胶带 42×14
         Stack({ alignContent: Alignment.TopStart }) {
           PhotoPaperGrid({ pixelMap: this.pixelMap, aspect: 104 / 128 })
-            .width(104)
-            .padding(4)
+            .width(this.scaleDim(104))
+            .padding(this.scaleDim(4))
             .backgroundColor(Color.White)
             .shadow({ radius: 6, color: '#33000000', offsetX: 1, offsetY: 3 })
           Column()
-            .width(42)
-            .height(14)
+            .width(this.scaleDim(42))
+            .height(this.scaleDim(14))
             .backgroundColor(TAPE_COLOR)
             .rotate({ angle: -20 })
-            .offset({ x: -6, y: -3 })
+            .offset({ x: this.scaleDim(-6), y: this.scaleDim(-3) })
             .shadow({ radius: 1, color: '#14000000', offsetY: 1 })
         }
       }
     }
-    .width(120)
-    .height(160)
+    .width(this.scaleDim(120))
+    .height(this.scaleDim(160))
     .alignContent(Alignment.Center)
   }
 }
 
-/** 预览卡用的齿孔条（7 孔，12vp 宽） */
+/** 预览卡用的齿孔条（7 孔，默认 12vp 宽；stripWidth 随整卡等比缩放） */
 @Component
 struct PreviewPerforationStrip {
+  stripWidth: number = 12;
+
   build() {
-    Column({ space: 4 }) {
+    Column({ space: this.stripWidth / 3 }) {
       ForEach([0, 1, 2, 3, 4, 5, 6], (_: number) => {
         Row()
-          .width(5)
-          .height(3)
-          .borderRadius(1)
+          .width(this.stripWidth * 5 / 12)
+          .height(this.stripWidth / 4)
+          .borderRadius(this.stripWidth / 12)
           .backgroundColor(FILM_HOLE)
       }, (_: number) => '')
     }
-    .width(12)
+    .width(this.stripWidth)
     .height('100%')
     .justifyContent(FlexAlign.Center)
     .backgroundColor(FILM_STRIP_BG)

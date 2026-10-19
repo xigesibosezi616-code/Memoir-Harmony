@@ -29,7 +29,8 @@
  *   抓不到退白纸先行；显影蒙层在吐纸途中渐褪（打印机边走边印——
  *   2026-10-19 用户反馈「出纸后照片才跳出来」的修法：相纸带着影像出），
  *   真 50MP 解码完成后对快照交叉淡入（同景同框，观感是显影变清晰）；
- *   落定 ±2.5° 随机微倾；
+ *   出纸即带 ±2.5° 随机微倾、单程滑入一步落定（落地后不再补晃，
+ *   2026-10-19 用户反馈「拍完要等一会照片才回正」的修法）；
  *   预览 surface **不销毁**（销毁后重建 surfaceId 变了预览接不回），相纸盖在上面
  * - 闪光三选托盘（自动/闪光开/闪光关，有闪光单元才显示）/ 前后摄切换；
  *   震动走 vibrator 预设效果（haptic.effect.soft / hard）
@@ -300,11 +301,16 @@ export struct PaperCameraView {
         .translate({ y: this.expanded ? 0 : 40 })
         .opacity(this.expanded ? 1 : 0)
 
-        // 相纸抽屉打开 = 换位不遮挡：抽屉占用变焦条 + 快门行的原位
-        // （互斥渲染，任何屏宽都不会盖住快门——2026-10-19 产品反馈「弹层过大
-        // 遮挡拍摄键」的结构性修法；选完 220ms 自动收条回到拍摄位）
+        // 相纸条弹出：变焦条让位、快门上移，卡片挂在拍摄键下面
+        // （2026-10-19 产品反馈：弹起时卡片要在拍摄键下面展示，不顶掉拍摄控制；
+        // 选中卡标签带 ✓+相纸名，选了什么一眼可见）
         if (this.showPaperStrip) {
           Column() {
+            if (!this.paperEjected) {
+              this.captureControls()
+            } else {
+              this.reviewControls()
+            }
             this.paperStrip()
           }
           .translate({ y: this.expanded ? 0 : 40 })
@@ -346,7 +352,7 @@ export struct PaperCameraView {
         bottom: this.safeAreaBottomVp
       })
 
-      // 相纸抽屉已改内流式换位（见上 showPaperStrip 分支），不再浮层覆盖
+      // 相纸条挂拍摄键下面（见上 showPaperStrip 分支），不再浮层覆盖、不顶掉拍摄控制
 
       // 快门白闪（不挡触摸）
       Column()
@@ -600,8 +606,9 @@ export struct PaperCameraView {
     .borderRadius(6)
     .rotate({ angle: this.paperTilt })
     .shadow({ radius: 8, color: '#40000000', offsetY: 4 })
-    // 打印机吐纸：相纸从取景框顶「出纸口」滑入（外层 clip 裁掉槽外部分），
-    // 到位后显影 + 落定微倾；重拍离场快速淡出（不倒吸回纸口）
+    // 打印机吐纸：相纸带着随机微倾从取景框顶「出纸口」滑入（外层 clip 裁掉
+    // 槽外部分），单程落定（无落地后二段晃）；途中显影蒙层渐褪；重拍离场快速
+    // 淡出（不倒吸回纸口）
     .transition(
       TransitionEffect.asymmetric(
         TransitionEffect.move(TransitionEdge.TOP)
@@ -1050,16 +1057,17 @@ export struct PaperCameraView {
     })
   }
 
-  /** 相纸选择条（横向滚动；预览用刚拍到的方图，所见即所得） */
+  /** 相纸选择条（挂在拍摄键下面横向滚动；预览用刚拍到的方图，所见即所得；小号卡 96，比书写页 sheet 的 120 更紧凑） */
   @Builder
   private paperStrip() {
     Scroll() {
-      Row({ space: 14 }) {
+      Row({ space: 10 }) {
         ForEach(CAMERA_PAPER_STYLES, (style: PaperStyle) => {
-          Column({ space: 6 }) {
+          Column({ space: 5 }) {
             PaperPreviewCard({
               style: style,
-              pixelMap: this.shotPixelMap
+              pixelMap: this.shotPixelMap,
+              cardWidth: 96
             })
               // 边框恒宽（未选中透明）——选中时不会把卡片顶得跳一下
               .border({
@@ -1074,19 +1082,28 @@ export struct PaperCameraView {
               })
               .opacity(this.selectedPaper === style ? 1 : 0.6)
               .animation({ curve: PAPER_CURVE })
-            Text(this.paperName(style))
-              .fontSize(12)
-              .fontWeight(this.selectedPaper === style ?
-                FontWeight.Medium : FontWeight.Normal)
-              .fontColor(this.selectedPaper === style ?
-                this.theme.textSecondary : this.theme.textTertiary)
+            Row({ space: 3 }) {
+              // 选中卡：✓ + 相纸名（accent 强调）——选了什么一眼可见
+              if (this.selectedPaper === style) {
+                SymbolGlyph($r('sys.symbol.checkmark'))
+                  .fontSize(11)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor([this.theme.accent])
+              }
+              Text(this.paperName(style))
+                .fontSize(11)
+                .fontWeight(this.selectedPaper === style ?
+                  FontWeight.Medium : FontWeight.Normal)
+                .fontColor(this.selectedPaper === style ?
+                  this.theme.accent : this.theme.textTertiary)
+            }
           }
           .onClick((): void => {
             this.pickPaper(style);
           })
         }, (style: PaperStyle) => style)
       }
-      .padding({ left: 20, right: 20, top: 10, bottom: 8 })
+      .padding({ left: 20, right: 20, top: 8, bottom: 6 })
     }
     .scrollable(ScrollDirection.Horizontal)
     .scrollBar(BarState.Off)
@@ -1180,7 +1197,7 @@ export struct PaperCameraView {
     if (!this.paperEjected) {
       // 快照没抓到：白纸先行兜底
       this.printDeveloping = true;
-      this.paperTilt = 0;
+      this.drawPaperTilt();
       this.getUIContext().animateTo({ curve: PAPER_CURVE }, (): void => {
         this.paperEjected = true;
       });
@@ -1218,9 +1235,9 @@ export struct PaperCameraView {
       return;
     }
     this.previewFramePixelMap = frame;
-    // 出纸是直的（先不倾），显影蒙层先盖满
+    // 出纸即带随机微倾（单程落定，无落地后二段晃），显影蒙层先盖满
     this.printDeveloping = true;
-    this.paperTilt = 0;
+    this.drawPaperTilt();
     this.getUIContext().animateTo({ curve: PAPER_CURVE }, (): void => {
       this.paperEjected = true;
     });
@@ -1269,15 +1286,18 @@ export struct PaperCameraView {
   }
 
   /** 出纸动画：显影蒙层吐纸途中渐褪（打印机边走边印）+ 相纸落定微倾（±2.5° 随机） */
+  /** 出纸动画：显影蒙层吐纸途中渐褪（打印机边走边印） */
   private startEjectAnimations(): void {
     this.getUIContext().animateTo(
       { duration: PRINT_DEVELOP_MS, delay: PRINT_DEVELOP_DELAY_MS, curve: Curve.EaseOut },
       (): void => {
         this.printDeveloping = false;
       });
-    this.getUIContext().animateTo({ delay: PRINT_EJECT_MS + 40, curve: PAPER_CURVE }, (): void => {
-      this.paperTilt = Math.random() * PAPER_TILT_DEGREES * 2 - PAPER_TILT_DEGREES;
-    });
+  }
+
+  /** 出纸即落定随机微倾（单程滑动一步到位；不再落地后补一段晃动） */
+  private drawPaperTilt(): void {
+    this.paperTilt = Math.random() * PAPER_TILT_DEGREES * 2 - PAPER_TILT_DEGREES;
   }
 
   /** 真片显影：交叉淡入盖过快照垫层，淡完再收垫层（防渲染中的 pixelmap 被释放） */
