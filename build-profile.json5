@@ -7,11 +7,11 @@
         "material": {
           "certpath": "/Users/gavin/.ohos/config/default_Memoir-Harmony_WwJNjojtTtLrpdWfjr48jys2DQ7U7spzvV7xKxD3rPw=.cer",
           "keyAlias": "debugKey",
-          "keyPassword": "0000001AE510386CCC1FCF6330E657A622037784A23E6CF8EDD7C7D38BF21D1D75E1AA4E701204A6B44E",
+          "keyPassword": "0000001A826F5AC4F7204385DE440D4EAED9DB4196B171226B038C54690AE851391042D623ED42444E49",
           "profile": "/Users/gavin/.ohos/config/default_Memoir-Harmony_WwJNjojtTtLrpdWfjr48jys2DQ7U7spzvV7xKxD3rPw=.p7b",
           "signAlg": "SHA256withECDSA",
           "storeFile": "/Users/gavin/.ohos/config/default_Memoir-Harmony_WwJNjojtTtLrpdWfjr48jys2DQ7U7spzvV7xKxD3rPw=.p12",
-          "storePassword": "0000001A86A13BE4F11D8DB8E4B0DC05161AFE1500989A5B26F1451548297859631C05BCDCA8CEFBDC67"
+          "storePassword": "0000001A1D3E0F5C7670E229E30214730BADC3A42A96BFE7DF19268C74EEA6E1C87769B24DD9CB65E0A7"
         }
       }
     ],
@@ -20,24 +20,47 @@
         name: 'default',
         signingConfig: 'default',
         targetSdkVersion: '26.0.0',
-        compatibleSdkVersion: '26.0.0',
+        compatibleSdkVersion: "26.0.0",
         runtimeOS: 'HarmonyOS',
         buildOption: {
           strictMode: {
             caseSensitiveCheck: true,
-            useNormalizedOHMUrl: true,
-          },
-        },
-      },
+            useNormalizedOHMUrl: true
+          }
+        }
+      }
     ],
     buildModeSet: [
       {
-        name: 'debug',
+        name: 'debug'
       },
       {
-        name: 'release',
-      },
+        name: 'release'
+      }
     ],
+    "capabilities": [
+      {
+        "bundleName": "com.example.temproject",
+        "config": [
+          {
+            "name": "Semantic location",
+            "capability": "com.huawei.service.locationSemantics"
+          },
+          {
+            "name": "HUAWEI ID instant login",
+            "capability": "com.huawei.service.account.quick_login_phone"
+          },
+          {
+            "name": "Push Kit",
+            "capability": "com.huawei.service.push.base_service"
+          },
+          {
+            "name": "Map Kit",
+            "capability": "com.huawei.service.mapkit"
+          }
+        ]
+      }
+    ]
   },
   modules: [
     {

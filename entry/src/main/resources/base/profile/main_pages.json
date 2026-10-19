@@ -3,6 +3,7 @@
     "pages/Index",
     "pages/ThemeDebug",
     "pages/LanguageDebug",
+    "pages/LocationDebug",
     "pages/Compose",
     "pages/EditEntry"
   ]

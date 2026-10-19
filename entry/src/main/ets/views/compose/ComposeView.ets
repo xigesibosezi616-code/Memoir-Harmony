@@ -18,6 +18,7 @@
 import { relationalStore } from '@kit.ArkData';
 import { KeyboardAvoidMode } from '@kit.ArkUI';
 import { abilityAccessCtrl, common } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 import { image } from '@kit.ImageKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../../theme/AppTheme';
@@ -64,16 +65,20 @@ import { PaperStylePickerSheet } from '../components/photo/PaperStylePickerSheet
 import { PhotoFullScreenCover } from '../components/photo/PhotoFullScreenCover';
 import { PaperCameraView } from '../camera/PaperCameraView';
 import { VoiceRecordingSheet } from '../components/audio/VoiceRecordingSheet';
+import { WeatherLocationBadge } from '../components/WeatherLocationBadge';
 import { MoodTag } from '../../models/Mood';
 import { Notebook, cleanedName, nameKey, nextSortOrder } from '../../models/Notebook';
-import { DraftEntry } from '../../models/Draft';
+import { DraftEntry, PlaceMode } from '../../models/Draft';
 import { generateUuid } from '../../models/Uuid';
 import { MediaStorageService } from '../../services/MediaStorageService';
+import { AppPrefs } from '../../services/AppPrefs';
+import { LocationWeatherManager } from '../../services/LocationWeatherManager';
 import { CircleIconButton } from './CircleIconButton';
 import { MoodSelector } from './MoodSelector';
 import { NotebookSelector } from './NotebookSelector';
 import { DraftExitDialog } from './DraftExitDialog';
 import { CreateNotebookDialog } from './CreateNotebookDialog';
+import { LocationPickerView } from './LocationPickerView';
 
 const DOMAIN = 0x0000;
 const TAG = 'ComposeView';
@@ -129,6 +134,17 @@ export struct ComposeView {
   private insertedAudioPaths: Set<string> = new Set<string>();
   /** 草稿带进来的录音文件（删掉时清没被新草稿引用的） */
   private restoredAudioPaths: Set<string> = new Set<string>();
+  // ---- 2.10 此时此地 ----
+  /** 天气 + 地点解析（@State 观察第一层；异步收尾 bump tick 兜底刷新） */
+  @State weather: LocationWeatherManager = new LocationWeatherManager();
+  /** 这篇日记记哪个地点：auto / none / manual（PlaceMode） */
+  @State placeMode: string = PlaceMode.Auto;
+  /** manual 模式挑中的名字 */
+  @State manualPlaceName: string = '';
+  /** 地点选择器 sheet */
+  @State showLocationPicker: boolean = false;
+  /** 解析完成信号：@State 类内部异步写 + bump 一下，确保最终态必刷（防内部写不通知的兜底） */
+  @State weatherPlaceTick: number = 0;
   /** 系统返回信号（路由页 onBackPress 拦截后 +1） */
   @StorageProp(STORAGE_KEY_COMPOSE_BACK_TICK) @Watch('onSystemBackTick')
   systemBackTick: number = 0;
@@ -263,6 +279,10 @@ export struct ComposeView {
               }
             }
 
+            // 此时此地（2.10，R-PLACE-01~04）：拿到天气/地点后胶囊可点开换地点；
+            // 没拿到给轻量入口，不打扰写作
+            this.weatherLocationRow()
+
             // 标题：可换行（最多三行，与详情页、书封面的实际呈现一致）
             // 光标色 = accent（对齐 iOS `.tint(accent)`：光标与文字区分，
             // 用文字近似色会让光标线叠进首字笔画、看起来像首字被劈开/遮挡）
@@ -388,6 +408,15 @@ export struct ComposeView {
         }
         .width('100%')
         .height('100%')
+        // 地点选择器（2.10）：挂内容 Column——录音 sheet 已占 Navigation、
+        // 相纸 sheet 已占根 Stack，同节点双 sheet 有覆盖风险，分开挂
+        .bindSheet(this.showLocationPicker, this.LocationPickerBuilder(), {
+          detents: [SheetSize.MEDIUM, SheetSize.LARGE],
+          showClose: false,
+          onDisappear: (): void => {
+            this.showLocationPicker = false;
+          }
+        })
       }
       .title(this.topBar)
       .mode(NavigationMode.Stack)
@@ -444,6 +473,208 @@ export struct ComposeView {
         this.restylePhotoId = undefined;
       }
     })
+  }
+
+  // ---- 2.10 此时此地 ----
+
+  /**
+   * 「此时此地」行四态（iOS weatherLocationRow 同款，R-PLACE-01~04）：
+   * 有内容 = 胶囊（点开地点选择器）+ 天气失败重试行；
+   * 解析中 = 占位文案；权限拒 = 去设置引导；没取过 = 轻量入口。
+   */
+  @Builder
+  private weatherLocationRow(): void {
+    if (this.weatherBadgeHasContent()) {
+      Column({ space: 8 }) {
+        // 内容胶囊：天气徽标 + 「可改」暗示（不记位置时显示斜杠图标），点开选择器
+        Row({ space: 6 }) {
+          WeatherLocationBadge({
+            weatherCode: this.weather.weatherCode,
+            weatherInfo: this.weather.weatherInfo,
+            locationInfo: this.effectivePlaceName(),
+            fontColor: this.theme.textSecondary
+          })
+          SymbolGlyph(this.placeMode === PlaceMode.None
+            ? $r('sys.symbol.map_slash') : $r('sys.symbol.chevron_down'))
+            .fontSize(9)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([this.theme.textTertiary])
+        }
+        .alignItems(VerticalAlign.Center)
+        .padding({ left: 10, right: 10, top: 5, bottom: 5 })
+        .backgroundColor(this.theme.cardBackground)
+        .borderRadius(14)
+        .onClick((): void => {
+          this.showLocationPicker = true;
+        })
+
+        // 天气单独失败：可点重试 + 错误码上屏（域+码，截图即可报，R-PLACE-04）
+        if (this.weather.weatherFailed) {
+          Column({ space: 1 }) {
+            Row({ space: 4 }) {
+              SymbolGlyph($r('sys.symbol.arrow_clockwise'))
+                .fontSize(9)
+                .fontWeight(FontWeight.Medium)
+                .fontColor([this.theme.textTertiary])
+              Text($r('app.string.s_f65ce37afd'))
+                .fontSize(this.theme.labelFont.size)
+                .fontWeight(this.theme.labelFont.weight)
+                .fontFamily(this.theme.labelFont.family)
+                .fontColor(this.theme.textTertiary)
+            }
+            if (this.weather.lastWeatherError.length > 0) {
+              Text(this.weather.lastWeatherError)
+                .fontSize(this.theme.labelFont.size)
+                .fontWeight(this.theme.labelFont.weight)
+                .fontFamily(this.theme.labelFont.family)
+                .fontColor(this.theme.textTertiary)
+                .opacity(0.6)
+                .maxLines(1)
+                .textOverflow({ overflow: TextOverflow.Ellipsis })
+            }
+          }
+          .alignItems(HorizontalAlign.Start)
+          .margin({ left: 2 })
+          .onClick((): void => {
+            this.startPlaceWeatherFetch();
+          })
+        }
+      }
+      .alignItems(HorizontalAlign.Start)
+    } else if (this.weather.isResolving) {
+      Text($r('app.string.s_bb69e30f5a'))
+        .fontSize(this.theme.labelFont.size)
+        .fontWeight(this.theme.labelFont.weight)
+        .fontFamily(this.theme.labelFont.family)
+        .fontColor(this.theme.textTertiary)
+    } else if (this.weather.locationDenied) {
+      // 权限被拒：系统不会再弹第二次，引导去系统设置（R-PLACE-03，不能点了没反应）
+      Row({ space: 4 }) {
+        SymbolGlyph($r('sys.symbol.map_slash'))
+          .fontSize(10)
+          .fontWeight(FontWeight.Medium)
+          .fontColor([this.theme.textTertiary])
+        Text($r('app.string.s_0cfc3b0e21'))
+          .fontSize(this.theme.labelFont.size)
+          .fontWeight(this.theme.labelFont.weight)
+          .fontFamily(this.theme.labelFont.family)
+          .fontColor(this.theme.textTertiary)
+      }
+      .alignItems(VerticalAlign.Center)
+      .onClick((): void => {
+        this.openLocationSettings();
+      })
+    } else {
+      // 还没取过：轻量入口（关了「记录位置」时只提天气）
+      Row({ space: 4 }) {
+        SymbolGlyph(AppPrefs.isLocationRecordingEnabled()
+          ? $r('sys.symbol.location_north_up_right') : $r('sys.symbol.thermometer'))
+          .fontSize(10)
+          .fontWeight(FontWeight.Medium)
+          .fontColor([this.theme.textTertiary])
+        if (AppPrefs.isLocationRecordingEnabled()) {
+          Text($r('app.string.s_aaa25533ca'))
+            .fontSize(this.theme.labelFont.size)
+            .fontWeight(this.theme.labelFont.weight)
+            .fontFamily(this.theme.labelFont.family)
+            .fontColor(this.theme.textTertiary)
+        } else {
+          Text($r('app.string.s_7645c5d19c'))
+            .fontSize(this.theme.labelFont.size)
+            .fontWeight(this.theme.labelFont.weight)
+            .fontFamily(this.theme.labelFont.family)
+            .fontColor(this.theme.textTertiary)
+        }
+      }
+      .alignItems(VerticalAlign.Center)
+      .onClick((): void => {
+        this.startPlaceWeatherFetch();
+      })
+    }
+  }
+
+  /** 地点选择器 sheet 内容（2.10）：数据全来自当前解析状态与选择态 */
+  @Builder
+  private LocationPickerBuilder(): void {
+    LocationPickerView({
+      currentMode: this.placeMode,
+      manualName: this.manualPlaceName,
+      autoName: this.weather.locationInfo,
+      latitude: this.weather.latitude,
+      longitude: this.weather.longitude,
+      hasCoordinate: this.weather.hasCoordinateForSearch(),
+      onSelect: (mode: string, manualName: string): void => {
+        this.placeMode = mode;
+        if (mode === PlaceMode.Manual) {
+          this.manualPlaceName = manualName;
+        }
+        this.showLocationPicker = false;
+      },
+      onCancel: (): void => {
+        this.showLocationPicker = false;
+      }
+    })
+  }
+
+  /** 有没有可展示的天气 / 地名（iOS hasContent：任一即算） */
+  private weatherBadgeHasContent(): boolean {
+    return this.weather.weatherCode.length > 0 || this.weather.locationInfo.length > 0;
+  }
+
+  /** 最终写进日记的地名：auto 用解析值 / none 不记 / manual 用挑的（iOS effectivePlaceName） */
+  private effectivePlaceName(): string {
+    if (this.placeMode === PlaceMode.None) {
+      return '';
+    }
+    if (this.placeMode === PlaceMode.Manual) {
+      return this.manualPlaceName;
+    }
+    return this.weather.locationInfo;
+  }
+
+  /** 草稿里的 placeMode 归一化：认识 auto/none/manual，其余按 auto（旧数据不崩） */
+  private validPlaceMode(raw: string): string {
+    if (raw === PlaceMode.None || raw === PlaceMode.Manual) {
+      return raw;
+    }
+    return PlaceMode.Auto;
+  }
+
+  /**
+   * 发起「此时此地」解析：外部置解析态（首屏必刷），完成后 bump tick 兜底
+   * （@State 类内部异步写在极端时序下不通知的保险，最终态一定渲染）。
+   */
+  private startPlaceWeatherFetch(): void {
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    this.weather.isResolving = true;
+    this.weatherPlaceTick++;
+    this.weather.requestLocationAndWeather(context).then((): void => {
+      this.weatherPlaceTick++;
+    });
+  }
+
+  /** 跳系统设置的本应用详情页（权限被拒引导，R-PLACE-03） */
+  private openLocationSettings(): void {
+    // 窄化到 UIAbilityContext：startAbility / abilityInfo 都在它上面
+    // （getHostContext 返回基类 Context，项目既有模式同款窄化）
+    const context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    if (context === undefined) {
+      return;
+    }
+    context.startAbility({
+      bundleName: 'com.huawei.hmos.settings',
+      abilityName: 'com.huawei.hmos.settings.MainAbility',
+      uri: 'application_info_entry',
+      parameters: {
+        pushParams: context.abilityInfo.bundleName
+      }
+    }).catch((err: BusinessError): void => {
+      hilog.error(DOMAIN, TAG, 'open settings failed: %{public}d %{public}s',
+        err.code, err.message ?? '');
+    });
   }
 
   // ---- 2.6 照片：相册选图 → 选相纸 → 光标处插入（R-RICH-03 / R-PHOTO-01） ----
@@ -1123,6 +1354,10 @@ export struct ComposeView {
         const restored = restoredNotebookSelection(draft.tags, []);
         this.selectedNotebookName = restored.length > 0 ? restored[0] : '';
         this.didRestoreDraft = true;
+        // 此时此地（2.10）：原样还原存草稿那一刻的快照，不重新定位（R-ENTRY-05）
+        this.weather.restore(draft.weatherCode ?? '', draft.weatherInfo ?? '', draft.locationInfo ?? '');
+        this.placeMode = this.validPlaceMode(draft.placeMode);
+        this.manualPlaceName = draft.manualPlaceName ?? '';
         // RichEditor 不能用 text 参数绑定，草稿标题在 controller 就绪后注入
         this.injectDraftIntoEditors();
       }
@@ -1131,6 +1366,10 @@ export struct ComposeView {
       this.injectDraftIntoBody();
       this.moods = await MoodRepository.fetchAllMoods(store);
       this.notebooks = await NotebookRepository.fetchAllNotebooks(store);
+      if (draft === null) {
+        // 新的一篇：自动取此时此地（R-PLACE-01）；有草稿则用还原的快照，不重取
+        this.startPlaceWeatherFetch();
+      }
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'loadPageData failed: %{public}s', JSON.stringify(err));
       this.presentSaveFailed();
@@ -1180,6 +1419,18 @@ export struct ComposeView {
     }
     if (this.selectedNotebookName.length > 0) {
       entry.tags = [this.selectedNotebookName];
+    }
+    // 此时此地（2.10）：天气 + 最终地名（选择器可换 / 不显示）写进日记，
+    // 只存本地不上传（R-PLACE-05）
+    if (this.weather.weatherCode.length > 0) {
+      entry.weatherCode = this.weather.weatherCode;
+    }
+    if (this.weather.weatherInfo.length > 0) {
+      entry.weatherInfo = this.weather.weatherInfo;
+    }
+    const entryPlaceName = this.effectivePlaceName();
+    if (entryPlaceName.length > 0) {
+      entry.locationInfo = entryPlaceName;
     }
     // 正文块（编辑器文档读回 + 照片/录音侧表拆回，2.5 保存链路）
     const blocks = composeCleanedBlocks(
@@ -1235,6 +1486,13 @@ export struct ComposeView {
     draft.mood = this.moodName;
     draft.moodColorHex = this.moodColorHex.length > 0 ? this.moodColorHex : undefined;
     draft.tags = this.selectedNotebookName.length > 0 ? [this.selectedNotebookName] : [];
+    // 此时此地（2.10）：快照存草稿——恢复时原样还原、不重新定位（R-ENTRY-05）
+    draft.weatherCode = this.weather.weatherCode.length > 0 ? this.weather.weatherCode : undefined;
+    draft.weatherInfo = this.weather.weatherInfo.length > 0 ? this.weather.weatherInfo : undefined;
+    const draftPlaceName = this.effectivePlaceName();
+    draft.locationInfo = draftPlaceName.length > 0 ? draftPlaceName : undefined;
+    draft.placeMode = this.placeMode;
+    draft.manualPlaceName = this.placeMode === PlaceMode.Manual ? this.manualPlaceName : undefined;
     draft.audioURLs = blocksAudioPaths(blocks); // 录音从块派生（2.7）
     try {
       await DraftRepository.saveDraft(store, draft);

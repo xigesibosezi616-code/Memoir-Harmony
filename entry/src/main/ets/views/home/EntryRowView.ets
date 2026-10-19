@@ -6,8 +6,7 @@
  * 行 1 日期星期（左上角）+ 心情徽标（右上角，与日期同行靠右）；
  * 行 2 标题（heading，单行，无标题卡用正文摘要当标题——备忘录同款：
  * 首行即标题）；行 3 正文摘要（单行，有独立标题才显示防重复）；
- * 行 4 日记本胶囊 ≤3（左下角，只放分类）+ 天气·定位（右下角，
- * 2.10 此时此地接入后渲染，模型字段已备）。
+ * 行 4 日记本胶囊 ≤3（左下角，只放分类）+ 天气·定位（右下角，2.10）。
  * 卡色与页面同纸色（theme.listCardBackground，融入一体）+ 16vp 圆角 +
  * 0.5 描边 + 柔影成型；色差浮卡（白卡/暖象牙卡）与标签独立行、高度
  * 不齐均为历史方案。
@@ -20,6 +19,7 @@ import { dayAndWeekday } from '../../services/AppDateFormatters';
 import { JournalEntry } from '../../models/JournalEntry';
 import { MoodBadge } from '../components/MoodBadge';
 import { TagPill } from '../components/TagPill';
+import { WeatherLocationBadge } from '../components/WeatherLocationBadge';
 
 @Component
 export struct EntryRowView {
@@ -87,13 +87,21 @@ export struct EntryRowView {
       // 弹性占位：底角行压到卡底（四角定位）
       Blank()
 
-      // 行 4（左下角）：日记本胶囊 ≤3（只放分类，心情已移右上角）；
-      // 天气·定位（右下角，2.10 此时此地数据接入后渲染——weatherInfo/
-      // locationInfo 字段已备，届时改 SpaceBetween 靠右）
+      // 行 4（底角）：日记本胶囊 ≤3（左下角，只放分类，心情已移右上角）；
+      // 天气·定位（右下角，2.10 此时此地——无内容时徽标自身渲染为空不占位）
       Row({ space: 6 }) {
         ForEach(this.entry.tags.slice(0, 3), (tag: string) => {
           TagPill({ name: tag })
         }, (tag: string): string => tag)
+        Blank()
+        WeatherLocationBadge({
+          weatherCode: this.entry.weatherCode ?? '',
+          weatherInfo: this.entry.weatherInfo ?? '',
+          locationInfo: this.entry.locationInfo ?? '',
+          fontSize: 10,
+          iconSize: 9,
+          fontColor: this.theme.textTertiary
+        })
       }
       .alignItems(VerticalAlign.Center)
       .width('100%')

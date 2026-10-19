@@ -235,6 +235,15 @@ export struct HomeView {
               .onClick((): void => {
                 this.getUIContext().getRouter().pushUrl({ url: 'pages/LanguageDebug' });
               })
+            Button('LocationDebug')
+              .fontSize(this.theme.bodyFont.size)
+              .fontColor(this.theme.accent)
+              .backgroundColor(this.theme.accentBackground)
+              .borderRadius(10)
+              .onClick((): void => {
+                // 2.10 此时此地偏好（记录位置开关 + 精度三档）；6.1 设置页就绪后删
+                this.getUIContext().getRouter().pushUrl({ url: 'pages/LocationDebug' });
+              })
             Button('ToastDebug')
               .fontSize(this.theme.bodyFont.size)
               .fontColor(this.theme.accent)

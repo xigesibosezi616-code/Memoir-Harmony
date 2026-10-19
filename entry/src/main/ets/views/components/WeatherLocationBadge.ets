@@ -25,12 +25,15 @@ export function weatherSymbolRes(code: string): Resource {
     // 晴（白天）
     case 'sun.max': case 'sun.max.fill': case 'sunrise': case 'sunset': case 'clear':
       return $r('sys.symbol.sun_max');
-    // 晴（夜间）
+    // 晴（夜间）：官方星月天气图标（moon_z_fill 是「睡眠」图标，不用）
     case 'moon': case 'moon.fill': case 'moon.stars': case 'moon.stars.fill':
-      return $r('sys.symbol.moon_z_fill');
+      return $r('sys.symbol.star_2_moon_fill');
     // 多云转晴
     case 'cloud.sun': case 'cloud.sun.fill': case 'partlyCloudy':
       return $r('sys.symbol.cloud_and_sun_fill');
+    // 多云转晴（夜间）
+    case 'cloud.moon': case 'cloud.moon.fill':
+      return $r('sys.symbol.cloud_moon_fill');
     // 阴
     case 'cloud': case 'cloud.fill': case 'mostlyCloudy': case 'cloudy':
       return $r('sys.symbol.cloud');
@@ -67,11 +70,11 @@ export function weatherSymbolRes(code: string): Resource {
 @Component
 export struct WeatherLocationBadge {
   /** 天气标识（iOS SF Symbol 名或老代码，见 weatherSymbolRes） */
-  weatherCode: string = '';
+  @Prop weatherCode: string = '';
   /** 温度文本，如 "26°" */
-  weatherInfo: string = '';
+  @Prop weatherInfo: string = '';
   /** 地名，如 "西安市" */
-  locationInfo: string = '';
+  @Prop locationInfo: string = '';
   /** 文字字号（fp） */
   fontSize: number = 12;
   /** 文字与图标颜色 */
@@ -100,7 +103,7 @@ export struct WeatherLocationBadge {
               .fontColor(this.fontColor)
               .opacity(0.6)
           }
-          SymbolGlyph($r('sys.symbol.position'))
+          SymbolGlyph($r('sys.symbol.location_north_up_right_fill'))
             .fontSize(this.iconSize - 1)
             .fontColor([this.fontColor])
             .opacity(0.75)

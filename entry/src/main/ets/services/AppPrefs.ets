@@ -11,6 +11,7 @@
  */
 import { preferences } from '@kit.ArkData';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { LOCATION_PRECISION_CITY, LOCATION_PRECISION_DISTRICT, LOCATION_PRECISION_STREET } from './PlaceWeatherFormat';
 
 // ---- 偏好键（与 iOS 同名）----
 
@@ -24,6 +25,10 @@ export const PREF_KEY_PEN_PAL_NAME = 'penPalName';
 export const PREF_KEY_SHOW_SPLASH_ANIMATION = 'showSplashAnimation';
 /** 插照片预选的相纸（对应 iOS `defaultPaperStyle`，默认 polaroid；05 §3.5） */
 export const PREF_KEY_DEFAULT_PAPER_STYLE = 'defaultPaperStyle';
+/** 记录位置开关（对应 iOS `locationRecordingEnabled`，默认开；2.10） */
+export const PREF_KEY_LOCATION_RECORDING_ENABLED = 'locationRecordingEnabled';
+/** 位置精度三档（对应 iOS `locationPrecision`，city / district / street，默认 city；2.10） */
+export const PREF_KEY_LOCATION_PRECISION = 'locationPrecision';
 
 // ---- AppStorage 镜像 key（EntryAbility 启动时由偏好算好写入，UI 用 @StorageLink/@StorageProp 观察）----
 
@@ -109,5 +114,34 @@ export class AppPrefs {
     } catch (err) {
       hilog.error(0x0000, 'AppPrefs', 'putBool failed key=%{public}s err=%{public}s', key, JSON.stringify(err));
     }
+  }
+
+  // ---- 2.10 此时此地 ----
+
+  /** 记录位置开关（默认开：iOS `object(forKey:)` 为 nil 时按 true） */
+  static isLocationRecordingEnabled(): boolean {
+    return AppPrefs.getBool(PREF_KEY_LOCATION_RECORDING_ENABLED, true);
+  }
+
+  static setLocationRecordingEnabled(enabled: boolean): void {
+    AppPrefs.putBool(PREF_KEY_LOCATION_RECORDING_ENABLED, enabled);
+  }
+
+  /** 位置精度三档取值（city / district / street）；非法值按 city 兜底 */
+  static currentLocationPrecision(): string {
+    return AppPrefs.normalizedLocationPrecision(
+      AppPrefs.getString(PREF_KEY_LOCATION_PRECISION, LOCATION_PRECISION_CITY));
+  }
+
+  static setLocationPrecision(precision: string): void {
+    AppPrefs.putString(PREF_KEY_LOCATION_PRECISION, precision);
+  }
+
+  /** 精度字符串归一化：认识 city / district / street，其余一律按 city（旧数据/手改坏了不崩） */
+  static normalizedLocationPrecision(raw: string): string {
+    if (raw === LOCATION_PRECISION_DISTRICT || raw === LOCATION_PRECISION_STREET) {
+      return raw;
+    }
+    return LOCATION_PRECISION_CITY;
   }
 }

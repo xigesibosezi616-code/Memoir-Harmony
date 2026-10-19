@@ -26,6 +26,7 @@ import richDocEditorTest from './test/RichDocEditor.test'
 import inkLedgerTest from './test/InkLedger.test'
 import cameraSessionTest from './test/CameraSession.test'
 import cameraPhotoFilesTest from './test/CameraPhotoFiles.test'
+import placeWeatherFormatTest from './test/PlaceWeatherFormat.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -56,4 +57,5 @@ export default function testsuite() {
   inkLedgerTest()
   cameraSessionTest()
   cameraPhotoFilesTest()
+  placeWeatherFormatTest()
 }
