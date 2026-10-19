@@ -28,8 +28,9 @@ export class BambooTheme implements AppTheme {
   readonly glassBackground: ResourceColor = 0xA8E0D8C6;
   readonly glassBorder: ResourceColor = 0xE6D4C9B8;
 
-  // 列表卡：米白和纸底上纯白卡 + 暖墨柔影（备忘录浅色款「亮卡浮于浅底」）
-  readonly listCardBackground: ResourceColor = 0xFFFFFFFF;
+  // 列表卡：与页面同纸色（融入一体，2026-10-19 用户拍板：不用色差浮卡，
+  // 卡即纸面一部分，靠 EntryRowView 的 0.5 描边 + 暖墨柔影成型）
+  readonly listCardBackground: ResourceColor = 0xFFFAF7F2;
   readonly listCardShadow: ShadowOptions = { radius: 8, color: 0x143E3A33, offsetX: 0, offsetY: 2 };
 
   readonly accent: ResourceColor = 0xFF8B7E6A;

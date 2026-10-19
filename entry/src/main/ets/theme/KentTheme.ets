@@ -28,7 +28,8 @@ export class KentTheme implements AppTheme {
   readonly glassBackground: ResourceColor = 0xA8DCDCDC;
   readonly glassBorder: ResourceColor = 0xB3999999;
 
-  // 列表卡：纯白底上白卡，中性柔影成型（备忘录浅色款同款投影思路）
+  // 列表卡：与页面同纸色（融入一体，2026-10-19 用户拍板：纯白底上
+  // 白卡靠 EntryRowView 的 0.5 描边 + 中性柔影成型，不用色差浮卡）
   readonly listCardBackground: ResourceColor = 0xFFFFFFFF;
   readonly listCardShadow: ShadowOptions = { radius: 8, color: 0x12000000, offsetX: 0, offsetY: 2 };
 

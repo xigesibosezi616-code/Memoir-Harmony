@@ -1,6 +1,6 @@
 /**
  * 富文本格式工具条（10_BUILD_MANUAL.md 2.5）。视觉沿用初版（iOS 对照）：
- * 通栏主题底 + 顶部 0.5 Divider，居中四盏灯 42×44 圆角 8，
+ * 通栏主题底 + 顶部 0.5 Divider，居中四盏灯 38×44 圆角 8，
  * 亮灯 = 主文字色 10% 透明底（colorWithAlpha）。
  *
  * 本轮保留的三项改进：
@@ -47,7 +47,7 @@ struct RichFormatButton {
     }
     .justifyContent(FlexAlign.Center)
     .alignItems(VerticalAlign.Center)
-    .width(42)
+    .width(38)
     .height(44)
     .borderRadius(8)
     // 亮灯：主文字色 10% 透明度打底（iOS 同款轻底色）
@@ -142,7 +142,11 @@ export struct RichFormatToolbar {
       Divider()
         .strokeWidth(0.5)
         .color(this.theme.border)
-      Row({ space: 4 }) {
+      // 2026-10-19 真机回归：键 42 + 间距 4 时内容 ~342vp 超出屏宽余量
+      // （345.6−40 内边距 = 305.6），录音键被顶到屏幕边缘。收窄为
+      // 键 38 + 间距 3 + 分隔线边距 8 + 条内边距 16 → 内容 ~303.5vp，
+      // 345.6−32 = 313.6 内放得下，两侧余 ~10vp（写日记 / 编辑页共用）
+      Row({ space: 3 }) {
         RichFormatButton({
           iconRes: $r('sys.symbol.bold'),
           labelRes: $r('app.string.s_f670b2adc0'),
@@ -181,7 +185,7 @@ export struct RichFormatToolbar {
           .strokeWidth(0.5)
           .color(colorWithAlpha(this.theme.textTertiary, 0x40))
           .height(20)
-          .margin({ left: 10, right: 10 })
+          .margin({ left: 8, right: 8 })
         RichFormatButton({
           iconRes: $r('sys.symbol.camera'),
           labelRes: $r('app.string.s_3da4b3651a'),
@@ -218,8 +222,8 @@ export struct RichFormatToolbar {
     .width('100%')
     .backgroundColor(this.theme.background)
     .padding({
-      left: 20,
-      right: 20,
+      left: 16,
+      right: 16,
       bottom: this.keyboardOpen ? 0 : this.safeAreaBottomVp
     })
   }
