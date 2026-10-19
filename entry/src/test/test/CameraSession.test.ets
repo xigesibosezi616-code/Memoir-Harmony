@@ -87,7 +87,7 @@ export default function cameraSessionTest() {
     it('cameraShotIsMovingPhotoOnlyWithVideo', 0, () => {
       const still = new CameraShot(new ArrayBuffer(8), undefined);
       expect(still.isMovingPhoto).assertFalse();
-      const moving = new CameraShot(new ArrayBuffer(8), new ArrayBuffer(8));
+      const moving = new CameraShot(new ArrayBuffer(8), Promise.resolve(new ArrayBuffer(8)));
       expect(moving.isMovingPhoto).assertTrue();
     })
 

@@ -129,7 +129,11 @@ export async function saveCameraShot(io: PhotoPaperIO, shot: CameraShot,
   }
   let fullStillFilename: string | undefined = undefined;
   let videoFilename: string | undefined = undefined;
-  const videoBuffer = shot.videoBuffer;
+  let videoBuffer: ArrayBuffer | undefined = undefined;
+  if (shot.videoReady !== undefined) {
+    // 动态视频后台提取在此接上（通常审阅期间已就绪；失败 resolve undefined）
+    videoBuffer = await shot.videoReady;
+  }
   if (videoBuffer !== undefined) {
     const stillName = `photo_${base}_full.jpg`;
     const movieName = `photo_${base}.mp4`;

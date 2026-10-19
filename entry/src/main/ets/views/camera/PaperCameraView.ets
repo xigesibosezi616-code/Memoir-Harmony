@@ -25,6 +25,8 @@
  *   快门行贴在闪光 / 相纸工具条上方；工具条居中收在底部（选中态近黑胶囊
  *   反白，平时裸灰字，无图标）
  * - 拍完：相纸从取景框顶「出纸口」打印出来（打印机吐纸 460ms 快出缓停），
+ *   快照先行——快门瞬间抓取景帧先上纸（surface 快照 ~50ms 出纸），
+ *   抓不到退白纸先行，真 50MP 解码完成后在显影蒙层下无感换掉；
  *   到位后白蒙层渐褪显影（560ms，拍立得显影感）+ 落定 ±2.5° 随机微倾；
  *   预览 surface **不销毁**（销毁后重建 surfaceId 变了预览接不回），相纸盖在上面
  * - 闪光三选托盘（自动/闪光开/闪光关，有闪光单元才显示）/ 前后摄切换；
@@ -140,8 +142,12 @@ export struct PaperCameraView {
   @State private sessionFailed: boolean = false;
   /** 会话已起（预览可见、快门可按） */
   @State private authorized: boolean = false;
-  /** 拍到的方图；非 undefined 时取景框变为相纸审阅态 */
+  /** 相纸已出（审阅态；白纸先行，影像解码到位后再显影上去） */
+  @State private paperEjected: boolean = false;
+  /** 拍到的方图；解码完成后落到已出的相纸上 */
   @State private shotPixelMap: image.PixelMap | undefined = undefined;
+  /** 快照先行：快门瞬间抓的取景帧（真片解码完成后换掉并释放） */
+  @State private previewFramePixelMap: image.PixelMap | undefined = undefined;
   /** 出纸显影中：白蒙层盖着影像，吐纸到位后褪去（拍立得显影） */
   @State private printDeveloping: boolean = false;
   @State private capturing: boolean = false;
@@ -177,6 +183,12 @@ export struct PaperCameraView {
   @State private expanded: boolean = false;
 
   private capturedShot: CameraShot | undefined = undefined;
+  /** 白纸先行留下的解码任务（「写下这一刻」抢在解码完成前点下时等它） */
+  private decodePromise: Promise<image.PixelMap | undefined> | undefined = undefined;
+  /** 「写下这一刻」在真片路上点下时的等待队列（真片到了 / 收纸时解锁） */
+  private shotWaiters: Array<(value: void) => void> = [];
+  /** 吐纸到位后的显影 / 落定延时（重拍 / 收纸要清，避免殃及下一张） */
+  private developTimer: number = -1;
   private session: CameraSession = new CameraSession();
   private surfaceController: XComponentController = new XComponentController();
   private surfaceId: string = '';
@@ -212,6 +224,8 @@ export struct PaperCameraView {
   }
 
   aboutToDisappear(): void {
+    clearTimeout(this.developTimer);
+    this.developTimer = -1;
     this.clearStripTimer();
     this.clearFlashTrayTimer();
     this.setSystemBarsForCamera(false);
@@ -240,7 +254,7 @@ export struct PaperCameraView {
             .letterSpacing(this.theme.letterSpacingWide)
             // 字距尾空让「尺素」视觉重心左偏：右挪半个字距，与下方小字对齐
             .offset({ x: this.theme.letterSpacingWide / 2 })
-          Text(this.shotPixelMap !== undefined ?
+          Text(this.paperEjected ?
             $r('app.string.s_95a69206f7') : $r('app.string.s_e5e80726bd'))
             .fontSize(this.theme.labelFont.size)
             .fontWeight(this.theme.labelFont.weight)
@@ -261,7 +275,7 @@ export struct PaperCameraView {
           .translate({ y: this.expanded ? 0 : 40 })
           .opacity(this.expanded ? 1 : 0)
           .transition(controlSwapTransition())
-        } else if (this.shotPixelMap === undefined) {
+        } else if (!this.paperEjected) {
           Column() {
             this.zoomRow()
             this.captureControls()
@@ -417,7 +431,7 @@ export struct PaperCameraView {
         })
         .width(this.frameSide())
         .height(this.frameSide() / this.previewAspect)
-        .visibility(this.authorized && this.shotPixelMap === undefined ?
+        .visibility(this.authorized && !this.paperEjected ?
           Visibility.Visible : Visibility.Hidden)
 
       // 未授权 / 会话失败：引导态盖在预览位上
@@ -425,8 +439,8 @@ export struct PaperCameraView {
         this.viewfinderPlaceholder()
       }
 
-      // 拍完：照片以相纸形态落下（白框 + 底部留白 + 小倾斜）
-      if (this.shotPixelMap !== undefined) {
+      // 拍完：相纸落下（白纸先行，影像解码到位后显影上来）
+      if (this.paperEjected) {
         this.paperPrint()
       }
     }
@@ -466,7 +480,7 @@ export struct PaperCameraView {
 
   /** 自由变焦可用：会话在跑且不在相纸审阅态 */
   private canZoomFreely(): boolean {
-    return this.authorized && this.shotPixelMap === undefined;
+    return this.authorized && !this.paperEjected;
   }
 
   /** 未授权 / 会话失败的占位（权限被拒给「去设置」引导） */
@@ -508,12 +522,29 @@ export struct PaperCameraView {
   private paperPrint() {
     Column() {
       Stack() {
-        Image(this.shotPixelMap)
-          .objectFit(ImageFit.Cover)
-          .width(this.frameSide() - 24)
-          .height((this.frameSide() - 24) * 0.82)
-          .borderRadius(2)
-          .draggable(false)
+        if (this.shotPixelMap !== undefined) {
+          Image(this.shotPixelMap)
+            .objectFit(ImageFit.Cover)
+            .width(this.frameSide() - 24)
+            .height((this.frameSide() - 24) * 0.82)
+            .borderRadius(2)
+            .draggable(false)
+        } else if (this.previewFramePixelMap !== undefined) {
+          // 快照先行：取景帧先顶着，真片解码完成后无感换掉
+          Image(this.previewFramePixelMap)
+            .objectFit(ImageFit.Cover)
+            .width(this.frameSide() - 24)
+            .height((this.frameSide() - 24) * 0.82)
+            .borderRadius(2)
+            .draggable(false)
+        } else {
+          // 白纸先行：解码未完成时照片位是空白相纸（与显影蒙层同色，到位无感替换）
+          Column()
+            .width(this.frameSide() - 24)
+            .height((this.frameSide() - 24) * 0.82)
+            .borderRadius(2)
+            .backgroundColor('#F7F6F2')
+        }
         // 显影白蒙层：出纸时盖着影像，吐纸到位后渐褪（拍立得显影感）
         Column()
           .width(this.frameSide() - 24)
@@ -962,6 +993,10 @@ export struct PaperCameraView {
     this.session.onCaptureFailed = (): void => {
       // 拍照 / 提取失败：取景不中断，快门可再按
       this.capturing = false;
+      // 快照先行已出纸但没等到真片：收纸退回拍摄态
+      if (this.paperEjected && this.capturedShot === undefined) {
+        this.retake();
+      }
     };
     this.session.open(context, this.surfaceId,
       Math.round(this.getUIContext().vp2px(this.frameSide()))).then((ok: boolean): void => {
@@ -982,23 +1017,108 @@ export struct PaperCameraView {
     });
   }
 
-  /** 拍到一张：解码中心方形 → 相纸从取景框顶「打印」出来（吐纸→显影→落定） */
+  /** 拍到一张：真片解码后落到相纸上（快照 / 白纸已先行出纸） */
   private async handleShot(shot: CameraShot): Promise<void> {
-    const square = await decodeCenterSquare(shot.stillBuffer);
     this.capturing = false;
-    if (square === undefined) {
-      hilog.error(DOMAIN, TAG, 'decodeCenterSquare failed, stay in capture mode');
+    this.capturedShot = shot;
+    this.resolveShotWaiters();
+    this.decodePromise = decodeCenterSquare(shot.stillBuffer);
+    if (!this.paperEjected) {
+      // 快照没抓到：白纸先行兜底
+      this.printDeveloping = true;
+      this.paperTilt = 0;
+      this.getUIContext().animateTo({ curve: PAPER_CURVE }, (): void => {
+        this.paperEjected = true;
+      });
+      // 毫秒计时：相纸出片上屏（快门→此处 = 用户感知的拍照延迟）
+      this.session.markPaperShown();
+      this.scheduleDevelop();
+    }
+    const square = await this.decodePromise;
+    // 已重拍：丢弃本次解码
+    if (this.capturedShot !== shot) {
       return;
     }
-    this.capturedShot = shot;
+    if (square === undefined) {
+      hilog.error(DOMAIN, TAG, 'decodeCenterSquare failed, stay in capture mode');
+      this.retake();
+      return;
+    }
+    // 真片换下快照（显影蒙层未褪时无感；蒙层已褪是一次「显影变清晰」）
+    this.getUIContext().animateTo({ curve: PAPER_CURVE }, (): void => {
+      this.shotPixelMap = square;
+      this.releasePreviewFrame();
+    });
+    this.session.markPhotoOnPaper();
+  }
+
+  /** 快门瞬间抓取景帧先上纸（真 50MP 成像 ~0.8s，先让相纸有图） */
+  private async ejectWithPreviewFrame(): Promise<void> {
+    const frame = await this.grabPreviewFrame();
+    // 拍摄已失败 / 相纸已出（白纸兜底抢先）：快照作废
+    if (!this.capturing || this.paperEjected) {
+      if (frame !== undefined) {
+        frame.release().catch((): void => {});
+      }
+      return;
+    }
+    if (frame === undefined) {
+      return;
+    }
+    this.previewFramePixelMap = frame;
     // 出纸是直的（先不倾），显影蒙层先盖满
     this.printDeveloping = true;
     this.paperTilt = 0;
     this.getUIContext().animateTo({ curve: PAPER_CURVE }, (): void => {
-      this.shotPixelMap = square;
+      this.paperEjected = true;
     });
-    // 吐纸到位：白蒙层渐褪（影像显影）+ 相纸落定微倾（±2.5° 随机）
-    setTimeout((): void => {
+    // 毫秒计时：快照先行出纸（用户看到相纸的第一刻）
+    this.session.markPaperShown();
+    this.scheduleDevelop();
+  }
+
+  /** 抓取景器当前帧（surface 快照）并居中裁方（与取景框所见一致） */
+  private async grabPreviewFrame(): Promise<image.PixelMap | undefined> {
+    if (this.surfaceId.length === 0) {
+      return undefined;
+    }
+    try {
+      const full = await image.createPixelMapFromSurface(this.surfaceId);
+      const size = full.getImageInfoSync().size;
+      const side = Math.min(size.width, size.height);
+      await full.crop({
+        size: { width: side, height: side },
+        x: Math.floor((size.width - side) / 2),
+        y: Math.floor((size.height - side) / 2)
+      } as image.Region);
+      return full;
+    } catch (err) {
+      // 快照失败（机型 / 时机不支持）不算拍照失败：白纸先行兜底
+      return undefined;
+    }
+  }
+
+  /** 释放快照帧（真片换下 / 收纸时调用，防泄漏） */
+  private releasePreviewFrame(): void {
+    const frame = this.previewFramePixelMap;
+    this.previewFramePixelMap = undefined;
+    if (frame !== undefined) {
+      frame.release().catch((): void => {});
+    }
+  }
+
+  /** 真片已到 / 已收纸：解锁「写下这一刻」的等待者 */
+  private resolveShotWaiters(): void {
+    const waiters = this.shotWaiters;
+    this.shotWaiters = [];
+    for (const resolve of waiters) {
+      resolve();
+    }
+  }
+
+  /** 吐纸到位：白蒙层渐褪（影像显影）+ 相纸落定微倾（±2.5° 随机） */
+  private scheduleDevelop(): void {
+    this.developTimer = setTimeout((): void => {
       this.getUIContext().animateTo(
         { duration: PRINT_DEVELOP_MS, curve: Curve.EaseOut },
         (): void => {
@@ -1011,7 +1131,7 @@ export struct PaperCameraView {
   }
 
   private capture(): void {
-    if (!this.authorized || this.capturing || this.shotPixelMap !== undefined) {
+    if (!this.authorized || this.capturing || this.paperEjected) {
       return;
     }
     this.capturing = true;
@@ -1024,20 +1144,50 @@ export struct PaperCameraView {
       this.flashOn = false;
     });
     this.session.capture();
+    // 快照先行：取景帧立刻上纸，真片解码完成后换掉
+    this.ejectWithPreviewFrame();
   }
 
   private retake(): void {
+    clearTimeout(this.developTimer);
+    this.developTimer = -1;
     this.capturedShot = undefined;
+    this.decodePromise = undefined;
     this.shotPixelMap = undefined;
+    this.releasePreviewFrame();
+    this.paperEjected = false;
+    this.printDeveloping = false;
+    this.resolveShotWaiters();
   }
 
   /** 「写下这一刻」：回写默认相纸偏好，交产物给页面插入（文件链由页面跑） */
-  private confirmShot(): void {
-    const shot = this.capturedShot;
-    const square = this.shotPixelMap;
-    if (shot === undefined || square === undefined) {
+  private async confirmShot(): Promise<void> {
+    if (!this.paperEjected) {
       return;
     }
+    if (this.capturedShot === undefined && this.capturing) {
+      // 快照先行的窗口里点下：等真片到（拍摄没失败就一定会来）
+      await new Promise<void>((resolve: (value: void) => void): void => {
+        this.shotWaiters.push(resolve);
+      });
+    }
+    const shot = this.capturedShot;
+    if (shot === undefined) {
+      return;
+    }
+    // 抢在解码完成前点下：等解码（白纸先行留给解码的窗口，通常已就绪）
+    let square = this.shotPixelMap;
+    if (square === undefined && this.decodePromise !== undefined) {
+      square = await this.decodePromise;
+      if (square !== undefined && this.capturedShot === shot) {
+        this.shotPixelMap = square;
+      }
+    }
+    if (square === undefined) {
+      return;
+    }
+    clearTimeout(this.developTimer);
+    this.developTimer = -1;
     this.clearStripTimer();
     this.clearFlashTrayTimer();
     AppPrefs.putString(PREF_KEY_DEFAULT_PAPER_STYLE, this.selectedPaper);
@@ -1121,6 +1271,10 @@ export struct PaperCameraView {
   }
 
   private togglePaperStrip(): void {
+    // 白纸先行的审阅态：影像解码没到位不开条（预览卡是普通字段，开了不会再刷出来）
+    if (this.paperEjected && this.shotPixelMap === undefined) {
+      return;
+    }
     this.haptic('haptic.effect.soft');
     this.clearStripTimer();
     this.clearFlashTrayTimer();

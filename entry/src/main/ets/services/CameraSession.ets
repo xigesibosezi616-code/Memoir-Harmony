@@ -9,16 +9,20 @@
  *   重编码会丢配对标识，且失败是静默的）；方形裁切只用于显示，由视图层另做
  * - 存相册（R-PHOTO-06）：`photoAssetAvailable` 给的 PhotoAsset 走官方相机链路
  *   `MediaAssetChangeRequest.saveCameraPhoto`（免权限），失败只记日志不影响日记
- * - 沙盒提取：`requestMovingPhoto` → `MovingPhoto.requestContent` 把原图 + 视频写进
- *   cacheDir 临时文件再读回；动态链路失败退 `requestImageData` 拿静态图（R-PHOTO-04
+ * - 沙盒提取：`requestMovingPhoto` → `MovingPhoto.requestContent` 拿原样字节。
+ *   **静图先行**：只探 IMAGE 轨，一到手立刻交付 UI（相纸出纸不等视频）；
+ *   视频转后台继续提取（`CameraShot.videoReady`），确认落盘时自然接上，
+ *   拿不到 → 落盘退化普通照片。静图全败退 `requestImageData`（R-PHOTO-04
  *   静态兜底），再失败才算拍照失败
  * - 闪光三态 / 变焦（夹设备范围与 5× 上限）/ 前后摄切换（拆会话重建，surface 不变）
+ * - 毫秒计时：快门→资产→入库→静图→出纸→视频逐段写 camera_timing.log（CameraPerfLog）
  */
 import { camera } from '@kit.CameraKit';
 import { photoAccessHelper } from '@kit.MediaLibraryKit';
 import { common } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { CameraPerfLog } from './CameraPerfLog';
 
 const DOMAIN = 0x0000;
 const TAG = 'CameraSession';
@@ -164,29 +168,38 @@ export function bestPhotoProfile(profiles: Array<camera.Profile>): camera.Profil
   return best;
 }
 
-/** 一次拍照的产物（iOS `CameraShot`）：原样字节，绝不重编码（R-PHOTO-03） */
+/**
+ * 一次拍照的产物（iOS `CameraShot`）：原样字节，绝不重编码（R-PHOTO-03）。
+ * 静图先行交付出纸；动态视频**后台补齐**——`videoReady` 是提取中的 Promise，
+ * 落盘链（saveCameraShot）await 它拿字节，失败 resolve undefined 退化普通照片。
+ */
 export class CameraShot {
   readonly stillBuffer: ArrayBuffer;
-  readonly videoBuffer: ArrayBuffer | undefined;
+  readonly videoReady: Promise<ArrayBuffer | undefined> | undefined;
 
-  constructor(stillBuffer: ArrayBuffer, videoBuffer: ArrayBuffer | undefined) {
+  constructor(stillBuffer: ArrayBuffer,
+    videoReady: Promise<ArrayBuffer | undefined> | undefined) {
     this.stillBuffer = stillBuffer;
-    this.videoBuffer = videoBuffer;
+    this.videoReady = videoReady;
   }
 
   get isMovingPhoto(): boolean {
-    return this.videoBuffer !== undefined;
+    return this.videoReady !== undefined;
   }
 }
 
-/** 动态照片提取结果（cacheDir 临时文件读回的两份字节） */
-class MovingPhotoFiles {
-  readonly still: ArrayBuffer;
-  readonly video: ArrayBuffer | undefined;
+/** 一次拍照的毫秒计时（快门按下为 0 点；各阶段写 CameraPerfLog） */
+class CaptureTiming {
+  readonly id: number;
+  private readonly startMs: number;
 
-  constructor(still: ArrayBuffer, video: ArrayBuffer | undefined) {
-    this.still = still;
-    this.video = video;
+  constructor(id: number) {
+    this.id = id;
+    this.startMs = Date.now();
+  }
+
+  elapsedMs(): number {
+    return Date.now() - this.startMs;
   }
 }
 
@@ -229,6 +242,9 @@ export class CameraSession {
   private zoomRangeCache: Array<number> = [1, MAX_ZOOM_RATIO];
   /** 预览显示区短边（px）：setupSession 挑预览档位用（匹配显示区） */
   private previewShortSidePx: number = 1080;
+  /** 当前拍照的毫秒计时（capture() 置位；各阶段埋点读它） */
+  private timing: CaptureTiming | undefined = undefined;
+  private timingSeq: number = 0;
 
   get previewAspect(): number {
     return this.previewAspectValue;
@@ -267,6 +283,7 @@ export class CameraSession {
     if (photoOutput === undefined) {
       return;
     }
+    this.timing = new CaptureTiming(++this.timingSeq);
     try {
       const setting: camera.PhotoCaptureSetting = {
         quality: camera.QualityLevel.QUALITY_LEVEL_HIGH
@@ -639,6 +656,10 @@ export class CameraSession {
           this.onCaptureFailed();
           return;
         }
+        const timing = this.timing;
+        if (timing !== undefined) {
+          CameraPerfLog.mark(this.context, `cap#${timing.id} asset=+${timing.elapsedMs()}ms`);
+        }
         this.saveAndExtract(asset);
       });
   }
@@ -655,6 +676,10 @@ export class CameraSession {
       return;
     }
     await this.saveToGallery(asset);
+    const timing = this.timing;
+    if (timing !== undefined) {
+      CameraPerfLog.mark(context, `cap#${timing.id} gallery=+${timing.elapsedMs()}ms`);
+    }
     await this.extractShot(asset);
   }
 
@@ -677,20 +702,31 @@ export class CameraSession {
     }
   }
 
-  /** 沙盒提取：动态链路（原图+视频）优先，失败退静态图（R-PHOTO-04 兜底） */
+  /**
+   * 沙盒提取：**静图先行**——只探 IMAGE 轨，一到手立刻交付 UI（相纸出纸不等视频）；
+   * 视频转后台继续提取（`CameraShot.videoReady`），确认落盘时自然接上，
+   * 拿不到 → 落盘退化普通照片。静图全败退 `requestImageData`（R-PHOTO-04 静态兜底）。
+   */
   private async extractShot(asset: photoAccessHelper.PhotoAsset): Promise<void> {
     const context = this.context;
     if (context === undefined) {
       this.onCaptureFailed();
       return;
     }
+    const timing = this.timing;
     let still: ArrayBuffer | undefined = undefined;
-    let video: ArrayBuffer | undefined = undefined;
+    let videoReady: Promise<ArrayBuffer | undefined> | undefined = undefined;
     if (this.movingPhotoEnabled) {
-      const files = await CameraSession.extractMovingPhoto(context, asset);
-      if (files !== undefined) {
-        still = files.still;
-        video = files.video;
+      still = await CameraSession.extractMovingStill(context, asset);
+      if (still !== undefined) {
+        // 视频后台补齐：探针循环自跑，成功 / 失败都不阻塞出纸
+        videoReady = CameraSession.extractMovingVideo(context, asset).then(
+          (video: ArrayBuffer | undefined): ArrayBuffer | undefined => {
+            if (timing !== undefined) {
+              CameraPerfLog.mark(context, `cap#${timing.id} video=+${timing.elapsedMs()}ms`);
+            }
+            return video;
+          });
       }
     }
     if (still === undefined) {
@@ -701,45 +737,53 @@ export class CameraSession {
       this.onCaptureFailed();
       return;
     }
-    this.onShot(new CameraShot(still, video));
+    if (timing !== undefined) {
+      CameraPerfLog.mark(context, `cap#${timing.id} still=+${timing.elapsedMs()}ms`);
+    }
+    this.onShot(new CameraShot(still, videoReady));
+  }
+
+  /** 相纸出片上屏时刻（视图 handleShot 解码完成后调；毫秒计时用） */
+  markPaperShown(): void {
+    const context = this.context;
+    const timing = this.timing;
+    if (context !== undefined && timing !== undefined) {
+      CameraPerfLog.mark(context, `cap#${timing.id} paper=+${timing.elapsedMs()}ms`);
+    }
+  }
+
+  /** 真片落到相纸时刻（快照先行后换真片；毫秒计时用） */
+  markPhotoOnPaper(): void {
+    const context = this.context;
+    const timing = this.timing;
+    if (context !== undefined && timing !== undefined) {
+      CameraPerfLog.mark(context, `cap#${timing.id} photo=+${timing.elapsedMs()}ms`);
+    }
   }
 
   /**
-   * 动态照片原样字节提取：requestMovingPhoto → requestContent 直接拿
-   * IMAGE / VIDEO 的 ArrayBuffer（官方 since 12 重载，免临时文件中转）。
-   *
-   * 资产两阶段写入竞态（50MP 全分辨率后加剧，实测 13MB 资产夜拍就绪可拖到 20s+）：
-   * - BALANCE 模式失败快（14000011 / undefined 秒回），适合密集探针轮询——
-   *   资产一就绪立刻取到内容，典型白天 1-4s 交付；
-   * - 探针全败再发一次 HIGH_QUALITY（内部会等两阶段就绪，~4.5s 超时退
-   *   undefined）背水一战；
-   * - still 字节跨尝试保留：IMAGE 拿到就不再重发，VIDEO 单独重试；
-   *   视频始终拿不到但静图在手 → 交 still-only（R-PHOTO-04 静态兜底）。
+   * 静图原样字节提取（BALANCE 密集探针 + HIGH_QUALITY 背水一战）。
+   * 资产两阶段写入竞态下 BALANCE 失败快（14000011 / undefined 秒回），
+   * 适合密集轮询——IMAGE 轨（第一阶段）典型几十毫秒~1s 就绪。
    */
-  private static async extractMovingPhoto(context: common.UIAbilityContext,
-    asset: photoAccessHelper.PhotoAsset): Promise<MovingPhotoFiles | undefined> {
+  private static async extractMovingStill(context: common.UIAbilityContext,
+    asset: photoAccessHelper.PhotoAsset): Promise<ArrayBuffer | undefined> {
     const balanceWaits: number[] = [300, 600, 1000, 1500, 2200, 3000, 4000, 5000];
-    let still: ArrayBuffer | undefined = undefined;
     for (let attempt = 0; attempt <= balanceWaits.length; attempt++) {
       try {
         const movingPhoto = await CameraSession.requestMovingPhotoObject(
           context, asset, photoAccessHelper.DeliveryMode.BALANCE_MODE);
-        if (movingPhoto === undefined) {
-          throw new Error('movingPhoto resolved undefined');
-        }
-        if (still === undefined) {
-          still = await movingPhoto.requestContent(
+        if (movingPhoto !== undefined) {
+          return await movingPhoto.requestContent(
             photoAccessHelper.ResourceType.IMAGE_RESOURCE);
         }
-        const video = await movingPhoto.requestContent(
-          photoAccessHelper.ResourceType.VIDEO_RESOURCE);
-        return new MovingPhotoFiles(still, video);
       } catch (err) {
-        if (attempt < balanceWaits.length) {
-          await new Promise<void>((resolve: () => void): void => {
-            setTimeout(resolve, balanceWaits[attempt]);
-          });
-        }
+        // 资产未就绪（14000011）/ 秒回 undefined：按节奏重试
+      }
+      if (attempt < balanceWaits.length) {
+        await new Promise<void>((resolve: () => void): void => {
+          setTimeout(resolve, balanceWaits[attempt]);
+        });
       }
     }
     // 背水一战：HIGH_QUALITY 内部等两阶段写入（自带 ~4.5s 超时）
@@ -747,20 +791,52 @@ export class CameraSession {
       const movingPhoto = await CameraSession.requestMovingPhotoObject(
         context, asset, photoAccessHelper.DeliveryMode.HIGH_QUALITY_MODE);
       if (movingPhoto !== undefined) {
-        if (still === undefined) {
-          still = await movingPhoto.requestContent(
-            photoAccessHelper.ResourceType.IMAGE_RESOURCE);
-        }
-        const video = await movingPhoto.requestContent(
-          photoAccessHelper.ResourceType.VIDEO_RESOURCE);
-        return new MovingPhotoFiles(still, video);
+        return await movingPhoto.requestContent(
+          photoAccessHelper.ResourceType.IMAGE_RESOURCE);
       }
     } catch (err) {
-      hilog.warn(DOMAIN, TAG, 'extractMovingPhoto hq fallback failed: %{public}s',
+      hilog.warn(DOMAIN, TAG, 'extractMovingStill hq fallback failed: %{public}s',
         JSON.stringify(err));
     }
-    if (still !== undefined) {
-      return new MovingPhotoFiles(still, undefined);
+    return undefined;
+  }
+
+  /**
+   * 视频原样字节提取（IMAGE 之后的第二阶段，就绪更晚）：
+   * 同款 BALANCE 探针 + HIGH_QUALITY 背水一战；全失败 resolve undefined
+   * → 落盘链退化普通照片（R-PHOTO-04）。后台跑，不阻塞出纸。
+   */
+  private static async extractMovingVideo(context: common.UIAbilityContext,
+    asset: photoAccessHelper.PhotoAsset): Promise<ArrayBuffer | undefined> {
+    const balanceWaits: number[] = [300, 600, 1000, 1500, 2200, 3000, 4000, 5000];
+    for (let attempt = 0; attempt <= balanceWaits.length; attempt++) {
+      try {
+        const movingPhoto = await CameraSession.requestMovingPhotoObject(
+          context, asset, photoAccessHelper.DeliveryMode.BALANCE_MODE);
+        if (movingPhoto !== undefined) {
+          return await movingPhoto.requestContent(
+            photoAccessHelper.ResourceType.VIDEO_RESOURCE);
+        }
+      } catch (err) {
+        // 视频轨未就绪：按节奏重试
+      }
+      if (attempt < balanceWaits.length) {
+        await new Promise<void>((resolve: () => void): void => {
+          setTimeout(resolve, balanceWaits[attempt]);
+        });
+      }
+    }
+    // 背水一战：HIGH_QUALITY 内部等两阶段写入（自带 ~4.5s 超时）
+    try {
+      const movingPhoto = await CameraSession.requestMovingPhotoObject(
+        context, asset, photoAccessHelper.DeliveryMode.HIGH_QUALITY_MODE);
+      if (movingPhoto !== undefined) {
+        return await movingPhoto.requestContent(
+          photoAccessHelper.ResourceType.VIDEO_RESOURCE);
+      }
+    } catch (err) {
+      hilog.warn(DOMAIN, TAG, 'extractMovingVideo hq fallback failed: %{public}s',
+        JSON.stringify(err));
     }
     return undefined;
   }
