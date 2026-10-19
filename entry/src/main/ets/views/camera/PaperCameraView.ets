@@ -26,8 +26,10 @@
  *   反白，平时裸灰字，无图标）
  * - 拍完：相纸从取景框顶「出纸口」打印出来（打印机吐纸 460ms 快出缓停），
  *   快照先行——快门瞬间抓取景帧先上纸（surface 快照 ~50ms 出纸），
- *   抓不到退白纸先行，真 50MP 解码完成后在显影蒙层下无感换掉；
- *   到位后白蒙层渐褪显影（560ms，拍立得显影感）+ 落定 ±2.5° 随机微倾；
+ *   抓不到退白纸先行；显影蒙层在吐纸途中渐褪（打印机边走边印——
+ *   2026-10-19 用户反馈「出纸后照片才跳出来」的修法：相纸带着影像出），
+ *   真 50MP 解码完成后对快照交叉淡入（同景同框，观感是显影变清晰）；
+ *   落定 ±2.5° 随机微倾；
  *   预览 surface **不销毁**（销毁后重建 surfaceId 变了预览接不回），相纸盖在上面
  * - 闪光三选托盘（自动/闪光开/闪光关，有闪光单元才显示）/ 前后摄切换；
  *   震动走 vibrator 预设效果（haptic.effect.soft / hard）
@@ -107,6 +109,12 @@ const PRINT_EJECT_MS: number = 460;
 /** 显影时长：出纸后白蒙层褪去、影像浮现（拍立得显影感） */
 const PRINT_DEVELOP_MS: number = 560;
 
+/** 吐纸启动后多久开始显影（打印机边走边印：蒙层在吐纸途中渐褪） */
+const PRINT_DEVELOP_DELAY_MS: number = 120;
+
+/** 真片交叉淡入时长（盖过快照垫层，观感是显影变清晰） */
+const PHOTO_SWAP_MS: number = 320;
+
 /** 换位交叉淡切：相纸抽屉与拍摄控件组互换插槽时的进出场转场 */
 function controlSwapTransition(): TransitionEffect {
   return TransitionEffect.translate({ y: 18 })
@@ -148,6 +156,8 @@ export struct PaperCameraView {
   @State private shotPixelMap: image.PixelMap | undefined = undefined;
   /** 快照先行：快门瞬间抓的取景帧（真片解码完成后换掉并释放） */
   @State private previewFramePixelMap: image.PixelMap | undefined = undefined;
+  /** 真片显影：false=快照在显，true=真片交叉淡入盖过快照 */
+  @State private realPhotoRevealed: boolean = false;
   /** 出纸显影中：白蒙层盖着影像，吐纸到位后褪去（拍立得显影） */
   @State private printDeveloping: boolean = false;
   @State private capturing: boolean = false;
@@ -187,8 +197,8 @@ export struct PaperCameraView {
   private decodePromise: Promise<image.PixelMap | undefined> | undefined = undefined;
   /** 「写下这一刻」在真片路上点下时的等待队列（真片到了 / 收纸时解锁） */
   private shotWaiters: Array<(value: void) => void> = [];
-  /** 吐纸到位后的显影 / 落定延时（重拍 / 收纸要清，避免殃及下一张） */
-  private developTimer: number = -1;
+  /** 真片交叉淡入后收走快照垫层的延时（淡完再释放，防渲染中的 pixelmap 被回收） */
+  private swapReleaseTimer: number = -1;
   private session: CameraSession = new CameraSession();
   private surfaceController: XComponentController = new XComponentController();
   private surfaceId: string = '';
@@ -224,8 +234,9 @@ export struct PaperCameraView {
   }
 
   aboutToDisappear(): void {
-    clearTimeout(this.developTimer);
-    this.developTimer = -1;
+    clearTimeout(this.swapReleaseTimer);
+    this.swapReleaseTimer = -1;
+    this.releasePreviewFrame();
     this.clearStripTimer();
     this.clearFlashTrayTimer();
     this.setSystemBarsForCamera(false);
@@ -522,28 +533,31 @@ export struct PaperCameraView {
   private paperPrint() {
     Column() {
       Stack() {
-        if (this.shotPixelMap !== undefined) {
-          Image(this.shotPixelMap)
-            .objectFit(ImageFit.Cover)
-            .width(this.frameSide() - 24)
-            .height((this.frameSide() - 24) * 0.82)
-            .borderRadius(2)
-            .draggable(false)
-        } else if (this.previewFramePixelMap !== undefined) {
-          // 快照先行：取景帧先顶着，真片解码完成后无感换掉
-          Image(this.previewFramePixelMap)
-            .objectFit(ImageFit.Cover)
-            .width(this.frameSide() - 24)
-            .height((this.frameSide() - 24) * 0.82)
-            .borderRadius(2)
-            .draggable(false)
-        } else {
+        if (this.shotPixelMap === undefined && this.previewFramePixelMap === undefined) {
           // 白纸先行：解码未完成时照片位是空白相纸（与显影蒙层同色，到位无感替换）
           Column()
             .width(this.frameSide() - 24)
             .height((this.frameSide() - 24) * 0.82)
             .borderRadius(2)
             .backgroundColor('#F7F6F2')
+        } else if (this.previewFramePixelMap !== undefined) {
+          // 快照垫层：吐纸途中即显影可见，真片交叉淡入后收走
+          Image(this.previewFramePixelMap)
+            .objectFit(ImageFit.Cover)
+            .width(this.frameSide() - 24)
+            .height((this.frameSide() - 24) * 0.82)
+            .borderRadius(2)
+            .draggable(false)
+        }
+        if (this.shotPixelMap !== undefined) {
+          // 真片层：交叉淡入盖过快照（同景同框，观感是显影变清晰）
+          Image(this.shotPixelMap)
+            .objectFit(ImageFit.Cover)
+            .width(this.frameSide() - 24)
+            .height((this.frameSide() - 24) * 0.82)
+            .borderRadius(2)
+            .draggable(false)
+            .opacity(this.realPhotoRevealed ? 1 : 0)
         }
         // 显影白蒙层：出纸时盖着影像，吐纸到位后渐褪（拍立得显影感）
         Column()
@@ -1032,10 +1046,10 @@ export struct PaperCameraView {
       });
       // 毫秒计时：相纸出片上屏（快门→此处 = 用户感知的拍照延迟）
       this.session.markPaperShown();
-      this.scheduleDevelop();
+      this.startEjectAnimations();
     }
     const square = await this.decodePromise;
-    // 已重拍：丢弃本次解码
+    // 已重拍 / 已确认收场：丢弃本次解码
     if (this.capturedShot !== shot) {
       return;
     }
@@ -1044,11 +1058,9 @@ export struct PaperCameraView {
       this.retake();
       return;
     }
-    // 真片换下快照（显影蒙层未褪时无感；蒙层已褪是一次「显影变清晰」）
-    this.getUIContext().animateTo({ curve: PAPER_CURVE }, (): void => {
-      this.shotPixelMap = square;
-      this.releasePreviewFrame();
-    });
+    // 真片上纸 + 交叉淡入盖过快照（同景同框，观感是显影变清晰）
+    this.shotPixelMap = square;
+    this.revealRealPhoto();
     this.session.markPhotoOnPaper();
   }
 
@@ -1074,7 +1086,7 @@ export struct PaperCameraView {
     });
     // 毫秒计时：快照先行出纸（用户看到相纸的第一刻）
     this.session.markPaperShown();
-    this.scheduleDevelop();
+    this.startEjectAnimations();
   }
 
   /** 抓取景器当前帧（surface 快照）并居中裁方（与取景框所见一致） */
@@ -1116,18 +1128,36 @@ export struct PaperCameraView {
     }
   }
 
-  /** 吐纸到位：白蒙层渐褪（影像显影）+ 相纸落定微倾（±2.5° 随机） */
-  private scheduleDevelop(): void {
-    this.developTimer = setTimeout((): void => {
-      this.getUIContext().animateTo(
-        { duration: PRINT_DEVELOP_MS, curve: Curve.EaseOut },
-        (): void => {
-          this.printDeveloping = false;
-        });
-      this.getUIContext().animateTo({ curve: PAPER_CURVE }, (): void => {
-        this.paperTilt = Math.random() * PAPER_TILT_DEGREES * 2 - PAPER_TILT_DEGREES;
+  /** 出纸动画：显影蒙层吐纸途中渐褪（打印机边走边印）+ 相纸落定微倾（±2.5° 随机） */
+  private startEjectAnimations(): void {
+    this.getUIContext().animateTo(
+      { duration: PRINT_DEVELOP_MS, delay: PRINT_DEVELOP_DELAY_MS, curve: Curve.EaseOut },
+      (): void => {
+        this.printDeveloping = false;
       });
-    }, PRINT_EJECT_MS + 40);
+    this.getUIContext().animateTo({ delay: PRINT_EJECT_MS + 40, curve: PAPER_CURVE }, (): void => {
+      this.paperTilt = Math.random() * PAPER_TILT_DEGREES * 2 - PAPER_TILT_DEGREES;
+    });
+  }
+
+  /** 真片显影：交叉淡入盖过快照垫层，淡完再收垫层（防渲染中的 pixelmap 被释放） */
+  private revealRealPhoto(): void {
+    this.getUIContext().animateTo(
+      { duration: PHOTO_SWAP_MS, curve: Curve.EaseOut },
+      (): void => {
+        this.realPhotoRevealed = true;
+      });
+    const snapshot = this.previewFramePixelMap;
+    if (snapshot === undefined) {
+      return;
+    }
+    clearTimeout(this.swapReleaseTimer);
+    this.swapReleaseTimer = setTimeout((): void => {
+      this.swapReleaseTimer = -1;
+      if (this.previewFramePixelMap === snapshot) {
+        this.releasePreviewFrame();
+      }
+    }, PHOTO_SWAP_MS + 180);
   }
 
   private capture(): void {
@@ -1149,11 +1179,12 @@ export struct PaperCameraView {
   }
 
   private retake(): void {
-    clearTimeout(this.developTimer);
-    this.developTimer = -1;
+    clearTimeout(this.swapReleaseTimer);
+    this.swapReleaseTimer = -1;
     this.capturedShot = undefined;
     this.decodePromise = undefined;
     this.shotPixelMap = undefined;
+    this.realPhotoRevealed = false;
     this.releasePreviewFrame();
     this.paperEjected = false;
     this.printDeveloping = false;
@@ -1180,14 +1211,19 @@ export struct PaperCameraView {
     if (square === undefined && this.decodePromise !== undefined) {
       square = await this.decodePromise;
       if (square !== undefined && this.capturedShot === shot) {
+        // 抢先落片（视图即将离场，handleShot 靠 capturedShot 守卫让路）
         this.shotPixelMap = square;
+        this.revealRealPhoto();
+        this.session.markPhotoOnPaper();
       }
     }
     if (square === undefined) {
       return;
     }
-    clearTimeout(this.developTimer);
-    this.developTimer = -1;
+    // 让 handleShot 的解码续段跳过 UI 动画（视图即将拆）
+    this.capturedShot = undefined;
+    clearTimeout(this.swapReleaseTimer);
+    this.swapReleaseTimer = -1;
     this.clearStripTimer();
     this.clearFlashTrayTimer();
     AppPrefs.putString(PREF_KEY_DEFAULT_PAPER_STYLE, this.selectedPaper);
