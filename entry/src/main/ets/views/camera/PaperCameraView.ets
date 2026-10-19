@@ -88,6 +88,10 @@ const ZOOM_BAR_TEXT: string = '#E8E1D7';
 const ZOOM_DRAG_VP_PER_OCTAVE: number = 80;
 /** 变焦 UI 上限：档位最大 10×，拖动 / 捏合同沿（超出档位的纯数码段不做） */
 const ZOOM_UI_MAX_RATIO: number = 10;
+/** 拖动 / 捏合 JNI 节流下限（ms）：120Hz 手势更新合并到 ~60Hz 下发，中间值丢弃（HAL 1-2 帧才生效，收尾必发精确终值） */
+const ZOOM_SET_MIN_INTERVAL_MS: number = 16;
+/** 数字泡文案写 @State 节流下限（ms）：~30Hz 足够跟手；快速滑动逐 0.1 高频 Text 重排是卡顿源 */
+const ZOOM_LABEL_MIN_INTERVAL_MS: number = 32;
 /** 平滑变焦走数轮询周期（ms）：真值轮询驱动悬浮数字泡，与画面帧率同量级 */
 const SMOOTH_ZOOM_POLL_MS: number = 32;
 /** 相纸落到手里的轻微倾斜幅度（±°，iOS ±2.5） */
@@ -198,6 +202,12 @@ export struct PaperCameraView {
   private smoothZoomPollTimer: number = -1;
   /** 平滑变焦走数目标倍率（-1 = 无进行中的走数；与轮询定时器配套） */
   private smoothZoomTargetRatio: number = -1;
+  /** 上次 setZoom JNI 下发时刻（拖动 / 捏合节流，ms） */
+  private lastZoomSetMs: number = 0;
+  /** 上次数字泡文案写 @State 时刻（节流，ms） */
+  private lastZoomLabelMs: number = 0;
+  /** 本次手势真拖动过（收尾收口判定：纯点按不触发 endContinuousZoom 的重置逻辑） */
+  private dragZoomActive: boolean = false;
   /** 相纸落下时的轻微倾斜（每次拍照随机，避免每次一模一样） */
   @State private paperTilt: number = 0;
   /** 取景画面宽高比（Profile 实测值；XComponent 按它定高防拉伸） */
@@ -662,7 +672,7 @@ export struct PaperCameraView {
         this.setZoomUiValue(target);
         return;
       }
-      this.setZoomUiValue(current);
+      this.updateFlightZoomUi(current);
       this.smoothZoomPollTimer = setTimeout(tick, SMOOTH_ZOOM_POLL_MS);
     };
     this.smoothZoomPollTimer = setTimeout(tick, SMOOTH_ZOOM_POLL_MS);
@@ -788,23 +798,30 @@ export struct PaperCameraView {
   }
 
   /**
-   * 连续变焦（拖条 / 捏合共用，官方手势模式）：每次手势更新把目标直接
-   * `setZoom` 下发（HAL 1-2 帧生效自动合并，官方示例同款不节流）；
-   * 全精度记 `continuousZoomTarget`，标签 0.1 步进才写 @State（重渲染降一个量级），跨档轻震。
+   * 连续变焦（拖条 / 捏合共用，官方手势模式）：手势更新合并下发——
+   * ① JNI 节流：120Hz 事件只在 ≥16ms 窗口下发一次（HAL 1-2 帧生效自动收敛到最新值，
+   *    高频 setZoomRatio 只会积压相机服务拖卡预览）；② 数字泡 ~30Hz 节流写 @State；
+   * ③ 拖动途中圆钮不随途闪换（落位窗 ±0.05 进进出出 = pill↔纯文本互换重排 Row，
+   *    快速滑动的卡顿根因），收尾 endContinuousZoom 才落位；跨档轻震保留。
    */
   private applyContinuousZoom(target: number): void {
     const clamped: number = Math.min(Math.max(target, this.zoomMinCached), this.zoomMaxCached);
     this.continuousZoomTarget = clamped;
-    this.session.setZoom(clamped);
+    this.dragZoomActive = true;
     // 拖动接管：停掉平滑变焦走数轮询（若有），数字泡改由拖动真值驱动
     if (this.smoothZoomPollTimer >= 0 || this.smoothZoomTargetRatio >= 0) {
       this.cancelSmoothZoomCount();
+    }
+    const now: number = Date.now();
+    if (now - this.lastZoomSetMs >= ZOOM_SET_MIN_INTERVAL_MS) {
+      this.lastZoomSetMs = now;
+      this.session.setZoom(clamped);
     }
     const rounded: number = Math.round(clamped * 10) / 10;
     if (Math.abs(rounded - this.zoomRatio) < 0.001) {
       return;
     }
-    this.setZoomUiValue(rounded);
+    this.updateFlightZoomUi(rounded);
     const nearest: number = nearestZoomPreset(rounded, this.zoomPresetList);
     if (nearest !== this.lastNearestPreset) {
       this.lastNearestPreset = nearest;
@@ -812,9 +829,32 @@ export struct PaperCameraView {
     }
   }
 
-  /** 连续变焦收尾：把精确终值再下发一次（收口） */
+  /**
+   * 途中走数（拖动 / 捏合 / 平滑变焦飞行共用单口）：圆钮收起不随途闪换
+   * （落位窗 ±0.05 进进出出 = pill↔纯文本互换重排 Row，快速滑动卡顿根因），
+   * 数字泡 ~30Hz 节流写；落位收口走 setZoomUiValue。
+   */
+  private updateFlightZoomUi(ratio: number): void {
+    this.zoomRatio = ratio;
+    if (this.zoomSettledPreset !== -1) {
+      this.zoomSettledPreset = -1;
+    }
+    const label: string = formatZoomLabel(ratio);
+    if (label !== this.zoomBubbleLabel && Date.now() - this.lastZoomLabelMs >= ZOOM_LABEL_MIN_INTERVAL_MS) {
+      this.lastZoomLabelMs = Date.now();
+      this.zoomBubbleLabel = label;
+    }
+  }
+
+  /** 连续变焦收尾：精确终值下发 + UI 落位（在档位 ±0.05 内点圆钮、否则数字泡常驻） */
   private endContinuousZoom(): void {
+    if (!this.dragZoomActive) {
+      return;
+    }
+    this.dragZoomActive = false;
+    this.lastZoomSetMs = 0;
     this.session.setZoom(this.continuousZoomTarget);
+    this.setZoomUiValue(this.continuousZoomTarget);
   }
 
   // ---- 控制行 ----
