@@ -67,7 +67,7 @@ import { PaperCameraView } from '../camera/PaperCameraView';
 import { VoiceRecordingSheet } from '../components/audio/VoiceRecordingSheet';
 import { WeatherLocationBadge } from '../components/WeatherLocationBadge';
 import { MoodTag } from '../../models/Mood';
-import { Notebook, cleanedName, nameKey, nextSortOrder } from '../../models/Notebook';
+import { Notebook, cleanedName, nameKey, nextSortOrder, quietestColor } from '../../models/Notebook';
 import { DraftEntry, PlaceMode } from '../../models/Draft';
 import { generateUuid } from '../../models/Uuid';
 import { MediaStorageService } from '../../services/MediaStorageService';
@@ -1558,6 +1558,8 @@ export struct ComposeView {
     }
     const now = Date.now();
     const notebook = new Notebook(generateUuid(), typed, now, now);
+    // 写日记页顺手新建没机会挑颜色：取书架上用得最少的颜色（05 §4.1，iOS quietestColor）
+    notebook.colorId = quietestColor(this.notebooks);
     notebook.sortOrder = nextSortOrder(this.notebooks.map((n: Notebook): number => n.sortOrder));
     try {
       await NotebookRepository.insertNotebook(store, notebook);

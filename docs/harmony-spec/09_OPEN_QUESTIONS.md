@@ -36,6 +36,7 @@
 | Q26 | 🔴 | **bindContentCover 真机「隐形挂载」**：全屏照片查看用 bindContentCover，真机出现 appear 日志齐全但零渲染、吞掉整页触摸（dt=163552ms）的幽灵态；且 EditEntryView 同时 bindSheet+bindContentCover 双绑属 API 违规用法 | 2.6 全屏查看 | 鸿蒙 | 2026-10-17 弃用 bindContentCover：三页改**页面内条件浮层**（根 Stack 末位 if(showPhotoFullscreen)，同层最高）。根因未深挖（疑模态子窗口层丢失）；教训：模态类 API（bindContentCover/bindSheet）同一节点只绑一个，全屏沉浸浮层优先用页面内浮层（可嵌自定义转场、可与其他 UI 联动，如 Tab 栏 barOpacity） |
 | Q27 | ⚪ | **真机验证方法论教训（「关全屏白屏」疑云结案）**：曾判定「关闭全屏后整页白屏」并二分删除 transition/barOpacity/hideTitleBar——全部误报 | 验收流程 | 鸿蒙 | 2026-10-17 结案：**像素采样伪象**。`sips` 转 BMP 是负高度 top-down 行序，采样脚本按 bottom-up 公式翻转导致所有采样点垂直镜像（页面照片/Tab 栏位置全采错成背景白区）；dumpLayout 组件树一直完好。教训：①截图判位必须先用已知参照物（状态栏文字、照片区域）校验采样坐标映射；②「白屏」类结论需 dumpLayout（树）+ 像素分布对比（与正常帧 white/dark/colored 占比一致=同页）+ 无诱导语的模型看图三重交叉；③真机注入双击用单次调用链式 down/up（`uinput -T -d x y -u x y -d x y -u x y`，实测间隔 ~45ms；两次独立 uinput ~350ms、uitest doubleClick ~640ms，都超 280ms 双击窗）；④长 E2E 前先 `power-shell timeout -o 600000` 防自动锁屏（锁屏后 dump 有树但截屏全黑） |
 | Q28 | ✅ | **2.9 相机/动态照片的三条官方链路假设**：① `requestMovingPhoto`/`requestImageData`/`saveCameraPhoto` d.ts 权限标注与官方文档用法相悖；② `PhotoViewPicker` IMAGE_TYPE（'image/*'）是否包含动态照片资产可选；③ `loadMovingPhoto`+`MovingPhotoView` 沙箱文件播放可用性 | 2.9 相机 | 鸿蒙 | **2026-10-19 真机实证三条全过，结案**（详述见下 Q28） |
+| Q29 | ✅ | **首启默认日记本颜色冲突**：05_DATA_MODEL §4.2 写「墨绿」，iOS 源码 `ContentView.ensureDefaultTagsExist` 用 `Tag()` 默认构造（**酒红**） | 3.1 书架 | 文档 | 2026-10-20 拍板：**以 iOS 为准（酒红）**，实现已一致；05 §4.2 待勘误（详述见下 Q29） |
 
 ---
 
@@ -365,3 +366,47 @@ R-RICH-09 要求打开编辑时就地转成正文里的录音块。纯逻辑已�
   - **③ 过**：`loadMovingPhoto`+`MovingPhotoView` 沙箱 fileUri 配对长按播放可用；
     实测约束记录：MovingPhotoView 不支持动态属性、不支持 expandSafeArea、
     AVPlayer 并发 ≤3；`onError` 退化静态图路径保持。
+
+### Q29 ✅ 首启默认日记本颜色冲突（2026-10-20 拍板：以 iOS 为准，酒红）
+
+- **冲突**：`05_DATA_MODEL.md` §4.2 写首启默认 4 本颜色为「墨绿」，但 iOS 源码
+  `ContentView.ensureDefaultTagsExist`（L255-266）用 `Tag()` 默认构造建 4 本，
+  `Tag.init` 默认 `color = .wineRed`（**酒红**）——iOS 真机首启 4 本都是酒红。
+- **拍板**：按 CLAUDE.md「冲突以 iOS 源码为准」，**默认 4 本 = 酒红**。鸿蒙实现
+  `Notebook` 构造函数默认 `colorId` 本就是 WineRed，与 iOS 一致，**实现无需改**；
+  05 §4.2 属文档笔误待勘误（本条即记录）。
+- **注意区分三个「默认颜色」**（易混）：
+  ① 首启 4 本 → 酒红（`Tag()` 默认，本条）；
+  ② 书架「+ 新建日记本」弹窗 → 墨绿（iOS `CreateTagSheet` `CoverEdit(color:.pineGreen)`，3.1 已照做）；
+  ③ 写日记页顺手新建（没机会挑颜色）→ `quietestColor`（书架上用得最少的颜色，象牙白除外，书架为空/并列时按 `BookColor` 声明序取第一个；iOS `TagSelector.quietestColor`，05 §4.1，3.1 已接）。
+
+### Q30 ✅ 书架 Scroll「短内容居中 + 内容槽原点 0」双坑（2026-10-20 真机像素级实证结案）
+
+- **现象**（Mate X6 折叠外屏 1080×2440，密度 3.125，沉浸全屏窗口）：
+  ① 短内容（4 本/1288px < 视口 2318px）时书架内容 Column 悬在屏幕中部
+  （[0,576]，576=(2440-1288)/2 精确居中于**全窗**帧），冷启 100% 复现；
+  ② 高内容态下 Scroll 内容**首个子组件的 top inset（margin/padding）渲染约半密度**
+  （12vp→15px 而非 37.5px）；
+  ③ dump 里 Scroll/Column 的 bounds 是**钳制后可见域**（Scroll 显示 (0,122) 但内容槽
+  实际从窗口顶 y=0 起——`.align(Alignment.Top)` 试验时标题渲染在 y≈40-70 **状态栏底下**，
+  截图像素实锤）。uitest dumpLayout 的 y 坐标在沉浸布局下**不可当布局原点用**，以像素为准。
+- **根因**：沉浸窗口 + HdsTabs barOverlap 下，Scroll 内容槽 = 全窗 [0,2440]（含状态栏区），
+  布局系统**不做**顶部避让；子内容 < 槽高时走「窗口帧居中」分支（官方 faqs-arkui-725
+  实锤「子组件小于 Scroll 尺寸默认居中排布」），≥ 时从槽顶 y=0 排（穿进状态栏）。
+  旧代码的 safeAreaTopVp 补偿其实一直在做顶部避让的正事（先前误诊「双重避让」删掉了）。
+- **试错**：`.align(Alignment.Top)`（faqs-arkui-725 官方方案一）在本机 API 下会**吃掉
+  Scroll 第一个子组件**（标题 Row 从组件树消失，A/B 隔离实验实锤），弃用；
+  HomeView 免疫此坑是因为它用 **List**（官方方案二：List 高度受限时短内容默认顶对齐）。
+- **终稿**（BookshelfView，双保险）：
+  ① 内容 Column `.constraintSize({ minHeight: viewportHeightVp })`（Scroll.onAreaChange
+  量视口高）→ 内容恒 ≥ 视口，居中分支永不触发，两种数据量下标题都精确落
+  [479,158][601,195]（状态栏下 12vp）；
+  ② 标题 `.margin({ top: safeAreaTopVp + 12 })` 恢复顶部避让（内容槽原点 0，避让必须
+  自做；12vp 小间隙与 HomeView 头部 padding 同款）；
+  ③ `edgeEffect(Spring, { alwaysEnabled: true })`（内容不满一屏也果冻回弹，HomeView
+  同款注释）；④ 内容树整体 `if (contentWidthVp > 0)` 量到才画，防首帧居中闪屏。
+- **验证**：4 本/8 本两数据量冷启 dump + 像素双验，标题一字不差 158、板全宽
+  [0,·][1079,·]、书顶对齐 257；367 测试全绿。
+- **大屏预警**：折叠展开态视口更高、内容更矮，居中错位会被放大——本修复已从根上
+  消灭，大屏适配时无需再处理此坑，但**避让/几何全部走 safeAreaTopVp + onAreaChange
+  实测值**，勿信 dump 坐标。

@@ -25,6 +25,7 @@ import {
   STORAGE_KEY_HIDE_TAB_BAR
 } from '../../services/ImmersiveChrome';
 import { HomeView } from '../home/HomeView';
+import { BookshelfView } from '../shelf/BookshelfView';
 import { ErrorToastView } from './ErrorToastView';
 
 /** tab 定义（0 记录 / 1 日记本 / 2 邮筒 / 3 设置，顺序与 iOS ContentView 一致） */
@@ -74,7 +75,7 @@ export struct MainTabsView {
         .tabBar(this.tabBarItem(0))
 
         TabContent() {
-          this.tabBody($r('app.string.s_a3b90b392b'))
+          BookshelfView()
         }
         .tabBar(this.tabBarItem(1))
 

@@ -141,11 +141,17 @@ export struct HomeView {
           })
         }
 
-        // 空状态（R-HOME-05）：底部浮钮仍在，引导第一次书写
+        // 空状态（R-HOME-05）：底部浮钮仍在，引导第一次书写；
+        // 卡高与有日记时的标准卡同款（118vp，EntryRowView.cardHeightVp），
+        // 空态与内容态切换无高度跳变（2026-10-20 用户拍板）；
+        // 两行文案卡内水平+垂直居中（2026-10-20 用户拍板，iOS 为左上对齐，
+        // 以用户要求为准）；layoutWeight(1) 撑满卡内区（118-32=86vp）供居中
+        // 注：不能在 ThemedCard 尾随闭包后链 .constraintSize（ets 编译
+        // 限制，"Declaration or statement expected"），改经 minHeightVp 传入
         if (this.entries.length === 0) {
           ListItem() {
             Column() {
-              ThemedCard() {
+              ThemedCard({ minHeightVp: EntryRowView.cardHeightVp }) {
                 Column({ space: 8 }) {
                   Text($r('app.string.s_09873b1938'))
                     .fontSize(this.theme.headingFont.size)
@@ -158,7 +164,10 @@ export struct HomeView {
                     .fontFamily(this.theme.captionFont.family)
                     .fontColor(this.theme.textTertiary)
                 }
-                .alignItems(HorizontalAlign.Start)
+                .alignItems(HorizontalAlign.Center)
+                .justifyContent(FlexAlign.Center)
+                .layoutWeight(1)
+                .width('100%')
               }
             }
             .padding({ left: 16, right: 16 })

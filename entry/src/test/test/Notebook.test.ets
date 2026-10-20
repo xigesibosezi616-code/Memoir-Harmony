@@ -8,7 +8,9 @@
 import { describe, it, expect } from '@ohos/hypium';
 import { BookColor, Notebook, nameKey, cleanedName, isNameTaken,
   uniqueName, singleNotebook, nextSortOrder, retiredColorReplacement,
-  bookColorFromRaw, DEFAULT_NOTEBOOK_NAMES } from '../../main/ets/models/Notebook';
+  bookColorFromRaw, DEFAULT_NOTEBOOK_NAMES, coverDisplayName, quietestColor,
+  BOOK_COLOR_ORDER } from '../../main/ets/models/Notebook';
+import { countNotebookUsage, ShelfEntryCounts } from '../../main/ets/data/NotebookRepository';
 
 function makeNotebook(id: string, name: string): Notebook {
   return new Notebook(id, name, 100, 100);
@@ -110,6 +112,86 @@ export default function notebookTest() {
     it('defaultNotebookNamesAreUserData', 0, () => {
       expect(DEFAULT_NOTEBOOK_NAMES.length).assertEqual(4);
       expect(DEFAULT_NOTEBOOK_NAMES[0]).assertEqual('生活');
+    })
+
+    // ---- 3.1 书架：封面标题折行（coverDisplayName） ----
+
+    it('coverDisplayNameKeepsShortNamesUnfolded', 0, () => {
+      expect(coverDisplayName('旅行')).assertEqual('旅行');
+      expect(coverDisplayName('读书笔记')).assertEqual('读书笔记'); // 恰好 4 字不折
+      expect(coverDisplayName('')).assertEqual('');
+    })
+
+    it('coverDisplayNameFoldsCjkEveryFourChars', 0, () => {
+      expect(coverDisplayName('读书笔记本')).assertEqual('读书笔记\n本'); // 5 字
+      expect(coverDisplayName('一二三四五六七八')).assertEqual('一二三四\n五六七八'); // 恰 8 字
+      expect(coverDisplayName('一二三四五六七八九')).assertEqual('一二三四\n五六七八\n九'); // 9 字
+    })
+
+    it('coverDisplayNameLeavesLatinNamesToSystemWrap', 0, () => {
+      expect(coverDisplayName('All Entries')).assertEqual('All Entries'); // 拉丁字母不硬折
+      expect(coverDisplayName('读书abc本')).assertEqual('读书abc本'); // 混排含字母整体交给系统
+    })
+
+    // ---- 3.1 书架：顺手新建取色（quietestColor，iOS TagSelector） ----
+
+    it('quietestColorReturnsFirstDeclaredWhenShelfEmpty', 0, () => {
+      // 一本都没有：并列全 0，按声明序取第一个（酒红）；iOS 的 ?? .pineGreen 永不触发
+      expect(quietestColor([])).assertEqual(BookColor.WineRed);
+    })
+
+    it('quietestColorPicksLeastUsed', 0, () => {
+      const first = makeNotebook('n1', '生活'); // 默认酒红
+      const second = makeNotebook('n2', '工作');
+      second.colorId = BookColor.WineRed;
+      const third = makeNotebook('n3', '旅行');
+      third.colorId = BookColor.PineGreen;
+      // 酒红 2 本、墨绿 1 本 → 下一个最少用且并列取声明序：普鲁士蓝
+      expect(quietestColor([first, second, third])).assertEqual(BookColor.PrussianBlue);
+    })
+
+    it('quietestColorTieBreaksByDeclarationOrder', 0, () => {
+      const only = makeNotebook('n1', '生活');
+      only.colorId = BookColor.PineGreen;
+      // 墨绿 1 本，其余全 0 → 并列取声明序第一个：酒红
+      expect(quietestColor([only])).assertEqual(BookColor.WineRed);
+    })
+
+    it('quietestColorNeverReturnsIvory', 0, () => {
+      const books: Notebook[] = [];
+      const order: BookColor[] = [BookColor.WineRed, BookColor.PineGreen,
+        BookColor.PrussianBlue, BookColor.Eggplant, BookColor.AmberBrown,
+        BookColor.Charcoal, BookColor.Slate];
+      for (let i = 0; i < order.length; i++) {
+        const nb = makeNotebook(`n${i}`, `本${i}`);
+        nb.colorId = order[i];
+        books.push(nb);
+      }
+      // 象牙白以外全用过 1 次 → 并列取声明序第一个非象牙白 = 酒红，绝不给象牙白
+      expect(quietestColor(books)).assertEqual(BookColor.WineRed);
+      expect(order.indexOf(BookColor.Ivory) < 0).assertTrue();
+    })
+
+    it('bookColorOrderMatchesIosAllCases', 0, () => {
+      expect(BOOK_COLOR_ORDER.length).assertEqual(8);
+      expect(BOOK_COLOR_ORDER[0]).assertEqual(BookColor.WineRed);
+      expect(BOOK_COLOR_ORDER[BOOK_COLOR_ORDER.length - 1]).assertEqual(BookColor.Ivory);
+    })
+
+    // ---- 3.1 书架：篇数汇总（countNotebookUsage / ShelfEntryCounts） ----
+
+    it('countNotebookUsageAggregatesByNotebookName', 0, () => {
+      const counts = countNotebookUsage([['生活'], [], ['旅行'], ['生活'], []]);
+      expect(counts['生活']).assertEqual(2);
+      expect(counts['旅行']).assertEqual(1);
+      expect(counts['工作']).assertUndefined();
+    })
+
+    it('shelfEntryCountsCountForFallsBackToZero', 0, () => {
+      const counts = new ShelfEntryCounts({ '生活': 3 }, 5);
+      expect(counts.countFor('生活')).assertEqual(3);
+      expect(counts.countFor('没有的本')).assertEqual(0);
+      expect(counts.total).assertEqual(5);
     })
   })
 }

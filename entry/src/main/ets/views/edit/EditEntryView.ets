@@ -60,7 +60,7 @@ import { PhotoFullScreenCover } from '../components/photo/PhotoFullScreenCover';
 import { PaperCameraView } from '../camera/PaperCameraView';
 import { VoiceRecordingSheet } from '../components/audio/VoiceRecordingSheet';
 import { MoodTag } from '../../models/Mood';
-import { Notebook, cleanedName, nameKey, nextSortOrder } from '../../models/Notebook';
+import { Notebook, cleanedName, nameKey, nextSortOrder, quietestColor } from '../../models/Notebook';
 import { generateUuid } from '../../models/Uuid';
 import { CircleIconButton } from '../compose/CircleIconButton';
 import { MoodSelector } from '../compose/MoodSelector';
@@ -1047,6 +1047,8 @@ export struct EditEntryView {
     }
     const now = Date.now();
     const notebook = new Notebook(generateUuid(), typed, now, now);
+    // 顺手新建没机会挑颜色：取书架上用得最少的颜色（05 §4.1，iOS quietestColor）
+    notebook.colorId = quietestColor(this.notebooks);
     notebook.sortOrder = nextSortOrder(this.notebooks.map((n: Notebook): number => n.sortOrder));
     try {
       await NotebookRepository.insertNotebook(store, notebook);

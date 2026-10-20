@@ -12,6 +12,10 @@ export struct ThemedCard {
   @BuilderParam content: () => void = emptyCardContent;
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
 
+  /** 可选卡高下限（vp）：空态卡等需要与标准卡（118vp）同款高度时传入；
+   * 默认 undefined = 内容自适应（原行为不变） */
+  minHeightVp?: number = undefined;
+
   build() {
     Column() {
       this.content()
@@ -21,6 +25,7 @@ export struct ThemedCard {
     .borderRadius(12)
     .border({ width: 0.5, color: this.theme.border })
     .alignItems(HorizontalAlign.Start)
+    .constraintSize({ minHeight: this.minHeightVp })
   }
 }
 

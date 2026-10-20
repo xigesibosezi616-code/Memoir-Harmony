@@ -34,8 +34,9 @@ export struct EntryRowView {
 
   /** 统一标准卡高：行 1 含心情徽标时最高（~22）+ 标题 21 + 摘要 16
    * + 胶囊 22 + 3×3 间距 + 24 上下内边距 ≈ 112，定 118 留余量防
-   * Blank 被挤成负值溢出卡底（Blank 沉底吸收余量） */
-  private static readonly cardHeightVp: number = 118;
+   * Blank 被挤成负值溢出卡底（Blank 沉底吸收余量）；
+   * 非 private：HomeView 空态卡同款高度复用 */
+  static readonly cardHeightVp: number = 118;
 
   build() {
     // 行距用显式 margin 不用 Column space：Blank 的剩余空间计算不含

@@ -8,9 +8,43 @@
 import { relationalStore } from '@kit.ArkData';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { BookTexture, Notebook } from '../models/Notebook';
+import { parseStringArray } from './ColumnCodec';
 
 const DOMAIN = 0x0000;
 const TAG = 'NotebookRepository';
+
+/** 书架篇数统计：各日记本名下篇数 + 总篇数（iOS `entryCountsByTag` + `entries.count`） */
+export class ShelfEntryCounts {
+  /** key = 日记本名（tags 里存的名字），value = 篇数 */
+  readonly byName: Record<string, number>;
+  /** 全部日记篇数（= 日记总数） */
+  readonly total: number;
+
+  constructor(byName: Record<string, number>, total: number) {
+    this.byName = byName;
+    this.total = total;
+  }
+
+  /** 指定日记本名的篇数；没有挂日记的返回 0 */
+  countFor(name: string): number {
+    const value = this.byName[name];
+    return value !== undefined ? value : 0;
+  }
+}
+
+/**
+ * 按日记本名字汇总篇数（纯函数）。一篇日记最多属于一本（R-BOOK-01），
+ * 但容错按多本计：tags 里出现过的名字各 +1（与 iOS `entryCountsByTag` 一致）。
+ */
+export function countNotebookUsage(entryTags: string[][]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const tags of entryTags) {
+    for (const name of tags) {
+      counts[name] = (counts[name] !== undefined ? counts[name] : 0) + 1;
+    }
+  }
+  return counts;
+}
 
 export class NotebookRepository {
   /** 全部日记本，按书架顺序（与书架同一个顺序，见 iOS `BookshelfView`） */
@@ -83,5 +117,37 @@ export class NotebookRepository {
         notebook.name, JSON.stringify(err));
       throw new Error('NotebookRepository.insertNotebook: 插入失败');
     }
+  }
+
+  /**
+   * 书架篇数统计：一次查全部日记的 tags 汇总（书可能很多，
+   * 不许每画一本书都把全部日记过滤一遍——iOS 同款优化）。
+   * 只查 tags 列，不整行加载。
+   */
+  static async fetchShelfEntryCounts(store: relationalStore.RdbStore): Promise<ShelfEntryCounts> {
+    let result: relationalStore.ResultSet;
+    try {
+      result = await store.querySql('SELECT tags FROM journal_entry');
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'query entry tags failed: %{public}s', JSON.stringify(err));
+      throw new Error('NotebookRepository.fetchShelfEntryCounts: 查询失败');
+    }
+    const entryTags: string[][] = [];
+    try {
+      while (result.goToNextRow()) {
+        // tags 列 NOT NULL DEFAULT '[]'，直接读
+        entryTags.push(parseStringArray(result.getString(result.getColumnIndex('tags'))));
+      }
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'read entry tags failed: %{public}s', JSON.stringify(err));
+      throw new Error('NotebookRepository.fetchShelfEntryCounts: 读行失败');
+    } finally {
+      try {
+        result.close();
+      } catch (err) {
+        hilog.warn(DOMAIN, TAG, 'close resultSet failed: %{public}s', JSON.stringify(err));
+      }
+    }
+    return new ShelfEntryCounts(countNotebookUsage(entryTags), entryTags.length);
   }
 }

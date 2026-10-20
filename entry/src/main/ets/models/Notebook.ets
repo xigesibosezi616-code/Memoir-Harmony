@@ -237,3 +237,76 @@ export function singleNotebook(names: string[]): string[] {
 
 /** 首启默认日记本名（按中文写入，是用户数据，不翻译 —— R-APP-07 / R-LANG-10） */
 export const DEFAULT_NOTEBOOK_NAMES: string[] = ['生活', '读书笔记', '旅行', '工作'];
+
+/**
+ * 封面渲染用的书名折行（iOS `BookCoverView.displayName`，与 `Notebook.displayName`
+ * 的差别）：中日韩标题按每 4 字断行；**带拉丁字母的**（英文名、外语界面下
+ * 「全部日记」的译名）不手动断——按 4 个字符硬切会把「All Entries」切成
+ * 「All 」「Entr」「ies」，交给系统按词换行。
+ */
+export function coverDisplayName(name: string): string {
+  if (name.length <= 4) {
+    return name;
+  }
+  for (let i = 0; i < name.length; i++) {
+    const code = name.charCodeAt(i);
+    // ASCII 字母（A-Z / a-z）：交给系统按词换行
+    if ((code >= 65 && code <= 90) || (code >= 97 && code <= 122)) {
+      return name;
+    }
+  }
+  let result = '';
+  for (let i = 0; i < name.length; i++) {
+    if (i > 0 && i % 4 === 0) {
+      result += '\n';
+    }
+    result += name.charAt(i);
+  }
+  return result;
+}
+
+/** `BookColor` 声明顺序（并列取色时的确定性依据，与 iOS `BookColor.allCases` 一致） */
+export const BOOK_COLOR_ORDER: BookColor[] = [
+  BookColor.WineRed,
+  BookColor.PineGreen,
+  BookColor.PrussianBlue,
+  BookColor.Eggplant,
+  BookColor.AmberBrown,
+  BookColor.Charcoal,
+  BookColor.Slate,
+  BookColor.Ivory
+];
+
+/**
+ * 写日记页顺手新建日记本时取的颜色（iOS `TagSelector.quietestColor`，05 §4.1）：
+ * 书架上**用得最少**的颜色，免得连建几本全是同一个颜色、摆在架子上分不清。
+ * 象牙白不参与（那是「全部日记」的门面）；并列按 `BookColor` 声明顺序取第一个，
+ * 结果确定——所以书架上一本都没有时返回声明序第一个**酒红**（与 iOS
+ * `candidates.min ?? .pineGreen` 行为一致：`??` 只在候选为空时触发，永不发生）。
+ */
+export function quietestColor(notebooks: Notebook[]): BookColor {
+  const usage: number[] = [];
+  for (let i = 0; i < BOOK_COLOR_ORDER.length; i++) {
+    usage.push(0);
+  }
+  for (const notebook of notebooks) {
+    const color = notebook.bookColor;
+    const index = BOOK_COLOR_ORDER.indexOf(color);
+    if (index >= 0) {
+      usage[index]++;
+    }
+  }
+  let bestIndex = -1;
+  let bestCount = Number.MAX_SAFE_INTEGER;
+  for (let i = 0; i < BOOK_COLOR_ORDER.length; i++) {
+    const color = BOOK_COLOR_ORDER[i];
+    if (color === BookColor.Ivory) {
+      continue; // 象牙白是「全部日记」的门面，不给新本子用
+    }
+    if (usage[i] < bestCount) {
+      bestCount = usage[i];
+      bestIndex = i;
+    }
+  }
+  return bestIndex >= 0 ? BOOK_COLOR_ORDER[bestIndex] : BookColor.PineGreen;
+}
