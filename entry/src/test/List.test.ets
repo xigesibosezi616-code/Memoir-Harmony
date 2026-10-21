@@ -27,6 +27,8 @@ import inkLedgerTest from './test/InkLedger.test'
 import cameraSessionTest from './test/CameraSession.test'
 import cameraPhotoFilesTest from './test/CameraPhotoFiles.test'
 import placeWeatherFormatTest from './test/PlaceWeatherFormat.test'
+import shelfDragTest from './test/ShelfDrag.test'
+import bookBoxProjectionTest from './test/BookBoxProjection.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -58,4 +60,6 @@ export default function testsuite() {
   cameraSessionTest()
   cameraPhotoFilesTest()
   placeWeatherFormatTest()
+  shelfDragTest()
+  bookBoxProjectionTest()
 }

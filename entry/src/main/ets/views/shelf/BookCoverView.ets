@@ -48,7 +48,7 @@ export struct BookCoverView {
   @Prop entryCount: number = 0;
   @Prop color: BookColor = BookColor.WineRed;
   /** 照片封面文件名（journal_photos/ 裸名）；空 = 纯色亚麻 */
-  @Prop coverPhotoFilename: string = '';
+  @Prop @Watch('onPhotoSourceChange') coverPhotoFilename: string = '';
   /** 照片封面的版式；没有照片时不起作用 */
   @Prop layout: CoverLayout = CoverLayout.FullBleed;
   /** 封面宽（vp）。高 = 宽 / COVER_ASPECT，比例布局的基准 */
@@ -102,6 +102,13 @@ export struct BookCoverView {
   /** 布面文字色：浅底（只有象牙白）用深棕，其余米白（iOS clothCover） */
   private clothTextColor(): string {
     return isLightBookColor(this.color) ? '#3D3428' : '#F5F0E6';
+  }
+
+  /** 照片封面换了（常驻的浮书 3.2 拿起另一本时）→ 清掉旧图重载，别沿用上一本的照片 */
+  private onPhotoSourceChange(): void {
+    this.photoPixelMap = undefined;
+    this.photoFailed = false;
+    this.loadCoverPhoto();
   }
 
   /** 加载照片封面（进程级缓存；失败置 photoFailed 走布面兜底） */

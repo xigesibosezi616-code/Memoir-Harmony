@@ -8,6 +8,7 @@
 import { relationalStore } from '@kit.ArkData';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { BookTexture, Notebook } from '../models/Notebook';
+import { SortOrderChange } from '../models/ShelfDrag';
 import { parseStringArray } from './ColumnCodec';
 
 const DOMAIN = 0x0000;
@@ -149,5 +150,23 @@ export class NotebookRepository {
       }
     }
     return new ShelfEntryCounts(countNotebookUsage(entryTags), entryTags.length);
+  }
+
+  /**
+   * 书架拖动换位落库（10_BUILD_MANUAL.md 3.2）：只写变了的那几条 sortOrder
+   * （新值 0, 1, 2…，iOS `saveOrder`）。失败抛错，调用方走 errors 提示 + 重查回滚。
+   */
+  static async updateSortOrders(store: relationalStore.RdbStore,
+    changes: SortOrderChange[]): Promise<void> {
+    for (const change of changes) {
+      try {
+        await store.executeSql('UPDATE notebook SET sort_order = ? WHERE id = ?',
+          [change.sortOrder, change.id]);
+      } catch (err) {
+        hilog.error(DOMAIN, TAG, 'update sort order failed id=%{public}s: %{public}s',
+          change.id, JSON.stringify(err));
+        throw new Error('NotebookRepository.updateSortOrders: 更新失败');
+      }
+    }
   }
 }

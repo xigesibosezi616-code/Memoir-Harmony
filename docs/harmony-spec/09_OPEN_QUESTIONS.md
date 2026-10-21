@@ -37,6 +37,9 @@
 | Q27 | ⚪ | **真机验证方法论教训（「关全屏白屏」疑云结案）**：曾判定「关闭全屏后整页白屏」并二分删除 transition/barOpacity/hideTitleBar——全部误报 | 验收流程 | 鸿蒙 | 2026-10-17 结案：**像素采样伪象**。`sips` 转 BMP 是负高度 top-down 行序，采样脚本按 bottom-up 公式翻转导致所有采样点垂直镜像（页面照片/Tab 栏位置全采错成背景白区）；dumpLayout 组件树一直完好。教训：①截图判位必须先用已知参照物（状态栏文字、照片区域）校验采样坐标映射；②「白屏」类结论需 dumpLayout（树）+ 像素分布对比（与正常帧 white/dark/colored 占比一致=同页）+ 无诱导语的模型看图三重交叉；③真机注入双击用单次调用链式 down/up（`uinput -T -d x y -u x y -d x y -u x y`，实测间隔 ~45ms；两次独立 uinput ~350ms、uitest doubleClick ~640ms，都超 280ms 双击窗）；④长 E2E 前先 `power-shell timeout -o 600000` 防自动锁屏（锁屏后 dump 有树但截屏全黑） |
 | Q28 | ✅ | **2.9 相机/动态照片的三条官方链路假设**：① `requestMovingPhoto`/`requestImageData`/`saveCameraPhoto` d.ts 权限标注与官方文档用法相悖；② `PhotoViewPicker` IMAGE_TYPE（'image/*'）是否包含动态照片资产可选；③ `loadMovingPhoto`+`MovingPhotoView` 沙箱文件播放可用性 | 2.9 相机 | 鸿蒙 | **2026-10-19 真机实证三条全过，结案**（详述见下 Q28） |
 | Q29 | ✅ | **首启默认日记本颜色冲突**：05_DATA_MODEL §4.2 写「墨绿」，iOS 源码 `ContentView.ensureDefaultTagsExist` 用 `Tag()` 默认构造（**酒红**） | 3.1 书架 | 文档 | 2026-10-20 拍板：**以 iOS 为准（酒红）**，实现已一致；05 §4.2 待勘误（详述见下 Q29） |
+| Q30 | ✅ | 书架 Scroll「短内容居中 + 内容槽原点 0」双坑（真机像素级实证） | 3.1 书架 | 鸿蒙 | 2026-10-20 结案（详述见下 Q30） |
+| Q31 | ✅ | 3.2 拖书五坑（编译+单测实证） | 3.2 拖书 | 鸿蒙 | 2026-10-20 结案（详述见下 Q31）；真机录屏验收未过 → 转 Q32 |
+| Q32 | 🔴 | **3.2 拖书手感未达产品要求（四项）**：① 32° 转身露书脊**透视不对**；② 侧转一瞬**有一条红线**；③ **动画生硬卡顿**；④ **落格、其余书让位与 iOS 差距很大** | 3.2 拖书 | 鸿蒙 + 产品（录屏验收） | 待专项修复（详述见下 Q32） |
 
 ---
 
@@ -410,3 +413,94 @@ R-RICH-09 要求打开编辑时就地转成正文里的录音块。纯逻辑已�
 - **大屏预警**：折叠展开态视口更高、内容更矮，居中错位会被放大——本修复已从根上
   消灭，大屏适配时无需再处理此坑，但**避让/几何全部走 safeAreaTopVp + onAreaChange
   实测值**，勿信 dump 坐标。
+
+### Q31 ✅ 3.2 拖书五坑（2026-10-20 编译+单测实证结案，真机录屏验收待做）
+
+- **① `LongPressGesture` 接口没有 `.sequenced()`**（编译实锤 `Property 'sequenced' does
+  not exist on type 'LongPressGestureInterface'`）。长按→拖动的顺序组合必须用
+  `GestureGroup(GestureMode.Sequence, LongPressGesture(...), PanGesture(...))`：
+  按够 350ms 才解锁 Pan，按不够就挪开→整组失败→外层 Scroll 的滚动手势接手
+  （体感与相册/桌面一致）。各子手势自己的 onAction/onActionEnd/onActionCancel
+  照常回调，drop 各入口幂等（settling 早退）。
+- **② `GestureEvent` 没有 `globalY`**（编译实锤）。手指的窗口坐标在
+  `event.fingerList[i].globalY`（FingerInfo，相对应用窗口左上角，vp，API 8+）。
+  边缘自动滚需要**视口内**坐标：Scroll `.onAreaChange` 记 `newArea.globalPosition.y`
+  （Scroll 滚动不改自身区域，该值恒定），`fingerList[0].globalY − viewportGlobalYVp`
+  即视口内 y。
+- **③ springMotion 是渲染服务（RS）侧物理弹簧，且不回调完成**。跟手/自动滚
+  全程用**同一个文件级 `curves.springMotion(0.2, 0.88)` 实例**逐帧 retarget——
+  中途换实例或换曲线改写同一属性会孤儿化 RS 侧动画（跟手丢弹簧感）。
+  **松手落位是例外**（2026-10-21 对齐 iOS）：跟随已结束，孤儿化旧弹簧安全；
+  落位滑动改定长 `animateTo` 420ms EaseInOut（iOS `settleAnimation .smooth(0.42)`
+  单个 withAnimation 块：order 挪位 + 浮书滑落点 + lifted 同拍），带跟手弹簧
+  会有过冲且节奏与 iOS 不符。完成链靠定时兜底（450ms 落位 + 500ms 转回 + 50ms
+  余量）。另外 `.animation()` 隐式动画会劫持同组件所有可动画属性，落位让位
+  必须包在 `animateTo` 事务里（只有 position 变，ForEach 键 = slot key 组件
+  不重建）。
+- **④ 投影矩阵不能进动画系统**。`.transform3D` 属性线性插值两颗旋转矩阵的中间态
+  不是旋转（书会先缩小再放大）。转角动画 = 16ms `setInterval` 改 `bookAngleRad`
+  状态、每帧重算两颗投影矩阵（iOS `Animatable.angle` 同款思路）。
+- **⑤ 自拼 3D 矩阵的两处正确性要点**（`BookBoxProjection.ets`，单测数值实证）：
+  a) 矩阵的 **z′ 行清零后再交给 ArkUI**：透视 + 平移的组合会在 z′ 行留下正比
+  x/y 的 bogus 深度（静止封面角点 z′≈−27），命中测试/深度排序可能被带偏；
+  清零后静止时对平面输入（面视图 z 恒 0）严格等于恒等——拿起那一下不跳。
+  b) `matRotateY` 的**实现方向与直觉相反**（x′=x·cos−z·sin）：书脊视图的
+  **右缘**（x=depth）才是与封面左缘共用的缝，左缘是背面。方向别靠记：
+  `spineFaceAngle`/`bookBoxLiftAngle` 直接读矩阵元素挑（书脊落左侧、拿起
+  方向自动朝可见侧），缝的对齐由单测钉死（任意转角下封面左缘角与书脊右缘
+  角投影差 < 0.01vp）。
+- **⑥ 浮书手感三件套**（真机实证，先前会话）：LTPO 深闲置触摸不唤醒低功耗链路
+  （第一帧冻住）→ 触地 poke（透明度里一个看不见的 0.1 小数抖动，强制出一帧
+  真实渲染）；浮书**常驻挂载**（idle 透明度 0.01 仍参与栅格化，首次挂载渲染
+  管线要现编译实测 ~367ms，页面加载时就挂出来第一次拿起才不卡）；
+  `HitTestMode.None` 实测吞触摸，浮书层用 `Transparent`。
+- **⑦ 顺序组合手势里只有最后一个手势能响应 onActionEnd**（官方 GestureGroup 文档
+  明示 + 真机实证，2026-10-20 用户报「拖书卡住」定位）。只长按拿起（350ms
+  onAction 已回调、书已浮起）、没拖就松手：PanGesture 从未识别 → 它的
+  onActionEnd/onActionCancel 都不来，而 LongPressGesture 的 onActionEnd 在
+  Sequence 组里**不回调** → dropBook 没人叫 → 书永远浮在原格上方，且
+  dragId 卡住后全架书点击/拖动全被守卫拦死（真机 `devecocli ui longclick`
+  稳定复现）。修法：格子上挂 `.onTouch` 兜底网，`TouchType.Up/Cancel` 且
+  `dragId === slot.key && !settling` → dropBook（真拖动时 pan 的 end 也会来，
+  dropBook 幂等先到先放下）；LongPress 的 onActionEnd 留作跨机型保险丝。
+- **⑧ 拖动中的格子用 opacity 0 隐藏，不用 `Visibility.Hidden`**：Hidden 会把
+  组件整个移出命中测试，拿起那一刻正在进行的触摸流有被掐断的风险（pan /
+  onTouch 收不到后续事件）；opacity 0 视觉等效（格子本来无背景，只剩书），
+  触摸流全程不断。（Hidden 掐流未单独实证——修 ⑦ 时顺手换掉防患未然；
+  onTouch 兜底网在 opacity 0 下命中链路完整是确定的。）
+- **验证**：398 测试全绿（新增 ShelfDrag 21 + BookBoxProjection 10）、
+  `devecocli build` 零 ERROR、check_localization 过绿。
+  真机录屏验收待做（R-BOOK-06 验收 = 用户看录屏确认）。
+  ⑦ 修复后真机复测：`ui longclick` 三本书（生活×2、旅行×1）拿起→松手全部
+  正常落回原格，书架无残影（布局签名 + 截图识别双确认）。
+
+### Q32 🔴 3.2 拖书手感未达产品要求（2026-10-21 用户真机验收反馈，待专项修复）
+
+- **产品结论**：功能逻辑（拿起/拖动/松手/只写变了 sortOrder）与 398 单测全绿，
+  但**手感多轮调教仍未过产品关**。用户拍板（2026-10-21）：先记入清单，
+  **后续专项修复**，不阻塞其它卡片推进；修复并录屏过验收前 3.2 不结案。
+- **四项问题（用户原话）**：
+  1. **长按后 32° 转身露书脊透视不对**；
+  2. **长按 32° 日记本侧转一瞬有一条红线**；
+  3. **动画生硬卡顿**；
+  4. **落格、其余书让位与 iOS 版本差距很大**。
+- **修复时先读**：R-BOOK-06/07；iOS `Shelf/ShelfGridView.swift`（动画参数在
+  文件头：lift `.smooth(0.45)` / follow `interactiveSpring(0.2, 0.88)` /
+  settle `.smooth(0.42)` / turnBack `.smooth(0.5)`）、
+  `Shelf/BookBoxProjection.swift`（eyeDistance 520、矩阵链）。
+- **初步假设（修复时逐条验证，勿直接当结论）**：
+  - ①透视：`eyeDistance 520` 是 iOS pt 口径直搬 vp；且 Q31 ⑤ 行/列主序转置
+    实验只验证了「静止恒等 + 缝对齐」，**透视强度的真实观感未与 iOS 对照过**
+    （TransformLab 实验页当时为查 transform3D 语义而建，透视项 w 的读法
+    行/列两种候选，实验未做完即 cleanup，备份在会话临时目录）。
+  - ②红线：疑似封面/书脊**双面各自 transform3D 栅格化在拼缝处露底**
+    （两颗矩阵浮点路径不同 → 同帧 1px 缝露出下层内容），或书脊渐变/烫线
+    （#D9C08A）在极窄投影带上的采样伪影；需逐帧截图定位出现在哪个转角区间。
+  - ③卡顿：现实现转角动画 = 16ms `setInterval` 改状态 → 每帧走 ArkUI 状态
+    更新管线重算两颗矩阵（iOS 是 Animatable 在渲染层插值）；考虑降每帧
+    状态传播面 / 与 vsync 对齐 / 减少同帧重布局范围。
+  - ④落格让位：现 `animateTo` 420ms **EaseInOutCubic** 单拍；iOS 是
+    `.smooth(0.42)`（SwiftUI smooth 样条，曲线形状不同）+ completion 链
+    （落位完 → 转回 0.5s）。曲线形状、让位起始时机都可能与 iOS 有观感差。
+- **约束（卡片原文）**：不要抖动、让位动画（拖动中实时让位）、角标；
+  验收 = **录屏给产品当面确认**。
