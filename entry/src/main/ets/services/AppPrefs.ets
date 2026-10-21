@@ -29,6 +29,12 @@ export const PREF_KEY_DEFAULT_PAPER_STYLE = 'defaultPaperStyle';
 export const PREF_KEY_LOCATION_RECORDING_ENABLED = 'locationRecordingEnabled';
 /** 位置精度三档（对应 iOS `locationPrecision`，city / district / street，默认 city；2.10） */
 export const PREF_KEY_LOCATION_PRECISION = 'locationPrecision';
+/** 目录版式（对应 iOS `bookContentsLayout`，list / grid，默认 list；3.3。所有日记本共用一个偏好） */
+export const PREF_KEY_BOOK_CONTENTS_LAYOUT = 'bookContentsLayout';
+
+/** 目录版式取值（iOS `BookContentsView.Layout`） */
+export const BOOK_CONTENTS_LAYOUT_LIST = 'list';
+export const BOOK_CONTENTS_LAYOUT_GRID = 'grid';
 
 // ---- AppStorage 镜像 key（EntryAbility 启动时由偏好算好写入，UI 用 @StorageLink/@StorageProp 观察）----
 
@@ -143,5 +149,23 @@ export class AppPrefs {
       return raw;
     }
     return LOCATION_PRECISION_CITY;
+  }
+
+  // ---- 3.3 日记本主页 ----
+
+  /** 目录版式（默认列表）；非法值按列表兜底（旧数据 / 手改坏了不崩） */
+  static currentBookContentsLayout(): string {
+    return AppPrefs.normalizedBookContentsLayout(
+      AppPrefs.getString(PREF_KEY_BOOK_CONTENTS_LAYOUT, BOOK_CONTENTS_LAYOUT_LIST));
+  }
+
+  static setBookContentsLayout(layout: string): void {
+    AppPrefs.putString(PREF_KEY_BOOK_CONTENTS_LAYOUT,
+      AppPrefs.normalizedBookContentsLayout(layout));
+  }
+
+  static normalizedBookContentsLayout(raw: string): string {
+    return raw === BOOK_CONTENTS_LAYOUT_GRID
+      ? BOOK_CONTENTS_LAYOUT_GRID : BOOK_CONTENTS_LAYOUT_LIST;
   }
 }

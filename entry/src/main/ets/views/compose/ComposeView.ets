@@ -191,6 +191,8 @@ export struct ComposeView {
   private pageDataLoaded: boolean = false;
   /** 草稿块（装载正文编辑器用；无草稿 = 空数组） */
   private draftBlocks: ContentBlock[] = [];
+  /** 路由参数带入的日记本名（从某本点「写一篇」时预选；草稿的选择优先） */
+  private initialNotebookName: string = '';
 
   aboutToDisappear(): void {
     // 全屏浮层没关就被路由弹走（边滑返回）时，别把主框架 Tab 栏一直藏着
@@ -231,7 +233,21 @@ export struct ComposeView {
     };
     const context = this.getUIContext().getHostContext();
     if (context !== undefined) {
+      this.readInitialNotebookParam();
       this.loadPageData(context);
+    }
+  }
+
+  /** 路由参数「写一篇」入口带入的日记本名（BookDetail 传；其他入口没有） */
+  private readInitialNotebookParam(): void {
+    const raw: Object | undefined = this.getUIContext().getRouter().getParams();
+    if (raw === undefined) {
+      return;
+    }
+    const params = raw as Record<string, Object>;
+    const value = params['initialNotebookName'];
+    if (typeof value === 'string') {
+      this.initialNotebookName = value;
     }
   }
 
@@ -1351,7 +1367,7 @@ export struct ComposeView {
         this.bodyAudioCount = this.audioCountOf(draft.contentBlocks);
         this.moodName = draft.mood;
         this.moodColorHex = draft.moodColorHex ?? '';
-        const restored = restoredNotebookSelection(draft.tags, []);
+        const restored = restoredNotebookSelection(draft.tags, [this.initialNotebookName]);
         this.selectedNotebookName = restored.length > 0 ? restored[0] : '';
         this.didRestoreDraft = true;
         // 此时此地（2.10）：原样还原存草稿那一刻的快照，不重新定位（R-ENTRY-05）
@@ -1369,6 +1385,10 @@ export struct ComposeView {
       if (draft === null) {
         // 新的一篇：自动取此时此地（R-PLACE-01）；有草稿则用还原的快照，不重取
         this.startPlaceWeatherFetch();
+        // 从某本点「写一篇」进来：没有草稿选择时预选那本
+        // （名字对不上库里任何一本时原样保留，与 iOS 传 tag.name 同款不设防）
+        const restored = restoredNotebookSelection([], [this.initialNotebookName]);
+        this.selectedNotebookName = restored.length > 0 ? restored[0] : '';
       }
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'loadPageData failed: %{public}s', JSON.stringify(err));

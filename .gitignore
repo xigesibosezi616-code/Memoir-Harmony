@@ -33,3 +33,7 @@ Thumbs.db
 
 # 本地验收工件（截图/像素取证/临时SQL），不入库
 .deveco-tmp/
+
+# 本地调试截图/dump（不进仓库）
+.tmp-ui/
+artifacts/

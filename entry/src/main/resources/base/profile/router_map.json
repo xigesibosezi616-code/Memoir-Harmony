@@ -4,6 +4,11 @@
       "name": "EntryDetail",
       "pageSourceFile": "src/main/ets/views/detail/EntryDetailView.ets",
       "buildFunction": "EntryDetailBuilder"
+    },
+    {
+      "name": "BookDetail",
+      "pageSourceFile": "src/main/ets/views/shelf/BookDetailView.ets",
+      "buildFunction": "BookDetailBuilder"
     }
   ]
 }

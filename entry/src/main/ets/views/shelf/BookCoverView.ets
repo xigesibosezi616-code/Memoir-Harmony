@@ -27,8 +27,9 @@ const PAGE_EDGE: number = 5;
 const FRAMED_PAPER: string = '#F4EEE2';
 const FRAMED_INK: string = '#3D3428';
 
-/** 亚麻封面精修图（05 §4.1：8 色，素材已随 convert_materials 转入 media） */
-function linenImageRes(color: BookColor): Resource {
+/** 亚麻封面精修图（05 §4.1：8 色，素材已随 convert_materials 转入 media）。
+ *  书架小书（BookCoverView）和 3.3 日记本主页大图（BookHeroView）共用 */
+export function linenImageRes(color: BookColor): Resource {
   switch (color) {
     case BookColor.WineRed: return $r('app.media.cover_wine_red_linen');
     case BookColor.PineGreen: return $r('app.media.cover_pine_green_linen');

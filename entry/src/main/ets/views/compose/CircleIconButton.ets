@@ -36,6 +36,10 @@ export struct CircleIconButton {
    * 普通成员只在建组件时赋一次值，✓ 会永远停在进页面时的禁用态。
    * 不叫 enabled：与通用属性 enabled 撞名会报 10505001 */
   @Prop pressEnabled: boolean = true;
+  /** 可选图标色：BookDetail 顶栏需要 hero 亮暗自适应（深色大图上换白色，
+   * iOS toolbarColorScheme 同款逻辑）。不传 = pressEnabled 驱动的
+   * textPrimary / textTertiary（标题栏内标准配色） */
+  iconColor?: ResourceColor;
   onTap: () => void = (): void => {};
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
 
@@ -49,7 +53,9 @@ export struct CircleIconButton {
         // 玻璃圆片（materialColor 赋色后的局部底色），皮革主题金片
         // (86,73,57) 与 textSecondary(138,123,106) 同调，对比仅 2.1:1，
         // 图标融进玻璃片；升 textPrimary 后 素笺 9.9 / 肯特 13.9 / 皮革 5.1
-        .fontColor([this.pressEnabled ? this.theme.textPrimary : this.theme.textTertiary])
+        .fontColor([this.iconColor !== undefined
+          ? this.iconColor
+          : (this.pressEnabled ? this.theme.textPrimary : this.theme.textTertiary)])
     }
     .width(32)
     .height(32)

@@ -130,6 +130,10 @@ export class ImmersiveChrome {
       hilog.error(DOMAIN, TAG, 'setWindowLayoutFullScreen failed: %{public}s', JSON.stringify(err));
     }
     this.publishAvoidAreas();
+    // expandSafeArea 生效 / 避让区就绪都可能晚于首查：延迟再查一遍兜底
+    setTimeout((): void => {
+      this.publishAvoidAreas();
+    }, 1500);
     try {
       this.mainWindow.on('avoidAreaChange', (): void => {
         this.publishAvoidAreas();
@@ -175,6 +179,11 @@ export class ImmersiveChrome {
       AppStorage.setOrCreate(STORAGE_KEY_SAFE_AREA_BOTTOM_VP, vpFromPx(indicatorArea.bottomRect.height, density));
       AppStorage.setOrCreate(STORAGE_KEY_SAFE_AREA_LEFT_VP, vpFromPx(systemArea.leftRect.width, density));
       AppStorage.setOrCreate(STORAGE_KEY_SAFE_AREA_RIGHT_VP, vpFromPx(systemArea.rightRect.width, density));
+      // 诊断：避让区原始值（px）——状态栏高是否恢复上报全靠它验证
+      hilog.info(DOMAIN, TAG,
+        'avoidAreas raw px: sysTop=%{public}d sysBottom=%{public}d sysLeft=%{public}d sysRight=%{public}d indicatorBottom=%{public}d density=%{public}f',
+        systemArea.topRect.height, systemArea.bottomRect.height, systemArea.leftRect.width,
+        systemArea.rightRect.width, indicatorArea.bottomRect.height, density);
       this.publishCutout(density);
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'publishAvoidAreas failed: %{public}s', JSON.stringify(err));

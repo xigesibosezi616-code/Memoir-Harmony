@@ -110,5 +110,12 @@ struct Index {
     }
     .width('100%')
     .height('100%')
+    // 系统 OTA（2026-10-21 前后）后 ArkUI 默认把整棵组件树渲染避让到状态栏
+    // 下面（布局仍全屏、渲染 [0,122] 起），getWindowAvoidArea(TYPE_SYSTEM)
+    // 随之报 0——应用手动让位链路全断，状态栏底下露出窗口底色（其他颜色
+    // 日记本主页顶部出现白色色块的根因）。显式扩展回边缘到边：渲染回到
+    // [0,0] 起，TYPE_SYSTEM 重新报真实状态栏高，各页 safeAreaTopVp 让位
+    // 重新生效（Tabs 自带的 expandSafeArea(BOTTOM) 同理保住了底缘）
+    .expandSafeArea([SafeAreaType.SYSTEM], [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM])
   }
 }

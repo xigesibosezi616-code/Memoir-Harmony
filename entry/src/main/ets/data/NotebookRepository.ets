@@ -7,12 +7,22 @@
  */
 import { relationalStore } from '@kit.ArkData';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { BookTexture, Notebook } from '../models/Notebook';
+import { BookTexture, Notebook, cleanedName, isNameTaken } from '../models/Notebook';
 import { SortOrderChange } from '../models/ShelfDrag';
-import { parseStringArray } from './ColumnCodec';
+import { encodeStringArray, parseStringArray } from './ColumnCodec';
 
 const DOMAIN = 0x0000;
 const TAG = 'NotebookRepository';
+
+/** 重命名结果（iOS `Tag.RenameResult`，三态同义） */
+export enum NotebookRenameResult {
+  /** 改了（日记的 tags 已连带改） */
+  Renamed = 'Renamed',
+  /** 空名字或和原来一样——什么都没做 */
+  Unchanged = 'Unchanged',
+  /** 和别的日记本撞名 */
+  NameTaken = 'NameTaken'
+}
 
 /** 书架篇数统计：各日记本名下篇数 + 总篇数（iOS `entryCountsByTag` + `entries.count`） */
 export class ShelfEntryCounts {
@@ -167,6 +177,101 @@ export class NotebookRepository {
           change.id, JSON.stringify(err));
         throw new Error('NotebookRepository.updateSortOrders: 更新失败');
       }
+    }
+  }
+
+  /**
+   * 重命名（10_BUILD_MANUAL.md 3.3，iOS `Tag.rename`）：名字就是身份，
+   * 改名必须把挂在这本上的日记（journal_entry.tags 里的旧名）一起改过去，
+   * 否则日记会从这本里「掉」出来。判重键 nameKey（忽略大小写 / 全半角）。
+   * 只改 journal_entry，不碰草稿表（iOS rename 也只 fetch JournalEntry）。
+   * 成功后同步改入参 notebook.name（调用方在页面上继续用它渲染）。
+   */
+  static async renameNotebook(store: relationalStore.RdbStore, notebook: Notebook,
+    rawNewName: string, otherNames: string[]): Promise<NotebookRenameResult> {
+    const newName = cleanedName(rawNewName);
+    if (newName.length === 0 || newName === notebook.name) {
+      return NotebookRenameResult.Unchanged;
+    }
+    if (isNameTaken(newName, otherNames)) {
+      return NotebookRenameResult.NameTaken;
+    }
+    const oldName = notebook.name;
+    // 1. 挂在这本上的日记：tags 里的旧名换新名（一篇一篇 UPDATE，量级 = 本内篇数）
+    let result: relationalStore.ResultSet;
+    try {
+      result = await store.querySql('SELECT id, tags FROM journal_entry');
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'rename: query entry tags failed: %{public}s', JSON.stringify(err));
+      throw new Error('NotebookRepository.renameNotebook: 查询失败');
+    }
+    const updates: string[][] = []; // [id, 新 tags JSON]
+    try {
+      while (result.goToNextRow()) {
+        const tags = parseStringArray(result.getString(result.getColumnIndex('tags')));
+        if (!tags.includes(oldName)) {
+          continue;
+        }
+        const replaced: string[] = [];
+        for (const tag of tags) {
+          replaced.push(tag === oldName ? newName : tag);
+        }
+        updates.push([result.getString(result.getColumnIndex('id')), encodeStringArray(replaced)]);
+      }
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'rename: read entry tags failed: %{public}s', JSON.stringify(err));
+      throw new Error('NotebookRepository.renameNotebook: 读行失败');
+    } finally {
+      try {
+        result.close();
+      } catch (err) {
+        hilog.warn(DOMAIN, TAG, 'close resultSet failed: %{public}s', JSON.stringify(err));
+      }
+    }
+    try {
+      for (const update of updates) {
+        await store.executeSql('UPDATE journal_entry SET tags = ? WHERE id = ?',
+          [update[1], update[0]]);
+      }
+      // 2. 本子改名
+      await store.executeSql('UPDATE notebook SET name = ? WHERE id = ?',
+        [newName, notebook.id]);
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'rename notebook failed %{public}s→%{public}s: %{public}s',
+        oldName, newName, JSON.stringify(err));
+      throw new Error('NotebookRepository.renameNotebook: 更新失败');
+    }
+    notebook.name = newName;
+    return NotebookRenameResult.Renamed;
+  }
+
+  /**
+   * 删日记本（R-BOOK-08）：只删本子记录，**不删日记**。
+   * 日记 tags 里的名字字符串原样保留（与 iOS `context.delete(tag)` 一致：
+   * 删的是 Tag 记录，JournalEntry.tags 是独立存的字符串数组）——
+   * 同名新建一本时那些日记会按「名字就是身份」重新归入。
+   * 照片封面文件由调用方经 MediaStorageService 删（R-BOOK-16 的本地部分）。
+   */
+  static async deleteNotebook(store: relationalStore.RdbStore, notebookId: string): Promise<void> {
+    try {
+      await store.executeSql('DELETE FROM notebook WHERE id = ?', [notebookId]);
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'delete notebook failed id=%{public}s: %{public}s',
+        notebookId, JSON.stringify(err));
+      throw new Error('NotebookRepository.deleteNotebook: 删除失败');
+    }
+  }
+
+  /** 每次进这本的日记列表刷新 lastOpenedAt（iOS BookDetailView.onAppear；「全部日记」无本，不调） */
+  static async touchLastOpenedAt(store: relationalStore.RdbStore,
+    notebookId: string, now: number): Promise<void> {
+    try {
+      await store.executeSql('UPDATE notebook SET last_opened_at = ? WHERE id = ?',
+        [now, notebookId]);
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'touch lastOpenedAt failed id=%{public}s: %{public}s',
+        notebookId, JSON.stringify(err));
+      // 只是埋点性质的字段，失败不挡页面
     }
   }
 }

@@ -29,6 +29,7 @@ import cameraPhotoFilesTest from './test/CameraPhotoFiles.test'
 import placeWeatherFormatTest from './test/PlaceWeatherFormat.test'
 import shelfDragTest from './test/ShelfDrag.test'
 import bookBoxProjectionTest from './test/BookBoxProjection.test'
+import bookContentsLogicTest from './test/BookContentsLogic.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -62,4 +63,5 @@ export default function testsuite() {
   placeWeatherFormatTest()
   shelfDragTest()
   bookBoxProjectionTest()
+  bookContentsLogicTest()
 }

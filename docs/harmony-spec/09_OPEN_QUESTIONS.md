@@ -504,3 +504,108 @@ R-RICH-09 要求打开编辑时就地转成正文里的录音块。纯逻辑已�
     （落位完 → 转回 0.5s）。曲线形状、让位起始时机都可能与 iOS 有观感差。
 - **约束（卡片原文）**：不要抖动、让位动画（拖动中实时让位）、角标；
   验收 = **录屏给产品当面确认**。
+
+### Q33 🟡 3.3 删除日记本语义：规则措辞与 iOS 源码不一致（2026-10-21，按 iOS 源码执行）
+
+- **冲突**：`06_RULES.md` R-BOOK-08 措辞是「删除日记本**只移除归属**（不删日记）」，
+  暗示要顺手清掉日记上的归属标记；但 iOS 源码（> 规则文档，CLAUDE.md 冲突裁决序）
+  `BookDetailView.deleteNotebook` 只做 `NotebookCoverStore.remove` + `context.delete(tag)`
+  ——删的是 Tag 记录，**完全不动 `JournalEntry.tags`**（tags 是独立存的字符串数组，
+  与 Tag 记录无外键关联），留下悬空的名字字符串；同名重建一本时那些日记按
+  「名字就是身份」重新归入。
+- **鸿蒙对齐做法**（3.3 已实现）：`NotebookRepository.deleteNotebook` 只
+  `DELETE FROM notebook WHERE id = ?`，封面文件走 `MediaStorageService.deleteCoverFile`；
+  `journal_entry.tags` 原样保留。
+- **若产品后续要求「删本时清归属」**：需在 deleteNotebook 里加一步
+  journal_entry tags 数组去除该名的批改（renameNotebook 的同款套路），并同步改 iOS。
+
+### Q34 🟡 3.3 大图照片加载复用 600px 缓存（iOS 独立 300px）（2026-10-21，观感差异微小）
+
+- **iOS**：`BookHeroView` 用独立 `SizedCache(maxSize: 300px)` 解码封面照片。
+- **鸿蒙**（3.3 已实现）：直接复用 `PhotoPaperIO.forFilesDir(...).loadImage`
+  （600px 全局缓存，与封面/详情页共用）。清晰度更高、内存占用略大；
+  大图按视口约 2×600px 显示，实际观感差异微小。若真机验收发现内存压力
+  或锯齿问题，再给 BookHeroView 建独立 300px 入口。
+
+### Q35 🟡 3.3 大图高度 62%→48%、布面标题居中、顶栏回归 iOS 滚动磨砂（2026-10-21 用户真机验收四轮定稿）
+
+- **用户三条**（原文口径）：①「全部日记」标题放大图中间；②目录上移、
+  差不多露出三篇日记的完整题目；③顶部做一条磨砂安全边界。
+- **与 iOS 的偏差**：hero 高 iOS 0.62（底部浮条 + 胶囊清让共吃 ~190vp，
+  0.62 时目录只露一行标题）→ 鸿蒙 0.48；布面烫标 iOS 顶部锚定
+  （top 60）→ 垂直居中（纯色本 +「全部日记」共用版式，一并生效）。
+- **磨砂边界四轮演进**（每轮真机截图像素实测驱动，最终回归 iOS 原版行为）：
+  1. Thin 毛玻璃 + 主题色 40%（记录主页同款）→ 在暖米布面上隐形
+     （带身只比底子亮 ~14/255）；
+  2. COMPONENT_ULTRA_THICK + 冷灰 65% 罩面 → 读得出层但切层感重；
+  3. backgroundEffect 白 30% 透明磨砂挪到状态栏下沿 → 用户否
+     （「弄的像iOS一样，现在这个不行」）；
+  4. **定稿 = iOS 原版**：常驻边界全部删除——静止时状态栏区域完全
+     透明沉浸；滚过大图后顶栏出磨砂（Thin + 主题色 40%，记录主页同
+     配方）+ 细线 + 居中标题，250ms 渐显。
+- **滚动后才暴露的布局 bug（已修）**：顶栏居中标题在 Stack 里不定位会
+  居中在「状态栏 + 44 行」整块上、压进状态栏（真机滚动后像素实测
+  y≈114-141）——显式 Row 钉到状态栏下面那行（y≈188 处居中）。
+- **顶栏返回 /「…」换官方圆钮（用户提出，2026-10-21）**：裸 SymbolGlyph
+  → `CircleIconButton`（官方 Button 圆钮，详情页 / 书写页同款全 app
+  统一）。给组件加可选 `iconColor` 参数承载 hero 亮暗自适应色
+  （`topBarIconColor()`，iOS `toolbarColorScheme` 同款逻辑）。官方沉浸
+  光感材质在内容区不生效（官方《沉浸光感》生效范围：仅系统标题栏 /
+  底部 TabBar；本页系统标题栏为全面屏 hero 隐藏）——正好落在「官方
+  组件不带沉浸感」形态：透明底 + stateEffect 按压反馈。系统返回钮
+  （真正的官方返回组件）只存在于系统标题栏，启用即占位、全面屏 hero
+  没了——与带不带沉浸光感无关，故不用。
+- **返回键无反应回归（用户报，2026-10-21，已修）**：根因 = 上一轮修
+  「标题压状态栏」时把居中标题包进了**全宽 44vp Row**，Stack 里后声明
+  = z 更高，正好盖在图标行上吞掉全部触摸（旧版标题是不定宽 Text、
+  两侧空隙能透传才没暴露）。修 = 标题 Row 加
+  `hitTestBehavior(HitTestMode.None)` 穿透。🔴 教训两条：① Stack 兄弟
+  全宽节点永远考虑触摸遮挡；② 上轮「点击返回 ✓」是**假阳性验证**——
+  用「y200-400 深色像素多」判回书架，磨砂态列表文字同样命中；本轮
+  改用整屏差异比例（37.3%）+ 书架大标题双重标记。
+- **底条与 Tab 胶囊的 36vp 不透明死带（用户报「和 iOS 不一致」，2026-10-21，
+  已修）**：iOS 底条是 `safeAreaInset(edge: .bottom)` 直接坐在系统
+  tab bar 上沿（无间隙）；鸿蒙旧值清让 90vp 让底条浮在胶囊上方
+  36vp，中间夹一条什么都不放的奶油色死带。修 = `BOTTOM_BAR_
+  CAPSULE_CLEARANCE_VP` 90→54，底条底边与胶囊可见顶边平齐（真机
+  实测胶囊顶 = 屏底上方 87vp@3x；底条底 2184px 与胶囊顶 2178px 重叠
+  6px，胶囊 barOverlap 在上层盖住，视觉无缝）。滚动内容底部清让公式
+  不变，末端距底条顶仍 24vp（iOS padding(.bottom, 24) 同款）。
+- **滚动内容透视过半透明 Tab 胶囊（用户报，2026-10-21，已修）**：根
+  Stack 底对齐、Scroll 铺满整页，滚过的目录行会从底条底下和胶囊磨砂
+  里透出来（iOS 视口天然裁在 safeAreaInset 条上沿）。修 = Scroll 视口
+  显式裁到底条上沿：`.height(scrollViewportHeight())`（容器高 −
+  底条顶到屏底距离）+ `.position({x:0,y:0})` 钉回顶部 + 尾部 Spacer
+  简化为 24。真机像素复验：滚到底后 1978px 以下零内容像素，胶囊区
+  干净。
+- **🔴 设备 OTA 改了安全区避让模型 → 其他颜色日记本顶部白色色块
+  （用户报，2026-10-21，已修，根因级）**：系统 OTA（伴随 density
+  3.0→3.125、状态栏 126→121px）后 ArkUI 默认把整棵组件树**渲染**避让
+  到状态栏下面（布局仍全屏：dump `origBounds=[0,0]` vs `bounds=[0,122]`），
+  `getWindowAvoidArea(TYPE_SYSTEM)` 随之报 **0**（内容不再与状态栏
+  重叠就没有可避让区）——应用的手动让位链路（safeAreaTopVp 全 app
+  padding）整体失效，状态栏底下露出窗口底色：素笺主题米色不显眼，
+  WineRed/皮革页就是一条刺眼白块。**getWindowAvoidArea 上报的语义
+  实测 = 当前内容与避让区的实际重叠量**（底部边缘到边 → indicator
+  87px 真值照常上报）。修 = Index 根 Stack
+  `.expandSafeArea([SafeAreaType.SYSTEM], [TOP, BOTTOM])`：绘制区域
+  扩回边缘到边，TYPE_SYSTEM 恢复上报 121px（hilog 实测
+  `sysTop=121 indicatorBottom=87`），safeAreaTopVp=38.72 让位链路
+  整体复活。顶栏图标 y168-212 修前后同位（避让平移 + margin=0 与
+  零平移 + margin=38.72 两组数值屏幕坐标巧合相等，各页无回归）。
+- **Scroll 受限高度 + 内容不满一屏 = 内容居中（faqs-arkui-725，已修）**：
+  视口裁剪后空本子内容 522vp < 视口 633vp，Scroll 默认把短内容垂直
+  居中 → hero 顶上顶出 ~55vp 死区。修 = 内容 Column
+  `.constraintSize({ minHeight: scrollViewportHeightVp() })` 顶齐。
+- **技术坑（复用必读）**：① 系统磨砂材质（Thin/ULTRA_THICK 等）自带
+  近乎不透明白底，`backgroundColor` 叠色会被材质埋掉；要自定义透明
+  磨砂只能用 `backgroundEffect`。② 页面内容短于视口时 Scroll 拖动只有
+  弹簧回弹、截图零变化——验证滚动行为前先确认内容足够长（本次往库里
+  直插 8 条测试日记才滚得动）。③ **截图像素分析**：`sips` 转 BMP 后
+  JPEG 源是 24bpp（步长 w×3）、PNG 源是 32bpp（步长 w×4），必须先读
+  `readUInt16LE(28)` 位深再定步长——步长用错坐标错位且越界读空
+  （本轮白色块排查时曾因此误判旧截图）。④ `uitest dumpLayout` 的
+  `bounds` 是安全区避让后的渲染框、`origBounds` 是布局框；expandSafeArea
+  生效后 bounds 元数据不变但绘制已扩展（以截图像素为准）。
+- **恢复 iOS 版式时改**：`BookDetailView.ets` 的 `HERO_HEIGHT_RATIO`、
+  顶栏磨砂底 Column、`BookHeroView.clothHero` 的 justifyContent 三处。

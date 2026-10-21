@@ -58,6 +58,7 @@ import {
   moveItem,
   nearestIndex
 } from '../../models/ShelfDrag';
+import { BOOK_DETAIL_ALL_ENTRIES_PARAM } from './BookDetailView';
 import { AppDatabase } from '../../data/Database';
 import {
   NotebookRepository,
@@ -220,7 +221,12 @@ export struct BookshelfView {
     this.resetDrag();
   }
 
+  /** 点书 → 日记本主页（3.3）：Tab 内 Navigation 栈（系统路由表），
+   *  底部 Tab 栏保留可见，对齐 iOS push（HomeView 同款范式） */
+  private navPathStack: NavPathStack = new NavPathStack();
+
   build() {
+    Navigation(this.navPathStack) {
     Stack() {
       Scroll(this.scroller) {
         // 量到尺寸才画整棵内容树：短内容首帧会被 Scroll 居中排布（见上），
@@ -320,6 +326,11 @@ export struct BookshelfView {
         this.pokeTick = this.pokeTick > 0.05 ? 0 : 0.1;
       }
     })
+    }
+    .hideTitleBar(true)
+    .mode(NavigationMode.Stack)
+    .width('100%')
+    .height('100%')
   }
 
   // ---- 摆书（3.1 绝对定位版 + 3.2 手势） ----
@@ -1016,16 +1027,16 @@ export struct BookshelfView {
     });
   }
 
-  // ---- 打开钩子（日记本主页是 3.3 的卡片，本卡只留钩子不跳转） ----
+  // ---- 打开钩子（点书 → 日记本主页，Tab 内 Navigation 栈，底部 Tab 栏保留可见） ----
 
   private openAllEntries(): void {
-    // TODO 3.3：pushPathByName('BookDetail', 'all')
+    this.navPathStack.pushPathByName('BookDetail', BOOK_DETAIL_ALL_ENTRIES_PARAM);
   }
 
   private openNotebook(slot: ShelfSlot): void {
     if (slot.notebook === undefined) {
       return;
     }
-    // TODO 3.3：pushPathByName('BookDetail', slot.notebook.id)
+    this.navPathStack.pushPathByName('BookDetail', slot.notebook.id);
   }
 }
