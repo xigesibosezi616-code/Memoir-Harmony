@@ -1,7 +1,7 @@
 # iOS 源码快照（最新）
 
-- 来源：iOS 仓库提交 `d31b09b`（2026-10-22，schema V10）
-- 对应的更新包：`docs/harmony-updates/` 里的 U01–U07 —— U02、U03、U04、U06、U07 **已交付**（按任务卡做）；U01 世界笔友、U05 邮筒还是**草稿**（只看不做）。
+- 来源：iOS 仓库提交 `0fef42d`（2026-10-23，schema V10）
+- 对应的更新包：`docs/harmony-updates/` 里的 U01–U08 —— U02、U03、U04、U06、U07、U08 **已交付**（按任务卡做）；U01 世界笔友、U05 邮筒还是**草稿**（只看不做）。
   快照里世界笔友、邮筒的代码是 iOS 现在的样子，等那两包交付再照着做
 - 内容和 `reference/ios/` 同一个范围：App 源码 `Memoir/`（含 `Assets.xcassets`、`Resources/`、`Localizable.xcstrings`、`InfoPlist.xcstrings`）、
   `Scripts/` 里的漏翻检查与素材 / 音效生成脚本、`Memoir/Docs/` 下的 `EXPORT_FORMAT.md` 与 `MEMBERSHIP.md`

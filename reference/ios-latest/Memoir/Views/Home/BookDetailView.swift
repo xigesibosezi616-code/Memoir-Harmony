@@ -9,7 +9,7 @@ import SwiftData
 /// 3. 底部常驻：「开始阅读」（从第一篇翻起）+ 写一篇
 ///
 /// 点目录里任一篇 → 翻页阅读器从那一篇开始；阅读器本身不动（`DiaryReaderView`）。
-/// 右上角「…」：换封面 / 重命名 / 删除（「全部日记」没有）。
+/// 右上角「…」：换封面 / 重命名 / 精装 PDF / 删除（「全部日记」没有）。
 struct BookDetailView: View {
     @Environment(ThemeManager.self) private var themeManager
     @Environment(AppEnvironment.self) private var env
@@ -23,6 +23,8 @@ struct BookDetailView: View {
     @State private var showRename = false
     @State private var renameText = ""
     @State private var showDeleteAlert = false
+    /// 精装 PDF（会员专属；免费用户能看预览，导出时弹付费页）
+    @State private var showBookExport = false
     /// 目录用列表还是宫格。记住用户上次选的（所有日记本共用一个偏好）
     @AppStorage("bookContentsLayout") private var layoutRaw = BookContentsView.Layout.list.rawValue
     /// 滚动区的可视高度（含状态栏、导航栏下面那段），大图取它的 62%
@@ -149,6 +151,12 @@ struct BookDetailView: View {
                         } label: {
                             Label("重命名", systemImage: "pencil")
                         }
+                        Button {
+                            showBookExport = true
+                        } label: {
+                            Label("精装 PDF", systemImage: "book.closed")
+                        }
+                        .disabled(entries.isEmpty)
                         Button(role: .destructive) {
                             showDeleteAlert = true
                         } label: {
@@ -183,6 +191,11 @@ struct BookDetailView: View {
                     onCancel: { showCoverSheet = false }
                 )
                 .presentationDetents([.large])
+            }
+        }
+        .fullScreenCover(isPresented: $showBookExport) {
+            if let tag {
+                BookExportView(tag: tag, entries: entries)
             }
         }
         .alert("重命名日记本", isPresented: $showRename) {

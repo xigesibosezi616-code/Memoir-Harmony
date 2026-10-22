@@ -475,6 +475,53 @@
         }
       }
     },
+    "%@由尺素排版" : {
+      "comment" : "精装 PDF 版权页：哪天由尺素排的版（%@ 是日期）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Typeset by Memoir on %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maquetado por Memoir el %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mis en page par Memoir le %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Memoir にて組版"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ Memoir에서 조판"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@由尺素排版"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@由尺素排版"
+          }
+        }
+      }
+    },
     "%@的回信到了，去信箱看看吧" : {
       "comment" : "回信到达通知正文，%@ 是笔友名",
       "localizations" : {
@@ -2353,6 +2400,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "「一杯茶的時間，剛好夠寫一段心情」"
+          }
+        }
+      }
+    },
+    "一段录音" : {
+      "comment" : "精装 PDF 正文里：这里原来是一段录音（纸上放不了，记一笔）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A voice recording"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una grabación de voz"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un enregistrement"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "録音"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "음성 녹음"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一段录音"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一段錄音"
           }
         }
       }
@@ -6316,6 +6410,100 @@
         }
       }
     },
+    "共 %lld 篇 · %lld 张照片" : {
+      "comment" : "精装 PDF 版权页：这本书有几篇日记、几张照片",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld entries · %lld photos"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld entradas · %lld fotos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld entrées · %lld photos"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日記 %lld 篇・写真 %lld 枚"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일기 %lld편 · 사진 %lld장"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共 %lld 篇 · %lld 张照片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共 %lld 篇 · %lld 張照片"
+          }
+        }
+      }
+    },
+    "共 %lld 页 · 约 %@" : {
+      "comment" : "精装 PDF：这本书一共多少页、PDF 大概多大",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pages · about %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld páginas · unos %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pages · environ %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全 %lld ページ・約 %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "총 %lld쪽 · 약 %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共 %lld 页 · 约 %@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共 %lld 頁 · 約 %@"
+          }
+        }
+      }
+    },
     "关于" : {
       "localizations" : {
         "en" : {
@@ -7755,6 +7943,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "出處"
+          }
+        }
+      }
+    },
+    "分享、存储或打印（%@）" : {
+      "comment" : "精装 PDF 导出好了：打开系统分享（存到文件、打印、发给别人），括号里是文件大小",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share, Save or Print (%@)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir, guardar o imprimir (%@)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partager, enregistrer ou imprimer (%@)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共有・保存・プリント（%@）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "공유, 저장 또는 프린트 (%@)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享、存储或打印（%@）"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享、儲存或列印（%@）"
           }
         }
       }
@@ -10405,6 +10640,53 @@
         }
       }
     },
+    "在家打印：有 A5 纸就选 A5、双面（长边翻页）。只有 A4 纸也行，A4 和 A5 比例一样，整页会等比放大。" : {
+      "comment" : "精装 PDF「怎么打印」小弹窗第 2 条：家用打印机用 A5 或 A4 纸怎么印（A 系列纸比例相同，A4 上是等比放大）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At home: with A5 paper, choose A5 and double-sided (flip on long edge). A4 works too — it has the same proportions, so each page simply prints larger."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En casa: con papel A5, elige A5 y doble cara (giro por el borde largo). También sirve A4: tiene las mismas proporciones, así que cada página sale más grande."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À la maison : avec du papier A5, choisissez A5 et recto verso (reliure bord long). L’A4 convient aussi : mêmes proportions, chaque page est simplement agrandie."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "家で印刷するなら：A5 用紙があれば A5・両面（長辺とじ）を選んでください。A4 でも大丈夫です。比率が同じなので、ページがそのまま拡大されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "집에서 인쇄할 때: A5 용지가 있으면 A5, 양면(긴 쪽 넘김)을 고르세요. A4 용지도 괜찮아요. 비율이 같아서 페이지가 그대로 확대돼요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在家打印：有 A5 纸就选 A5、双面（长边翻页）。只有 A4 纸也行，A4 和 A5 比例一样，整页会等比放大。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在家列印：有 A5 紙就選 A5、雙面（長邊翻頁）。只有 A4 紙也行，A4 和 A5 比例一樣，整頁會等比放大。"
+          }
+        }
+      }
+    },
     "在收件人里" : {
       "comment" : "世界笔友地图：名片按钮",
       "localizations" : {
@@ -11715,6 +11997,53 @@
         }
       }
     },
+    "宋体没能下载，这次先用苹方排版。联网后再导出就是宋体。" : {
+      "comment" : "精装 PDF：书用的字体没下载成功，这次用系统字体排的",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't download the book typeface, so this copy uses the system font. Export again when you're online to get it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo descargar la tipografía del libro, así que esta copia usa la del sistema. Vuelve a exportar cuando tengas conexión para obtenerla."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de télécharger la police du livre : cette version utilise la police du système. Exportez à nouveau une fois en ligne pour l’obtenir."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "書籍用の書体をダウンロードできなかったため、今回はシステムの書体で組みました。オンラインで書き出し直すと書籍用の書体になります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "책 서체를 내려받지 못해 이번에는 시스템 서체로 조판했어요. 인터넷에 연결한 뒤 다시 내보내면 책 서체로 나와요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "宋体没能下载，这次先用苹方排版。联网后再导出就是宋体。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "宋體沒能下載，這次先用蘋方排版。連網後再匯出就是宋體。"
+          }
+        }
+      }
+    },
     "完成" : {
       "localizations" : {
         "en" : {
@@ -12597,6 +12926,53 @@
         }
       }
     },
+    "导出 PDF" : {
+      "comment" : "精装 PDF：会员点了开始导出",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export PDF"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportar PDF"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporter en PDF"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF を書き出す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF 내보내기"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出 PDF"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "匯出 PDF"
+          }
+        }
+      }
+    },
     "导出备份" : {
       "localizations" : {
         "en" : {
@@ -12639,6 +13015,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "匯出備份"
+          }
+        }
+      }
+    },
+    "导出失败" : {
+      "comment" : "精装 PDF 导出失败",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export failed"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo exportar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de l’export"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "書き出せませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내보내지 못했어요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导出失败"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "匯出失敗"
           }
         }
       }
@@ -14551,6 +14974,53 @@
         }
       }
     },
+    "开通尺素会员，导出这本日记" : {
+      "comment" : "精装 PDF 导出页：不是会员时的主按钮，点了去付费页（用户定：叫「这本日记」，不叫「这本书」）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Join Memoir Plus to Export This Notebook"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Únete a Memoir Plus para exportar este cuaderno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S’abonner à Memoir Plus pour exporter ce carnet"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memoir Plus に入会してこのノートを書き出す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Memoir Plus 가입하고 이 노트 내보내기"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开通尺素会员，导出这本日记"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開通尺素會員，匯出這本日記"
+          }
+        }
+      }
+    },
     "当前位置" : {
       "localizations" : {
         "en" : {
@@ -15204,6 +15674,53 @@
         }
       }
     },
+    "怎么打印这本日记" : {
+      "comment" : "精装 PDF 导出页：主按钮下面的小链接，也是「怎么打印」小弹窗的标题（用户定：叫「这本日记」，不叫「这本书」）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How to print this notebook"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cómo imprimir este cuaderno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imprimer ce carnet"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このノートの印刷のしかた"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 노트 인쇄하는 법"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "怎么打印这本日记"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "怎麼列印這本日記"
+          }
+        }
+      }
+    },
     "怡然自得" : {
       "comment" : "心情弹窗：九档档名 6",
       "localizations" : {
@@ -15716,6 +16233,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "想做一本新的日記？"
+          }
+        }
+      }
+    },
+    "想做成一本真正的书：把 PDF 发给打印店或网上印书，说「A5、双面、装订成册」。第一页是封面，最后一页是封底。" : {
+      "comment" : "精装 PDF「怎么打印」小弹窗第 4 条：拿去打印店印成书时怎么说（引号按各语言的写法）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "For a real book, send the PDF to a print shop or an online book printer and ask for “A5, double-sided, bound”. The first page is the front cover, the last page the back cover."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para un libro de verdad, envía el PDF a una imprenta o a un servicio de impresión en línea y pide «A5, doble cara, encuadernado». La primera página es la portada y la última, la contraportada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour un vrai livre, envoyez le PDF à un imprimeur ou à un service d’impression en ligne en demandant « A5, recto verso, relié ». La première page est la couverture, la dernière la quatrième de couverture."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "本格的な一冊にするなら、PDF を印刷所やネットの製本サービスに送って「A5・両面・製本」と伝えてください。最初のページが表紙、最後のページが裏表紙です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "진짜 책으로 만들고 싶다면 PDF를 인쇄소나 온라인 제본 서비스에 보내 “A5, 양면, 제본”이라고 말하세요. 첫 페이지는 앞표지, 마지막 페이지는 뒤표지예요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "想做成一本真正的书：把 PDF 发给打印店或网上印书，说「A5、双面、装订成册」。第一页是封面，最后一页是封底。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "想做成一本真正的書：把 PDF 傳給印刷店或線上印書，說「A5、雙面、裝訂成冊」。第一頁是封面，最後一頁是封底。"
           }
         }
       }
@@ -16600,6 +17164,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "打包時出錯：%@"
+          }
+        }
+      }
+    },
+    "打印机不能双面也没关系，单面印出来一样能装订。" : {
+      "comment" : "精装 PDF「怎么打印」小弹窗第 3 条：单面打印也可以",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No double-sided printing? Single-sided pages can be bound just the same."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Tu impresora no imprime a doble cara? Las páginas a una cara se encuadernan igual."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas de recto verso ? Les pages imprimées d’un seul côté se relient tout aussi bien."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "両面印刷ができなくても大丈夫。片面でも同じように綴じられます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "양면 인쇄가 안 돼도 괜찮아요. 단면으로 뽑아도 똑같이 제본할 수 있어요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打印机不能双面也没关系，单面印出来一样能装订。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "印表機不能雙面也沒關係，單面印出來一樣能裝訂。"
           }
         }
       }
@@ -17673,6 +18284,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "換綁手機號"
+          }
+        }
+      }
+    },
+    "排法" : {
+      "comment" : "精装 PDF 导出页：每篇另起一页 / 接着排 的选择（读屏读这个名字）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Layout"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disposición"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise en page"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "組み方"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "배치"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "排法"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "排法"
+          }
+        }
+      }
+    },
+    "接着上一篇排" : {
+      "comment" : "精装 PDF 排法：接着上一篇往下排（分段控件，要短）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuous"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seguidas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À la suite"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "続けて組む"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이어서 싣기"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接着上一篇排"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接著上一篇排"
           }
         }
       }
@@ -21025,6 +21730,53 @@
         }
       }
     },
+    "有的日记写不满一页。下一篇是另起一页，还是接着往下排？" : {
+      "comment" : "精装 PDF 导出页：排法切换（每篇另起一页 / 接着上一篇排）上面的一句说明，把要选的事问清楚",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Some entries won't fill a page. Should the next one start on a new page, or continue right after?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Algunas entradas no llenan una página. ¿La siguiente empieza en una página nueva o va seguida?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Certaines entrées ne remplissent pas une page. La suivante commence-t-elle sur une nouvelle page, ou à la suite ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1ページに満たない日記もあります。次の日記は改ページしますか、それとも続けて組みますか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "한 쪽을 다 채우지 못하는 일기도 있어요. 다음 일기는 새 쪽에서 시작할까요, 이어서 실을까요?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有的日记写不满一页。下一篇是另起一页，还是接着往下排？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有的日記寫不滿一頁。下一篇是另起一頁，還是接著往下排？"
+          }
+        }
+      }
+    },
     "服务器响应异常（%lld）" : {
       "comment" : "网络错误，%lld 是 HTTP 状态码",
       "localizations" : {
@@ -22000,6 +22752,53 @@
         }
       }
     },
+    "正在下载宋体 %lld%%" : {
+      "comment" : "精装 PDF：第一次导出时下载书用的字体，后面是百分比",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloading book typeface %lld%%"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descargando la tipografía %lld %%"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Téléchargement de la police %lld %%"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "書籍用の書体をダウンロード中 %lld%%"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "책 서체 내려받는 중 %lld%%"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在下载宋体 %lld%%"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在下載宋體 %lld%%"
+          }
+        }
+      }
+    },
     "正在写信…" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -22090,6 +22889,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在寄出…"
+          }
+        }
+      }
+    },
+    "正在导出 %lld%%" : {
+      "comment" : "精装 PDF：导出进度，后面是百分比",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporting %lld%%"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportando %lld %%"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Export en cours %lld %%"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "書き出し中 %lld%%"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내보내는 중 %lld%%"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在导出 %lld%%"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在匯出 %lld%%"
           }
         }
       }
@@ -22228,6 +23074,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在找附近的地點…"
+          }
+        }
+      }
+    },
+    "正在排版…" : {
+      "comment" : "精装 PDF：正在把日记排成书（预览出来之前）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Typesetting…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maquetando…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mise en page…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "組版中…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "조판 중…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在排版…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在排版…"
           }
         }
       }
@@ -22880,6 +23773,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "每月一封「這個月的你」，年底一份「這一年」"
+          }
+        }
+      }
+    },
+    "每篇另起一页" : {
+      "comment" : "精装 PDF 排法：每篇日记从新的一页开始（分段控件，要短）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Each on New Page"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada una aparte"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle page"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1篇ずつ改ページ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "편마다 새 쪽"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每篇另起一页"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每篇另起一頁"
           }
         }
       }
@@ -25958,6 +26898,7 @@
     },
     "白框" : {
       "comment" : "封面版式：米白纸封面，照片嵌在上半部",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -26326,6 +27267,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "睡前寫几行字，把今天放下"
+          }
+        }
+      }
+    },
+    "知道了" : {
+      "comment" : "提示类小弹窗的确认按钮（看完了、关掉）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got it"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entendido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compris"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "わかりました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "알겠어요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "知道了"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "知道了"
           }
         }
       }
@@ -27161,6 +28149,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "篇"
+          }
+        }
+      }
+    },
+    "精装 PDF" : {
+      "comment" : "日记本「…」菜单里的一项、导出页的标题：把日记本排成书导出 PDF（会员专属）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hardcover PDF"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF encuadernado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF relié"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上製本 PDF"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "양장본 PDF"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精装 PDF"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "精裝 PDF"
           }
         }
       }
@@ -32236,6 +33271,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "「這本日記，永遠不會嫌你話多」"
+          }
+        }
+      }
+    },
+    "这本日记是 A5（148 × 210 毫米）大小。左右留白一宽一窄，宽的一边留给装订。" : {
+      "comment" : "精装 PDF「怎么打印」小弹窗第 1 条：规格（左右边距不一样宽，宽的那边是装订边）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This notebook is laid out at A5 (148 × 210 mm). The side margins differ: the wider one is for the binding."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este cuaderno está maquetado en A5 (148 × 210 mm). Los márgenes laterales son distintos: el más ancho es para la encuadernación."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce carnet est mis en page au format A5 (148 × 210 mm). Les marges latérales diffèrent : la plus large est réservée à la reliure."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このノートは A5（148 × 210 mm）で組まれています。左右の余白は片側が広く、広いほうが綴じしろです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 노트는 A5(148 × 210mm) 크기로 짜여 있어요. 좌우 여백이 한쪽만 넓은데, 넓은 쪽이 제본할 자리예요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这本日记是 A5（148 × 210 毫米）大小。左右留白一宽一窄，宽的一边留给装订。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這本日記是 A5（148 × 210 公釐）大小。左右留白一寬一窄，寬的一邊留給裝訂。"
           }
         }
       }
