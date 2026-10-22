@@ -1,0 +1,506 @@
+{
+  "version": 1,
+  "note": "世界笔友名册。iOS 与鸿蒙用同一份文件（U01 随附）。人设与提示词在服务端，这里只放客户端显示和算路程要用的。七种语言都已写上；上线前要请各地熟悉的人审校（第 7 步）。surname 没写的语言用 default。",
+  "penPals": [
+    {
+      "id": "mcrae",
+      "surname": {
+        "default": "McRae"
+      },
+      "region": "NZ",
+      "coordinate": {
+        "lat": -46.9,
+        "lon": 168.13
+      },
+      "timeZone": "Pacific/Auckland",
+      "nativeLanguage": "en",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "斯图尔特岛",
+        "zh-Hant": "斯圖爾特島",
+        "en": "Stewart Island",
+        "ja": "スチュワート島",
+        "ko": "스튜어트섬",
+        "fr": "Île Stewart",
+        "es": "Isla Stewart"
+      },
+      "card": {
+        "zh-Hans": "守着一条小渔船的老渔夫。夏天也带游客出海。",
+        "zh-Hant": "守著一條小漁船的老漁夫。夏天也帶遊客出海。",
+        "en": "An old fisherman with one small boat. Takes visitors out in summer.",
+        "ja": "小さな漁船を一艘守る老漁師。夏は観光客を乗せて海へ出る。",
+        "ko": "작은 고깃배 한 척을 지키는 늙은 어부. 여름엔 관광객을 태우고 바다로 나간다.",
+        "fr": "Un vieux pêcheur et son petit bateau. L'été, il emmène aussi des visiteurs en mer.",
+        "es": "Un viejo pescador con un pequeño barco. En verano también saca turistas al mar."
+      }
+    },
+    {
+      "id": "roux",
+      "surname": {
+        "default": "Roux"
+      },
+      "region": "FR",
+      "coordinate": {
+        "lat": 43.3,
+        "lon": 5.37
+      },
+      "timeZone": "Europe/Paris",
+      "nativeLanguage": "fr",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "马赛",
+        "zh-Hant": "馬賽",
+        "en": "Marseille",
+        "ja": "マルセイユ",
+        "ko": "마르세유",
+        "fr": "Marseille",
+        "es": "Marsella"
+      },
+      "card": {
+        "zh-Hans": "天不亮在家里的面包房揉面，白天去读建筑。",
+        "zh-Hant": "天不亮就在家裡的麵包店揉麵，白天去念建築。",
+        "en": "Kneads dough in the family bakery before dawn, studies architecture by day.",
+        "ja": "夜明け前は家のパン屋で生地をこね、昼は建築を学ぶ。",
+        "ko": "동트기 전엔 집안 빵집에서 반죽을 하고, 낮에는 건축을 공부한다.",
+        "fr": "Pétrit la pâte dans la boulangerie familiale avant l'aube, étudie l'architecture le jour.",
+        "es": "Amasa en la panadería familiar antes del amanecer y estudia arquitectura de día."
+      }
+    },
+    {
+      "id": "conneely",
+      "surname": {
+        "default": "Conneely"
+      },
+      "region": "IE",
+      "coordinate": {
+        "lat": 53.4,
+        "lon": -9.92
+      },
+      "timeZone": "Europe/Dublin",
+      "nativeLanguage": "en",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "康尼马拉",
+        "zh-Hant": "康尼馬拉",
+        "en": "Connemara",
+        "ja": "コネマラ",
+        "ko": "코네마라",
+        "fr": "Connemara",
+        "es": "Connemara"
+      },
+      "card": {
+        "zh-Hans": "送了四十年信的退休邮递员，现在终于有人给他写信。",
+        "zh-Hant": "送了四十年信的退休郵差，現在終於有人寫信給他。",
+        "en": "A retired postman who delivered letters for forty years. Now, at last, someone writes to him.",
+        "ja": "四十年、手紙を配ってきた元郵便配達員。今ようやく、彼に手紙を書く人が現れた。",
+        "ko": "40년 동안 편지를 배달한 은퇴한 집배원. 이제야 그에게 편지를 쓰는 사람이 생겼다.",
+        "fr": "Facteur à la retraite, il a distribué le courrier pendant quarante ans. Enfin, quelqu'un lui écrit.",
+        "es": "Cartero jubilado que repartió cartas durante cuarenta años. Por fin alguien le escribe a él."
+      }
+    },
+    {
+      "id": "nilsen",
+      "surname": {
+        "default": "Nilsen"
+      },
+      "region": "NO",
+      "coordinate": {
+        "lat": 67.93,
+        "lon": 13.09
+      },
+      "timeZone": "Europe/Oslo",
+      "nativeLanguage": "en",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "罗弗敦",
+        "zh-Hant": "羅弗敦",
+        "en": "Lofoten",
+        "ja": "ロフォーテン",
+        "ko": "로포텐",
+        "fr": "Lofoten",
+        "es": "Lofoten"
+      },
+      "card": {
+        "zh-Hans": "在岛与岛之间开渡轮的女船长。",
+        "zh-Hant": "在島與島之間開渡輪的女船長。",
+        "en": "Captains a ferry between the islands.",
+        "ja": "島から島へフェリーを走らせる女性船長。",
+        "ko": "섬과 섬 사이를 오가는 페리의 여성 선장.",
+        "fr": "Elle commande un ferry d'une île à l'autre.",
+        "es": "Capitana de un ferri que va de isla en isla."
+      }
+    },
+    {
+      "id": "miyashita",
+      "surname": {
+        "default": "Miyashita",
+        "zh-Hans": "宮下",
+        "zh-Hant": "宮下",
+        "ja": "宮下",
+        "ko": "미야시타"
+      },
+      "region": "JP",
+      "coordinate": {
+        "lat": 35.03,
+        "lon": 135.78
+      },
+      "timeZone": "Asia/Tokyo",
+      "nativeLanguage": "ja",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "京都",
+        "zh-Hant": "京都",
+        "en": "Kyoto",
+        "ja": "京都",
+        "ko": "교토",
+        "fr": "Kyoto",
+        "es": "Kioto"
+      },
+      "card": {
+        "zh-Hans": "街坊小神社的年轻神职人员。扫落叶、守祭事、偷偷听棒球。",
+        "zh-Hant": "街坊小神社的年輕神職人員。掃落葉、守祭典、偷偷聽棒球。",
+        "en": "A young priest at a small neighbourhood shrine. Sweeps leaves, keeps the festivals, listens to baseball on the sly.",
+        "ja": "町内の小さな神社の若い神職。落ち葉を掃き、祭りを守り、こっそり野球中継を聴く。",
+        "ko": "동네 작은 신사의 젊은 신관. 낙엽을 쓸고, 마쓰리를 지키고, 몰래 야구 중계를 듣는다.",
+        "fr": "Jeune prêtre d'un petit sanctuaire de quartier. Balaie les feuilles, veille sur les fêtes, écoute le baseball en cachette.",
+        "es": "Joven sacerdote de un pequeño santuario de barrio. Barre hojas, cuida las fiestas y escucha béisbol a escondidas."
+      }
+    },
+    {
+      "id": "amano",
+      "surname": {
+        "default": "Amano",
+        "zh-Hans": "天野",
+        "zh-Hant": "天野",
+        "ja": "天野",
+        "ko": "아마노"
+      },
+      "region": "JP",
+      "coordinate": {
+        "lat": 35.69,
+        "lon": 139.7
+      },
+      "timeZone": "Asia/Tokyo",
+      "nativeLanguage": "ja",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "东京",
+        "zh-Hant": "東京",
+        "en": "Tokyo",
+        "ja": "東京",
+        "ko": "도쿄",
+        "fr": "Tokyo",
+        "es": "Tokio"
+      },
+      "card": {
+        "zh-Hans": "在新宿站前的快餐店打工，正在备考气象预报士。",
+        "zh-Hant": "在新宿站前的速食店打工，正在準備氣象預報士考試。",
+        "en": "Works at a fast-food counter by Shinjuku Station, studying to become a weather forecaster.",
+        "ja": "新宿駅前のファストフード店でアルバイトしながら、気象予報士試験の勉強中。",
+        "ko": "신주쿠역 앞 패스트푸드점에서 아르바이트하며 기상예보사 시험을 준비 중.",
+        "fr": "Travaille dans un fast-food près de la gare de Shinjuku et prépare l'examen de prévisionniste météo.",
+        "es": "Trabaja en un local de comida rápida junto a la estación de Shinjuku y estudia para ser pronosticadora del tiempo."
+      }
+    },
+    {
+      "id": "wu",
+      "surname": {
+        "default": "Wu",
+        "zh-Hans": "吴",
+        "zh-Hant": "吳",
+        "ja": "呉",
+        "ko": "우"
+      },
+      "region": "CN",
+      "coordinate": {
+        "lat": 34.26,
+        "lon": 108.95
+      },
+      "timeZone": "Asia/Shanghai",
+      "nativeLanguage": "zh-Hans",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "西安",
+        "zh-Hant": "西安",
+        "en": "Xi'an",
+        "ja": "西安",
+        "ko": "시안",
+        "fr": "Xi'an",
+        "es": "Xi'an"
+      },
+      "card": {
+        "zh-Hans": "大三学生，也在创业。白天上课，晚上写代码，周末骑城墙。",
+        "zh-Hant": "大三學生，也在創業。白天上課，晚上寫程式，週末騎城牆。",
+        "en": "A third-year student who is also building a startup. Classes by day, code by night, cycling the city wall at weekends.",
+        "ja": "大学三年生で、起業もしている。昼は授業、夜はコード、週末は城壁の上をサイクリング。",
+        "ko": "대학교 3학년이자 창업 중. 낮엔 수업, 밤엔 코딩, 주말엔 성벽 위를 자전거로 달린다.",
+        "fr": "Étudiant en troisième année qui lance aussi sa start-up. Cours le jour, code la nuit, vélo sur les remparts le week-end.",
+        "es": "Estudiante de tercer año que también monta su empresa. Clases de día, código de noche y bici por la muralla los fines de semana."
+      }
+    },
+    {
+      "id": "park",
+      "surname": {
+        "default": "Park",
+        "zh-Hans": "朴",
+        "zh-Hant": "朴",
+        "ja": "朴",
+        "ko": "박"
+      },
+      "region": "KR",
+      "coordinate": {
+        "lat": 33.55,
+        "lon": 126.8
+      },
+      "timeZone": "Asia/Seoul",
+      "nativeLanguage": "ko",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "济州岛",
+        "zh-Hant": "濟州島",
+        "en": "Jeju Island",
+        "ja": "済州島",
+        "ko": "제주도",
+        "fr": "Île de Jeju",
+        "es": "Isla de Jeju"
+      },
+      "card": {
+        "zh-Hans": "海边咖啡馆的店主。妈妈七十岁了，还在下海。",
+        "zh-Hant": "海邊咖啡館的店主。媽媽七十歲了，還在下海。",
+        "en": "Runs a café by the sea. Her mother is seventy and still dives.",
+        "ja": "海辺のカフェの店主。七十歳の母は、今も海に潜っている。",
+        "ko": "바닷가 카페의 주인. 일흔 살 어머니는 아직도 물질을 한다.",
+        "fr": "Tient un café au bord de la mer. Sa mère a soixante-dix ans et plonge encore.",
+        "es": "Lleva un café junto al mar. Su madre tiene setenta años y todavía bucea."
+      }
+    },
+    {
+      "id": "tan",
+      "surname": {
+        "default": "Tan",
+        "zh-Hans": "陈",
+        "zh-Hant": "陳",
+        "ja": "陳",
+        "ko": "탄"
+      },
+      "region": "SG",
+      "coordinate": {
+        "lat": 1.33,
+        "lon": 103.85
+      },
+      "timeZone": "Asia/Singapore",
+      "nativeLanguage": "en",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "新加坡",
+        "zh-Hant": "新加坡",
+        "en": "Singapore",
+        "ja": "シンガポール",
+        "ko": "싱가포르",
+        "fr": "Singapour",
+        "es": "Singapur"
+      },
+      "card": {
+        "zh-Hans": "物流公司的亚太区高管。开了一辈子会，在走廊上养兰花。",
+        "zh-Hant": "物流公司的亞太區高管。開了一輩子會，在走廊上養蘭花。",
+        "en": "An Asia-Pacific logistics executive. A lifetime of meetings, and orchids along the corridor at home.",
+        "ja": "物流会社のアジア太平洋地域の幹部。会議に明け暮れた人生、家の廊下で蘭を育てている。",
+        "ko": "물류회사의 아시아태평양 지역 임원. 평생 회의만 해 왔고, 복도에서 난을 키운다.",
+        "fr": "Cadre dirigeant d'une société de logistique pour l'Asie-Pacifique. Une vie de réunions, et des orchidées dans le couloir.",
+        "es": "Directivo de logística para Asia-Pacífico. Toda una vida de reuniones, y orquídeas en el pasillo de casa."
+      }
+    },
+    {
+      "id": "aksoy",
+      "surname": {
+        "default": "Aksoy"
+      },
+      "region": "TR",
+      "coordinate": {
+        "lat": 40.98,
+        "lon": 29.03
+      },
+      "timeZone": "Europe/Istanbul",
+      "nativeLanguage": "tr",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "卡德柯伊",
+        "zh-Hant": "卡德柯伊",
+        "en": "Kadıköy",
+        "ja": "カドゥキョイ",
+        "ko": "카드쾨이",
+        "fr": "Kadıköy",
+        "es": "Kadıköy"
+      },
+      "card": {
+        "zh-Hans": "伊斯坦布尔亚洲岸的旧唱片店店主。喂一整条街的猫。",
+        "zh-Hant": "伊斯坦堡亞洲岸的舊唱片行老闆。餵一整條街的貓。",
+        "en": "Keeps an old record shop on Istanbul's Asian shore. Feeds every cat on the street.",
+        "ja": "イスタンブールのアジア側で古いレコード店を営む。通りじゅうの猫に餌をやっている。",
+        "ko": "이스탄불 아시아 쪽에서 오래된 레코드 가게를 한다. 거리의 고양이들에게 밥을 준다.",
+        "fr": "Tient une boutique de vieux disques sur la rive asiatique d'Istanbul. Nourrit tous les chats de la rue.",
+        "es": "Tiene una tienda de discos antiguos en la orilla asiática de Estambul. Alimenta a todos los gatos de la calle."
+      }
+    },
+    {
+      "id": "hartley",
+      "surname": {
+        "default": "Hartley"
+      },
+      "region": "US",
+      "coordinate": {
+        "lat": 47.0,
+        "lon": -114.3
+      },
+      "timeZone": "America/Denver",
+      "nativeLanguage": "en",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "蒙大拿",
+        "zh-Hant": "蒙大拿",
+        "en": "Montana",
+        "ja": "モンタナ",
+        "ko": "몬태나",
+        "fr": "Montana",
+        "es": "Montana"
+      },
+      "card": {
+        "zh-Hans": "山顶的火情瞭望员。一个人守着一座木屋，一整个夏天。",
+        "zh-Hant": "山頂的火情瞭望員。一個人守著一座木屋，一整個夏天。",
+        "en": "A fire lookout on a mountaintop. One cabin, one whole summer, alone.",
+        "ja": "山頂の森林火災監視員。ひと夏じゅう、ひとりで小屋を守る。",
+        "ko": "산꼭대기의 산불 감시원. 여름 내내 혼자 오두막을 지킨다.",
+        "fr": "Guetteuse d'incendies au sommet d'une montagne. Seule dans une cabane, tout un été.",
+        "es": "Vigía de incendios en la cima de una montaña. Sola en una cabaña, todo un verano."
+      }
+    },
+    {
+      "id": "tremblay",
+      "surname": {
+        "default": "Tremblay"
+      },
+      "region": "CA",
+      "coordinate": {
+        "lat": 46.12,
+        "lon": -70.68
+      },
+      "timeZone": "America/Toronto",
+      "nativeLanguage": "fr",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "魁北克",
+        "zh-Hant": "魁北克",
+        "en": "Quebec",
+        "ja": "ケベック",
+        "ko": "퀘벡",
+        "fr": "Québec",
+        "es": "Quebec"
+      },
+      "card": {
+        "zh-Hans": "枫糖农场主，三个孩子的妈妈。春天熬糖，冬天扫雪。",
+        "zh-Hant": "楓糖農場主，三個孩子的媽媽。春天熬糖，冬天掃雪。",
+        "en": "A maple farmer and mother of three. Boils syrup in spring, shovels snow in winter.",
+        "ja": "メープル農園を営む、三人の子の母。春はシロップを煮詰め、冬は雪かき。",
+        "ko": "메이플 농장을 꾸리는 세 아이의 엄마. 봄엔 시럽을 졸이고, 겨울엔 눈을 치운다.",
+        "fr": "Acéricultrice et mère de trois enfants. Fait bouillir l'eau d'érable au printemps, déneige l'hiver.",
+        "es": "Productora de jarabe de arce y madre de tres hijos. Hierve la savia en primavera y quita nieve en invierno."
+      }
+    },
+    {
+      "id": "ferreyra",
+      "surname": {
+        "default": "Ferreyra"
+      },
+      "region": "AR",
+      "coordinate": {
+        "lat": -34.62,
+        "lon": -58.37
+      },
+      "timeZone": "America/Argentina/Buenos_Aires",
+      "nativeLanguage": "es",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "布宜诺斯艾利斯",
+        "zh-Hant": "布宜諾斯艾利斯",
+        "en": "Buenos Aires",
+        "ja": "ブエノスアイレス",
+        "ko": "부에노스아이레스",
+        "fr": "Buenos Aires",
+        "es": "Buenos Aires"
+      },
+      "card": {
+        "zh-Hans": "夜班出租车司机。后座放着一本本子，请乘客写一句话。",
+        "zh-Hant": "夜班計程車司機。後座放著一本本子，請乘客寫一句話。",
+        "en": "Drives a night taxi. Keeps a notebook on the back seat for passengers to write one line.",
+        "ja": "夜勤のタクシー運転手。後部座席にノートを置いて、乗客にひと言ずつ書いてもらっている。",
+        "ko": "야간 택시 기사. 뒷좌석에 공책을 두고 승객에게 한 줄씩 적어 달라고 한다.",
+        "fr": "Chauffeur de taxi de nuit. Sur la banquette arrière, un carnet où chaque passager écrit une ligne.",
+        "es": "Taxista de noche. En el asiento de atrás lleva un cuaderno para que cada pasajero escriba una frase."
+      }
+    },
+    {
+      "id": "otieno",
+      "surname": {
+        "default": "Otieno"
+      },
+      "region": "KE",
+      "coordinate": {
+        "lat": -1.29,
+        "lon": 36.82
+      },
+      "timeZone": "Africa/Nairobi",
+      "nativeLanguage": "en",
+      "postage": 1,
+      "place": {
+        "zh-Hans": "内罗毕",
+        "zh-Hant": "奈洛比",
+        "en": "Nairobi",
+        "ja": "ナイロビ",
+        "ko": "나이로비",
+        "fr": "Nairobi",
+        "es": "Nairobi"
+      },
+      "card": {
+        "zh-Hans": "电台夜间节目的主持人。陪失眠的人聊天、放歌。",
+        "zh-Hant": "電台夜間節目的主持人。陪失眠的人聊天、放歌。",
+        "en": "Hosts a late-night radio show, keeping the sleepless company with talk and songs.",
+        "ja": "ラジオの深夜番組のパーソナリティ。眠れない人と話し、歌をかける。",
+        "ko": "라디오 심야 프로그램 진행자. 잠 못 드는 사람들과 이야기하고 노래를 튼다.",
+        "fr": "Animateur d'une émission de radio de nuit. Tient compagnie aux insomniaques, entre paroles et chansons.",
+        "es": "Locutor de un programa nocturno de radio. Acompaña a quienes no pueden dormir con charla y canciones."
+      }
+    },
+    {
+      "id": "m",
+      "surname": {
+        "default": "M."
+      },
+      "region": "AQ",
+      "coordinate": {
+        "lat": -64.8,
+        "lon": -63.5
+      },
+      "timeZone": "Antarctica/Palmer",
+      "nativeLanguage": "en",
+      "postage": 2,
+      "place": {
+        "zh-Hans": "南极",
+        "zh-Hant": "南極",
+        "en": "Antarctica",
+        "ja": "南極",
+        "ko": "남극",
+        "fr": "Antarctique",
+        "es": "Antártida"
+      },
+      "card": {
+        "zh-Hans": "南极半岛一座小岛上的邮局局长。只在夏天开门。",
+        "zh-Hant": "南極半島一座小島上的郵局局長。只在夏天開門。",
+        "en": "Postmistress of a tiny island post office off the Antarctic Peninsula. Open only in summer.",
+        "ja": "南極半島の小さな島にある郵便局の局長。開くのは夏だけ。",
+        "ko": "남극반도의 작은 섬에 있는 우체국의 국장. 여름에만 문을 연다.",
+        "fr": "Receveuse d'un petit bureau de poste sur une île de la péninsule Antarctique. Ouvert l'été seulement.",
+        "es": "Jefa de una pequeña oficina de correos en una isla de la península Antártica. Solo abre en verano."
+      }
+    }
+  ]
+}

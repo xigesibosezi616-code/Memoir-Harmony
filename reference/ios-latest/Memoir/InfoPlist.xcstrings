@@ -1,0 +1,355 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "桌面图标下显示的 App 名。各语言的名字是产品决策（2026-08-08 定），不是翻译，别自作主张改。",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "memoir"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añoranza"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjà Vu"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "그리움"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "memoir"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añoranza"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjà Vu"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "그리움"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素"
+          }
+        }
+      }
+    },
+    "NSCameraUsageDescription" : {
+      "comment" : "Privacy - Camera Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "memoir uses the camera to add photos to your entries."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añoranza usa la cámara para añadir fotos a tus entradas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjà Vu utilise l’appareil photo pour ajouter des photos à vos entrées."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素は日記に写真を添えるためにカメラを使用します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "그리움은 일기에 사진을 넣기 위해 카메라를 사용합니다."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "尺素需要相机权限来为日记添加照片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素需要相機權限來為日記加入照片"
+          }
+        }
+      }
+    },
+    "NSLocalNetworkUsageDescription" : {
+      "comment" : "Privacy - Local Network Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "开发调试：连接本机局域网内的开发服务器"
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Privacy - Location When In Use Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "memoir uses your location to record the weather in your entry and to show how far your letters travel on the pen pal map. It is never sent to our servers."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añoranza usa tu ubicación para registrar el tiempo al escribir y mostrar en el mapa de amigos por carta cuánto viajan tus cartas. Nunca se envía a nuestros servidores."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjà Vu utilise votre position pour noter la météo dans votre entrée et montrer, sur la carte des correspondants, le chemin de vos lettres. Elle n'est jamais envoyée à nos serveurs."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素は、日記にそのときの天気を残し、ペンフレンドの地図で手紙が旅する距離を示すために位置情報を使います。位置情報が当社のサーバーに送られることはありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "그리움은 일기에 그때의 날씨를 남기고, 펜팔 지도에서 편지가 가는 거리를 알려 주기 위해 위치 정보를 사용합니다. 위치 정보는 당사 서버로 전송되지 않습니다."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素用你的位置记下写日记时的天气，并在世界笔友地图上算出信要走多远。位置不会上传到我们的服务器。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素用你的位置記下寫日記時的天氣，並在世界筆友地圖上算出信要走多遠。位置不會上傳到我們的伺服器。"
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "comment" : "Privacy - Microphone Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "memoir uses the microphone to record voice notes for your entries. Recordings stay on your device and sync only to your own iCloud."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añoranza usa el micrófono para grabar notas de voz en tus entradas. Las grabaciones se quedan en tu dispositivo y solo se sincronizan con tu propio iCloud."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjà Vu utilise le micro pour enregistrer des notes vocales dans vos entrées. Les enregistrements restent sur votre appareil et ne se synchronisent qu’avec votre propre iCloud."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素は日記に音声を残すためにマイクを使用します。録音はこの端末に保存され、あなた自身の iCloud にのみ同期されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "그리움은 일기에 음성을 남기기 위해 마이크를 사용합니다. 녹음은 기기에 저장되며 본인의 iCloud로만 동기화됩니다."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "尺素需要使用麦克风为日记录制语音片段。录音内容仅保存在你的设备上，可同步到你的 iCloud。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素需要使用麥克風為日記錄製語音片段。錄音內容僅儲存在你的裝置上，可同步到你的 iCloud。"
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryAddUsageDescription" : {
+      "comment" : "Privacy - Photo Library Additions Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "memoir saves Live Photos taken in the app to your photo library, so the full version isn’t kept only inside the app."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añoranza guarda en tu fototeca las Live Photos hechas en la app, para que la versión completa no quede solo dentro de la app."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjà Vu enregistre dans votre photothèque les Live Photos prises dans l’app, afin que la version complète ne reste pas uniquement dans l’app."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素はアプリ内で撮影した Live Photo を写真ライブラリにも保存します。完全な一枚がアプリの中だけに残らないようにするためです。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "그리움은 앱에서 촬영한 Live Photo를 사진 보관함에도 저장합니다. 완전한 원본이 앱 안에만 남지 않도록 하기 위해서입니다."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "尺素需要将相机拍的 Live Photo 存一份到你的相册，以免完整的那一张只留在尺素里。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素需要將相機拍的 Live Photo 存一份到你的相簿，以免完整的那一張只留在尺素裡。"
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryUsageDescription" : {
+      "comment" : "Privacy - Photo Library Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "memoir needs access to your photo library so you can add photos and Live Photos to your entries. Images stay on your device and sync only to your own iCloud."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añoranza necesita acceder a tu fototeca para que puedas añadir fotos y Live Photos a tus entradas. Las imágenes se quedan en tu dispositivo y solo se sincronizan con tu propio iCloud."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déjà Vu accède à votre photothèque pour que vous puissiez ajouter des photos et des Live Photos à vos entrées. Les images restent sur votre appareil et ne se synchronisent qu’avec votre propre iCloud."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素は日記に写真や Live Photo を追加するために写真ライブラリへアクセスします。画像はこの端末に保存され、あなた自身の iCloud にのみ同期されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "그리움은 일기에 사진과 Live Photo를 넣을 수 있도록 사진 보관함에 접근합니다. 이미지는 기기에 저장되며 본인의 iCloud로만 동기화됩니다."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "尺素需要访问相册以让你为日记选择照片和 Live Photo。所有图片仅保存在你的设备上，并可同步至你的 iCloud。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素需要存取相簿以讓你為日記選擇照片和 Live Photo。所有圖片僅儲存在你的裝置上，並可同步至你的 iCloud。"
+          }
+        }
+      }
+    },
+    "尺素备份包" : {
+
+    }
+  },
+  "version" : "1.0"
+}
