@@ -6,7 +6,8 @@
  * - 三列书架板（iOS 参数：列距 18 / 行距 38 / 顶距 20 / 页边 22 / 封面比例 0.73）；
  *   板子画在书底下；第一格「全部日记」固定象牙白亚麻，没有「…」菜单
  * - 顺序 = sortOrder（相同按 createdAt，R-BOOK-05）；末尾永远有「新建」（R-BOOK-02）
- * - 新建弹窗：名称 + 撞名当场提示（R-BOOK-03）；默认色墨绿，一律排书架最后
+ * - 新建（3.4）：push 封面编辑器 create 模式（名称 + 封面 + 副标题一起选）；
+ *   撞名当场提示在编辑器内（R-BOOK-03），默认色墨绿，一律排书架最后
  * - 点书 → 日记本主页是 3.3 的卡片，本卡留打开钩子不跳转
  * - 入场：书架第一次出现时一本本依次落下（index × 0.06s 错峰）
  *
@@ -43,12 +44,8 @@ import { vibrator } from '@kit.SensorServiceKit';
 import {
   BookColor,
   CoverLayout,
-  Notebook,
-  cleanedName,
-  isNameTaken,
-  nextSortOrder
+  Notebook
 } from '../../models/Notebook';
-import { generateUuid } from '../../models/Uuid';
 import { bookBoxLiftAngle } from '../../models/BookBoxProjection';
 import {
   autoScrollSpeed,
@@ -59,6 +56,7 @@ import {
   nearestIndex
 } from '../../models/ShelfDrag';
 import { BOOK_DETAIL_ALL_ENTRIES_PARAM } from './BookDetailView';
+import { COVER_EDITOR_CREATE_PARAM } from './CoverEditorView';
 import { AppDatabase } from '../../data/Database';
 import {
   NotebookRepository,
@@ -79,7 +77,6 @@ import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
 import { STORAGE_KEY_APP_LANGUAGE } from '../../services/LanguageManager';
 import { ShelfBookView } from './BookCoverView';
 import { ShelfBook3DView } from './ShelfBook3DView';
-import { BookshelfCreateDialog } from './BookshelfCreateDialog';
 
 const DOMAIN = 0x0000;
 const TAG = 'BookshelfView';
@@ -161,7 +158,6 @@ export struct BookshelfView {
   homeReloadTick: number = 0;
   @State private notebooks: Notebook[] = [];
   @State private counts: ShelfEntryCounts | undefined = undefined;
-  @State private showCreate: boolean = false;
   /** 内容区宽（vp），格子和板子的几何全由它推 */
   @State private contentWidthVp: number = 0;
   /** Scroll 视口高（vp）：内容撑到视口高，短内容才不会被 Scroll 默认居中（faqs-arkui-725） */
@@ -303,19 +299,6 @@ export struct BookshelfView {
           this.resetDrag();
         }
       })
-
-      // 新建日记本弹窗（撞名判定在弹窗内当场提示）
-      if (this.showCreate) {
-        BookshelfCreateDialog({
-          existingNames: this.notebookNames(),
-          onCancel: (): void => {
-            this.showCreate = false;
-          },
-          onCreate: (name: string): void => {
-            this.createNotebook(name);
-          }
-        })
-      }
     }
     .width('100%')
     .height('100%')
@@ -466,7 +449,8 @@ export struct BookshelfView {
             .borderRadius(4)
             .border({ width: 1, color: this.theme.border, style: BorderStyle.Dashed })
             .onClick((): void => {
-              this.showCreate = true;
+              // 3.4：新建走整页封面编辑器（create 模式）
+              this.navPathStack.pushPathByName('CoverEditor', COVER_EDITOR_CREATE_PARAM);
             })
           }
           .width(this.cellWidth())
@@ -523,10 +507,7 @@ export struct BookshelfView {
     }
     .width(this.cellWidth())
     .height(this.cellHeight())
-    .position({
-      x: this.dragX - this.cellWidth() / 2,
-      y: this.dragY - this.cellHeight() / 2
-    })
+    .position(this.floatingBookPosition())
     .scale({ x: this.lifted ? 1.04 : 1, y: this.lifted ? 1.04 : 1 })
     .shadow({
       radius: this.lifted ? 16 : 0,
@@ -536,6 +517,25 @@ export struct BookshelfView {
     })
     .opacity(this.dragId !== '' ? 1 : 0.01 + this.pokeTick)
     .hitTestBehavior(HitTestMode.Transparent)
+    // 残影修复（2026-10-22 真机反馈「书架全部日记左上角有个透明的东西」）：
+    // idle 浮书此前带负偏移停在 (−半格, −半格)，戳在书架 Stack 边界外，
+    // 板子是 Stack 的孩子盖不到界外——LTP0 poke 抖 0.1 透明度时界外那截
+    // 11% 浮出来，就是全部日记左上角的「透明残影」。两刀一起下：
+    // 1) idle 停到 Stack 内部 (0,0)（第一格正后方）；2) zIndex 压到最底层，
+    // 被不透明的板子 + 第一格书整个盖住（仍参与栅格化，首拿 367ms 现编译
+    // 保活不变）。拿起 / 落位中翻回最上层
+    .zIndex(this.dragId !== '' ? 2 : -1)
+  }
+
+  /** 浮书位置：拿起跟手；idle 停在 Stack 内 (0,0)，让不透明层盖住保活书 */
+  private floatingBookPosition(): Position {
+    if (this.dragId !== '') {
+      return {
+        x: this.dragX - this.cellWidth() / 2,
+        y: this.dragY - this.cellHeight() / 2
+      };
+    }
+    return { x: 0, y: 0 };
   }
 
   // ---- 拿起 / 拖动 / 放下（R-BOOK-06 五阶段） ----
@@ -916,14 +916,6 @@ export struct BookshelfView {
     return this.displaySlots().length;
   }
 
-  private notebookNames(): string[] {
-    const names: string[] = [];
-    for (const notebook of this.notebooks) {
-      names.push(notebook.name);
-    }
-    return names;
-  }
-
   private totalCount(): number {
     return this.counts !== undefined ? this.counts.total : 0;
   }
@@ -972,36 +964,6 @@ export struct BookshelfView {
     if (context !== undefined) {
       this.load(context);
     }
-  }
-
-  /**
-   * 新建日记本（R-BOOK-03 / R-BOOK-05）：
-   * 撞名弹窗已拦，这里双保险再判一次；默认色墨绿；排书架最后。
-   */
-  private async createNotebook(rawName: string): Promise<void> {
-    const typed = cleanedName(rawName);
-    if (typed.length === 0 || isNameTaken(typed, this.notebookNames())) {
-      return;
-    }
-    const context = this.getUIContext().getHostContext();
-    if (context === undefined) {
-      return;
-    }
-    const now = Date.now();
-    const notebook = new Notebook(generateUuid(), typed, now, now);
-    notebook.colorId = BookColor.PineGreen;
-    notebook.sortOrder = nextSortOrder(this.notebooks.map((n: Notebook): number => n.sortOrder));
-    try {
-      const store = await AppDatabase.open(context);
-      await NotebookRepository.insertNotebook(store, notebook);
-    } catch (err) {
-      hilog.error(DOMAIN, TAG, 'create notebook failed name=%{public}s: %{public}s',
-        typed, JSON.stringify(err));
-      this.presentSaveFailed();
-      return;
-    }
-    this.showCreate = false;
-    this.load(context);
   }
 
   private presentSaveFailed(): void {

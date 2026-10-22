@@ -53,6 +53,8 @@ export struct LocationPickerView {
   @State query: string = '';
   @State sites: NearbySiteOption[] = [];
   @State isLoading: boolean = false;
+  /** site 接口失败（鉴权/网络）与「真没搜到」分开：前者给诚实的不可用提示，而不是误导性的「没有找到」 */
+  @State searchFailed: boolean = false;
   /** 输入停顿 300ms 再搜，避免每敲一个字打一次请求（iOS scheduleSearch 同款） */
   private searchTimer: number = -1;
   /** 并发搜索丢弃旧结果：只有最新一次请求的返回才进列表 */
@@ -264,6 +266,9 @@ export struct LocationPickerView {
   }
 
   private emptySitesText(): ResourceStr {
+    if (this.searchFailed) {
+      return $r('app.string.s_36205e6628');
+    }
     return this.query.trim().length > 0
       ? $r('app.string.s_35795a4e98')
       : $r('app.string.s_52cd34ba98');
@@ -314,6 +319,7 @@ export struct LocationPickerView {
     this.loadSeq++;
     const seq = this.loadSeq;
     this.isLoading = true;
+    this.searchFailed = false;
     const keyword = this.query.trim();
     try {
       let found: NearbySiteOption[] = [];
@@ -344,6 +350,7 @@ export struct LocationPickerView {
         be.code, be.message ?? '');
       if (seq === this.loadSeq) {
         this.sites = [];
+        this.searchFailed = true;
       }
     } finally {
       if (seq === this.loadSeq) {

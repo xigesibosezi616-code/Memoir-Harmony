@@ -12,7 +12,7 @@
  *
  * 顶栏：贴在大图上（滚过大图才出底色和标题）；深色大图上图标用浅色
  * （iOS `toolbarColorScheme(.dark)` 的对应）。右上「…」只有真本子才有
- * （「全部日记」不是库记录）：编辑封面（3.4 接通）/ 重命名 / 删除。
+ * （「全部日记」不是库记录）：编辑封面（push 封面编辑器）/ 重命名 / 删除。
  *
  * 删除语义（iOS 源码，> 规则文档措辞）：只删本子行 + 封面文件，
  * **不动 journal_entry.tags**——tags 是独立存的字符串数组，名字原样留下；
@@ -24,9 +24,9 @@ import { JournalEntry } from '../../models/JournalEntry';
 import {
   BookColor,
   CoverLayout,
-  Notebook,
-  isLightBookColor
+  Notebook
 } from '../../models/Notebook';
+import { COVER_ASPECT } from '../../models/CoverEdit';
 import {
   bookReadingEntries,
   heroSubtitle
@@ -55,7 +55,6 @@ import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
 import { BookHeroView } from './BookHeroView';
-import { CircleIconButton } from '../compose/CircleIconButton';
 import { BookContentsView } from './BookContentsView';
 import { RenameNotebookDialog } from './RenameNotebookDialog';
 
@@ -360,47 +359,61 @@ export struct BookDetailView {
   @Builder
   private topBar() {
     Stack() {
-      // 磨砂底 + 底缘细线（滚过大图渐显；大图上透明）。iOS 系统导航栏
-      // 同款：Thin 毛玻璃 + 主题背景色 40% 叠色（记录主页顶栏同配方），
-      // 盖在滚过的内容上读得出 frosted glass
-      Column()
-        .width('100%')
-        .height(this.safeAreaTopVp + TOP_BAR_ROW_HEIGHT_VP)
-        .backgroundColor(this.frostedBarColor())
-        .backgroundBlurStyle(BlurStyle.Thin)
-        .opacity(this.scrolledPastHero ? 1 : 0)
-        .animation({ duration: 250, curve: Curve.EaseOut })
-      Row()
-        .width('100%')
-        .height(0.5)
-        .backgroundColor(this.theme.border)
-        .opacity(this.scrolledPastHero ? 1 : 0)
-        .animation({ duration: 250, curve: Curve.EaseOut })
-        .position({ x: 0, y: this.safeAreaTopVp + TOP_BAR_ROW_HEIGHT_VP - 0.5 })
+      // 磨砂底 + 底缘细线（滚过大图才挂载；大图上完全没有）。iOS 系统
+      // 导航栏同款行为（.toolbarBackground 滚过前 .hidden）：Thin 毛玻璃 +
+      // 主题背景色 40% 叠色。坑：此前常驻挂载靠 opacity(0) 藏，真机实测
+      // backgroundBlurStyle 的毛玻璃层不吃组件透明度，大图上仍浮出一条
+      // 半磨砂白条（2026-10-21 用户反馈「状态栏到按钮处磨砂玻璃在图片上
+      // 面」）—— 改 if 挂载彻底摘掉，渐显渐隐交给 transition
+      if (this.scrolledPastHero) {
+        Column()
+          .width('100%')
+          .height(this.safeAreaTopVp + TOP_BAR_ROW_HEIGHT_VP)
+          .backgroundColor(this.frostedBarColor())
+          .backgroundBlurStyle(BlurStyle.Thin)
+          .transition(TransitionEffect.OPACITY.animation({ duration: 250, curve: Curve.EaseOut }))
+      }
+      if (this.scrolledPastHero) {
+        Row()
+          .width('100%')
+          .height(0.5)
+          .backgroundColor(this.theme.border)
+          .transition(TransitionEffect.OPACITY.animation({ duration: 250, curve: Curve.EaseOut }))
+          .position({ x: 0, y: this.safeAreaTopVp + TOP_BAR_ROW_HEIGHT_VP - 0.5 })
+      }
 
-      // 左返回 / 右「…」（真本子才有）。官方 Button 圆钮（CircleIconButton，
-      // 详情页 / 书写页同款全 app 统一）；顶栏画在内容区、系统标题栏隐藏
-      // （全面屏 hero），官方沉浸光感材质在内容区不生效（官方《沉浸光感》
-      // 生效范围）——正好取「官方组件不带沉浸感」形态：透明底 + stateEffect
-      // 按压反馈。图标色随 hero 亮暗自适应（iOS toolbarColorScheme 同款）
+      // 左返回 / 右「…」（真本子才有）。官方 Button 圆钮 + 主题三色
+      // （底/边/图标见下面三个 helper，2026-10-21 真机反馈看不清后逐主题重配）
       Row() {
-        CircleIconButton({
-          iconRes: $r('sys.symbol.chevron_left'),
-          iconSize: 14,
-          iconColor: this.topBarIconColor(),
-          onTap: (): void => {
-            this.navPathStack.pop();
-          }
+        Button({ type: ButtonType.Circle, stateEffect: true }) {
+          SymbolGlyph($r('sys.symbol.chevron_left'))
+            .fontSize(15)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([this.topBarIconColor()])
+        }
+        .width(34)
+        .height(34)
+        .padding(0)
+        .backgroundColor(this.topBarChipColor())
+        .border({ width: 0.5, color: this.topBarChipBorder() })
+        .onClick((): void => {
+          this.navPathStack.pop();
         })
         Blank()
         if (this.notebook !== undefined) {
-          CircleIconButton({
-            iconRes: $r('sys.symbol.more'),
-            iconSize: 14,
-            iconColor: this.topBarIconColor(),
-            onTap: (): void => {
-              this.showMenu = true;
-            }
+          Button({ type: ButtonType.Circle, stateEffect: true }) {
+            SymbolGlyph($r('sys.symbol.more'))
+              .fontSize(15)
+              .fontWeight(FontWeight.Medium)
+              .fontColor([this.topBarIconColor()])
+          }
+          .width(34)
+          .height(34)
+          .padding(0)
+          .backgroundColor(this.topBarChipColor())
+          .border({ width: 0.5, color: this.topBarChipBorder() })
+          .onClick((): void => {
+            this.showMenu = true;
           })
         }
       }
@@ -457,7 +470,7 @@ export struct BookDetailView {
       this.menuRow($r('app.string.s_ce3e4010fe'), $r('sys.symbol.picture_on_square'),
         this.theme.textPrimary, (): void => {
           this.showMenu = false;
-          // TODO 3.4：换封面（CoverChangeSheet）
+          this.navPathStack.pushPathByName('CoverEditor', this.notebookId);
         })
       this.menuRow($r('app.string.s_1cd80fd7a8'), $r('sys.symbol.square_and_pencil'),
         this.theme.textPrimary, (): void => {
@@ -647,11 +660,29 @@ export struct BookDetailView {
     return heroSubtitle(this.notebook?.subtitle, this.readingEntries(), this.appLanguage);
   }
 
-  /** 大图高度：滚动区可视高的 48%（最少 360）；还没量到先按 470 */
+  /** 大图高度：布面 / 白框 / 贴照片 = 滚动区可视高的 48%（最少 360）；
+   *  满版照片 = 容器宽 ÷ 0.73（编辑器烤盘固定比例）——照片一条不裁
+   *  完整铺满目录以上的整个大图区（2026-10-22 用户口径「确保目录以上
+   *  可以完整显示照片封面」；48% 矮 hero 会把竖版封面上下各裁 ~15%）；
+   *  还没量到先按 470。上限 0.8×容器高防展开大屏 hero 顶满整屏 */
   private heroHeightVp(): number {
-    return this.containerHeightVp > 0
-      ? Math.max(HERO_MIN_HEIGHT_VP, this.containerHeightVp * HERO_HEIGHT_RATIO)
-      : HERO_FALLBACK_HEIGHT_VP;
+    if (this.containerHeightVp <= 0) {
+      return HERO_FALLBACK_HEIGHT_VP;
+    }
+    if (this.isFullBleedPhotoHero() && this.containerWidthVp > 0) {
+      return Math.min(
+        this.containerWidthVp / COVER_ASPECT,
+        this.containerHeightVp * 0.8
+      );
+    }
+    return Math.max(HERO_MIN_HEIGHT_VP, this.containerHeightVp * HERO_HEIGHT_RATIO);
+  }
+
+  /** 满版照片封面判定（与 BookHeroView.style() 同条件） */
+  private isFullBleedPhotoHero(): boolean {
+    return this.notebook !== undefined
+      && (this.notebook.coverPhotoFilename ?? '').length > 0
+      && this.notebook.coverLayout === CoverLayout.FullBleed;
   }
 
   /** 底条顶到屏底的距离（安全区 + 胶囊清让 + 底条高） */
@@ -692,32 +723,27 @@ export struct BookDetailView {
     }
   }
 
+  // ---- 顶栏圆钮三色（2026-10-21 真机反馈看不清，逐主题重新适配）----
+
   /**
-   * 大图是深色的吗（iOS heroIsDark）：满版照片按深（顶上压了一层暗）；
-   * 白框是浅纸面；贴照片和纯色看布面颜色；「全部日记」象牙白 = 浅。
-   * 滚过大图后顶栏落回页面底色，图标一律回主题深色。
+   * 圆钮底色。滚过大图后磨砂条是主题底 → 主题 glassBackground 玻璃片
+   * （素笺 暖灰 / 皮革 金 / 肯特 浅灰，与 CircleIconButton 2026-10-16
+   * 调教同源）；大图上内容相关：白 72% 磨砂片，任意封面色 / 照片上成型。
+   * 对 iOS toolbarColorScheme 亮暗自适应的偏差：中调封面上裸图标自适应
+   * 两头不靠（真机实测看不清），弃自适应改固定片，记偏差。
    */
-  private heroIsDark(): boolean {
-    const notebook = this.notebook;
-    if (notebook === undefined) {
-      return false;
-    }
-    const photo = notebook.coverPhotoFilename ?? '';
-    if (photo.length > 0) {
-      if (notebook.coverLayout === CoverLayout.FullBleed) {
-        return true;
-      }
-      if (notebook.coverLayout === CoverLayout.Framed) {
-        return false;
-      }
-    }
-    return !isLightBookColor(notebook.bookColor);
+  private topBarChipColor(): ResourceColor {
+    return this.scrolledPastHero ? this.theme.glassBackground : 0xB8FFFFFF;
   }
 
+  /** 圆钮边框：滚过后主题 glassBorder；大图上 12% 深灰细边（白片在浅封面上成型） */
+  private topBarChipBorder(): ResourceColor {
+    return this.scrolledPastHero ? this.theme.glassBorder : 0x1F000000;
+  }
+
+  /** 圆钮图标色：大图上固定深墨（白片上 ≥8:1）；滚过后主题 textPrimary（玻璃片上 5.1~13.9） */
   private topBarIconColor(): ResourceColor {
-    return this.heroIsDark() && !this.scrolledPastHero
-      ? Color.White
-      : this.theme.textPrimary;
+    return this.scrolledPastHero ? this.theme.textPrimary : 0xFF3D3428;
   }
 
   /** 主题 textPrimary 的 75% 透明（iOS border 里 opacity(0.75)；三主题均为数字色值） */

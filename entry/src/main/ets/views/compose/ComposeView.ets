@@ -494,6 +494,24 @@ export struct ComposeView {
   // ---- 2.10 此时此地 ----
 
   /**
+   * 内容胶囊要不要补描边：素笺/肯特的 cardBackground 与页面底同色
+   * （FAF7F2/FAF7F2、FFFFFF/FFFFFF），胶囊底融进页面看不出「dock」形状
+   * （2026-10-22 用户反馈：皮革正常、素笺/肯特不行）；皮革 card ≠ bg 自带
+   * 可见深色底，不加边框保持原样。对 iOS 偏差（iOS 三主题同样融底），
+   * 用户拍板单独优化，记录于 PROGRESS.md 2.10。
+   * 主题色值均为 0xAARRGGBB 数字字面量，typeof 收窄后直接比较
+   * （ThemeDebug colorToHex 同款前提）。
+   */
+  private weatherCapsuleNeedsOutline(): boolean {
+    const card: ResourceColor = this.theme.cardBackground;
+    const bg: ResourceColor = this.theme.background;
+    if (typeof card === 'number' && typeof bg === 'number') {
+      return card === bg;
+    }
+    return false;
+  }
+
+  /**
    * 「此时此地」行四态（iOS weatherLocationRow 同款，R-PLACE-01~04）：
    * 有内容 = 胶囊（点开地点选择器）+ 天气失败重试行；
    * 解析中 = 占位文案；权限拒 = 去设置引导；没取过 = 轻量入口。
@@ -519,6 +537,11 @@ export struct ComposeView {
         .alignItems(VerticalAlign.Center)
         .padding({ left: 10, right: 10, top: 5, bottom: 5 })
         .backgroundColor(this.theme.cardBackground)
+        // 融底主题补 0.5vp 描边让胶囊有形（同页笔记本标签的既有语言）
+        .border({
+          width: this.weatherCapsuleNeedsOutline() ? 0.5 : 0,
+          color: this.theme.border
+        })
         .borderRadius(14)
         .onClick((): void => {
           this.showLocationPicker = true;

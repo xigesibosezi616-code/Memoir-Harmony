@@ -10,7 +10,7 @@
  * - 一多：断点（sm/md/lg）测宽发布 AppStorage，占位内容限宽 840vp 居中
  * - 记录 tab 本步仍是占位页（2.1/2.2 换真实记录页），其余三 tab 用现有资源名占位
  */
-import { curves } from '@kit.ArkUI';
+import { curves, window } from '@kit.ArkUI';
 import { HdsTabs, HdsTabsController, hdsMaterial } from '@kit.UIDesignKit';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
@@ -50,6 +50,13 @@ export struct MainTabsView {
   @StorageProp(STORAGE_KEY_SAFE_AREA_BOTTOM_VP) safeAreaBottomVp: number = 0;
   /** 照片全屏查看期间藏浮动 Tab 栏（barOverlap 层在 NavDestination 之上，只有透明度能压它） */
   @StorageProp(STORAGE_KEY_HIDE_TAB_BAR) hideTabBar: boolean = false;
+  /** 键盘弹出中（2026-10-21 真机反馈：写日记弹键盘时 dock 栏跟着键盘一起
+   * 升到键盘顶上——RESIZE_WITH_CARET 压页时悬浮胶囊贴页底随之抬高。
+   * iOS 键盘天然盖住 Tab 栏，这里用 barOpacity 归零对齐该观感；
+   * 相机页 barOpacity 0 + 底部拍照钮实测可点，命中安全有先例） */
+  @State private keyboardUp: boolean = false;
+  /** 主窗口句柄（键盘高度监听用；aboutToDisappear 注销） */
+  private mainWindow: window.Window | undefined = undefined;
   @State currentTab: number = 0;
   @State containerWidthVp: number = 0;
 
@@ -61,6 +68,29 @@ export struct MainTabsView {
   ];
 
   private readonly tabsController: HdsTabsController = new HdsTabsController();
+
+  aboutToAppear(): void {
+    // 键盘高度监听（官方 window.on('keyboardHeightChange') 配方，
+    // 与 RichFormatToolbar 同款）：键盘弹起 → keyboardUp，Tab 栏透明归位
+    const context = this.getUIContext().getHostContext();
+    if (context !== undefined) {
+      window.getLastWindow(context).then((win: window.Window): void => {
+        this.mainWindow = win;
+        win.on('keyboardHeightChange', (height: number): void => {
+          this.keyboardUp = height > 0;
+        });
+      }).catch((): void => {
+        // 取不到窗口（极端场景）：Tab 栏保持常显，不阻塞功能
+      });
+    }
+  }
+
+  aboutToDisappear(): void {
+    if (this.mainWindow !== undefined) {
+      this.mainWindow.off('keyboardHeightChange');
+      this.mainWindow = undefined;
+    }
+  }
 
   build() {
     Stack() {
@@ -114,7 +144,8 @@ export struct MainTabsView {
         // 照片全屏浮层开着 → 整条 Tab 栏透明（barOverlap 悬浮胶囊层在
         // NavDestination 之上，页面内浮层盖不住，HdsTabs 又无 hideBar API，
         // 只能用 barOpacity 归零；三页 @Watch 联动，关浮层/页面销毁恢复 1）
-        barOpacity: this.hideTabBar ? 0 : 1,
+        // 键盘弹出（写日记等输入页）同样归零：dock 不随键盘抬高（2026-10-21）
+        barOpacity: (this.hideTabBar || this.keyboardUp) ? 0 : 1,
         // materialLevel ADAPTIVE：官方最佳实践推荐绝大多数场景用自适应档，
         // 系统按设备算力/用户系统设置自动选 SMOOTH/GENTLE/EXQUISITE；
         // 浅色主题（素笺/肯特）下动效弱是玻璃材质浅色物理特性 + 系统档位策略，

@@ -325,7 +325,9 @@ export struct BookCoverView {
         .height(this.coverWidth() * 0.8)
         .margin({ top: this.coverHeight() * 0.03 })
         Text(coverDisplayName(this.name))
-          .fontSize(Math.max(10, this.coverWidth() * 0.1))
+          // 2026-10-21 真机反馈书名偏大：iOS max(10, w*0.1) 降一档为
+          // max(9, w*0.09)（书架 ~11fp→9，预览 150vp 15fp→13.5），记 iOS 偏差
+          .fontSize(Math.max(9, this.coverWidth() * 0.09))
           .fontWeight(FontWeight.Medium)
           .fontFamily(this.theme.titleFont.family)
           .fontColor(FRAMED_INK)
@@ -359,21 +361,29 @@ export struct BookCoverView {
     return this.coverWidth() * 0.6;
   }
 
-  /** 相角三角形路径：贴照片板的四角，corner = 板宽 × 0.15（iOS MountedPhoto） */
-  private cornerTriangle(left: boolean, top: boolean): string {
-    const w = this.plateWidth();
-    const h = w * 1.1;
-    const c = w * 0.15;
-    if (left && top) {
-      return `M 0 0 L ${c} 0 L 0 ${c} Z`;
-    }
-    if (!left && top) {
-      return `M ${w} 0 L ${w - c} 0 L ${w} ${c} Z`;
-    }
-    if (left && !top) {
-      return `M 0 ${h} L ${c} ${h} L 0 ${h - c} Z`;
-    }
-    return `M ${w} ${h} L ${w - c} ${h} L ${w} ${h - c} Z`;
+  /**
+   * 相角三角（iOS MountedPhoto Canvas 四角压角）：用 linearGradient 硬分界
+   * （0.5/0.5 双 stop）沿对角线切出直角三角形。此前用 Path commands 画，
+   * 真机上 Path 命令坐标出现缩放 / 错位异常（白边里散落暗色噪点、三角
+   * 残缺，2026-10-22 两轮真机反馈「四角相角不能正确显示」）——渐变方案
+   * 纯布局实现，不经过 Shape 渲染路径，任意尺寸 / 像素密度下都稳定锐利。
+   * 渐变轴从直角顶点指向对角顶点，斜边正好横穿轴 50% 处，硬 stop 切出斜边。
+   */
+  @Builder
+  private photoCorner(x: number, y: number, angle: number) {
+    Column()
+      .width(this.plateWidth() * 0.15)
+      .height(this.plateWidth() * 0.15)
+      .linearGradient({
+        angle: angle,
+        colors: [
+          ['rgba(43,37,33,0.92)', 0],
+          ['rgba(43,37,33,0.92)', 0.5],
+          ['rgba(43,37,33,0)', 0.5],
+          ['rgba(43,37,33,0)', 1]
+        ] as [ResourceColor, number][]
+      })
+      .position({ x: x, y: y })
   }
 
   @Builder
@@ -414,34 +424,18 @@ export struct BookCoverView {
           .width('100%')
           .height('100%')
           .padding(this.plateWidth() * 0.05)
-          // 四角相角：深色小三角压住照片的角
-          Path()
-            .commands(this.cornerTriangle(true, true))
-            .width('100%')
-            .height('100%')
-            .fill('rgba(43,37,33,0.92)')
-          Path()
-            .commands(this.cornerTriangle(false, true))
-            .width('100%')
-            .height('100%')
-            .fill('rgba(43,37,33,0.92)')
-          Path()
-            .commands(this.cornerTriangle(true, false))
-            .width('100%')
-            .height('100%')
-            .fill('rgba(43,37,33,0.92)')
-          Path()
-            .commands(this.cornerTriangle(false, false))
-            .width('100%')
-            .height('100%')
-            .fill('rgba(43,37,33,0.92)')
+          // 四角相角：深色小三角压住照片的角（渐变硬分界实现，见 photoCorner 注释）
+          this.photoCorner(0, 0, 135)
+          this.photoCorner(this.plateWidth() * 0.85, 0, 225)
+          this.photoCorner(0, this.plateWidth() * 1.1 - this.plateWidth() * 0.15, 45)
+          this.photoCorner(this.plateWidth() * 0.85, this.plateWidth() * 1.1 - this.plateWidth() * 0.15, 315)
         }
         .width(this.plateWidth())
         .height(this.plateWidth() * 1.1)
         .margin({ top: this.coverHeight() * 0.13 })
-        // 书名烫在照片下面
+        // 书名烫在照片下面（字号同上：iOS 0.1 降 0.09，2026-10-21 真机反馈）
         Text(coverDisplayName(this.name))
-          .fontSize(Math.max(10, this.coverWidth() * 0.1))
+          .fontSize(Math.max(9, this.coverWidth() * 0.09))
           .fontWeight(FontWeight.Medium)
           .fontFamily(this.theme.titleFont.family)
           .fontColor(this.foilColor())
@@ -453,6 +447,10 @@ export struct BookCoverView {
           })
           .textAlign(TextAlign.Center)
           .maxLines(2)
+          // 照片底和书名之间留一口气（iOS VStack spacing h*0.045，
+          // 2026-10-21 真机反馈「字可以下来一点、照片底部和文字中间
+          // 有一个空格」——此前 0 间距书名贴着照片底）
+          .margin({ top: this.coverHeight() * 0.045 })
           .padding({
             left: this.coverWidth() * 0.12,
             right: this.coverWidth() * 0.12

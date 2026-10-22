@@ -9,6 +9,11 @@
       "name": "BookDetail",
       "pageSourceFile": "src/main/ets/views/shelf/BookDetailView.ets",
       "buildFunction": "BookDetailBuilder"
+    },
+    {
+      "name": "CoverEditor",
+      "pageSourceFile": "src/main/ets/views/shelf/CoverEditorView.ets",
+      "buildFunction": "CoverEditorBuilder"
     }
   ]
 }

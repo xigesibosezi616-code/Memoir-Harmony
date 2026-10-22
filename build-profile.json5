@@ -5,13 +5,13 @@
         "name": "default",
         "type": "HarmonyOS",
         "material": {
-          "certpath": "/Users/gavin/.ohos/config/default_Memoir-Harmony_WwJNjojtTtLrpdWfjr48jys2DQ7U7spzvV7xKxD3rPw=.cer",
-          "keyAlias": "debugKey",
-          "keyPassword": "0000001A826F5AC4F7204385DE440D4EAED9DB4196B171226B038C54690AE851391042D623ED42444E49",
-          "profile": "/Users/gavin/.ohos/config/default_Memoir-Harmony_WwJNjojtTtLrpdWfjr48jys2DQ7U7spzvV7xKxD3rPw=.p7b",
+          "storeFile": "/Users/gavin/Desktop/Memoir-Harmony/Memoir.p12",
+          "storePassword": "00000022670DF92F3F04D1BCEA70C6047654632C4BDAB5834A9F2F64AF0E24EE68D666504EA37756A1F04A9E4295E127B0F3",
+          "keyAlias": "Memoir",
+          "keyPassword": "00000022F5AC680D0504D066CC7A64E1286BA091793BC3B1EBCF6CD6D9356E519ECFB4EF3E45FC7DA5EF02466A99B3198B38",
           "signAlg": "SHA256withECDSA",
-          "storeFile": "/Users/gavin/.ohos/config/default_Memoir-Harmony_WwJNjojtTtLrpdWfjr48jys2DQ7U7spzvV7xKxD3rPw=.p12",
-          "storePassword": "0000001A1D3E0F5C7670E229E30214730BADC3A42A96BFE7DF19268C74EEA6E1C87769B24DD9CB65E0A7"
+          "profile": "/Users/gavin/Desktop/Memoir-Harmony/MemoirDebug.p7b",
+          "certpath": "/Users/gavin/Desktop/Memoir-Harmony/Memoir.cer"
         }
       }
     ],
@@ -55,8 +55,16 @@
             "capability": "com.huawei.service.push.base_service"
           },
           {
+            "name": "Device status detection",
+            "capability": "com.huawei.service.device_security.device_verify"
+          },
+          {
             "name": "Map Kit",
             "capability": "com.huawei.service.mapkit"
+          },
+          {
+            "name": "Safety Detect",
+            "capability": "com.huawei.service.device_security.safety_detect"
           }
         ]
       }

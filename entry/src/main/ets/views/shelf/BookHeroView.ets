@@ -20,12 +20,18 @@ import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
 
-/** 满版底部融进页面底色的那一段有多高（iOS fadeHeight） */
-const FADE_HEIGHT: number = 150;
 /** 满版顶部压暗的高（亮照片上状态栏 / 返回键看得清） */
 const TOP_DIM_HEIGHT: number = 140;
 /** 上面压着状态栏和返回键，版式内容从这往下排（iOS topClearance） */
 const TOP_CLEARANCE: number = 104;
+/** 贴照片版式的顶部留白（2026-10-22 真机反馈「整体可以再上去一点」；
+ *  iOS 同处用 104，这里收窄到 88——状态栏约 39vp + 顶栏 44vp = 83vp 仍让开） */
+const TIP_IN_CLEARANCE: number = 88;
+/** 贴照片版式给书名块预留的高度（iOS tipInContent 同处用 130；
+ *  书名 26 号单行 + 副标题约 103vp，预留 110，多出的高度让给照片） */
+const TIP_IN_TITLE_RESERVE: number = 110;
+/** 贴照片版式书名号（iOS clothTitle 28；2026-10-22 真机反馈「字体可以缩小一点点点」） */
+const TIP_IN_TITLE_FONT: number = 26;
 /** 白框的纸与墨（与书架封面一致，iOS framedPaper / framedInk） */
 const FRAMED_PAPER: string = '#F4EEE2';
 const FRAMED_INK: string = '#3D3428';
@@ -141,9 +147,10 @@ export struct BookHeroView {
     return isLightBookColor(this.color) ? '#6B5A3E' : '#D9C08A';
   }
 
-  /** 布面居中标题：上下各一道细线，书名像烫在布面正中（iOS clothTitle） */
+  /** 布面居中标题：上下各一道细线，书名像烫在布面正中（iOS clothTitle）。
+   *  布面版式沿用 iOS 28 号；贴照片版式传 26（真机反馈字体略缩） */
   @Builder
-  private clothTitle() {
+  private clothTitle(titleFontSize: number) {
     Column({ space: 14 }) {
       Row()
         .width(36)
@@ -151,7 +158,7 @@ export struct BookHeroView {
         .backgroundColor(this.foilColor())
         .opacity(0.7)
       Text(this.title)
-        .fontSize(28)
+        .fontSize(titleFontSize)
         .fontWeight(FontWeight.Normal)
         .fontFamily(this.theme.titleFont.family)
         .fontColor(this.foilColor())
@@ -188,7 +195,7 @@ export struct BookHeroView {
     Stack() {
       this.clothBackground()
       Column() {
-        this.clothTitle()
+        this.clothTitle(28)
       }
       .width('100%')
       .height('100%')
@@ -239,7 +246,10 @@ export struct BookHeroView {
         // 加载中先铺布面色，避免闪白
         this.clothBackground()
       }
-      // 顶部压暗：状态栏、返回键压在亮照片上也看得清
+      // 顶部压暗：状态栏、返回键压在亮照片上也看得清。
+      // 坑（2026-10-22 真机黑带根因）：Stack 未定位子项默认居中——
+      // 这条带不钉在顶部会悬在照片正中间，和底下融底带叠成一条
+      // 「深色半透明遮罩」。iOS 用 .overlay(alignment: .top) 钉顶
       Column()
         .width('100%')
         .height(TOP_DIM_HEIGHT)
@@ -247,15 +257,13 @@ export struct BookHeroView {
           angle: 180,
           colors: [['rgba(0,0,0,0.28)', 0], ['rgba(0,0,0,0)', 1]] as [ResourceColor, number][]
         })
-      // 融进页面底色，和下面的目录接成一体（参考图 ④）
-      Column()
-        .width('100%')
-        .height(FADE_HEIGHT)
-        .linearGradient({
-          angle: 180,
-          colors: this.fadeColors()
-        })
-      // 书名 + 副标题写在融化的那一段上
+        .position({ x: 0, y: 0 })
+      // （原满版底部渐隐带 2026-10-22 用户拍板移除：照片直铺到底边，
+      //  不再融进页面底色——用户反馈「标题和标题上面一直有一个半透明的」，
+      //  即这条背景色渐隐蒙层。iOS 原版有（参考图 ④ fadeHeight 150），
+      //  与 iOS 的偏差记录在 PROGRESS.md 3.3。标题可读性靠照片自身的
+      //  构图裁切保证）
+      // 书名 + 副标题压在照片上（iOS bottomLeading）
       Column({ space: 8 }) {
         Text(this.title)
           .fontSize(30)
@@ -277,19 +285,13 @@ export struct BookHeroView {
       .alignItems(HorizontalAlign.Start)
       .padding({ left: 22, right: 22, bottom: 14 })
       .position({ x: 0, y: '100%' })
-      .translate({ y: -14 })
+      // 坑（2026-10-22「标题太靠下」根因）：position 锚的是列**顶边**，
+      // y:'100%' 让顶边贴 hero 底，translate 只上移 14vp 时 bottom padding
+      // 全落在折叠线外被裁掉——文字底边距 hero 底只剩 ~1vp（实测 3px），
+      // 标题糊死在目录分界上。改 -100%（上移整个自身高）让列**底边**贴
+      // hero 底，padding 才真正把文字抬起 14vp（iOS bottomLeading 同款）
+      .translate({ y: '-100%' })
     }
-  }
-
-  /** 渐隐色标：主题背景 0 → 0.85 → 1（iOS 三档 stops；主题色统一数字色，可叠 alpha） */
-  private fadeColors(): [ResourceColor, number][] {
-    const bg = this.theme.background;
-    const base = typeof bg === 'number' ? bg : 0xFFFAF7F2;
-    return [
-      [(base & 0x00FFFFFF) | 0x00000000, 0],
-      [(base & 0x00FFFFFF) | 0xD9000000, 0.7],
-      [(base & 0x00FFFFFF) | 0xFF000000, 1]
-    ] as [ResourceColor, number][];
   }
 
   // ---- 白框 ----
@@ -349,6 +351,9 @@ export struct BookHeroView {
       .width('100%')
       .alignItems(HorizontalAlign.Start)
       .padding({ left: 26, right: 26, top: TOP_CLEARANCE, bottom: 30 })
+      // iOS .frame(alignment: .top)：白框内容从顶部留白往下排。
+      // 不定位会被 Stack 居中吊在半空（同满版黑带那类坑）
+      .position({ x: 0, y: 0 })
       this.cleanBottomEdge(true)
     }
   }
@@ -358,12 +363,13 @@ export struct BookHeroView {
   /**
    * 贴照片的照片板宽（连白边在内）。照片 + 书名要塞进导航栏以下的那段里：
    * 宽度按可用高度反推，免得矮屏上挤出去（iOS tipInContent）。
+   * 顶部留白和书名预留用的是贴照片自己的两个常量（真机反馈上移 + 照片放大）。
    * 还没量到时先用宽度的 52% 占位，量到后重排。
    */
   private plateWidthVp(): number {
     const byWidth = this.heroWidthVp > 0 ? this.heroWidthVp * 0.52 : 0;
     if (this.heroHeightVp > 0) {
-      const available = this.heroHeightVp - TOP_CLEARANCE - 130;
+      const available = this.heroHeightVp - TIP_IN_CLEARANCE - TIP_IN_TITLE_RESERVE;
       const byHeight = available > 0 ? available / 1.1 : 0;
       if (byHeight > 0 && (byWidth === 0 || byHeight < byWidth)) {
         return byHeight;
@@ -378,11 +384,11 @@ export struct BookHeroView {
       this.clothBackground()
       Column({ space: 22 }) {
         this.mountedPhoto()
-        this.clothTitle()
+        this.clothTitle(TIP_IN_TITLE_FONT)
       }
       .width('100%')
       .alignItems(HorizontalAlign.Center)
-      .padding({ top: TOP_CLEARANCE, left: 40, right: 40 })
+      .padding({ top: TIP_IN_CLEARANCE, left: 40, right: 40 })
       this.cleanBottomEdge(isLightBookColor(this.color))
     }
   }
@@ -417,45 +423,38 @@ export struct BookHeroView {
       .width('100%')
       .height('100%')
       .padding(this.plateWidthVp() * 0.05)
-      Path()
-        .commands(this.cornerTriangle(true, true))
-        .width('100%')
-        .height('100%')
-        .fill('rgba(43,37,33,0.92)')
-      Path()
-        .commands(this.cornerTriangle(false, true))
-        .width('100%')
-        .height('100%')
-        .fill('rgba(43,37,33,0.92)')
-      Path()
-        .commands(this.cornerTriangle(true, false))
-        .width('100%')
-        .height('100%')
-        .fill('rgba(43,37,33,0.92)')
-      Path()
-        .commands(this.cornerTriangle(false, false))
-        .width('100%')
-        .height('100%')
-        .fill('rgba(43,37,33,0.92)')
+      // 四角相角：深色小三角压住照片的角（渐变硬分界实现，见 photoCorner 注释）
+      this.photoCorner(0, 0, 135)
+      this.photoCorner(this.plateWidthVp() * 0.85, 0, 225)
+      this.photoCorner(0, this.plateWidthVp() * 1.1 - this.plateWidthVp() * 0.15, 45)
+      this.photoCorner(this.plateWidthVp() * 0.85, this.plateWidthVp() * 1.1 - this.plateWidthVp() * 0.15, 315)
     }
     .width(this.plateWidthVp())
     .height(this.plateWidthVp() * 1.1)
   }
 
-  /** 相角三角形路径：贴照片板的四角（iOS MountedPhoto，corner = 板宽 × 0.15） */
-  private cornerTriangle(left: boolean, top: boolean): string {
-    const w = this.plateWidthVp();
-    const h = w * 1.1;
-    const c = w * 0.15;
-    if (left && top) {
-      return `M 0 0 L ${c} 0 L 0 ${c} Z`;
-    }
-    if (!left && top) {
-      return `M ${w} 0 L ${w - c} 0 L ${w} ${c} Z`;
-    }
-    if (left && !top) {
-      return `M 0 ${h} L ${c} ${h} L 0 ${h - c} Z`;
-    }
-    return `M ${w} ${h} L ${w - c} ${h} L ${w} ${h - c} Z`;
+  /**
+   * 相角三角（iOS MountedPhoto Canvas 四角压角）：用 linearGradient 硬分界
+   * （0.5/0.5 双 stop）沿对角线切出直角三角形。此前用 Path commands 画，
+   * 真机上 Path 命令坐标出现缩放 / 错位异常（白边里散落暗色噪点、三角
+   * 残缺，2026-10-22 两轮真机反馈「四角相角不能正确显示」）——渐变方案
+   * 纯布局实现，不经过 Shape 渲染路径，任意尺寸 / 像素密度下都稳定锐利。
+   * 渐变轴从直角顶点指向对角顶点，斜边正好横穿轴 50% 处，硬 stop 切出斜边。
+   */
+  @Builder
+  private photoCorner(x: number, y: number, angle: number) {
+    Column()
+      .width(this.plateWidthVp() * 0.15)
+      .height(this.plateWidthVp() * 0.15)
+      .linearGradient({
+        angle: angle,
+        colors: [
+          ['rgba(43,37,33,0.92)', 0],
+          ['rgba(43,37,33,0.92)', 0.5],
+          ['rgba(43,37,33,0)', 0.5],
+          ['rgba(43,37,33,0)', 1]
+        ] as [ResourceColor, number][]
+      })
+      .position({ x: x, y: y })
   }
 }

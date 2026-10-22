@@ -7,7 +7,7 @@
  */
 import { relationalStore } from '@kit.ArkData';
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { BookTexture, Notebook, cleanedName, isNameTaken } from '../models/Notebook';
+import { BookColor, BookTexture, CoverLayout, Notebook, cleanedName, isNameTaken } from '../models/Notebook';
 import { SortOrderChange } from '../models/ShelfDrag';
 import { encodeStringArray, parseStringArray } from './ColumnCodec';
 
@@ -127,6 +127,32 @@ export class NotebookRepository {
       hilog.error(DOMAIN, TAG, 'insert notebook failed name=%{public}s: %{public}s',
         notebook.name, JSON.stringify(err));
       throw new Error('NotebookRepository.insertNotebook: 插入失败');
+    }
+  }
+
+  /**
+   * 编辑封面落库（10_BUILD_MANUAL.md 3.4，R-BOOK-13/15/16 的库端）：
+   * 颜色 / 照片文件名 / 版式 / 副标题一次写回；照片换掉或移除时
+   * cover_photo_filename 置 null（旧文件删除由调用方做，云端副本等 Q3）。
+   * 失败抛错，调用方走 errors 提示。
+   */
+  static async updateCover(store: relationalStore.RdbStore, notebookId: string,
+    color: BookColor, coverPhotoFilename: string | undefined,
+    coverLayout: CoverLayout | undefined, subtitle: string | undefined): Promise<void> {
+    const values: relationalStore.ValuesBucket = {
+      'color_id': color,
+      'cover_photo_filename': coverPhotoFilename ?? null,
+      'cover_layout_id': coverLayout ?? null,
+      'subtitle': subtitle ?? null
+    };
+    try {
+      const predicates = new relationalStore.RdbPredicates('notebook')
+        .equalTo('id', notebookId);
+      await store.update(values, predicates);
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'update cover failed id=%{public}s: %{public}s',
+        notebookId, JSON.stringify(err));
+      throw new Error('NotebookRepository.updateCover: 更新失败');
     }
   }
 

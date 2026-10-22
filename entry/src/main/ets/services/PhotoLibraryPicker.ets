@@ -22,6 +22,7 @@ import { common } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { dataSharePredicates } from '@kit.ArkData';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { COVER_SOURCE_MAX_EDGE } from '../models/CoverEdit';
 
 const DOMAIN = 0x0000;
 const TAG = 'PhotoLibraryPicker';
@@ -95,6 +96,60 @@ function quietUnlink(path: string): void {
   }
 }
 
+/**
+ * 相册封面选取的产物（10_BUILD_MANUAL.md 3.4）。对应 iOS
+ * `BookCustomizerView.load` 的 `data + downsample(data, maxPixels: 2400)`。
+ * - `buffer`：静态图**原始字节**（动态照片取 still）。构图重裁从它现解干净源，
+ *   不在裁过的图上再裁（iOS `pickedOriginal` 同款）
+ * - `previewPixelMap`：长边 ≤2400 的解码（构图页显示用）
+ */
+export class PickedCoverSource {
+  readonly buffer: ArrayBuffer;
+  readonly previewPixelMap: image.PixelMap;
+
+  constructor(buffer: ArrayBuffer, previewPixelMap: image.PixelMap) {
+    this.buffer = buffer;
+    this.previewPixelMap = previewPixelMap;
+  }
+}
+
+/**
+ * 从字节解码 PixelMap（等比缩到最长边 ≤ maxEdge，**不放大**）。
+ * 正文选图走 2048（本文件），封面源走 2400（`COVER_SOURCE_MAX_EDGE`）。
+ */
+export async function decodeImageFromBuffer(buffer: ArrayBuffer,
+  maxEdge: number): Promise<image.PixelMap | undefined> {
+  let source: image.ImageSource | undefined = undefined;
+  try {
+    source = image.createImageSource(buffer);
+    const info: image.ImageInfo = await source.getImageInfo();
+    const width = info.size.width;
+    const height = info.size.height;
+    if (width <= 0 || height <= 0) {
+      return undefined;
+    }
+    const scale = Math.min(1, maxEdge / Math.max(width, height));
+    if (scale < 1) {
+      const desiredSize: image.Size = {
+        width: Math.max(1, Math.round(width * scale)),
+        height: Math.max(1, Math.round(height * scale))
+      };
+      const options: image.DecodingOptions = { desiredSize: desiredSize };
+      return await source.createPixelMap(options);
+    }
+    return await source.createPixelMap();
+  } catch (err) {
+    hilog.error(DOMAIN, TAG, 'decodeImageFromBuffer failed: %{public}s', JSON.stringify(err));
+    return undefined;
+  } finally {
+    if (source !== undefined) {
+      source.release().catch((err: Object): void => {
+        hilog.error(DOMAIN, TAG, 'ImageSource release failed: %{public}s', JSON.stringify(err));
+      });
+    }
+  }
+}
+
 export class PhotoLibraryPicker {
   /**
    * 拉起系统图库选择一张图片。
@@ -120,6 +175,39 @@ export class PhotoLibraryPicker {
       return undefined;
     }
     return new PickedLibraryPhoto(pixelMap, undefined, undefined);
+  }
+
+  /**
+   * 拉起系统图库选一张**封面源图**（3.4）：拿静态图原始字节 + ≤2400 预览解码。
+   * 用户取消 / 读不到 / 解码失败 → undefined（调用方静默收场，与 2.6 拍板一致）。
+   * 动态照片取 still 原始字节（R-PHOTO-03 的意图：不重编码原始数据）；
+   * 提取失败退普通静态图（R-PHOTO-04 兜底）。
+   */
+  static async pickCoverSource(context: common.Context): Promise<PickedCoverSource | undefined> {
+    const uris = await PhotoLibraryPicker.pickUri();
+    if (uris.length === 0) {
+      return undefined;
+    }
+    const uri = uris[0];
+    if (await PhotoLibraryPicker.isMovingPhotoUri(context, uri)) {
+      const moving = await PhotoLibraryPicker.pickMovingPhoto(context, uri);
+      if (moving !== undefined && moving.stillBuffer !== undefined) {
+        const preview = await decodeImageFromBuffer(moving.stillBuffer, COVER_SOURCE_MAX_EDGE);
+        if (preview !== undefined) {
+          return new PickedCoverSource(moving.stillBuffer, preview);
+        }
+      }
+      // 提取失败：退普通静态图（下面照常走 uri 原始字节）
+    }
+    const buffer = PhotoLibraryPicker.readUriBytes(uri);
+    if (buffer === undefined) {
+      return undefined;
+    }
+    const preview = await decodeImageFromBuffer(buffer, COVER_SOURCE_MAX_EDGE);
+    if (preview === undefined) {
+      return undefined;
+    }
+    return new PickedCoverSource(buffer, preview);
   }
 
   /** 拉起系统图库选择器；取消 / 出错返回空数组 */
@@ -204,7 +292,7 @@ export class PhotoLibraryPicker {
       hilog.error(DOMAIN, TAG, 'moving photo temp file missing');
       return undefined;
     }
-    const pixelMap = await PhotoLibraryPicker.decodeFromBuffer(still);
+    const pixelMap = await decodeImageFromBuffer(still, DECODE_MAX_EDGE);
     if (pixelMap === undefined) {
       return undefined;
     }
@@ -235,17 +323,17 @@ export class PhotoLibraryPicker {
     }
   }
 
-  /** 从 uri 读文件 → 解码 PixelMap（最长边 ≤2048，等比缩小、不放大） */
-  private static async decodeFromUri(uri: string): Promise<image.PixelMap | undefined> {
+  /** 从 uri 读出原始字节（选图 / 封面源共用） */
+  private static readUriBytes(uri: string): ArrayBuffer | undefined {
     let file: fileIo.File | undefined = undefined;
     try {
       file = fileIo.openSync(uri, fileIo.OpenMode.READ_ONLY);
       const size = fileIo.statSync(file.fd).size;
       const buffer = new ArrayBuffer(size);
       fileIo.readSync(file.fd, buffer);
-      return await PhotoLibraryPicker.decodeFromBuffer(buffer);
+      return buffer;
     } catch (err) {
-      hilog.error(DOMAIN, TAG, 'decodeFromUri failed: %{public}s', JSON.stringify(err));
+      hilog.error(DOMAIN, TAG, 'readUriBytes failed: %{public}s', JSON.stringify(err));
       return undefined;
     } finally {
       if (file !== undefined) {
@@ -258,36 +346,12 @@ export class PhotoLibraryPicker {
     }
   }
 
-  /** 从字节解码 PixelMap（最长边 ≤2048，等比缩小、不放大） */
-  private static async decodeFromBuffer(buffer: ArrayBuffer): Promise<image.PixelMap | undefined> {
-    let source: image.ImageSource | undefined = undefined;
-    try {
-      source = image.createImageSource(buffer);
-      const info: image.ImageInfo = await source.getImageInfo();
-      const width = info.size.width;
-      const height = info.size.height;
-      if (width <= 0 || height <= 0) {
-        return undefined;
-      }
-      const scale = Math.min(1, DECODE_MAX_EDGE / Math.max(width, height));
-      if (scale < 1) {
-        const desiredSize: image.Size = {
-          width: Math.max(1, Math.round(width * scale)),
-          height: Math.max(1, Math.round(height * scale))
-        };
-        const options: image.DecodingOptions = { desiredSize: desiredSize };
-        return await source.createPixelMap(options);
-      }
-      return await source.createPixelMap();
-    } catch (err) {
-      hilog.error(DOMAIN, TAG, 'decodeFromBuffer failed: %{public}s', JSON.stringify(err));
+  /** 从 uri 读文件 → 解码 PixelMap（最长边 ≤2048，等比缩小、不放大） */
+  private static async decodeFromUri(uri: string): Promise<image.PixelMap | undefined> {
+    const buffer = PhotoLibraryPicker.readUriBytes(uri);
+    if (buffer === undefined) {
       return undefined;
-    } finally {
-      if (source !== undefined) {
-        source.release().catch((err: Object): void => {
-          hilog.error(DOMAIN, TAG, 'ImageSource release failed: %{public}s', JSON.stringify(err));
-        });
-      }
     }
+    return decodeImageFromBuffer(buffer, DECODE_MAX_EDGE);
   }
 }
