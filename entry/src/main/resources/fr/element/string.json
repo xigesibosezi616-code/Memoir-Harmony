@@ -2731,6 +2731,46 @@
     {
       "name": "s_966b6def6c",
       "value": "Déjà Vu a besoin du micro pour enregistrer des notes vocales dans votre journal. Les enregistrements restent uniquement sur votre appareil."
+    },
+    {
+      "name": "eye_flip_hint",
+      "value": "En bas de l'écran, levez les yeux pour tourner la page"
+    },
+    {
+      "name": "eye_flip_intro_title",
+      "value": "Tournez les pages du regard, les mains libres"
+    },
+    {
+      "name": "eye_flip_intro_usage",
+      "value": "En bas de l'écran, levez les yeux pour tourner la page"
+    },
+    {
+      "name": "eye_flip_intro_privacy",
+      "value": "La caméra frontale détecte les mouvements de tête uniquement sur cet appareil. L'image n'est jamais affichée, enregistrée ni envoyée."
+    },
+    {
+      "name": "eye_flip_intro_enable",
+      "value": "Essayer maintenant"
+    },
+    {
+      "name": "eye_flip_note_title",
+      "value": "Avant de commencer :"
+    },
+    {
+      "name": "eye_flip_note_1",
+      "value": "Essuyez la zone du capteur en haut de l'écran avant utilisation"
+    },
+    {
+      "name": "eye_flip_note_2",
+      "value": "Gardez les yeux à moins de 50 cm de l'écran"
+    },
+    {
+      "name": "eye_flip_note_3",
+      "value": "Utilisez-le dans un environnement bien éclairé"
+    },
+    {
+      "name": "eye_flip_unavailable",
+      "value": "Le tournage de page par le regard est temporairement indisponible"
     }
   ]
 }

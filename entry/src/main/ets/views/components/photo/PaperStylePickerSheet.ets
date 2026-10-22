@@ -112,12 +112,19 @@ export struct PaperStylePickerSheet {
     Column({ space: 10 }) {
       PaperPreviewCard({
         style: style,
-        pixelMap: this.pixelMap
+        pixelMap: this.pixelMap,
+        sampleRes: $r('app.media.paper_sample_sinara'),
+        cardWidth: 132
       })
       Text(this.styleName(style))
         .fontSize(12)
         .fontColor(this.theme.textSecondary)
     }
+    .padding({ top: 10, bottom: 10, left: 8, right: 8 })
+    .backgroundColor(this.theme.cardBackground)
+    .borderRadius(14)
+    .border({ width: 0.8, color: this.theme.border })
+    .shadow({ radius: 4, color: '#14000000', offsetY: 2 })
     .onClick((): void => {
       if (!this.isMember && this.onLockedPick !== undefined) {
         this.onLockedPick();

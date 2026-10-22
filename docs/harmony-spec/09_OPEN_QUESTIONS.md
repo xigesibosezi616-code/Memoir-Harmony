@@ -40,6 +40,10 @@
 | Q30 | ✅ | 书架 Scroll「短内容居中 + 内容槽原点 0」双坑（真机像素级实证） | 3.1 书架 | 鸿蒙 | 2026-10-20 结案（详述见下 Q30） |
 | Q31 | ✅ | 3.2 拖书五坑（编译+单测实证） | 3.2 拖书 | 鸿蒙 | 2026-10-20 结案（详述见下 Q31）；真机录屏验收未过 → 转 Q32 |
 | Q32 | 🔴 | **3.2 拖书手感未达产品要求（四项）**：① 32° 转身露书脊**透视不对**；② 侧转一瞬**有一条红线**；③ **动画生硬卡顿**；④ **落格、其余书让位与 iOS 差距很大** | 3.2 拖书 | 鸿蒙 + 产品（录屏验收） | 待专项修复（详述见下 Q32） |
+| Q33 | 🟡 | 3.3 删除日记本语义：规则措辞与 iOS 源码不一致（按 iOS 源码执行：只删本子行，不删日记） | 3.3 日记本主页 | 鸿蒙 | 2026-10-21（详述见下 Q33） |
+| Q34 | 🟡 | 3.3 大图照片加载复用 600px 缓存（iOS 独立 300px） | 3.3 日记本主页 | 鸿蒙 | 2026-10-21（详述见下 Q34） |
+| Q35 | 🟡 | 3.3 大图高度/布面标题/顶栏磨砂等真机验收四轮定稿 | 3.3 日记本主页 | 产品 + 鸿蒙 | 2026-10-21 定稿（详述见下 Q35） |
+| Q36 | 🟡 | **3.5 阅读器三条声明偏差 + 仿真翻页技术坑**：① 仿真翻页（官方最佳实践配方）替代 iOS `UIPageViewController(.pageCurl)`，华为 Reader Kit 排除；② 大屏单列页宽封顶 420vp；③ trace 25 / audio 60 / photoHeight 剪裁等尺寸常量待真机核对 | 3.5 阅读器 | 鸿蒙 + 产品（录屏验收） | 2026-10-22 代码完成待真机验收（详述见下 Q36） |
 
 ---
 
@@ -609,3 +613,98 @@ R-RICH-09 要求打开编辑时就地转成正文里的录音块。纯逻辑已�
   生效后 bounds 元数据不变但绘制已扩展（以截图像素为准）。
 - **恢复 iOS 版式时改**：`BookDetailView.ets` 的 `HERO_HEIGHT_RATIO`、
   顶栏磨砂底 Column、`BookHeroView.clothHero` 的 justifyContent 三处。
+
+### Q36 🟡 3.5 阅读器三条声明偏差 + 仿真翻页技术坑（2026-10-22 代码完成；2026-10-22 深夜真机材质对齐华为完成，见「追记」）
+
+- **偏差① 仿真翻页替代 iOS 页卷转场（用户拍板，R-READ-07 允许）**：
+  iOS 阅读器用系统 `UIPageViewController(.pageCurl)`；鸿蒙无系统页卷
+  转场，华为 Reader Kit 排除（不可用）。终稿 = 官方《翻页动效》最佳
+  实践配方移植（`views/reader/PageCurlNode.ets`）：三页 Stack（上一页/
+  当前页/下一页）+ `componentSnapshot.getSync` 截图 + `NodeContainer`/
+  `RenderNode` + `drawPixelMapMesh` 沿折线 E-H 的 3×3 反射矩阵画折起
+  背面 + pathA/pathC/pathB 阴影全套。**backward（右滑回上一页）=
+  forward 水平镜像**（canvas translate+scale(-1,1) 后几何与截图逻辑
+  完全复用）。松手进度 >35% 或甩速 >600vp/s 补完、否则回弹（16ms
+  setInterval，官方节奏）；翻页动画期间 animating 锁新手势（iOS 实机
+  教训：转场交错崩）。
+- **偏差② 大屏单列页宽封顶 420vp**：iOS 阅读器单列、无此约束；鸿蒙
+  大屏（≥600vp 断点）若行宽吃满 716.8vp 每行字数过长不可读，页宽
+  封顶 `ReaderLayout.maxPageWidth` 420 居中。
+- **偏差③ 尺寸常量待真机核对**：trace 25 / audio 60 / photoHeight
+  剪裁策略等从 iOS pt 1:1 换算，真机验收时一并核对。
+- **技术坑（复用必读）**：① `GestureEvent` 本 SDK **无 localX/localY/
+  velocityX 字段**——位置在 `fingerList[0].localX`（FingerInfo），速度
+  需手动采样（隔 ~8ms 记两帧位移/时间自算，dt>160ms 回 0）；②
+  `lineSpacing(number)` 不收裸 number，要 `LengthMetrics.vp()`
+  （2.3/3.3 后第三犯）；③ `NodeController` 只有抽象 `makeNode`，无
+  addNode/clearNodes——自包根 FrameNode，每帧 new CurlRenderNode +
+  setNode（remove+append）触发重绘（官方样例同款）；④ 翻页后页面
+  内容刷新用 **ForEach 单元素数组 + 带页号 keyGenerator** 强制子树
+  重建（V1 plain 成员变化不触发子组件重渲染的坑）；⑤ NodeContainer
+  加 `hitTestBehavior(HitTestMode.None)` 才不拦底层手势；⑥
+  `hvigorw assembleHap` 需要 `JAVA_HOME`（export DevEco 自带 JBR）。
+- **验收口径**：真机翻书手感（卷页跟手/松手补完/回弹/甩页）、R-READ-05
+  长文不截断、R-READ-06 三主题、页眉页码/续页小标题/结尾页；若每帧
+  setNode 换节点真机掉帧，备选方案 = 单节点+状态更新重绘。
+- **追记（2026-10-22 深夜，角卷材质对华为 hc4 逐像素标定完成，真机全验证）**：
+  - **对标方法**：华为阅读（com.huawei.hmsapp.books）抓拍 hold 帧
+    （hc1-hc8，关键 hc4 = 触点 (600,700)），PIL 逐行剖面 + 白像素中位
+    （>150 滤文字干扰）+ 多模态裁剪放大交叉验证。**先决条件：对比双方
+    渲染几何必须一致**（首次采样错用未约束基准 A，全部剖面错位返工）。
+  - **华为角卷材质实测基准**（W=1080，纸底 249 归一）：背面带 = 渐变
+    88%（弦侧）→ ~98-100%（折缘受光），clip 五边形 = **直线边缘**
+    （pathC 画在 pathA 之上，B 左侧楔形 = 镜像背面内容，文字方向
+    镜像）；弦影带 = 沿弦 0x1E(88%) 起 ~0.22W 衰减，画在透出页上；
+    折缘平页侧 B-A 软影 [0x14→0x05] ~0.12W、D-B 侧 [0x1E→0x06]
+    ~0.03W、**A-K 侧无**；楔形区（B 左侧）hw 压暗 88%。
+  - **跟手约束放宽**：华为真机渲染 A=(600,700) **不被约束**（多扫描线
+    证明；官方样例 0.6 会浅 74px 破坏跟手）→ `TOUCH_CIRCLE_RATIO`
+    0.6→0.7（(600,700) 恰过圆 maxY=703.8，极深拖拽仍夹回防退化）。
+  - **绘制序终稿（drawCornerCurl 五步）**：① 弦影带（端点外延 0.06W
+    盖 I/D 角隙）→ ② pathA 平面页 → ③ pathC 背面带（反射矩阵 +
+    drawPixelMapMesh，**画在 pathA 后** = 直线边缘 + 楔形镜像内容）→
+    ④ 背面暗化渐变 [chordMid→A, 0x1E→0x04] fill pathC → ⑤ 折缘带
+    D-B + B-A（awayFrom 用弦中点；早期 awayFrom=geo.I 因 I 位于
+    A-K 延长线下方致带翻转进背面带，B-A 带平页侧全丢——几何敏感
+    bug 教训）。
+  - **右缘返回手势冲突（真机 Mate X6 实测）**：系统返回手势区
+    x≥~1008（72px）会消费触点，角抓取永远到不了 app——华为同款
+    Navigation 机制，系统限制接受。终稿 = NavDestination
+    `.onBackPressed((): boolean => true)` 拦截系统返回（依据
+    faqs-arkui-1117：拦截侧滑+标题栏返回+返回键，不拦
+    navPathStack.pop()，悬浮返回键照常退出）。**测试注入注意**：
+    uinput 从 x=1050 起手不触发 app 手势（系统区），从 x=1000 内
+    起手正常。
+  - **边折模式触发**（易误测）：方向判定需水平位移过 6vp 阈值——
+    纯竖直注入不触发任何翻页；边折 = 水平拖拽且起手不在角落区
+    （如 (950,700)→(500,700)），竖直折缝渲染 + commit 验证 ✓。
+  - **回归结论（真机）**：四角（TR/BR/TL/BL）背面带 90-92% +
+    commit 全过；边折 crease x≈780-900 竖直暗带 + commit 过；
+    取消路径（x=980 小拖松手）无 commit 页恢复；`compare_images`
+    hc4 vs 终稿 = **零差异**；hilog 无 Drawing_napi mesh 报错。
+  - **像素取证方法论**：① 对比前必须确认双方渲染几何一致（约束/
+    触点差异毁所有剖面）；② 正文区扫描线单值不可靠——文字抗锯齿
+    边缘 ≈ 88-96% 与阴影带同域，须白像素中位 + 多点剖面；③
+    recognize_ui_components 是组件识别工具不做材质对比，材质对比
+    用 compare_images；④ 本模型不支持直接读图（read 图片文件报错），
+    视觉判断走 compare_images / 多模态工具。
+  - **追记（2026-10-23 用户反馈「字体排版 + 纸感都不行」后的重构）**：
+    - **字体排版**：`ReaderTextAdapter` 不再用 `ceil(fs×1.5)+sp` 估算，
+      改为 graphics.text 实测「国Ag」自然行高 + `lineSpacing`；渲染用
+      `heightOnly:true + heightScale`（此前只设 heightScale、没开
+      heightOnly，参数被忽略，实绘仅 ~19.7vp/行，分页却按 32vp 算，
+      导致页底留白与断页都不对）。字体族显式映射 `Noto Serif`（西文，
+      对齐 Georgia）+ `HarmonyOS Sans SC`（中文回退，对齐 iOS
+      Georgia→PingFang）；`serif` generic 在 graphics.text 里不是有效
+      family，会整段退默认无衬线。真机验证：正文行距 ~30vp、页数
+      1/5→1/7，页眉日期/标题/页码字号保持 iOS 同值。
+    - **纸感翻书**：去掉「上下角 A-K 锥形角卷」触发（用户反馈上下角
+      翻页质感不行），所有水平拖拽统一整页卷曲；被卷起的一半用当前页
+      `cloneSync + flipSync(true,false)` 的水平镜像副本，按 24 条竖条铺到
+      折缝另一侧（轻微圆柱弯曲），整层 92% 不透明、留 8% 让下一页隐约
+      透出（薄纸 show-through），再叠折缝高光 / 折缘投影 / 透出页暗化。
+      代码：`PageCurlNode.drawEdgeCurl` + `DiaryReaderView.beginFlip`；
+      `CurlMath` 的角卷纯函数与单测保留，但手势不再触发。
+    - **验证**：488 单测全绿、`assembleHap` BUILD SUCCESSFUL、
+      `check_localization` 过绿；字体真机截图已验；纸感重构后 USB 断开，
+      真机录屏 / 像素对比待设备重连（模拟器冒烟另记）。

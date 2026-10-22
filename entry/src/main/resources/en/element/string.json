@@ -2731,6 +2731,46 @@
     {
       "name": "s_966b6def6c",
       "value": "memoir needs the microphone to record voice notes for your journal. Recordings are kept only on your device."
+    },
+    {
+      "name": "eye_flip_hint",
+      "value": "At the bottom of the screen, look up to turn the page"
+    },
+    {
+      "name": "eye_flip_intro_title",
+      "value": "Eye-Controlled Page Turning, Hands Free"
+    },
+    {
+      "name": "eye_flip_intro_usage",
+      "value": "At the bottom of the screen, look up to turn the page"
+    },
+    {
+      "name": "eye_flip_intro_privacy",
+      "value": "The front camera detects head movement on this device only. The camera feed is never shown, saved, or uploaded."
+    },
+    {
+      "name": "eye_flip_intro_enable",
+      "value": "Try It Now"
+    },
+    {
+      "name": "eye_flip_note_title",
+      "value": "Before you start:"
+    },
+    {
+      "name": "eye_flip_note_1",
+      "value": "Wipe the sensor area at the top of the screen before use"
+    },
+    {
+      "name": "eye_flip_note_2",
+      "value": "Keep your eyes less than 50 cm from the screen"
+    },
+    {
+      "name": "eye_flip_note_3",
+      "value": "Use in a well-lit environment"
+    },
+    {
+      "name": "eye_flip_unavailable",
+      "value": "Eye-controlled page turning is temporarily unavailable"
     }
   ]
 }

@@ -2731,6 +2731,46 @@
     {
       "name": "s_966b6def6c",
       "value": "尺素需要使用麥克風為日記錄製語音片段。錄音內容僅保存在你的裝置上。"
+    },
+    {
+      "name": "eye_flip_hint",
+      "value": "閱讀到螢幕底部，向上看，翻下一頁"
+    },
+    {
+      "name": "eye_flip_intro_title",
+      "value": "眼動翻頁，解放雙手"
+    },
+    {
+      "name": "eye_flip_intro_usage",
+      "value": "閱讀到螢幕底部，向上看，翻下一頁"
+    },
+    {
+      "name": "eye_flip_intro_privacy",
+      "value": "前置鏡頭僅在本機辨識頭部動作，畫面不顯示、不儲存、不上傳。"
+    },
+    {
+      "name": "eye_flip_intro_enable",
+      "value": "立即體驗"
+    },
+    {
+      "name": "eye_flip_note_title",
+      "value": "使用注意事項："
+    },
+    {
+      "name": "eye_flip_note_1",
+      "value": "使用前請擦拭螢幕頂部感應器區域"
+    },
+    {
+      "name": "eye_flip_note_2",
+      "value": "眼睛與螢幕之間距離小於 50 公分"
+    },
+    {
+      "name": "eye_flip_note_3",
+      "value": "請在環境光線充足時使用"
+    },
+    {
+      "name": "eye_flip_unavailable",
+      "value": "眼動翻頁暫時不可用"
     }
   ]
 }

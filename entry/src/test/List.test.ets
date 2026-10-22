@@ -31,6 +31,9 @@ import shelfDragTest from './test/ShelfDrag.test'
 import bookBoxProjectionTest from './test/BookBoxProjection.test'
 import bookContentsLogicTest from './test/BookContentsLogic.test'
 import coverEditTest from './test/CoverEdit.test'
+import readerPagesTest from './test/ReaderPages.test'
+import curlMathTest from './test/CurlMath.test'
+import eyeFlipMachineTest from './test/EyeFlipMachine.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -66,4 +69,7 @@ export default function testsuite() {
   bookBoxProjectionTest()
   bookContentsLogicTest()
   coverEditTest()
+  readerPagesTest()
+  curlMathTest()
+  eyeFlipMachineTest()
 }

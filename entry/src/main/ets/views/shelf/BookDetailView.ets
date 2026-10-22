@@ -786,9 +786,12 @@ export struct BookDetailView {
     }
   }
 
-  /** 点目录里某一篇 → 翻页阅读器从那一篇开始（3.5 接通，本卡留钩子不跳转） */
-  private openReader(_entry: JournalEntry | undefined): void {
-    // TODO 3.5：DiaryReaderView(initialDiary, entries)
+  /** 点目录里某一篇 → 翻页阅读器从那一篇开始（R-READ-02） */
+  private openReader(entry: JournalEntry | undefined): void {
+    this.navPathStack.pushPathByName('DiaryReader', {
+      'notebookId': this.notebookId,
+      'initialEntryId': entry !== undefined ? entry.id : ''
+    } as Record<string, Object>);
   }
 
   /** 写一篇（带入这本的名字，写日记页预选；「全部日记」不带） */

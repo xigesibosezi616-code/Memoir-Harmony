@@ -2739,6 +2739,46 @@
     {
       "name": "s_966b6def6c",
       "value": "尺素需要使用麦克风为日记录制语音片段。录音内容仅保存在你的设备上。"
+    },
+    {
+      "name": "eye_flip_hint",
+      "value": "阅读到屏幕底部，向上看，翻下一页"
+    },
+    {
+      "name": "eye_flip_intro_title",
+      "value": "眼动翻页，释放双手"
+    },
+    {
+      "name": "eye_flip_intro_usage",
+      "value": "阅读到屏幕底部，向上看，翻下一页"
+    },
+    {
+      "name": "eye_flip_intro_privacy",
+      "value": "前置摄像头仅在本机识别头部动作，画面不显示、不保存、不上传。"
+    },
+    {
+      "name": "eye_flip_intro_enable",
+      "value": "立即体验"
+    },
+    {
+      "name": "eye_flip_note_title",
+      "value": "使用注意事项："
+    },
+    {
+      "name": "eye_flip_note_1",
+      "value": "使用前请擦拭屏幕顶部感应器区域"
+    },
+    {
+      "name": "eye_flip_note_2",
+      "value": "眼睛与屏幕之间距离小于 50 厘米"
+    },
+    {
+      "name": "eye_flip_note_3",
+      "value": "请在环境光线充足时使用"
+    },
+    {
+      "name": "eye_flip_unavailable",
+      "value": "眼动翻页暂时不可用"
     }
   ]
 }

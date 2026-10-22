@@ -2731,6 +2731,46 @@
     {
       "name": "s_966b6def6c",
       "value": "그리움은 일기 음성 메모를 녹음하기 위해 마이크를 사용합니다. 녹음 내용은 기기에만 저장됩니다。"
+    },
+    {
+      "name": "eye_flip_hint",
+      "value": "화면 하단까지 읽은 뒤 위를 보면 다음 페이지로 넘어갑니다"
+    },
+    {
+      "name": "eye_flip_intro_title",
+      "value": "시선으로 페이지 넘기기, 두 손은 자유롭게"
+    },
+    {
+      "name": "eye_flip_intro_usage",
+      "value": "화면 하단까지 읽은 뒤 위를 보면 다음 페이지로 넘어갑니다"
+    },
+    {
+      "name": "eye_flip_intro_privacy",
+      "value": "전면 카메라는 기기에서만 머리 움직임을 감지하며, 화면은 표시·저장·전송되지 않습니다."
+    },
+    {
+      "name": "eye_flip_intro_enable",
+      "value": "지금 체험하기"
+    },
+    {
+      "name": "eye_flip_note_title",
+      "value": "사용 전 확인사항:"
+    },
+    {
+      "name": "eye_flip_note_1",
+      "value": "사용 전에 화면 상단 센서 부위를 닦아 주세요"
+    },
+    {
+      "name": "eye_flip_note_2",
+      "value": "눈과 화면 사이 거리를 50cm 이내로 유지하세요"
+    },
+    {
+      "name": "eye_flip_note_3",
+      "value": "밝은 환경에서 사용하세요"
+    },
+    {
+      "name": "eye_flip_unavailable",
+      "value": "시선 페이지 넘기기를 일시적으로 사용할 수 없습니다"
     }
   ]
 }

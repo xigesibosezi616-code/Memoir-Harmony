@@ -31,6 +31,8 @@ export const PREF_KEY_LOCATION_RECORDING_ENABLED = 'locationRecordingEnabled';
 export const PREF_KEY_LOCATION_PRECISION = 'locationPrecision';
 /** 目录版式（对应 iOS `bookContentsLayout`，list / grid，默认 list；3.3。所有日记本共用一个偏好） */
 export const PREF_KEY_BOOK_CONTENTS_LAYOUT = 'bookContentsLayout';
+/** 眼动翻页引导页是否已展示过（只弹一次；3.5） */
+export const PREF_KEY_EYE_INTRO_SHOWN = 'eyeIntroShown';
 
 /** 目录版式取值（iOS `BookContentsView.Layout`） */
 export const BOOK_CONTENTS_LAYOUT_LIST = 'list';

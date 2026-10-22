@@ -2731,6 +2731,46 @@
     {
       "name": "s_966b6def6c",
       "value": "Añoranza necesita el micrófono para grabar notas de voz en tu diario. Las grabaciones se guardan solo en tu dispositivo."
+    },
+    {
+      "name": "eye_flip_hint",
+      "value": "Al llegar al final de la pantalla, mira hacia arriba para pasar de página"
+    },
+    {
+      "name": "eye_flip_intro_title",
+      "value": "Pasa las páginas con la mirada, manos libres"
+    },
+    {
+      "name": "eye_flip_intro_usage",
+      "value": "Al llegar al final de la pantalla, mira hacia arriba para pasar de página"
+    },
+    {
+      "name": "eye_flip_intro_privacy",
+      "value": "La cámara frontal detecta el movimiento de la cabeza solo en este dispositivo. La imagen nunca se muestra, guarda ni envía."
+    },
+    {
+      "name": "eye_flip_intro_enable",
+      "value": "Probar ahora"
+    },
+    {
+      "name": "eye_flip_note_title",
+      "value": "Antes de empezar:"
+    },
+    {
+      "name": "eye_flip_note_1",
+      "value": "Limpia la zona del sensor en la parte superior de la pantalla antes de usarla"
+    },
+    {
+      "name": "eye_flip_note_2",
+      "value": "Mantén los ojos a menos de 50 cm de la pantalla"
+    },
+    {
+      "name": "eye_flip_note_3",
+      "value": "Úsalo en un entorno bien iluminado"
+    },
+    {
+      "name": "eye_flip_unavailable",
+      "value": "El paso de páginas con la mirada no está disponible temporalmente"
     }
   ]
 }

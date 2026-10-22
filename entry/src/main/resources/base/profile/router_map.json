@@ -14,6 +14,11 @@
       "name": "CoverEditor",
       "pageSourceFile": "src/main/ets/views/shelf/CoverEditorView.ets",
       "buildFunction": "CoverEditorBuilder"
+    },
+    {
+      "name": "DiaryReader",
+      "pageSourceFile": "src/main/ets/views/reader/DiaryReaderView.ets",
+      "buildFunction": "DiaryReaderBuilder"
     }
   ]
 }
