@@ -17118,6 +17118,53 @@
         }
       }
     },
+    "按月份" : {
+      "comment" : "记录页列表模式顶上的切换：一个月一张卡片，点开看这个月的日记（另一项是「全部日记」）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "By month"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por mes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Par mois"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月ごと"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "월별"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按月份"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按月份"
+          }
+        }
+      }
+    },
     "按笔友" : {
       "comment" : "信箱顶上的切换：一位笔友一组。要短",
       "localizations" : {
@@ -21396,6 +21443,53 @@
         }
       }
     },
+    "杂志" : {
+      "comment" : "日记本封面版式：纸面封面、照片嵌在上半部、书名在照片下面（原名「白框」）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Magazine"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revista"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Magazine"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雑誌"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "잡지"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "杂志"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雜誌"
+          }
+        }
+      }
+    },
     "来信" : {
       "localizations" : {
         "en" : {
@@ -24462,6 +24556,53 @@
         }
       }
     },
+    "点右上角的 ＋，开始书写今天的故事" : {
+      "comment" : "记录页（大屏模式）没有日记时卡片里的提示：写日记的入口在右上角的加号",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap + at the top right to start writing today's story"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca + arriba a la derecha para escribir la historia de hoy"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez + en haut à droite pour écrire l'histoire du jour"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右上の ＋ から、今日の物語を書きはじめよう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오른쪽 위의 ＋를 눌러 오늘의 이야기를 시작해 보세요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点右上角的 ＋，开始书写今天的故事"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "點右上角的 ＋，開始書寫今天的故事"
+          }
+        }
+      }
+    },
     "点右上角的信封图标，%@会给你写信" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -27159,6 +27300,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "素箋"
+          }
+        }
+      }
+    },
+    "纸面颜色" : {
+      "comment" : "编辑封面：版式是「杂志」时颜色栏的标题（颜色是封面那张纸的颜色；贴照片时叫「布面颜色」）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paper color"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Color del papel"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couleur du papier"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "紙の色"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "종이 색상"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "纸面颜色"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "紙面顏色"
           }
         }
       }

@@ -10,15 +10,18 @@ import SwiftUI
 /// 📌 **2026-10 皮革下架，只留亚麻**（见 `BookTexture`）。牛皮只有皮革款，跟着下架 → 9 色变 8 色。
 ///
 /// 存量数据由 `BookColor.retiredColorReplacement` + `migrateTagsToBookCoverSystem` 接住。
+///
+/// 📌 **声明顺序 = 所有颜色选择器里的顺序**（2026-10-22 用户定）：象牙白、石灰、炭黑排前面 ——
+/// 这三个最通用、最不容易出错，审美最柔和；其余照旧。
 enum BookColor: String, CaseIterable, Codable {
+    case ivory         = "Ivory"
+    case slate         = "Slate"
+    case charcoal      = "Charcoal"
     case wineRed       = "WineRed"
     case pineGreen     = "PineGreen"
     case prussianBlue  = "PrussianBlue"
     case eggplant      = "Eggplant"
     case amberBrown    = "AmberBrown"
-    case charcoal      = "Charcoal"
-    case slate         = "Slate"
-    case ivory         = "Ivory"
 
     /// 已下架颜色 → 最接近的保留色。
     ///

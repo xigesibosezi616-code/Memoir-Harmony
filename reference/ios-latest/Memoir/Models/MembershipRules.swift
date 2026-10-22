@@ -25,7 +25,7 @@ extension PaperStyle {
 }
 
 extension CoverLayout {
-    /// 免费的只有满版；白框、贴照片要会员
+    /// 免费的只有满版；杂志、贴照片要会员
     var isMemberOnly: Bool { self != .fullBleed }
 }
 

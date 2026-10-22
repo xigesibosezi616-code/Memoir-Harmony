@@ -8,11 +8,11 @@ struct SettingsAppearanceView: View {
     @Environment(ThemeManager.self) private var themeManager
 
     @AppStorage("showSplashAnimation") private var showSplashAnimation: Bool = true
-    /// 手记页展示方式：列表 / 大屏
-    @AppStorage(HomeDisplayMode.storageKey) private var homeDisplayModeRaw: String = HomeDisplayMode.list.rawValue
+    /// 手记页展示方式：大屏（默认）/ 列表
+    @AppStorage(HomeDisplayMode.storageKey) private var homeDisplayModeRaw: String = HomeDisplayMode.defaultMode.rawValue
 
     private var currentHomeDisplayMode: HomeDisplayMode {
-        HomeDisplayMode(rawValue: homeDisplayModeRaw) ?? .list
+        HomeDisplayMode(rawValue: homeDisplayModeRaw) ?? .defaultMode
     }
 
     var body: some View {

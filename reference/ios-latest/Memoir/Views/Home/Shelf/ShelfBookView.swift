@@ -106,7 +106,7 @@ struct ShelfBook3D: View, Animatable {
 
     /// 书脊颜色跟着封面走（写日记前选本子的转盘也用）：
     /// - 满版：照片的主色（书架上那本已经读过缩略图，缓存里一般有；没有就用布面色）
-    /// - 白框：纸色（白框的书是纸面精装，书脊也是纸）
+    /// - 杂志：纸色（纸面精装，书脊也是这张纸；2026-10-22 起纸是这本选的颜色）
     /// - 贴照片 / 纯色：布面颜色
     static func spineColor(color: BookColor, photo: CoverPhotoSource?, layout: CoverLayout) -> Color {
         guard let photo else { return Color(hex: color.hex) }
@@ -117,7 +117,7 @@ struct ShelfBook3D: View, Animatable {
             }
             return Color(hex: color.hex)
         case .framed:
-            return Color(hex: "#DCD3C2")
+            return MagazinePaper(color: color).spine
         case .tipIn:
             return Color(hex: color.hex)
         }

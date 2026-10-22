@@ -7,10 +7,11 @@ import SwiftUI
 ///   SwiftUI 只加载 `Cover_{Color}_Linen` 并叠加标题与篇数。
 /// - **满版**（2026-10 P2）：照片铺满，SwiftUI 补上精装书的样子 ——
 ///   左侧书脊的明暗与一道压痕、上下各压暗一层让文字在任何照片上都看得清。
-/// - **白框**（P3b）：米白纸封面，照片嵌在上半部，书名写在照片下面。
+/// - **杂志**（P3b；2026-10-22 前叫「白框」，只有米白纸）：纸面封面，纸是这本选的颜色（`MagazinePaper`），
+///   照片嵌在上半部，书名写在照片下面。
 /// - **贴照片**（P3b）：亚麻布面中间贴一张带白边的照片、四角压着相角，书名烫在照片下面。
 ///
-/// 白框、贴照片的各部分按封面宽度的比例摆，书架上的小书和编辑页的大预览长得一样。
+/// 杂志、贴照片的各部分按封面宽度的比例摆，书架上的小书和编辑页的大预览长得一样。
 struct BookCoverView: View {
     let name: String
     let entryCount: Int
@@ -19,6 +20,10 @@ struct BookCoverView: View {
     var photo: CoverPhotoSource? = nil
     /// 照片封面的版式；没有照片时不起作用
     var layout: CoverLayout = .fullBleed
+    /// 宽 / 高。书架、编辑页都是 0.73；精装 PDF 的封面是 A5 的比例
+    var aspect: CGFloat = NotebookCoverStore.aspect
+    /// 带投影（像一本书放在那儿）；精装 PDF 里封面就是整页，不要投影
+    var elevated = true
 
     private var assetName: String {
         "Cover_\(color.rawValue)_\(BookTexture.linen.rawValue)"
@@ -41,8 +46,8 @@ struct BookCoverView: View {
 
     var body: some View {
         // 尺寸由 Color.clear 按比例定，各版式的内容放 overlay 里 —— 铺满的照片撑不大封面
-        Color.clear
-            .aspectRatio(0.73, contentMode: .fit)
+        let cover = Color.clear
+            .aspectRatio(aspect, contentMode: .fit)
             .overlay {
                 if let photo {
                     switch layout {
@@ -54,8 +59,13 @@ struct BookCoverView: View {
                     clothCover
                 }
             }
-            .shadow(color: .black.opacity(0.20), radius: 10, x: 2, y: 6)
-            .shadow(color: .black.opacity(0.12), radius: 3,  x: 0, y: 2)
+        if elevated {
+            cover
+                .shadow(color: .black.opacity(0.20), radius: 10, x: 2, y: 6)
+                .shadow(color: .black.opacity(0.12), radius: 3,  x: 0, y: 2)
+        } else {
+            cover
+        }
     }
 
     // MARK: - 共用：标题与篇数
@@ -102,9 +112,14 @@ struct BookCoverView: View {
         // 浅底（只有象牙白）用深棕字，其余米白
         let text = color.isLight ? Color(hex: "#3D3428") : Color(hex: "#F5F0E6")
         let shadow = color.isLight ? Color.white.opacity(0.5) : Color.black.opacity(0.4)
-        return Image(assetName)
-            .resizable()
-            .aspectRatio(contentMode: .fill)
+        // 布面图本身是 0.73；封面不是这个比例时（精装 PDF）铺满后裁在框里，书名、篇数照样贴着封面的边
+        return Color.clear
+            .overlay {
+                Image(assetName)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            }
+            .clipped()
             .overlay(alignment: .topLeading) {
                 cornerTitle(color: text, shadow: shadow, shadowRadius: 1)
             }
@@ -153,27 +168,24 @@ struct BookCoverView: View {
             }
     }
 
-    // MARK: - 白框
-
-    /// 白框的纸与墨
-    static let framedPaper = Color(hex: "#F4EEE2")
-    static let framedInk = Color(hex: "#3D3428")
+    // MARK: - 杂志
 
     private func framedCover(_ photo: CoverPhotoSource) -> some View {
-        GeometryReader { geo in
+        let paper = MagazinePaper(color: color)
+        return GeometryReader { geo in
             let w = geo.size.width
             let h = geo.size.height
             let margin = w * 0.1
             ZStack(alignment: .topLeading) {
-                LinearGradient(colors: [Color(hex: "#F8F3EA"), Self.framedPaper], startPoint: .top, endPoint: .bottom)
+                paper.gradient
 
                 VStack(alignment: .leading, spacing: 0) {
                     // 抬头：篇数 + 一道细线（参考图 ② 的刊头）
-                    countBadge(color: Self.framedInk, opacity: 0.6)
+                    countBadge(color: paper.ink, opacity: 0.6)
                         .scaleEffect(0.85, anchor: .leading)
                         .frame(height: h * 0.11)
                     Rectangle()
-                        .fill(Self.framedInk.opacity(0.35))
+                        .fill(paper.ink.opacity(0.35))
                         .frame(height: 0.5)
 
                     // 照片：方形
@@ -185,7 +197,7 @@ struct BookCoverView: View {
 
                     Text(verbatim: displayName)
                         .font(.system(size: max(10, w * 0.1), weight: .medium, design: .serif))
-                        .foregroundColor(Self.framedInk)
+                        .foregroundColor(paper.ink)
                         .lineLimit(2)
                         .lineSpacing(2)
                         .padding(.top, h * 0.04)
@@ -234,6 +246,38 @@ struct BookCoverView: View {
                 .frame(width: w)
             }
         }
+    }
+}
+
+// MARK: - 杂志的纸
+
+/// 杂志封面的纸（2026-10-22 起颜色可选；原来只有一张米白纸，叫「白框」）。
+/// 象牙白就是原来那张米白纸、深棕字；其余颜色是这本的颜色铺满、上沿受光略亮一点，米白字（同布面封面上的字）。
+/// 封面、日记本主页大图、书脊、精装 PDF 的封底都用它
+struct MagazinePaper {
+    let color: BookColor
+
+    /// 纸：上沿略亮、往下一点点暗
+    var gradient: LinearGradient {
+        LinearGradient(colors: [top, bottom], startPoint: .top, endPoint: .bottom)
+    }
+
+    private var top: Color {
+        color == .ivory ? Color(hex: "#F8F3EA") : Color(hex: color.hex).mix(with: .white, by: 0.06)
+    }
+
+    private var bottom: Color {
+        color == .ivory ? Color(hex: "#F4EEE2") : Color(hex: color.hex)
+    }
+
+    /// 墨：浅纸压深棕字，深纸写米白字
+    var ink: Color {
+        color.isLight ? Color(hex: "#3D3428") : Color(hex: "#F5F0E6")
+    }
+
+    /// 书脊（书架、写前选本子的转盘）：纸面精装，书脊也是这张纸
+    var spine: Color {
+        color == .ivory ? Color(hex: "#DCD3C2") : Color(hex: color.hex)
     }
 }
 

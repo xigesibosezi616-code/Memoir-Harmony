@@ -198,8 +198,9 @@ iOS 端的实现除 `formatVersion` 外全部有缺省值兜底（缺 `encrypted
 不升 `formatVersion` —— 新增可选字段，旧的读取方忽略即可。
 
 **`taxonomy.json` 里日记本的 `coverLayout` / `subtitle`**（2026-10 P3b 起，都可选）：
-- `coverLayout`：照片封面的版式，`"FullBleed"`（满版）/ `"Framed"`（白框）/ `"TipIn"`（贴照片）。
-  缺失或不认识的值按满版；没有 `coverFile` 时没有意义（「仅文字」导出也不写）
+- `coverLayout`：照片封面的版式，`"FullBleed"`（满版）/ `"Framed"`（杂志，2026-10-22 前叫白框）/ `"TipIn"`（贴照片）。
+  缺失或不认识的值按满版；没有 `coverFile` 时没有意义（「仅文字」导出也不写）。
+  杂志、贴照片的纸色 / 布面色取这本的 `colorID`（2026-10-22 起杂志的纸也跟 `colorID`，格式不变）
 - `subtitle`：日记本主页书名下那行小字，最多 24 个字符，缺失 = 没有
 
 **`taxonomy.json` 里日记本的 `textureID`**：2026-10 起只有 `"Linen"`（皮革下架）。

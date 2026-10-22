@@ -8,7 +8,8 @@
 2. coding agent：每次做手册里的一张任务卡。在 agent 里输入一句 **读取 TASK.md，执行第 X.Y 步** 即可（[`TASK.md`](TASK.md) 里是完整的开场提示词，会让它先读 [`CLAUDE.md`](CLAUDE.md)）
 3. 进度记在 [`PROGRESS.md`](PROGRESS.md)
 4. iOS 在 v1 之后的变化写成**更新包**，在 [`docs/harmony-updates/`](docs/harmony-updates/HARMONY_UPDATES.md)。**每次 `git pull` 之后看一眼那里的索引**：
-   状态「草稿」的只看不做（可以提前知道 v1 里哪些东西以后会删、会改），「已交付」的按包里的任务卡做（步骤号形如 U02-1）
+   状态「草稿」的只看不做（可以提前知道 v1 里哪些东西以后会删、会改），「已交付」的按包里的任务卡做（步骤号形如 U02-1）。
+   v1 还没做完也能一边做：已经做完的那几步，单独排更新包的卡去改；还没做到的，做 v1 那张卡时 agent 会先查已交付的包、直接按新规则做（见 `TASK.md` 第 2 步）
 
 ## 目录
 

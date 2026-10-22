@@ -5,11 +5,15 @@ import SwiftUI
 /// 两种模式服务不同目的，不是简单的视觉偏好：
 /// - `list` 用来**找**某一篇（信息密度高，一屏多条）
 /// - `showcase` 用来**重看**一篇（照片放大、留白，像翻唱片）
+///
+/// 2026-10-22 起新用户默认大屏，列表是可选项（设置里大屏排前面）。手动选过的照旧记着
 enum HomeDisplayMode: String, CaseIterable {
-    case list
     case showcase
+    case list
 
     static let storageKey = "homeDisplayMode"
+    /// 没选过时用哪种（`@AppStorage` 的默认值都用它，别各写各的）
+    static let defaultMode: HomeDisplayMode = .showcase
 
     /// 🔴 返回 `LocalizedStringKey` 而**不是** `String`。
     ///

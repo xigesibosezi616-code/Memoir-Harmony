@@ -10,7 +10,9 @@ struct HomeView: View {
     @State private var composeHasDraft = false
     @State private var showFloatingTitle = false
     /// 手记页展示方式：列表（找某一篇）/ 大屏（重看一篇）
-    @AppStorage(HomeDisplayMode.storageKey) private var displayModeRaw: String = HomeDisplayMode.list.rawValue
+    @AppStorage(HomeDisplayMode.storageKey) private var displayModeRaw: String = HomeDisplayMode.defaultMode.rawValue
+    /// 列表模式的看法：全部日记 / 按月份（记住上次选的）
+    @AppStorage(HomeListGrouping.storageKey) private var listGrouping: HomeListGrouping = .all
     /// 大屏模式下点卡片要跳详情，用它驱动导航
     @State private var showcaseTarget: JournalEntry?
 
@@ -35,7 +37,7 @@ struct HomeView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var displayMode: HomeDisplayMode {
-        HomeDisplayMode(rawValue: displayModeRaw) ?? .list
+        HomeDisplayMode(rawValue: displayModeRaw) ?? .defaultMode
     }
     private var isShowcase: Bool { displayMode == .showcase }
     private var zoom: ShowcaseZoom { ShowcaseZoom(rawValue: zoomRaw) ?? .one }
@@ -135,30 +137,40 @@ struct HomeView: View {
                     } else if isShowcase {
                         showcase
                     } else {
-                        LazyVStack(spacing: 12, pinnedViews: .sectionHeaders) {
-                            ForEach(groupedEntries, id: \.key) { group in
-                                Section {
-                                    ForEach(group.entries) { entry in
-                                        NavigationLink(value: entry) {
-                                            EntryRowView(entry: entry)
+                        // 全部日记 / 按月份（2026-10-22，同信箱的归类）
+                        HomeListGroupingPicker(selection: $listGrouping, theme: theme)
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 12)
+                        switch listGrouping {
+                        case .all:
+                            LazyVStack(spacing: 12, pinnedViews: .sectionHeaders) {
+                                ForEach(groupedEntries, id: \.key) { group in
+                                    Section {
+                                        ForEach(group.entries) { entry in
+                                            NavigationLink(value: entry) {
+                                                EntryRowView(entry: entry)
+                                            }
+                                            .buttonStyle(.plain)
                                         }
-                                        .buttonStyle(.plain)
+                                    } header: {
+                                        HStack {
+                                            Text(group.key)
+                                                .font(theme.captionFont)
+                                                .foregroundStyle(theme.textTertiary)
+                                                .tracking(theme.letterSpacingWide)
+                                            Spacer()
+                                        }
+                                        .padding(.horizontal, 20)
+                                        .padding(.vertical, 6)
+                                        .background(theme.background)
                                     }
-                                } header: {
-                                    HStack {
-                                        Text(group.key)
-                                            .font(theme.captionFont)
-                                            .foregroundStyle(theme.textTertiary)
-                                            .tracking(theme.letterSpacingWide)
-                                        Spacer()
-                                    }
-                                    .padding(.horizontal, 20)
-                                    .padding(.vertical, 6)
-                                    .background(theme.background)
                                 }
                             }
+                            .padding(.horizontal, 20)
+                        case .month:
+                            EntryMonthCards(groups: groupedEntries, theme: theme)
+                                .padding(.horizontal, 20)
                         }
-                        .padding(.horizontal, 20)
                     }
 
                     // 给底部按钮/Tab 栏留白；大屏模式按钮在导航栏，留一点即可（总览要滚到底，留出 Tab 栏的高度）
@@ -357,9 +369,16 @@ struct HomeView: View {
                     Text("暂无日记")
                         .font(theme.headingFont)
                         .foregroundStyle(theme.textPrimary)
-                    Text("点击下方按钮，开始书写今天的故事")
-                        .font(theme.captionFont)
-                        .foregroundStyle(theme.textTertiary)
+                    // 写日记的入口：列表模式在下方，大屏模式在右上角
+                    Group {
+                        if isShowcase {
+                            Text("点右上角的 ＋，开始书写今天的故事")
+                        } else {
+                            Text("点击下方按钮，开始书写今天的故事")
+                        }
+                    }
+                    .font(theme.captionFont)
+                    .foregroundStyle(theme.textTertiary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }

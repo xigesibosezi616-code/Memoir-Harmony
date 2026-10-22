@@ -238,7 +238,7 @@ func dedupeTagsByName(context: ModelContext) {
             ($0.createdAt, $0.id.uuidString) < ($1.createdAt, $1.id.uuidString)
         }
         // 留下的那条缺什么、要删的有 → 转过来，别让用户刚设好的封面因为去重丢了（P5：本机缺的才补）。
-        // 封面照片和版式是一套，一起转（只转照片的话，「白框」会变回默认的「满版」）；副标题单独看。
+        // 封面照片和版式是一套，一起转（只转照片的话，「杂志」会变回默认的「满版」）；副标题单独看。
         // 都按同一个顺序取第一个，两台设备转的是同一份
         if let survivor = ordered.first {
             let rest = ordered.dropFirst()

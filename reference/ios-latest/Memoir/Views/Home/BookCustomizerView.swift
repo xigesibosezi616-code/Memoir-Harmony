@@ -35,7 +35,7 @@ struct BookCustomizerView: View {
     }
 
     private var showsColors: Bool {
-        previewPhoto == nil || edit.layout.showsClothColor
+        previewPhoto == nil || edit.layout.showsCoverColor
     }
 
     var body: some View {
@@ -247,8 +247,8 @@ struct BookCustomizerView: View {
 
     private var colorSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // 没照片：颜色就是封面；贴照片：颜色是照片底下的布面
-            sectionTitle(previewPhoto == nil ? "或者选一种颜色" : "布面颜色")
+            // 没照片：颜色就是封面；贴照片：颜色是照片底下的布面；杂志：颜色是那张纸
+            sectionTitle(previewPhoto == nil ? "或者选一种颜色" : (edit.layout == .framed ? "纸面颜色" : "布面颜色"))
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 14) {

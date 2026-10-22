@@ -4,7 +4,8 @@ import SwiftUI
 ///
 /// - **满版**：照片铺满，往下渐渐融进页面底色；书名用正文色写在融化的那一段上（参考图 ④），
 ///   顶部压一层浅暗，状态栏和返回键在亮照片上也看得清
-/// - **白框**（P3b）：整幅米白纸，照片嵌在中间，书名写在照片下面 —— 一页杂志（参考图 ②）
+/// - **杂志**（P3b；2026-10-22 前叫「白框」，只有米白纸）：整幅纸（颜色跟这本选的走，见 `MagazinePaper`），
+///   照片嵌在中间，书名写在照片下面 —— 一页杂志（参考图 ②）
 /// - **贴照片**（P3b）：布面铺满，正中贴一张带白边、压着相角的照片，书名烫在下面
 /// - **纯色亚麻**（2026-10-08 产品定「布面铺满」）：把这本的布面放大铺满，书名像烫在布面正中，
 ///   上下各一道细线 —— 一本布面精装书的封面放大来看。
@@ -55,7 +56,7 @@ struct BookHeroView: View {
                             }
                     }
                 case .framed:
-                    LinearGradient(colors: [Color(hex: "#F8F3EA"), BookCoverView.framedPaper], startPoint: .top, endPoint: .bottom)
+                    MagazinePaper(color: color).gradient
                 case .cloth, .tipIn:
                     cloth
                 }
@@ -74,8 +75,9 @@ struct BookHeroView: View {
                     )
                     .frame(height: fadeHeight)
                 } else {
-                    // 干净地收在一条边上：底边一点暗影 + 一道细亮线，像封面的下沿
-                    let lightBase = style == .framed || color.isLight
+                    // 干净地收在一条边上：底边一点暗影 + 一道细亮线，像封面的下沿。
+                    // 布面、杂志的纸都是这本的颜色，只有象牙白算浅底
+                    let lightBase = color.isLight
                     VStack(spacing: 0) {
                         LinearGradient(colors: [.black.opacity(0), .black.opacity(lightBase ? 0.08 : 0.22)], startPoint: .top, endPoint: .bottom)
                             .frame(height: 22)
@@ -119,7 +121,7 @@ struct BookHeroView: View {
 
     private func framedContent(_ photo: CoverPhotoSource) -> some View {
         GeometryReader { geo in
-            let ink = BookCoverView.framedInk
+            let ink = MagazinePaper(color: color).ink
             VStack(alignment: .leading, spacing: 0) {
                 Rectangle()
                     .fill(ink.opacity(0.3))
