@@ -129,6 +129,38 @@
       "value": "Connecté"
     },
     {
+      "name": "s_55a04b58cd",
+      "value": "Non défini"
+    },
+    {
+      "name": "s_c460390c74",
+      "value": "Impossible d'enregistrer le pseudonyme"
+    },
+    {
+      "name": "s_cecceb5a0a",
+      "value": "Numéro de téléphone associé"
+    },
+    {
+      "name": "s_b94e9a68cd",
+      "value": "Impossible d'associer. Veuillez réessayer plus tard"
+    },
+    {
+      "name": "s_ab8da9843c",
+      "value": "Aucun numéro de téléphone associé. Votre numéro est le seul moyen de récupérer votre compte : sans lui, vous perdrez l'accès en cas de changement de téléphone ou d'indisponibilité de votre HUAWEI ID."
+    },
+    {
+      "name": "s_eb2a123165",
+      "value": "Votre numéro est le seul moyen de récupérer ce compte. Sans lui, vous perdrez l'accès en changeant de téléphone ou si votre HUAWEI ID devient inutilisable."
+    },
+    {
+      "name": "s_ebad4d402e",
+      "value": "Toutes vos données sur nos serveurs : votre compte Memoir, le numéro de téléphone et le HUAWEI ID associés, votre surnom, le nom de votre correspondant et l'historique des lettres."
+    },
+    {
+      "name": "s_10a55ee848",
+      "value": "Les journaux, photos, enregistrements et lettres déjà reçues sur ce téléphone et dans votre espace cloud HUAWEI. Ils vous appartiennent et restent en place après la suppression."
+    },
+    {
       "name": "s_00360964eb",
       "value": "Fédération japonaise des industries de l'imprimerie, glossaire des termes d'imprimerie ; université des arts Musashino, fichier Zokei. L'attribution du nom au Japon est rapportée dans les cinquante ans d'histoire de Tokushu Paper Manufacturing."
     },

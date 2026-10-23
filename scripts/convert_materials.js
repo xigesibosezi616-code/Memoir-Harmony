@@ -135,6 +135,64 @@ const HAND_STRINGS = {
     'zh-Hans': '已登录', 'zh-Hant': '已登入',
     'en': 'Signed in', 'ja': 'ログイン済み',
     'ko': '로그인됨', 'fr': 'Connecté', 'es': 'Sesión iniciada' },
+  // ---- 4.3 账户页（U02 华为版文案 + iOS xcstrings 疏漏的短词）----
+  s_55a04b58cd: { // 未设置（昵称占位）
+    'zh-Hans': '未设置', 'zh-Hant': '未設定',
+    'en': 'Not set', 'ja': '未設定',
+    'ko': '미설정', 'fr': 'Non défini', 'es': 'Sin configurar' },
+  s_c460390c74: { // 昵称保存失败
+    'zh-Hans': '昵称保存失败', 'zh-Hant': '暱稱儲存失敗',
+    'en': 'Could not save your nickname', 'ja': 'ニックネームを保存できませんでした',
+    'ko': '닉네임을 저장하지 못했어요',
+    'fr': 'Impossible d\'enregistrer le pseudonyme',
+    'es': 'No se pudo guardar tu apodo' },
+  s_cecceb5a0a: { // 手机号绑定成功
+    'zh-Hans': '手机号绑定成功', 'zh-Hant': '手機號綁定成功',
+    'en': 'Phone number linked', 'ja': '電話番号を連携しました',
+    'ko': '전화번호가 연결되었어요',
+    'fr': 'Numéro de téléphone associé',
+    'es': 'Número de teléfono vinculado' },
+  s_b94e9a68cd: { // 绑定失败，请稍后再试
+    'zh-Hans': '绑定失败，请稍后再试', 'zh-Hant': '綁定失敗，請稍後再試',
+    'en': 'Could not link. Please try again later',
+    'ja': '連携できませんでした。しばらくしてからもう一度お試しください',
+    'ko': '연결에 실패했어요. 잠시 후 다시 시도해 주세요',
+    'fr': 'Impossible d\'associer. Veuillez réessayer plus tard',
+    'es': 'No se pudo vincular. Inténtalo de nuevo más tarde' },
+  // 以下三条译文取自 U02「七种语言的新文案」（勿机翻；外语统一写 HUAWEI ID）
+  s_ab8da9843c: { // 未绑定手机号。手机号是账号的唯一凭据，不绑定的话，换手机或华为账号不可用时将无法找回账号。
+    'zh-Hans': '未绑定手机号。手机号是账号的唯一凭据，不绑定的话，换手机或华为账号不可用时将无法找回账号。',
+    'zh-Hant': '未綁定手機號碼。手機號碼是帳戶的唯一憑證，不綁定的話，換手機或華為帳號無法使用時將無法找回帳戶。',
+    'en': 'No phone number linked. Your phone number is the only way to recover your account — without it, you\'ll lose access if you change phones or your HUAWEI ID becomes unavailable.',
+    'ja': '電話番号が未登録です。電話番号はアカウントを取り戻す唯一の手段です。登録しないと、機種変更時や HUAWEI ID が使えなくなったときにアカウントを復旧できません。',
+    'ko': '전화번호가 연결되지 않았습니다. 전화번호는 계정을 복구할 수 있는 유일한 수단입니다. 연결하지 않으면 기기를 바꾸거나 HUAWEI ID를 사용할 수 없게 될 때 계정을 찾을 수 없습니다.',
+    'fr': 'Aucun numéro de téléphone associé. Votre numéro est le seul moyen de récupérer votre compte : sans lui, vous perdrez l\'accès en cas de changement de téléphone ou d\'indisponibilité de votre HUAWEI ID.',
+    'es': 'No hay número de teléfono vinculado. Tu número es la única forma de recuperar la cuenta: sin él, perderás el acceso si cambias de teléfono o tu HUAWEI ID deja de estar disponible.' },
+  s_eb2a123165: { // 手机号是账号的唯一凭据。不绑定的话，换手机或华为账号不可用时将无法找回账号。
+    'zh-Hans': '手机号是账号的唯一凭据。不绑定的话，换手机或华为账号不可用时将无法找回账号。',
+    'zh-Hant': '手機號是帳號的唯一憑據。不綁定的話，換手機或華為帳號無法使用時將無法找回帳號。',
+    'en': 'Your phone number is the only way to recover this account. Without it, you\'ll lose access if you switch phones or your HUAWEI ID becomes unavailable.',
+    'ja': '電話番号はアカウントを取り戻す唯一の手段です。未登録のままだと、機種変更やHUAWEI IDが使えなくなった際にアカウントを復元できません。',
+    'ko': '휴대폰 번호는 계정을 되찾을 수 있는 유일한 수단입니다. 연결하지 않으면 기기를 바꾸거나 HUAWEI ID를 쓸 수 없게 될 때 계정을 복구할 수 없습니다.',
+    'fr': 'Votre numéro est le seul moyen de récupérer ce compte. Sans lui, vous perdrez l\'accès en changeant de téléphone ou si votre HUAWEI ID devient inutilisable.',
+    'es': 'Tu número es la única forma de recuperar esta cuenta. Sin él, perderás el acceso si cambias de teléfono o tu HUAWEI ID deja de estar disponible.' },
+  s_ebad4d402e: { // 我们服务器上关于你的全部数据：尺素账号、绑定的手机号和华为账号、昵称、笔友称呼，以及来信记录。
+    'zh-Hans': '我们服务器上关于你的全部数据：尺素账号、绑定的手机号和华为账号、昵称、笔友称呼，以及来信记录。',
+    'zh-Hant': '我們伺服器上關於你的全部資料：尺素帳號、綁定的手機號和華為帳號、暱稱、筆友稱呼，以及來信紀錄。',
+    'en': 'Everything about you on our servers: your Memoir account, the linked phone number and HUAWEI ID, your nickname, your pen pal\'s name, and your letter records.',
+    'ja': '当社サーバー上のあなたに関するすべてのデータ：Memoir のアカウント、登録済みの電話番号と HUAWEI ID、ニックネーム、ペンフレンドの呼び名、手紙の記録。',
+    'ko': '저희 서버에 있는 회원님의 모든 데이터: Memoir 계정, 연결된 휴대폰 번호와 HUAWEI ID, 닉네임, 펜팔 호칭, 편지 기록.',
+    'fr': 'Toutes vos données sur nos serveurs : votre compte Memoir, le numéro de téléphone et le HUAWEI ID associés, votre surnom, le nom de votre correspondant et l\'historique des lettres.',
+    'es': 'Todos tus datos en nuestros servidores: tu cuenta de Memoir, el número de teléfono y el HUAWEI ID vinculados, tu apodo, el nombre de tu amigo por correspondencia y el registro de cartas.' },
+  // 不会被删除正文：鸿蒙没有 iCloud，去掉 iOS 版里的 iCloud 表述（自译，术语对齐既有词条）
+  s_10a55ee848: { // 这台手机里的日记、照片、录音，以及已经收到的信。它们是你自己的，注销后照样都在。
+    'zh-Hans': '这台手机里的日记、照片、录音，以及已经收到的信。它们是你自己的，注销后照样都在。',
+    'zh-Hant': '這台手機裡的日記、照片、錄音，以及已經收到的信。它們是你自己的，註銷後照樣都在。',
+    'en': 'The diary entries, photos, recordings, and letters already received on this phone. They\'re yours, and they stay after deletion.',
+    'ja': 'この端末内の日記、写真、録音、そしてすでに受け取った手紙。それらはあなたのものなので、退会後もそのまま残ります。',
+    'ko': '이 휴대폰의 일기, 사진, 녹음, 그리고 이미 받은 편지. 모두 회원님의 것이므로 탈퇴 후에도 그대로 남아 있어요.',
+    'fr': 'Les journaux, photos, enregistrements et lettres déjà reçues sur ce téléphone. Ils vous appartiennent et restent en place après la suppression.',
+    'es': 'Los diarios, fotos, grabaciones y cartas ya recibidas en este teléfono. Son tuyos y permanecen ahí tras eliminar la cuenta.' },
 };
 
 /** 把 LANGS 之外的固定条目（keepOriginals）按语言拼出来；appName 来自 xcstrings */

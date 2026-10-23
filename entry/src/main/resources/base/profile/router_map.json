@@ -24,6 +24,21 @@
       "name": "Login",
       "pageSourceFile": "src/main/ets/views/auth/LoginView.ets",
       "buildFunction": "LoginBuilder"
+    },
+    {
+      "name": "Account",
+      "pageSourceFile": "src/main/ets/views/settings/SettingsAccountView.ets",
+      "buildFunction": "SettingsAccountBuilder"
+    },
+    {
+      "name": "ChangePhone",
+      "pageSourceFile": "src/main/ets/views/auth/ChangePhoneView.ets",
+      "buildFunction": "ChangePhoneBuilder"
+    },
+    {
+      "name": "DeleteAccount",
+      "pageSourceFile": "src/main/ets/views/auth/DeleteAccountView.ets",
+      "buildFunction": "DeleteAccountBuilder"
     }
   ]
 }

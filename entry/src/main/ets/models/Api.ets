@@ -53,6 +53,22 @@ interface BindPhoneResponseRaw {
   user?: UserRaw;
 }
 
+interface ChangePhoneResponseRaw {
+  ok?: boolean;
+  user?: UserRaw;
+}
+
+interface DeleteAccountResponseRaw {
+  ok?: boolean;
+  /** 后端历史字段（iOS 用）；鸿蒙恒 false，留着不拒收老形状 */
+  appleRevoked?: boolean;
+}
+
+/** 只回 {ok:true} 的轻响应（PATCH /me 等）的原始形状 */
+interface OkResponseRaw {
+  ok?: boolean;
+}
+
 /** 校验过的用户快照（id 统一 string；可选字段归一 ''；bindings 只留 provider 名单） */
 export class UserDTO {
   readonly id: string;
@@ -132,6 +148,24 @@ export class BindPhoneResponse {
     this.switchedAccount = switchedAccount;
     this.token = token;
     this.user = user;
+  }
+}
+
+/** POST /me/bindings/phone/change 成功响应（4.3 换绑；user 为换绑后的快照） */
+export class ChangePhoneResponse {
+  readonly user: UserDTO;
+
+  constructor(user: UserDTO) {
+    this.user = user;
+  }
+}
+
+/** POST /me/delete 成功响应（账号已在服务端删除，本地只剩清登录态） */
+export class DeleteAccountResponse {
+  readonly ok: boolean;
+
+  constructor(ok: boolean) {
+    this.ok = ok;
   }
 }
 
@@ -224,4 +258,31 @@ export function parseBindPhoneResponse(raw: string): BindPhoneResponse {
     throw new Error('bindPhone.switchedAccount missing');
   }
   return new BindPhoneResponse(r.switchedAccount, optionalString(r.token), userFromRaw(r.user));
+}
+
+export function parseChangePhoneResponse(raw: string): ChangePhoneResponse {
+  const r = requireObject<ChangePhoneResponseRaw>(raw);
+  if (r.ok !== true) {
+    throw new Error('changePhone.ok missing');
+  }
+  if (r.user === undefined) {
+    throw new Error('changePhone.user missing');
+  }
+  return new ChangePhoneResponse(userFromRaw(r.user));
+}
+
+export function parseDeleteAccountResponse(raw: string): DeleteAccountResponse {
+  const r = requireObject<DeleteAccountResponseRaw>(raw);
+  if (r.ok !== true) {
+    throw new Error('deleteAccount.ok missing');
+  }
+  return new DeleteAccountResponse(true);
+}
+
+/** 校验 {ok:true} 轻响应（PATCH /me；非 ok 折 Decoding 档，防 200 空/坏体静默通过） */
+export function parseOkResponse(raw: string): void {
+  const r = requireObject<OkResponseRaw>(raw);
+  if (r.ok !== true) {
+    throw new Error('ok missing');
+  }
 }

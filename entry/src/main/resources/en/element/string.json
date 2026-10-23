@@ -129,6 +129,38 @@
       "value": "Signed in"
     },
     {
+      "name": "s_55a04b58cd",
+      "value": "Not set"
+    },
+    {
+      "name": "s_c460390c74",
+      "value": "Could not save your nickname"
+    },
+    {
+      "name": "s_cecceb5a0a",
+      "value": "Phone number linked"
+    },
+    {
+      "name": "s_b94e9a68cd",
+      "value": "Could not link. Please try again later"
+    },
+    {
+      "name": "s_ab8da9843c",
+      "value": "No phone number linked. Your phone number is the only way to recover your account — without it, you'll lose access if you change phones or your HUAWEI ID becomes unavailable."
+    },
+    {
+      "name": "s_eb2a123165",
+      "value": "Your phone number is the only way to recover this account. Without it, you'll lose access if you switch phones or your HUAWEI ID becomes unavailable."
+    },
+    {
+      "name": "s_ebad4d402e",
+      "value": "Everything about you on our servers: your Memoir account, the linked phone number and HUAWEI ID, your nickname, your pen pal's name, and your letter records."
+    },
+    {
+      "name": "s_10a55ee848",
+      "value": "The diary entries, photos, recordings, and letters already received on this phone and in your Huawei cloud space. They're yours, and they stay after deletion."
+    },
+    {
       "name": "s_00360964eb",
       "value": "Japan Federation of Printing Industries, glossary of printing terms; Musashino Art University, Zokei File. The claim that the name was coined in Japan appears in Tokushu Paper Manufacturing's fifty-year history."
     },

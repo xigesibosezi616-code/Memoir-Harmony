@@ -80,7 +80,6 @@ import { LocationWeatherManager } from '../../services/LocationWeatherManager';
 import { CircleIconButton } from './CircleIconButton';
 import { MoodSelector } from './MoodSelector';
 import { NotebookSelector } from './NotebookSelector';
-import { DraftExitDialog } from './DraftExitDialog';
 import { CreateNotebookDialog } from './CreateNotebookDialog';
 import { LocationPickerView } from './LocationPickerView';
 
@@ -152,22 +151,6 @@ export struct ComposeView {
   /** 系统返回信号（路由页 onBackPress 拦截后 +1） */
   @StorageProp(STORAGE_KEY_COMPOSE_BACK_TICK) @Watch('onSystemBackTick')
   systemBackTick: number = 0;
-
-  /** 官方弹窗控制器：DraftExitDialog（autoCancel 点遮罩=取消；customStyle 玻璃卡自绘） */
-  private exitDialogController: CustomDialogController = new CustomDialogController({
-    builder: DraftExitDialog({
-      onDiscard: (): void => {
-        this.discardAndClose();
-      },
-      onSave: (): void => {
-        this.saveDraftAndClose();
-      }
-    }),
-    autoCancel: true,
-    alignment: DialogAlignment.Center,
-    customStyle: true
-  });
-
   /** 库句柄（aboutToAppear 打开；AppDatabase 内部有缓存单例） */
   private store: relationalStore.RdbStore | undefined = undefined;
   /** 恢复进来的草稿；保存 / 转正 / 丢弃都以它为准 */
@@ -1452,7 +1435,33 @@ export struct ComposeView {
       this.getUIContext().getRouter().back();
       return;
     }
-    this.exitDialogController.open();
+    this.confirmExitDraft();
+  }
+
+  /**
+   * 保存草稿确认：官方 AlertDialog（R-THEME-10——按钮纯官方默认样式，随明暗自适应）。
+   * autoCancel 点遮罩 / 返回键 = 关弹窗继续编辑（返回键难免误触，不该逼用户
+   * 在「丢弃」和「保存」之间二选一——R-ENTRY-02 语义随官方弹窗保留）。
+   */
+  private confirmExitDraft(): void {
+    this.getUIContext().showAlertDialog({
+      title: $r('app.string.s_654040bb31'),
+      message: $r('app.string.s_4306623202'),
+      autoCancel: true,
+      alignment: DialogAlignment.Center,
+      primaryButton: {
+        value: $r('app.string.s_95a2fe4ab7'),
+        action: (): void => {
+          this.discardAndClose();
+        }
+      },
+      secondaryButton: {
+        value: $r('app.string.s_4cd30ef91e'),
+        action: (): void => {
+          this.saveDraftAndClose();
+        }
+      }
+    });
   }
 
   /**

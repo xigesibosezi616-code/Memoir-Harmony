@@ -1,10 +1,18 @@
 /**
- * 手机号登录页（10_BUILD_MANUAL.md 4.2；AUTH_DESIGN.md §6 两步流）。
- * 对应 iOS `LoginView.swift`（login 模式；bindPhone 模式 4.3 绑定流再开）。
+ * 手机号登录页（10_BUILD_MANUAL.md 4.2/4.3；AUTH_DESIGN.md §6 两步流）。
+ * 对应 iOS `LoginView.swift`（login / bindPhone 双模式）。
  *
  * 两步流：手机号 → 验证码；6 位自动提交；重发倒计时由后端 retryAfter 驱动；
  * 命中频控（429）按顶层 retryAfter 恢复倒计时（杀 App 重进立刻点重发的场景）。
  * 登录不强制：写日记永远不需要登录，这里只服务 AI 信件等云端能力。
+ *
+ * 模式（路由参数，pushPathByName('Login', param)）：
+ * - ''（登录）：验证码 → POST /auth/verify-code → establish
+ * - 'bindPhone'（补绑手机号，需已登录）：验证码 → POST /me/bindings/phone；
+ *   switchedAccount == true 时服务端已把绑定转移到老账号并删掉空壳——
+ *   本地 token 指向的身份不存在了，必须用返回 token+user 覆盖（establish），
+ *   并提示「已找回你的账号」（R-ACCOUNT-04）；否则只刷快照（updateUser）。
+ *
  * 华为账号登录按钮（U02：放手机号登录下面）后端 /auth/huawei 未实现（09 Q1），
  * 4.4 接——本页不预留死 UI。
  *
@@ -21,7 +29,7 @@ import { STORAGE_KEY_HIDE_TAB_BAR, STORAGE_KEY_SAFE_AREA_TOP_VP,
 import { AuthLogic } from '../../services/auth/AuthLogic';
 import { HttpError } from '../../services/http/HttpError';
 import { STORAGE_KEY_SESSION_TICK } from '../../services/auth/UserSession';
-import { SendCodeResponse, AuthResponse } from '../../models/Api';
+import { SendCodeResponse, AuthResponse, BindPhoneResponse } from '../../models/Api';
 
 /** 系统路由表入口（router_map.json → name `Login`） */
 @Builder
@@ -36,6 +44,8 @@ export struct LoginView {
   @StorageProp(STORAGE_KEY_SAFE_AREA_TOP_VP) safeAreaTopVp: number = 0;
   @StorageProp(STORAGE_KEY_SAFE_AREA_BOTTOM_VP) safeAreaBottomVp: number = 0;
 
+  /** 模式：0 = 登录，1 = 补绑手机号（bindPhone；路由参数 'bindPhone'） */
+  @State private mode: number = 0;
   /** 两步流：0 = 手机号步，1 = 验证码步（iOS Step.phone / .code） */
   @State private step: number = 0;
   @State private phone: string = '';
@@ -78,7 +88,7 @@ export struct LoginView {
         // 内容块：iOS VStack(spacing:28) 同款节拍；整块水平居中（iOS VStack 默认 .center）
         Column({ space: 28 }) {
           Column({ space: 8 }) {
-            Text(this.step === 0 ? $r('app.string.s_f2d81a9c46') : $r('app.string.s_5c3e9b7a12'))
+            Text(this.titleText())
               .fontSize(this.theme.titleFont.size)
               .fontWeight(this.theme.titleFont.weight)
               .fontFamily(this.theme.titleFont.family)
@@ -136,6 +146,10 @@ export struct LoginView {
     .backgroundColor(this.theme.background)
     .onReady((ctx: NavDestinationContext) => {
       this.navPathStack = ctx.pathStack;
+      // 模式由路由参数带进来（设置页账户卡 ''；账户页补绑 'bindPhone'）
+      if (ctx.pathInfo.param === 'bindPhone') {
+        this.mode = 1;
+      }
     })
     .onShown((): void => {
       AppStorage.setOrCreate(STORAGE_KEY_HIDE_TAB_BAR, true);
@@ -145,8 +159,22 @@ export struct LoginView {
     })
   }
 
-  /** 副标题：手机号步 = 未注册说明；验证码步 = 已发送至掩码手机号 */
+  /** 页面标题：登录模式 = 手机号登录；补绑模式 = 绑定手机号；验证码步两模式同文案 */
+  private titleText(): Resource {
+    if (this.step === 1) {
+      return $r('app.string.s_5c3e9b7a12');
+    }
+    if (this.mode === 1) {
+      return $r('app.string.s_7fbe49401c');
+    }
+    return $r('app.string.s_f2d81a9c46');
+  }
+
+  /** 副标题：手机号步 = 模式说明；验证码步 = 已发送至掩码手机号 */
   private subtitleText(): Resource {
+    if (this.step === 0 && this.mode === 1) {
+      return $r('app.string.s_06f6dfc980');
+    }
     if (this.step === 0) {
       return $r('app.string.s_e9989b9fd6');
     }
@@ -202,7 +230,7 @@ export struct LoginView {
       .onChange((value: string) => {
         this.code = AuthLogic.digitsOnly(value, 6);
         if (this.code.length === 6 && !this.busy) {
-          this.login();
+          this.submitCode();
         }
       })
   }
@@ -219,7 +247,7 @@ export struct LoginView {
             .height(18)
             .color(this.theme.cardBackground)
         }
-        Text(this.step === 0 ? $r('app.string.s_084f68942b') : $r('app.string.s_21f1e88275'))
+        Text(this.primaryButtonText())
           .fontSize(this.theme.captionFont.size)
           .fontWeight(this.theme.captionFont.weight)
           .fontFamily(this.theme.captionFont.family)
@@ -237,9 +265,20 @@ export struct LoginView {
       if (this.step === 0) {
         this.sendCode();
       } else {
-        this.login();
+        this.submitCode();
       }
     })
+  }
+
+  /** 主按钮文案：手机号步 = 获取验证码；验证码步按模式 = 登录 / 绑定 */
+  private primaryButtonText(): Resource {
+    if (this.step === 0) {
+      return $r('app.string.s_084f68942b');
+    }
+    if (this.mode === 1) {
+      return $r('app.string.s_6aed7c48be');
+    }
+    return $r('app.string.s_21f1e88275');
   }
 
   /** 发验证码：成功进验证码步并起倒计时；429 按顶层 retryAfter 恢复倒计时 */
@@ -270,6 +309,15 @@ export struct LoginView {
     }
   }
 
+  /** 验证码步提交入口：按模式分发（登录 / 补绑手机号） */
+  private submitCode(): void {
+    if (this.mode === 1) {
+      this.bindPhone();
+    } else {
+      this.login();
+    }
+  }
+
   /** 验码登录：成功建立会话，提示后返回 */
   private async login(): Promise<void> {
     if (this.busy || this.code.length !== 6) {
@@ -285,9 +333,7 @@ export struct LoginView {
       const session = this.env.session;
       if (session !== undefined) {
         session.establish(resp.token, resp.user);
-        // 登录态变化信号：设置页（4.3 账户卡）@Watch 刷新用（RDB 无观察机制同款补法）
-        AppStorage.setOrCreate(STORAGE_KEY_SESSION_TICK,
-          (AppStorage.get<number>(STORAGE_KEY_SESSION_TICK) ?? 0) + 1);
+        this.bumpSessionTick();
       }
       this.presentResourceToast($r('app.string.s_8d4a2f6e90'), ErrorToastKind.Success);
       this.stopCountdown();
@@ -298,6 +344,53 @@ export struct LoginView {
     } finally {
       this.busy = false;
     }
+  }
+
+  /** 补绑手机号（R-ACCOUNT-04）：switchedAccount 时服务端已把绑定转移到老账号并删空壳，
+   * 本地 token 指向的身份不存在——必须用返回 token+user 覆盖（establish）并提示「已找回你的账号」；
+   * 正常绑定只刷快照（updateUser）。409 冲突（号已属于别人）由 envelope.message 透传。 */
+  private async bindPhone(): Promise<void> {
+    if (this.busy || this.code.length !== 6) {
+      return;
+    }
+    const session = this.env.session;
+    const token: string | null = session === undefined ? null : session.token;
+    if (token === null) {
+      this.presentResourceToast($r('app.string.s_0e37efff8d'), ErrorToastKind.Error);
+      this.navPathStack.pop();
+      return;
+    }
+    this.busy = true;
+    try {
+      const auth = this.env.auth;
+      if (auth === undefined) {
+        return;
+      }
+      const resp: BindPhoneResponse = await auth.bindPhone(this.phone, this.code, token);
+      if (resp.switchedAccount && resp.token.length > 0 && session !== undefined) {
+        session.establish(resp.token, resp.user);
+        this.presentResourceToast($r('app.string.s_221b549139'), ErrorToastKind.Success);
+      } else {
+        if (session !== undefined) {
+          session.updateUser(resp.user);
+        }
+        this.presentResourceToast($r('app.string.s_cecceb5a0a'), ErrorToastKind.Success);
+      }
+      this.bumpSessionTick();
+      this.stopCountdown();
+      this.navPathStack.pop();
+    } catch (e) {
+      this.presentAuthError(e, $r('app.string.s_b94e9a68cd'));
+      this.code = '';
+    } finally {
+      this.busy = false;
+    }
+  }
+
+  /** 登录态变化信号：设置页（4.3 账户卡）@Watch 刷新用（RDB 无观察机制同款补法） */
+  private bumpSessionTick(): void {
+    AppStorage.setOrCreate(STORAGE_KEY_SESSION_TICK,
+      (AppStorage.get<number>(STORAGE_KEY_SESSION_TICK) ?? 0) + 1);
   }
 
   /** 服务端错误透传（envelope.message，本地化由后端按 Accept-Language 出），

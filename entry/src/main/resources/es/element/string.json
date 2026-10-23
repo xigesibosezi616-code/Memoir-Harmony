@@ -129,6 +129,38 @@
       "value": "Sesión iniciada"
     },
     {
+      "name": "s_55a04b58cd",
+      "value": "Sin configurar"
+    },
+    {
+      "name": "s_c460390c74",
+      "value": "No se pudo guardar tu apodo"
+    },
+    {
+      "name": "s_cecceb5a0a",
+      "value": "Número de teléfono vinculado"
+    },
+    {
+      "name": "s_b94e9a68cd",
+      "value": "No se pudo vincular. Inténtalo de nuevo más tarde"
+    },
+    {
+      "name": "s_ab8da9843c",
+      "value": "No hay número de teléfono vinculado. Tu número es la única forma de recuperar la cuenta: sin él, perderás el acceso si cambias de teléfono o tu HUAWEI ID deja de estar disponible."
+    },
+    {
+      "name": "s_eb2a123165",
+      "value": "Tu número es la única forma de recuperar esta cuenta. Sin él, perderás el acceso si cambias de teléfono o tu HUAWEI ID deja de estar disponible."
+    },
+    {
+      "name": "s_ebad4d402e",
+      "value": "Todos tus datos en nuestros servidores: tu cuenta de Memoir, el número de teléfono y el HUAWEI ID vinculados, tu apodo, el nombre de tu amigo por correspondencia y el registro de cartas."
+    },
+    {
+      "name": "s_10a55ee848",
+      "value": "Los diarios, fotos, grabaciones y cartas ya recibidas en este teléfono y en tu espacio en la nube de HUAWEI. Son tuyos y permanecen ahí tras eliminar la cuenta."
+    },
+    {
       "name": "s_00360964eb",
       "value": "Federación Japonesa de Industrias de la Impresión, glosario de términos de imprenta; Universidad de Arte Musashino, archivo Zokei. La atribución del nombre a Japón consta en la historia de los cincuenta años de Tokushu Paper Manufacturing."
     },

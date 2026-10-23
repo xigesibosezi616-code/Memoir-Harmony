@@ -11,7 +11,8 @@ import { AuthLogic } from '../../main/ets/services/auth/AuthLogic';
 import { SessionStore, SESSION_KEY_TOKEN, SESSION_KEY_USER } from '../../main/ets/services/auth/SessionStore';
 import { UserSession } from '../../main/ets/services/auth/UserSession';
 import { parseUserDto, parseAuthResponse, parseSendCodeResponse,
-  parseMeResponse, parseBindPhoneResponse, UserDTO } from '../../main/ets/models/Api';
+  parseMeResponse, parseBindPhoneResponse, parseChangePhoneResponse,
+  parseDeleteAccountResponse, parseOkResponse, UserDTO } from '../../main/ets/models/Api';
 import { HttpError, HttpErrorKind } from '../../main/ets/services/http/HttpError';
 import { UnauthorizedGate } from '../../main/ets/services/http/HttpMapping';
 
@@ -238,6 +239,112 @@ export default function authSessionTest() {
       const err429 = new HttpError(HttpErrorKind.Status, 'http 429', 429);
       expect(gate.handleError(err429)).assertFalse();
       expect(session.isLoggedIn()).assertTrue();
+    })
+
+    // ---- 4.3 换绑 / 注销 / 昵称保存的响应解析 ----
+
+    it('parseChangePhoneResponseRequiresOkAndUser', 0, () => {
+      const raw = `{"ok":true,"user":${USER_JSON}}`;
+      const resp = parseChangePhoneResponse(raw);
+      expect(resp.user.id).assertEqual('42');
+      expect(resp.user.phone).assertEqual('13800138000');
+      // ok 缺失 / 为 false、user 缺失都抛错（防 200 空/坏体静默通过）
+      const badBodies: string[] = [
+        `{"user":${USER_JSON}}`,
+        `{"ok":false,"user":${USER_JSON}}`,
+        '{"ok":true}',
+        'null',
+        '[]'
+      ];
+      for (const body of badBodies) {
+        let threw = false;
+        try {
+          parseChangePhoneResponse(body);
+        } catch (e) {
+          threw = true;
+        }
+        expect(threw).assertTrue();
+      }
+    })
+
+    it('parseDeleteAccountResponseRequiresOk', 0, () => {
+      // 历史字段 appleRevoked 兼容不拒收，但不建模
+      const resp = parseDeleteAccountResponse('{"ok":true,"appleRevoked":true}');
+      expect(resp.ok).assertTrue();
+      expect(parseDeleteAccountResponse('{"ok":true}').ok).assertTrue();
+      const badBodies: string[] = ['{}', '{"ok":false}', '"ok"', 'null'];
+      for (const body of badBodies) {
+        let threw = false;
+        try {
+          parseDeleteAccountResponse(body);
+        } catch (e) {
+          threw = true;
+        }
+        expect(threw).assertTrue();
+      }
+    })
+
+    it('parseOkResponseValidatesPatchMeBody', 0, () => {
+      // PATCH /me 只回 {ok:true}；非 ok 折 Decoding 档
+      parseOkResponse('{"ok":true}');
+      const badBodies: string[] = ['{}', '{"ok":false}', '', 'null', '[]', '"ok"'];
+      for (const body of badBodies) {
+        let threw = false;
+        try {
+          parseOkResponse(body);
+        } catch (e) {
+          threw = true;
+        }
+        expect(threw).assertTrue();
+      }
+    })
+
+    // ---- 4.3 账户页生命周期：换绑刷快照不换 token；补绑 switchedAccount 必换 token ----
+
+    it('changePhoneRefreshesSnapshotKeepsToken', 0, () => {
+      const store = new MemorySessionStore();
+      const session = new UserSession(store);
+      session.establish('jwt-token-abc', userFromJson(USER_JSON));
+      const resp = parseChangePhoneResponse(
+        `{"ok":true,"user":{"id":42,"phone":"13900139000",`
+        + `"displayName":"小明","penPalName":"青鸟","bindings":[{"provider":"phone"}]}}`);
+      session.updateUser(resp.user);
+      expect(session.token).assertEqual('jwt-token-abc');
+      expect(session.user?.phone).assertEqual('13900139000');
+      // 快照落了存储（重启不回退）
+      expect(new UserSession(store).user?.phone).assertEqual('13900139000');
+    })
+
+    it('bindPhoneSwitchedAccountMustEstablishNewToken', 0, () => {
+      const store = new MemorySessionStore();
+      const session = new UserSession(store);
+      session.establish('jwt-empty-shell', userFromJson(USER_MIN_JSON));
+      // switchedAccount：服务端已把绑定转移到老账号并删空壳，旧 token 指向的身份
+      // 已不存在——必须用返回 token+user 覆盖（establish），否则下一请求就 401
+      const resp = parseBindPhoneResponse(BIND_PHONE_JSON);
+      expect(resp.switchedAccount).assertTrue();
+      expect(resp.token.length > 0).assertTrue();
+      session.establish(resp.token, resp.user);
+      expect(session.token).assertEqual('jwt-new');
+      expect(session.user?.id).assertEqual('42');
+      expect(new UserSession(store).token).assertEqual('jwt-new');
+      // 正常绑定（switchedAccount false）：只刷快照，token 不动
+      const normal = parseBindPhoneResponse(
+        `{"ok":true,"switchedAccount":false,"user":${USER_JSON}}`);
+      expect(normal.switchedAccount).assertFalse();
+      session.updateUser(normal.user);
+      expect(session.token).assertEqual('jwt-new');
+    })
+
+    it('deleteAccountClearsSessionButNotOtherStores', 0, () => {
+      const store = new MemorySessionStore();
+      const session = new UserSession(store);
+      session.establish('jwt-token-abc', userFromJson(USER_JSON));
+      parseDeleteAccountResponse('{"ok":true}');
+      session.clear();
+      expect(session.isLoggedIn()).assertFalse();
+      expect(store.get(SESSION_KEY_TOKEN)).assertNull();
+      expect(new UserSession(store).isLoggedIn()).assertFalse();
     })
   })
 }
