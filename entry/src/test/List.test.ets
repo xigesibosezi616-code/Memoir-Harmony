@@ -34,6 +34,10 @@ import coverEditTest from './test/CoverEdit.test'
 import readerPagesTest from './test/ReaderPages.test'
 import curlMathTest from './test/CurlMath.test'
 import eyeFlipMachineTest from './test/EyeFlipMachine.test'
+import showcaseDigestTest from './test/ShowcaseDigest.test'
+import dominantColorTest from './test/DominantColor.test'
+import entryPhotoStoreTest from './test/EntryPhotoStore.test'
+import appContinuationTest from './test/AppContinuation.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -72,4 +76,8 @@ export default function testsuite() {
   readerPagesTest()
   curlMathTest()
   eyeFlipMachineTest()
+  showcaseDigestTest()
+  dominantColorTest()
+  entryPhotoStoreTest()
+  appContinuationTest()
 }

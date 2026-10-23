@@ -29,8 +29,80 @@
       "value": "Español"
     },
     {
+      "name": "eye_flip_hint",
+      "value": "En bas de l'écran, levez les yeux pour tourner la page"
+    },
+    {
+      "name": "eye_flip_intro_title",
+      "value": "Tournez les pages du regard, les mains libres"
+    },
+    {
+      "name": "eye_flip_intro_usage",
+      "value": "En bas de l'écran, levez les yeux pour tourner la page"
+    },
+    {
+      "name": "eye_flip_intro_privacy",
+      "value": "La caméra frontale détecte les mouvements de tête uniquement sur cet appareil. L'image n'est jamais affichée, enregistrée ni envoyée."
+    },
+    {
+      "name": "eye_flip_intro_enable",
+      "value": "Essayer maintenant"
+    },
+    {
+      "name": "eye_flip_note_title",
+      "value": "Avant de commencer :"
+    },
+    {
+      "name": "eye_flip_note_1",
+      "value": "Essuyez la zone du capteur en haut de l'écran avant utilisation"
+    },
+    {
+      "name": "eye_flip_note_2",
+      "value": "Gardez les yeux à moins de 50 cm de l'écran"
+    },
+    {
+      "name": "eye_flip_note_3",
+      "value": "Utilisez-le dans un environnement bien éclairé"
+    },
+    {
+      "name": "eye_flip_unavailable",
+      "value": "Le tournage de page par le regard est temporairement indisponible"
+    },
+    {
       "name": "EntryAbility_label",
       "value": "Déjà Vu"
+    },
+    {
+      "name": "microphone_permission_reason",
+      "value": "Déjà Vu a besoin du micro pour enregistrer des notes vocales dans votre journal. Les enregistrements restent uniquement sur votre appareil."
+    },
+    {
+      "name": "s_e4c4ff3b29",
+      "value": "Impossible de lire l'enregistrement"
+    },
+    {
+      "name": "s_7c3f9e2a",
+      "value": "Placer à"
+    },
+    {
+      "name": "s_2e8d4f6b",
+      "value": "Gauche"
+    },
+    {
+      "name": "s_9b5c1d3f",
+      "value": "Droite"
+    },
+    {
+      "name": "s_094be81a60",
+      "value": "Impossible de démarrer l'enregistrement"
+    },
+    {
+      "name": "s_7126a0f54e",
+      "value": "Impossible d'accéder au micro"
+    },
+    {
+      "name": "s_36205e6628",
+      "value": "Service de localisation temporairement indisponible"
     },
     {
       "name": "s_00360964eb",
@@ -53,8 +125,16 @@
       "value": "Une fois associé, vous pourrez vous connecter au même compte avec Apple sur cet appareil"
     },
     {
+      "name": "s_00dd5e7c19",
+      "value": "Très désagréable"
+    },
+    {
       "name": "s_00e69bd114",
       "value": "Connecté"
+    },
+    {
+      "name": "s_01542f8ad2",
+      "value": "%d entrées · %d photos"
     },
     {
       "name": "s_01d498446e",
@@ -63,6 +143,10 @@
     {
       "name": "s_022bf3283d",
       "value": "Insérer"
+    },
+    {
+      "name": "s_02519f32e9",
+      "value": "Touchez + en haut à droite pour écrire l'histoire du jour"
     },
     {
       "name": "s_02abbe99ce",
@@ -77,6 +161,10 @@
       "value": "« Le toi de demain remerciera celui qui écrit aujourd'hui. »"
     },
     {
+      "name": "s_044fc3ac8d",
+      "value": "…puis expire lentement"
+    },
+    {
       "name": "s_04543b3673",
       "value": "Chaque mois, une lettre sur « vous ce mois-ci », et « votre année » en fin d'année."
     },
@@ -87,6 +175,14 @@
     {
       "name": "s_0498f1dcc0",
       "value": "Changer la photo"
+    },
+    {
+      "name": "s_04e86ea902",
+      "value": "Stress"
+    },
+    {
+      "name": "s_05aa9400bd",
+      "value": "Dégoût"
     },
     {
       "name": "s_06829794c0",
@@ -153,6 +249,10 @@
       "value": "« S'autoriser à aller mal est aussi une forme de douceur. »"
     },
     {
+      "name": "s_09f81f62fd",
+      "value": "Enthousiasme"
+    },
+    {
       "name": "s_0ae0dc846a",
       "value": "« Toute attente est l'attente d'un soi meilleur. »"
     },
@@ -181,6 +281,10 @@
       "value": "Nouveau"
     },
     {
+      "name": "s_0cfa09d980",
+      "value": "Colère"
+    },
+    {
       "name": "s_0cfc3b0e21",
       "value": "La localisation est désactivée — activez-la dans Réglages"
     },
@@ -191,6 +295,10 @@
     {
       "name": "s_0e37efff8d",
       "value": "Votre session a expiré. Veuillez vous reconnecter."
+    },
+    {
+      "name": "s_0e978c435e",
+      "value": "Ça a été dur. Reste ici, ton téléphone en main : tu n'as rien à faire."
     },
     {
       "name": "s_0f2fc67cd3",
@@ -229,8 +337,16 @@
       "value": "Boîte aux lettres"
     },
     {
+      "name": "s_11d0241540",
+      "value": "Retour"
+    },
+    {
       "name": "s_121c1f2d8e",
       "value": "Partager la sauvegarde (%s)"
+    },
+    {
+      "name": "s_12316406a8",
+      "value": "Répond en deux ou trois jours"
     },
     {
       "name": "s_129af6c2eb",
@@ -241,6 +357,14 @@
       "value": "Impossible d'enregistrer la vidéo Live Photo. La photo a été insérée en image fixe."
     },
     {
+      "name": "s_12d09b2cba",
+      "value": "Été"
+    },
+    {
+      "name": "s_12e33f7397",
+      "value": "Émerveillement"
+    },
+    {
       "name": "s_132f0d719a",
       "value": "Renvoyer (%ds)"
     },
@@ -249,8 +373,16 @@
       "value": "Ville uniquement, ex. « Canton »"
     },
     {
+      "name": "s_13d655e2da",
+      "value": "%s est un correspondant IA fictif de Déjà Vu."
+    },
+    {
       "name": "s_13ff717165",
       "value": "Rappel de scellé (jours)"
+    },
+    {
+      "name": "s_14c21c8141",
+      "value": "Mise en page…"
     },
     {
       "name": "s_14c9516e3f",
@@ -263,6 +395,10 @@
     {
       "name": "s_16070acfe0",
       "value": "%d"
+    },
+    {
+      "name": "s_1623a38e8e",
+      "value": "Un peu de grisaille, ce n'est rien. Arrête-toi un instant, doucement."
     },
     {
       "name": "s_16460eb17d",
@@ -289,6 +425,14 @@
       "value": "Vert sapin"
     },
     {
+      "name": "s_181e010524",
+      "value": "Gêne"
+    },
+    {
+      "name": "s_18cb8ddf9d",
+      "value": "Voir l'original"
+    },
+    {
       "name": "s_1a4cb39357",
       "value": "Ce qu'on écrit tard dans la nuit est souvent le plus vrai."
     },
@@ -303,6 +447,10 @@
     {
       "name": "s_1b0adeee54",
       "value": "Sous les Tang, on coupait le bambou et on l'immergeait cent jours dans l'étang, jusqu'à ce que l'écorce verte se détache — une étape que les papetiers appelaient shaqing, « tuer le vert ». La pâte donnait un papier légèrement jaune et étonnamment résistant : les Song y imprimèrent leurs livres, les Ming y écrivirent leurs lettres. Les cinq opérations consignées par Song Yingxing en 1637 sont encore suivies aujourd'hui."
+    },
+    {
+      "name": "s_1bb8716350",
+      "value": "Nuit polaire"
     },
     {
       "name": "s_1be7ae4fc2",
@@ -349,6 +497,10 @@
       "value": "Ouvrir Réglages"
     },
     {
+      "name": "s_1f316e471f",
+      "value": "Mis en page par Memoir le %s"
+    },
+    {
       "name": "s_1fdf0d90c3",
       "value": "·"
     },
@@ -359,6 +511,14 @@
     {
       "name": "s_212c3cace3",
       "value": "C'est ainsi que votre correspondant vous appellera. Laissez vide pour ne rien mettre."
+    },
+    {
+      "name": "s_213a16c5c5",
+      "value": "Écrire à %s"
+    },
+    {
+      "name": "s_2145aebdd9",
+      "value": "Glissez les pages cochées jusqu’à la fente pour les envoyer à %s"
     },
     {
       "name": "s_215574245b",
@@ -397,6 +557,10 @@
       "value": "« Les petites choses d'aujourd'hui compteront peut-être demain. »"
     },
     {
+      "name": "s_231468e491",
+      "value": "Culpabilité"
+    },
+    {
       "name": "s_234289679b",
       "value": "Carte épurée"
     },
@@ -411,6 +575,10 @@
     {
       "name": "s_25124ed74c",
       "value": "Nom"
+    },
+    {
+      "name": "s_25a56f877d",
+      "value": "Ça a été dur. Rien ne presse : reste ici, ton téléphone en main."
     },
     {
       "name": "s_25fbc95421",
@@ -435,6 +603,10 @@
     {
       "name": "s_287dbc9adc",
       "value": "Songeur"
+    },
+    {
+      "name": "s_28c46f23f7",
+      "value": "Solitude"
     },
     {
       "name": "s_28cfd5c34e",
@@ -469,8 +641,20 @@
       "value": "« Ce qui ne se dit pas peut s'écrire. »"
     },
     {
+      "name": "s_2b59026359",
+      "value": "Quel mot décrit le mieux ce moment ?"
+    },
+    {
       "name": "s_2bbc8185e3",
       "value": "Connectez-vous pour que votre correspondant puisse vous écrire"
+    },
+    {
+      "name": "s_2bf9c54792",
+      "value": "Magazine"
+    },
+    {
+      "name": "s_2c0b8a9d86",
+      "value": "Imprimer ce carnet"
     },
     {
       "name": "s_2c6afc5f55",
@@ -509,6 +693,10 @@
       "value": "Accord de confidentialité"
     },
     {
+      "name": "s_2ea1523acf",
+      "value": "Répond en trois à cinq jours"
+    },
+    {
       "name": "s_2ed0fae234",
       "value": "%s par mois. Renouvellement automatique dans les 24 heures précédant l'échéance. Résiliable à tout moment dans Réglages → Compte Apple → Abonnements."
     },
@@ -529,12 +717,24 @@
       "value": "Humeur"
     },
     {
+      "name": "s_3017ebc38b",
+      "value": "Fierté"
+    },
+    {
       "name": "s_30f4d7cfe8",
       "value": "ou"
     },
     {
       "name": "s_3150ea0d70",
       "value": "Contenu inclus"
+    },
+    {
+      "name": "s_32256643cf",
+      "value": "Si c'est très dur en ce moment"
+    },
+    {
+      "name": "s_3225d1a315",
+      "value": "Confiance"
     },
     {
       "name": "s_328070e3ac",
@@ -555,6 +755,10 @@
     {
       "name": "s_33a1272ec8",
       "value": "Confirmer"
+    },
+    {
+      "name": "s_33be7bd82b",
+      "value": "Le cœur en peine"
     },
     {
       "name": "s_34028338a4",
@@ -581,12 +785,24 @@
       "value": "Vous pouvez passer et le changer plus tard dans les réglages"
     },
     {
+      "name": "s_36c6be2be0",
+      "value": "Ajouté"
+    },
+    {
+      "name": "s_36f485a94d",
+      "value": "Indifférence"
+    },
+    {
       "name": "s_3755f56f2f",
       "value": "Supprimer"
     },
     {
       "name": "s_375d6fd193",
       "value": "Exportez un carnet en PDF relié, prêt à imprimer."
+    },
+    {
+      "name": "s_37a8ee52ac",
+      "value": "Activez la localisation pour voir le chemin de chaque lettre"
     },
     {
       "name": "s_37eb470096",
@@ -607,6 +823,14 @@
     {
       "name": "s_39bd23b773",
       "value": "Calendrier d’écriture"
+    },
+    {
+      "name": "s_3a31adc3b5",
+      "value": "Contentement"
+    },
+    {
+      "name": "s_3a5fd35d41",
+      "value": "Localisation désactivée : chaque réponse met un ou deux jours"
     },
     {
       "name": "s_3aaae04c18",
@@ -663,6 +887,10 @@
     {
       "name": "s_3d39e30c5a",
       "value": "Touchez pour enregistrer"
+    },
+    {
+      "name": "s_3d7a66408e",
+      "value": "Quel bonheur. Garde précieusement ce moment."
     },
     {
       "name": "s_3d93dce578",
@@ -741,6 +969,10 @@
       "value": "Mise en page"
     },
     {
+      "name": "s_4358147908",
+      "value": "Ce carnet est mis en page au format A5 (148 × 210 mm). Les marges latérales diffèrent : la plus large est réservée à la reliure."
+    },
+    {
       "name": "s_4361b1e753",
       "value": "iCloud restreint"
     },
@@ -759,6 +991,10 @@
     {
       "name": "s_446462a28f",
       "value": "« Même un jour ordinaire recèle quelque chose qui ne l'est pas. »"
+    },
+    {
+      "name": "s_4494ba640a",
+      "value": "Voir la traduction"
     },
     {
       "name": "s_44fd049d7d",
@@ -801,12 +1037,24 @@
       "value": "Gratuit : une lettre par semaine. Avec Plus, votre correspondant répond à chaque page."
     },
     {
+      "name": "s_48b785f88a",
+      "value": "Soulevez le rabat du doigt, ou touchez"
+    },
+    {
       "name": "s_48f55a18f1",
       "value": "Une réponse est en chemin"
     },
     {
       "name": "s_497b5a5707",
       "value": "S'abonner à Memoir Plus"
+    },
+    {
+      "name": "s_498e49bbe4",
+      "value": "Même un petit mieux mérite d'être noté."
+    },
+    {
+      "name": "s_49c5ce566f",
+      "value": "Afficher moins par écran"
     },
     {
       "name": "s_49f055a8cc",
@@ -853,6 +1101,10 @@
       "value": "Annuler"
     },
     {
+      "name": "s_4db728d201",
+      "value": "Envie de commencer un nouveau carnet ?"
+    },
+    {
       "name": "s_4e09cf222e",
       "value": "Code envoyé"
     },
@@ -877,6 +1129,10 @@
       "value": "Saisissez le nouveau numéro"
     },
     {
+      "name": "s_5017313c4e",
+      "value": "%1$s là-bas · %2$s"
+    },
+    {
       "name": "s_502b05fb33",
       "value": "Voulez-vous vraiment supprimer cette entrée ? Cette action est irréversible."
     },
@@ -885,8 +1141,16 @@
       "value": "Sources"
     },
     {
+      "name": "s_50a5de527c",
+      "value": "Soulagement"
+    },
+    {
       "name": "s_50f87ef514",
       "value": "Aucune humeur enregistrée sur cette période"
+    },
+    {
+      "name": "s_514c04d14d",
+      "value": "Sans adresse · toujours près de vous"
     },
     {
       "name": "s_514dbb7b7e",
@@ -895,6 +1159,10 @@
     {
       "name": "s_518462faa6",
       "value": "Choisir dans Photos"
+    },
+    {
+      "name": "s_51ebe277ee",
+      "value": "Couleur du papier"
     },
     {
       "name": "s_524e22ba8d",
@@ -921,10 +1189,6 @@
       "value": "Aucun lieu trouvé à proximité"
     },
     {
-      "name": "s_36205e6628",
-      "value": "Service de localisation temporairement indisponible"
-    },
-    {
       "name": "s_534de73969",
       "value": "Création du paquet…"
     },
@@ -945,6 +1209,10 @@
       "value": "Le maroquin est une peau de chèvre au grain serré, le meilleur fond pour l'or ; le veau, lisse et peu marqué, domine la reliure anglaise de qualité du XVIIe au XIXe siècle."
     },
     {
+      "name": "s_555caf4a22",
+      "value": "À la suite"
+    },
+    {
       "name": "s_559a6ba154",
       "value": "Gérer les humeurs"
     },
@@ -953,12 +1221,32 @@
       "value": "Définir un mot de passe (4 caractères min.)"
     },
     {
+      "name": "s_5630b886f9",
+      "value": "Vous"
+    },
+    {
+      "name": "s_566dd5a48b",
+      "value": "Pas de recto verso ? Les pages imprimées d’un seul côté se relient tout aussi bien."
+    },
+    {
       "name": "s_5720afd3c4",
       "value": "Li Zhao, Supplément à l'histoire des Tang (IXe s.) : « pour le papier, il y a le papier de bambou de Shao ». Song Yingxing, Tiangong Kaiwu, chapitre « Tuer le vert » (1637), décrit cinq opérations : tremper le bambou coupé, le cuire à la chaux, puiser à la forme, coucher la feuille, la sécher au feu. Le papier de bambou de Jiajiang (Sichuan) est cité à l'égal du papier Xuan ; Zhang Daqian les appelait « les deux trésors du pays »."
     },
     {
+      "name": "s_57ce7f1870",
+      "value": "S’abonner à Memoir Plus pour exporter ce carnet"
+    },
+    {
       "name": "s_582c50066c",
       "value": "car."
+    },
+    {
+      "name": "s_584109b412",
+      "value": "Nouvelle page"
+    },
+    {
+      "name": "s_587b4e19dc",
+      "value": "Bientôt"
     },
     {
       "name": "s_589be40a92",
@@ -1013,6 +1301,10 @@
       "value": "Les deux saisies diffèrent"
     },
     {
+      "name": "s_5c7cc8abd6",
+      "value": "Appeler le %s"
+    },
+    {
       "name": "s_5cd32361fa",
       "value": "Grille"
     },
@@ -1029,12 +1321,20 @@
       "value": "Renommer le carnet"
     },
     {
+      "name": "s_5d5815647c",
+      "value": "Replier"
+    },
+    {
       "name": "s_5d701678ab",
       "value": "Memoir"
     },
     {
       "name": "s_5e03599e74",
       "value": "« Cet endroit reste là, pour quand tu voudras parler. »"
+    },
+    {
+      "name": "s_5e8b69140c",
+      "value": "Répond dans la journée"
     },
     {
       "name": "s_5eb5a366c6",
@@ -1077,6 +1377,10 @@
       "value": "« La solitude n'est pas un mal : c'est du temps avec soi. »"
     },
     {
+      "name": "s_60f0393ca0",
+      "value": "Inquiétude"
+    },
+    {
       "name": "s_613b4f74e0",
       "value": "Déplacer à droite"
     },
@@ -1097,12 +1401,28 @@
       "value": "Icône d'humeur"
     },
     {
+      "name": "s_643e29f431",
+      "value": "C'est écrit. Comment te sens-tu en ce moment ?"
+    },
+    {
       "name": "s_644c1623fe",
       "value": "Échec de l'envoi du code"
     },
     {
       "name": "s_654040bb31",
       "value": "Enregistrer ce brouillon ?"
+    },
+    {
+      "name": "s_65fc81e161",
+      "value": "Activer"
+    },
+    {
+      "name": "s_674bd11a2a",
+      "value": "Aux anges"
+    },
+    {
+      "name": "s_6753381261",
+      "value": "Échec de l’export"
     },
     {
       "name": "s_677df5aca2",
@@ -1161,6 +1481,10 @@
       "value": "Associer"
     },
     {
+      "name": "s_6afac68dca",
+      "value": "Impossible de télécharger la police du livre : cette version utilise la police du système. Exportez à nouveau une fois en ligne pour l’obtenir."
+    },
+    {
       "name": "s_6b16103d80",
       "value": "Maroquin de chèvre — nul fond ne porte mieux la dorure"
     },
@@ -1201,8 +1525,16 @@
       "value": "Afficher automatiquement la météo à la rédaction"
     },
     {
+      "name": "s_6ceae6c8b0",
+      "value": "Certaines entrées ne remplissent pas une page. La suivante commence-t-elle sur une nouvelle page, ou à la suite ?"
+    },
+    {
       "name": "s_6d1f3e58bb",
       "value": "« Aucun pas n'est perdu : chacun compte. »"
+    },
+    {
+      "name": "s_6d33b0d1f9",
+      "value": "En pleine lumière"
     },
     {
       "name": "s_6e5c04b091",
@@ -1233,12 +1565,20 @@
       "value": "Page du journal"
     },
     {
+      "name": "s_714152477b",
+      "value": "Automne"
+    },
+    {
       "name": "s_7147dd5d08",
       "value": "Nettoyer %d fichiers résiduels et libérer %s ?"
     },
     {
       "name": "s_71cfa4ee81",
       "value": "À %s"
+    },
+    {
+      "name": "s_72c38981e7",
+      "value": "Joie"
     },
     {
       "name": "s_72ca690ff2",
@@ -1257,6 +1597,14 @@
       "value": "Pas encore sauvegardé"
     },
     {
+      "name": "s_733f4ad13a",
+      "value": "Honte"
+    },
+    {
+      "name": "s_73cc66ab46",
+      "value": "Frustration"
+    },
+    {
       "name": "s_73f8dc416c",
       "value": "Pas encore de courrier"
     },
@@ -1267,6 +1615,10 @@
     {
       "name": "s_74bd07ef78",
       "value": "Aujourd'hui, je voudrais dire…"
+    },
+    {
+      "name": "s_74fd338158",
+      "value": "À %s de vous"
     },
     {
       "name": "s_7549a61e00",
@@ -1333,12 +1685,32 @@
       "value": "Changer de numéro"
     },
     {
+      "name": "s_7afd163467",
+      "value": "En espérant que ce court instant t'ait fait un peu de bien."
+    },
+    {
+      "name": "s_7bb5b11a5d",
+      "value": "Gratitude"
+    },
+    {
       "name": "s_7bf3cf769a",
       "value": "En faire un livre"
     },
     {
+      "name": "s_7c124dbbca",
+      "value": "Trouver une ligne d'écoute près de chez vous"
+    },
+    {
       "name": "s_7c130d80b8",
       "value": "Ville"
+    },
+    {
+      "name": "s_7d048ef485",
+      "value": "Tristesse"
+    },
+    {
+      "name": "s_7d07a38a9f",
+      "value": "Plus de timbres. Un nouveau carnet arrive bientôt"
     },
     {
       "name": "s_7d84c682b8",
@@ -1349,12 +1721,24 @@
       "value": "Rien n’est coché : l’enveloppe est vide"
     },
     {
+      "name": "s_7dc6ec1c5c",
+      "value": "Hiver"
+    },
+    {
       "name": "s_7debf9cb03",
       "value": "Réglages"
     },
     {
       "name": "s_7ebd4ae074",
       "value": "Kent"
+    },
+    {
+      "name": "s_7f0145172f",
+      "value": "Ton humeur du moment"
+    },
+    {
+      "name": "s_7fba459a97",
+      "value": "Par défaut · %d entrées"
     },
     {
       "name": "s_7fbe49401c",
@@ -1377,6 +1761,18 @@
       "value": "Commencer à écrire"
     },
     {
+      "name": "s_810e1db235",
+      "value": "En paix"
+    },
+    {
+      "name": "s_8174d1e505",
+      "value": "Épuisement"
+    },
+    {
+      "name": "s_819dedd1a1",
+      "value": "Glissez vers le haut ou touchez pour sortir la lettre"
+    },
+    {
       "name": "s_81d3179a26",
       "value": "Votre position ne figure que dans les entrées de cet appareil et n'est jamais envoyée. Les modifications ne concernent que les entrées à venir."
     },
@@ -1387,6 +1783,14 @@
     {
       "name": "s_824e119909",
       "value": "Abattu"
+    },
+    {
+      "name": "s_82aa40f702",
+      "value": "%d pages · environ %s"
+    },
+    {
+      "name": "s_833e892fa2",
+      "value": "Déception"
     },
     {
       "name": "s_83a302c43c",
@@ -1421,12 +1825,20 @@
       "value": "Fusionner avec les carnets existants"
     },
     {
+      "name": "s_85dc6e7aed",
+      "value": "Calme"
+    },
+    {
       "name": "s_85f02cfb34",
       "value": "Nouvelle entrée"
     },
     {
       "name": "s_85f84428c2",
       "value": "Désactivé, les Live Photos apparaissent en image fixe sur vos autres appareils."
+    },
+    {
+      "name": "s_869f037ff5",
+      "value": "Téléchargement de la police %d %%"
     },
     {
       "name": "s_86ef74c64f",
@@ -1453,6 +1865,14 @@
       "value": "Trancher, jeter, se détacher — dans le minimalisme moderne, moins c'est plus"
     },
     {
+      "name": "s_88dd24c6f2",
+      "value": "Désespoir"
+    },
+    {
+      "name": "s_8921bcd103",
+      "value": "Plus de timbres. Un nouveau carnet arrive %s"
+    },
+    {
       "name": "s_89345cda95",
       "value": "Ne pas envoyer"
     },
@@ -1463,6 +1883,14 @@
     {
       "name": "s_895ec8fd1b",
       "value": "Erreur lors de l’archivage : %s"
+    },
+    {
+      "name": "s_89c7b03a96",
+      "value": "Mise en page"
+    },
+    {
+      "name": "s_89e57b7930",
+      "value": "Découragement"
     },
     {
       "name": "s_8a7a73f2b2",
@@ -1505,12 +1933,20 @@
       "value": "« Quelque part, quelqu'un regarde le même ciel que toi. »"
     },
     {
+      "name": "s_8cb44af50f",
+      "value": "Suis la vibration, inspire lentement…"
+    },
+    {
       "name": "s_8cd62ee39c",
       "value": "« Tu es plus courageux que tu ne le crois. »"
     },
     {
       "name": "s_8d1a970c8d",
       "value": "Style par défaut"
+    },
+    {
+      "name": "s_8d34f398c2",
+      "value": "Amusement"
     },
     {
       "name": "s_8d6bc0a28f",
@@ -1545,6 +1981,10 @@
       "value": "Touchez l'enveloppe en haut à droite et %s vous écrira"
     },
     {
+      "name": "s_8f9a55ccb3",
+      "value": "Peur"
+    },
+    {
       "name": "s_8fad83c181",
       "value": "« Rien ne presse : l'histoire ne fait que commencer. »"
     },
@@ -1567,6 +2007,10 @@
     {
       "name": "s_9101853a76",
       "value": "Sous-titre (facultatif)"
+    },
+    {
+      "name": "s_9131b3c5b6",
+      "value": "Agacement"
     },
     {
       "name": "s_91732e25ee",
@@ -1593,6 +2037,10 @@
       "value": "« Quand on est seul, les mots sont la meilleure compagnie. »"
     },
     {
+      "name": "s_935aabaeb1",
+      "value": "Ce correspondant n'est pas encore prêt : la lettre n'est pas partie"
+    },
+    {
       "name": "s_9392c3c977",
       "value": "Statistiques"
     },
@@ -1603,6 +2051,10 @@
     {
       "name": "s_9401eee769",
       "value": "30 jours"
+    },
+    {
+      "name": "s_948a67b305",
+      "value": "Parlez-en à une personne de confiance, ou contactez une ligne d'écoute."
     },
     {
       "name": "s_9545e4dc22",
@@ -1617,8 +2069,16 @@
       "value": "Cet instant est désormais sur le papier"
     },
     {
+      "name": "s_974bfbcc56",
+      "value": "Nuit polaire : période où, à l'intérieur des cercles polaires, le soleil reste toute la journée sous l'horizon — à Tromsø, en Norvège, environ de fin novembre à mi-janvier. Mode sombre à l'échelle du système : Apple l'a introduit en 2019 avec iOS 13 ; la même année, Google a ajouté un thème sombre système à Android 10. Sur un écran OLED, un pixel noir n'émet aucune lumière."
+    },
+    {
       "name": "s_975ac3e011",
       "value": "Jointe à la lettre"
+    },
+    {
+      "name": "s_9854b63ae3",
+      "value": "Par mois"
     },
     {
       "name": "s_9860e2406f",
@@ -1633,8 +2093,16 @@
       "value": "Délai dépassé — réessayez plus tard"
     },
     {
+      "name": "s_98be827150",
+      "value": "Écrire dans celui-ci"
+    },
+    {
       "name": "s_9908c922f2",
       "value": "Vérification…"
+    },
+    {
+      "name": "s_994a9fe7f9",
+      "value": "Une si belle humeur mérite qu'on s'y attarde."
     },
     {
       "name": "s_997b9c5847",
@@ -1661,6 +2129,14 @@
       "value": "Vous n'êtes pas connecté à iCloud : les entrées restent sur cet appareil. Connectez-vous dans Réglages → Compte Apple et la synchronisation démarrera."
     },
     {
+      "name": "s_9c1c6f5d81",
+      "value": "%s là-bas"
+    },
+    {
+      "name": "s_9c44ec8a2f",
+      "value": "PDF relié"
+    },
+    {
       "name": "s_9c92f8559a",
       "value": "Ces fichiers n'appartiennent à aucune entrée existante. Les supprimer n'affectera pas vos contenus."
     },
@@ -1677,6 +2153,10 @@
       "value": "Brouillon enregistré"
     },
     {
+      "name": "s_9ddfc6f8d5",
+      "value": "Choisir les destinataires"
+    },
+    {
       "name": "s_9e19a026db",
       "value": "Dans cette lettre"
     },
@@ -1691,6 +2171,10 @@
     {
       "name": "s_9f0103656b",
       "value": "Couleur de la toile"
+    },
+    {
+      "name": "s_9f24026626",
+      "value": "Au plus bas"
     },
     {
       "name": "s_9f9a88b0c8",
@@ -1733,6 +2217,10 @@
       "value": "#%s"
     },
     {
+      "name": "s_a305bdce5e",
+      "value": "Le cœur joyeux"
+    },
+    {
       "name": "s_a33bda51e5",
       "value": "Mot de passe incorrect — réessayez"
     },
@@ -1745,6 +2233,10 @@
       "value": "L'achat n'a pas pu aboutir. Réessayez plus tard."
     },
     {
+      "name": "s_a462c30c72",
+      "value": "Zoom"
+    },
+    {
       "name": "s_a4e6f10bf1",
       "value": "Renvoyer"
     },
@@ -1753,12 +2245,20 @@
       "value": "Format de fichier incorrect — il est peut-être endommagé"
     },
     {
+      "name": "s_a5b49a429e",
+      "value": "Courage"
+    },
+    {
       "name": "s_a612e01da7",
       "value": "Écrire la première entrée"
     },
     {
       "name": "s_a671f238f1",
       "value": "Rue"
+    },
+    {
+      "name": "s_a7e0766525",
+      "value": "Toutes"
     },
     {
       "name": "s_a7f814c0a4",
@@ -1781,8 +2281,24 @@
       "value": "La lettre du jour vient de partir, elle n'est pas allée loin. Écrivez demain, la réponse viendra demain."
     },
     {
+      "name": "s_a9583b5773",
+      "value": "Répond en quelques heures"
+    },
+    {
+      "name": "s_a9c3c6683b",
+      "value": "Là où les pixels s'éteignent commence la nuit la plus profonde"
+    },
+    {
+      "name": "s_a9c8397cce",
+      "value": "Correspondants du monde"
+    },
+    {
       "name": "s_a9d57f8585",
       "value": "Écrire cet instant"
+    },
+    {
+      "name": "s_aa6bbe90c2",
+      "value": "%s · à %s de vous"
     },
     {
       "name": "s_aaa25533ca",
@@ -1817,6 +2333,10 @@
       "value": "Aperçu :"
     },
     {
+      "name": "s_ad70ab4ff7",
+      "value": "Export en cours %d %%"
+    },
+    {
       "name": "s_ad8012ee9f",
       "value": "Thèmes"
     },
@@ -1837,6 +2357,10 @@
       "value": "Touchez la boîte aux lettres pour envoyer à %s les pages cochées"
     },
     {
+      "name": "s_af52700ce1",
+      "value": "Une journée pareille mérite quelques lignes de plus."
+    },
+    {
       "name": "s_af5a2c8bff",
       "value": "Italique"
     },
@@ -1851,6 +2375,14 @@
     {
       "name": "s_b065d573da",
       "value": "Impossible d'écrire la lettre"
+    },
+    {
+      "name": "s_b0e24833f7",
+      "value": "Déplier"
+    },
+    {
+      "name": "s_b107678c2e",
+      "value": "Partager, enregistrer ou imprimer (%s)"
     },
     {
       "name": "s_b1a9ba7930",
@@ -1949,8 +2481,20 @@
       "value": "Trop de requêtes — réessayez dans environ %d secondes"
     },
     {
+      "name": "s_b7ebc71b40",
+      "value": "Devenez membre pour écrire à %s"
+    },
+    {
+      "name": "s_b83ba48b71",
+      "value": "Mélancolie"
+    },
+    {
       "name": "s_b869f3199c",
       "value": "Mots"
+    },
+    {
+      "name": "s_b86ded4a21",
+      "value": "Ni triste ni gai"
     },
     {
       "name": "s_b8bb31e170",
@@ -1961,8 +2505,16 @@
       "value": "Relâcher pour déposer ici"
     },
     {
+      "name": "s_b972a94c85",
+      "value": "Par correspondant"
+    },
+    {
       "name": "s_b981bb73cb",
       "value": "La lumière de l'après-midi est douce. Toi aussi."
+    },
+    {
+      "name": "s_b9c6b284ee",
+      "value": "Le correspondant que vous avez nommé. Il écrit dans votre langue."
     },
     {
       "name": "s_bb69e30f5a",
@@ -1971,6 +2523,10 @@
     {
       "name": "s_bb7874b421",
       "value": "Intertitre"
+    },
+    {
+      "name": "s_bb8a65d0b7",
+      "value": "Lettre en route"
     },
     {
       "name": "s_bb9da11863",
@@ -1995,6 +2551,10 @@
     {
       "name": "s_bd1775eabd",
       "value": "Écris quelques mots avant que le soleil ne se retire."
+    },
+    {
+      "name": "s_bd6bd4738c",
+      "value": "Surprise"
     },
     {
       "name": "s_bd7fc4488b",
@@ -2025,12 +2585,20 @@
       "value": "« Arrête-toi parfois pour regarder le chemin parcouru. »"
     },
     {
+      "name": "s_bf72168234",
+      "value": "Timbres : %d"
+    },
+    {
       "name": "s_bfae481139",
       "value": "Vous n’êtes pas connecté à iCloud. Vos journaux ne sont que sur cet appareil et seront perdus si vous supprimez l’app. Connectez-vous dans « Réglages → Compte Apple » et la synchronisation démarrera automatiquement."
     },
     {
       "name": "s_bfd6de1bee",
       "value": "Saisir à nouveau"
+    },
+    {
+      "name": "s_bfe4c57f10",
+      "value": "À"
     },
     {
       "name": "s_c06a9a8733",
@@ -2047,6 +2615,10 @@
     {
       "name": "s_c15e3efa81",
       "value": "« Les émotions ne sont ni justes ni fausses : elles sont entendues, ou ignorées. »"
+    },
+    {
+      "name": "s_c19e7282f7",
+      "value": "1re année : environ %1$s/mois, puis %2$s/an"
     },
     {
       "name": "s_c20e6cdf1d",
@@ -2085,6 +2657,10 @@
       "value": "Supprimer la photo"
     },
     {
+      "name": "s_c4e973e803",
+      "value": "À la maison : avec du papier A5, choisissez A5 et recto verso (reliure bord long). L’A4 convient aussi : mêmes proportions, chaque page est simplement agrandie."
+    },
+    {
       "name": "s_c5096164af",
       "value": "MEMOIR"
     },
@@ -2095,6 +2671,14 @@
     {
       "name": "s_c567ba63ab",
       "value": "« Certains chemins se font seul, mais on n'a pas à tout porter seul. »"
+    },
+    {
+      "name": "s_c57af70474",
+      "value": "Irritation"
+    },
+    {
+      "name": "s_c5b5636641",
+      "value": "Afficher plus par écran"
     },
     {
       "name": "s_c5c198d890",
@@ -2133,6 +2717,10 @@
       "value": "Par défaut"
     },
     {
+      "name": "s_c9ac2abd66",
+      "value": "Cette lettre part pour"
+    },
+    {
       "name": "s_ca2e64e0b5",
       "value": "Payant"
     },
@@ -2161,6 +2749,10 @@
       "value": "Memoir doit conserver votre numéro de téléphone pour la connexion et transmettre le texte de vos entrées pour composer une réponse lorsque vous demandez une lettre. Sans votre consentement, ces fonctionnalités ne peuvent pas être proposées. Nous en sommes désolés."
     },
     {
+      "name": "s_cb63c62e50",
+      "value": "Compris"
+    },
+    {
       "name": "s_cb7f4c5817",
       "value": "Suivre le thème"
     },
@@ -2175,6 +2767,14 @@
     {
       "name": "s_cbcc5a7c11",
       "value": "Envoi en cours…"
+    },
+    {
+      "name": "s_cbefa1b42e",
+      "value": "%d correspondants, aux quatre coins du monde"
+    },
+    {
+      "name": "s_cc10aa451b",
+      "value": "Ce n'est rien. Reste ici, ton téléphone en main, et ralentis."
     },
     {
       "name": "s_cca54b96ed",
@@ -2225,6 +2825,10 @@
       "value": "Envoyé. Écrivez de nouvelles pages et revenez les envoyer."
     },
     {
+      "name": "s_ceab2d4c71",
+      "value": "Carte des correspondants"
+    },
+    {
       "name": "s_cf9d76b498",
       "value": "Découvrir Memoir Plus"
     },
@@ -2249,6 +2853,10 @@
       "value": "Bientôt disponible"
     },
     {
+      "name": "s_d39917428a",
+      "value": "Un peu morose"
+    },
+    {
       "name": "s_d3fc6fa5bc",
       "value": "Pleine page"
     },
@@ -2257,12 +2865,24 @@
       "value": "Liste"
     },
     {
+      "name": "s_d48fd5f69b",
+      "value": "Jalousie"
+    },
+    {
+      "name": "s_d51054a2b4",
+      "value": "La nuit polaire, c'est ce temps de l'hiver, aux hautes latitudes, où le soleil ne se lève plus. Aujourd'hui, elle habite tous nos téléphones : le mode sombre plonge l'écran dans un seul aplat noir et, sur un écran OLED, les pixels noirs s'éteignent tout simplement — les mots semblent sortir de la nuit. Net, un brin futuriste, et doux dans une pièce sombre : quelques lignes tard le soir, sans réveiller qui dort à côté."
+    },
+    {
       "name": "s_d55de11445",
       "value": "Synchronisé avec l'App Store"
     },
     {
       "name": "s_d567eeebd2",
       "value": "⚠️ Sans mot de passe, quiconque obtient ce fichier peut lire toutes vos entrées."
+    },
+    {
+      "name": "s_d58b0502e6",
+      "value": "Exporter en PDF"
     },
     {
       "name": "s_d5af163131",
@@ -2291,6 +2911,10 @@
     {
       "name": "s_d84664c768",
       "value": "Après le changement, connectez-vous avec le nouveau numéro."
+    },
+    {
+      "name": "s_d946dacd50",
+      "value": "Bonheur"
     },
     {
       "name": "s_d9b91c877d",
@@ -2333,12 +2957,24 @@
       "value": "**Le texte, les photos et les enregistrements que vous écrivez ne sont jamais envoyés à nos serveurs.** Ils restent sur votre appareil et se synchronisent entre vos appareils via votre propre iCloud, auquel nous n’avons pas accès."
     },
     {
+      "name": "s_df6331be72",
+      "value": "Les correspondants du monde sont réservés aux membres : cette lettre n'est pas partie"
+    },
+    {
       "name": "s_df73c654d2",
       "value": "Créer une sauvegarde"
     },
     {
+      "name": "s_dfac3b9d59",
+      "value": "Une journée ordinaire, c'est aussi une journée bien vécue."
+    },
+    {
       "name": "s_dfd9e22f59",
       "value": "Un code sera envoyé au numéro associé à votre compte"
+    },
+    {
+      "name": "s_e141654f13",
+      "value": "Centre de recherche et d'intervention en crise psychologique de Pékin · 24 h/24"
     },
     {
       "name": "s_e162d4656a",
@@ -2357,6 +2993,10 @@
       "value": "Votre dernière lettre vient de partir. Envoyez la suivante un peu plus tard."
     },
     {
+      "name": "s_e249c526c7",
+      "value": "Très agréable"
+    },
+    {
       "name": "s_e2aedf50f2",
       "value": "« S'accepter tel qu'on est maintenant : voilà le meilleur commencement. »"
     },
@@ -2367,6 +3007,10 @@
     {
       "name": "s_e488fa1386",
       "value": "Touchez le bouton ci-dessous pour écrire l'histoire du jour"
+    },
+    {
+      "name": "s_e4eb902363",
+      "value": "Répond en un ou deux jours"
     },
     {
       "name": "s_e524dcf71e",
@@ -2397,6 +3041,10 @@
       "value": "La lune elle-même attend que tu achèves l'histoire du jour."
     },
     {
+      "name": "s_e75c0baca3",
+      "value": "Un enregistrement"
+    },
+    {
       "name": "s_e775910242",
       "value": "Un journal écrit pour soi"
     },
@@ -2423,6 +3071,10 @@
     {
       "name": "s_ea0ef2ae72",
       "value": "Suivant"
+    },
+    {
+      "name": "s_ea7061a8e3",
+      "value": "Dans quel carnet écrire ?"
     },
     {
       "name": "s_eaa6b0540d",
@@ -2489,6 +3141,10 @@
       "value": "count"
     },
     {
+      "name": "s_eedf364579",
+      "value": "L'humeur n'a pas été enregistrée, mais ton journal est bien sauvegardé."
+    },
+    {
       "name": "s_ef6e0d1008",
       "value": "Choisir une icône"
     },
@@ -2521,6 +3177,14 @@
       "value": "Vos entrées se synchronisent automatiquement avec iCloud : rien n'est perdu en changeant d'appareil. Elles vivent dans votre compte, nous n'y avons pas accès."
     },
     {
+      "name": "s_f2544d8e37",
+      "value": "Espoir"
+    },
+    {
+      "name": "s_f27c1cada1",
+      "value": "Pour un vrai livre, envoyez le PDF à un imprimeur ou à un service d’impression en ligne en demandant « A5, recto verso, relié ». La première page est la couverture, la dernière la quatrième de couverture."
+    },
+    {
       "name": "s_f29761cd03",
       "value": "MEMOIR"
     },
@@ -2531,6 +3195,10 @@
     {
       "name": "s_f2a27892d0",
       "value": "Actif"
+    },
+    {
+      "name": "s_f2d2c96c62",
+      "value": "Accablement"
     },
     {
       "name": "s_f32f4dac3a",
@@ -2547,6 +3215,10 @@
     {
       "name": "s_f4ae8c66ad",
       "value": "Polaroid"
+    },
+    {
+      "name": "s_f4b0ec3120",
+      "value": "Paix"
     },
     {
       "name": "s_f60d7d12e4",
@@ -2581,12 +3253,28 @@
       "value": "Votre consentement est nécessaire pour continuer"
     },
     {
+      "name": "s_f73492117c",
+      "value": "États-Unis · 988 Suicide & Crisis Lifeline"
+    },
+    {
+      "name": "s_f84fe41dd6",
+      "value": "Choisis celui qui te ressemble"
+    },
+    {
       "name": "s_f85412ce62",
       "value": "Nous noter"
     },
     {
+      "name": "s_f867d672f3",
+      "value": "Printemps"
+    },
+    {
       "name": "s_f8778319a6",
       "value": "Importer comme nouveaux carnets"
+    },
+    {
+      "name": "s_f893902ee4",
+      "value": "Anxiété"
     },
     {
       "name": "s_f8d820eebf",
@@ -2617,8 +3305,20 @@
       "value": "« Faire le premier pas compte plus que la direction. »"
     },
     {
+      "name": "s_fa6a5ccde2",
+      "value": "Vous êtes ici"
+    },
+    {
       "name": "s_fa78a6eba6",
       "value": "Échec de la génération : %s"
+    },
+    {
+      "name": "s_fabe6d8d19",
+      "value": "Touchez ou glissez vers le haut pour briser le sceau"
+    },
+    {
+      "name": "s_fac14ac621",
+      "value": "OK"
     },
     {
       "name": "s_fac430ea0c",
@@ -2637,8 +3337,16 @@
       "value": "Créer"
     },
     {
+      "name": "s_fda7539bde",
+      "value": "Satisfaction"
+    },
+    {
       "name": "s_fdc1a10b4f",
       "value": "Nostalgique"
+    },
+    {
+      "name": "s_fddfaa4339",
+      "value": "Par date"
     },
     {
       "name": "s_fe06546672",
@@ -2647,6 +3355,10 @@
     {
       "name": "s_fe1629f682",
       "value": "ex. : 2025 · Kyoto"
+    },
+    {
+      "name": "s_fe2161f91d",
+      "value": "Passion"
     },
     {
       "name": "s_fe9ea3f070",
@@ -2686,7 +3398,7 @@
     },
     {
       "name": "s_6ccf6187f5",
-      "value": "Déjà Vu utilise votre position pour noter la météo du moment dans votre entrée."
+      "value": "Déjà Vu utilise votre position pour noter la météo dans votre entrée et montrer, sur la carte des correspondants, le chemin de vos lettres. Elle n'est jamais envoyée à nos serveurs."
     },
     {
       "name": "s_8d037e1dca",
@@ -2703,74 +3415,6 @@
     {
       "name": "s_e15f73bdc6",
       "value": "Déjà Vu utilise l’appareil photo pour ajouter des photos à vos entrées."
-    },
-    {
-      "name": "s_7c3f9e2a",
-      "value": "Placer à"
-    },
-    {
-      "name": "s_2e8d4f6b",
-      "value": "Gauche"
-    },
-    {
-      "name": "s_9b5c1d3f",
-      "value": "Droite"
-    },
-    {
-      "name": "s_7126a0f54e",
-      "value": "Impossible d'accéder au micro"
-    },
-    {
-      "name": "s_094be81a60",
-      "value": "Impossible de démarrer l'enregistrement"
-    },
-    {
-      "name": "s_e4c4ff3b29",
-      "value": "Impossible de lire l'enregistrement"
-    },
-    {
-      "name": "s_966b6def6c",
-      "value": "Déjà Vu a besoin du micro pour enregistrer des notes vocales dans votre journal. Les enregistrements restent uniquement sur votre appareil."
-    },
-    {
-      "name": "eye_flip_hint",
-      "value": "En bas de l'écran, levez les yeux pour tourner la page"
-    },
-    {
-      "name": "eye_flip_intro_title",
-      "value": "Tournez les pages du regard, les mains libres"
-    },
-    {
-      "name": "eye_flip_intro_usage",
-      "value": "En bas de l'écran, levez les yeux pour tourner la page"
-    },
-    {
-      "name": "eye_flip_intro_privacy",
-      "value": "La caméra frontale détecte les mouvements de tête uniquement sur cet appareil. L'image n'est jamais affichée, enregistrée ni envoyée."
-    },
-    {
-      "name": "eye_flip_intro_enable",
-      "value": "Essayer maintenant"
-    },
-    {
-      "name": "eye_flip_note_title",
-      "value": "Avant de commencer :"
-    },
-    {
-      "name": "eye_flip_note_1",
-      "value": "Essuyez la zone du capteur en haut de l'écran avant utilisation"
-    },
-    {
-      "name": "eye_flip_note_2",
-      "value": "Gardez les yeux à moins de 50 cm de l'écran"
-    },
-    {
-      "name": "eye_flip_note_3",
-      "value": "Utilisez-le dans un environnement bien éclairé"
-    },
-    {
-      "name": "eye_flip_unavailable",
-      "value": "Le tournage de page par le regard est temporairement indisponible"
     }
   ]
 }

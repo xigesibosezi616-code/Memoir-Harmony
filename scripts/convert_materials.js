@@ -30,6 +30,7 @@ const crypto = require('crypto');
 
 const ROOT = path.resolve(__dirname, '..');
 const IOS_MEMOIR = path.join(ROOT, 'reference', 'ios', 'Memoir');
+const IOS_MEMOIR_LATEST = path.join(ROOT, 'reference', 'ios-latest', 'Memoir');
 const ENTRY_RES = path.join(ROOT, 'entry', 'src', 'main', 'resources');
 const APPSCOPE_RES = path.join(ROOT, 'AppScope', 'resources');
 const INDEX_FILE = path.join(ROOT, 'strings_index.json');
@@ -44,6 +45,76 @@ const LANGS = [
   { ios: 'fr', dir: 'fr' },
   { ios: 'es', dir: 'es' },
 ];
+
+/**
+ * 手工维护的麦克风权限说明（module.json5 requestPermissions 的 reason，
+ * R-LANG-05）。不走 xcstrings：ios-latest 的 InfoPlist 文案带「可同步到你的
+ * iCloud」（iOS 同步功能的措辞），鸿蒙没有 iCloud，权限弹窗不能照搬；
+ * 七语言沿用移交时那份不提 iCloud 的旧译文（韩语句尾全角句号笔误已修）。
+ */
+const MICROPHONE_PERMISSION_REASON = {
+  'zh-Hans': '尺素需要使用麦克风为日记录制语音片段。录音内容仅保存在你的设备上。',
+  'zh-Hant': '尺素需要使用麥克風為日記錄製語音片段。錄音內容僅保存在你的裝置上。',
+  'en': 'memoir needs the microphone to record voice notes for your journal. Recordings are kept only on your device.',
+  'ja': '尺素は日記の音声メモの録音にマイクを使用します。録音内容はお使いのデバイスにのみ保存されます。',
+  'ko': '그리움은 일기 음성 메모를 녹음하기 위해 마이크를 사용합니다. 녹음 내용은 기기에만 저장됩니다.',
+  'fr': 'Déjà Vu a besoin du micro pour enregistrer des notes vocales dans votre journal. Les enregistrements restent uniquement sur votre appareil.',
+  'es': 'Añoranza necesita el micrófono para grabar notas de voz en tu diario. Las grabaciones se guardan solo en tu dispositivo.',
+};
+
+/**
+ * 手工补写的 UI 文案（历代卡片补的：iOS 物料里没有的鸿蒙侧文案，如错误
+ * Toast、纸张选项）。资源名沿用 s_ + SHA1(简中原文) 前 10 位的老约定，
+ * 代码已引用、不再改名；走 keepOriginals 强制写入，重跑不丢。
+ */
+const HAND_STRINGS = {
+  s_e4c4ff3b29: { // 无法播放录音
+    'zh-Hans': '无法播放录音', 'zh-Hant': '無法播放錄音',
+    'en': 'Could not play the recording', 'ja': '録音を再生できません',
+    'ko': '녹음을 재생할 수 없어요',
+    'fr': 'Impossible de lire l\'enregistrement',
+    'es': 'No se pudo reproducir la grabación' },
+  s_7c3f9e2a: { // 放在
+    'zh-Hans': '放在', 'zh-Hant': '放在', 'en': 'Place at', 'ja': '配置',
+    'ko': '배치', 'fr': 'Placer à', 'es': 'Colocar en' },
+  s_2e8d4f6b: { // 左边
+    'zh-Hans': '左边', 'zh-Hant': '左邊', 'en': 'Left', 'ja': '左',
+    'ko': '왼쪽', 'fr': 'Gauche', 'es': 'Izquierda' },
+  s_9b5c1d3f: { // 右边
+    'zh-Hans': '右边', 'zh-Hant': '右邊', 'en': 'Right', 'ja': '右',
+    'ko': '오른쪽', 'fr': 'Droite', 'es': 'Derecha' },
+  s_094be81a60: { // 无法开始录音
+    'zh-Hans': '无法开始录音', 'zh-Hant': '無法開始錄音',
+    'en': 'Could not start recording', 'ja': '録音を開始できません',
+    'ko': '녹음을 시작할 수 없어요',
+    'fr': 'Impossible de démarrer l\'enregistrement',
+    'es': 'No se pudo iniciar la grabación' },
+  s_7126a0f54e: { // 无法访问麦克风
+    'zh-Hans': '无法访问麦克风', 'zh-Hant': '無法存取麥克風',
+    'en': 'Cannot access the microphone', 'ja': 'マイクにアクセスできません',
+    'ko': '마이크에 접근할 수 없어요',
+    'fr': 'Impossible d\'accéder au micro',
+    'es': 'No se puede acceder al micrófono' },
+  s_36205e6628: { // 位置服务暂时不可用
+    'zh-Hans': '位置服务暂时不可用', 'zh-Hant': '位置服務暫時不可用',
+    'en': 'Location service is temporarily unavailable',
+    'ja': '位置情報サービスは一時的に利用できません',
+    'ko': '위치 서비스를 일시적으로 사용할 수 없어요',
+    'fr': 'Service de localisation temporairement indisponible',
+    'es': 'Servicio de ubicación temporalmente no disponible' },
+};
+
+/** 把 LANGS 之外的固定条目（keepOriginals）按语言拼出来；appName 来自 xcstrings */
+function fixedEntriesFor(iosLang, appName) {
+  const fixed = [
+    { name: 'EntryAbility_label', value: appName },
+    { name: 'microphone_permission_reason', value: MICROPHONE_PERMISSION_REASON[iosLang] },
+  ];
+  for (const [name, values] of Object.entries(HAND_STRINGS)) {
+    fixed.push({ name, value: values[iosLang] });
+  }
+  return fixed;
+}
 
 /**
  * iOS 格式占位符 → 鸿蒙格式化写法（R-LANG-07：带参数的整句保持整句）。
@@ -66,6 +137,18 @@ function resName(hashInput) {
 
 function loadXcstrings(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8'));
+}
+
+/**
+ * 合并新旧两份 xcstrings（TASK.md 更新包规则：已交付更新包的文案以
+ * `reference/ios-latest` 为准；但 latest 随未落地更新包删掉的键——如 U03
+ * 心情系统换掉的 `mood.*`——鸿蒙对应卡片还没做、代码仍在引用，不能跟着丢）。
+ * 规则：两份都有的键取 latest（译文修正在 latest）；只有旧份有的键保留。
+ */
+function mergeXcstrings(oldFile, latestFile) {
+  const oldStrings = loadXcstrings(oldFile).strings || {};
+  const latestStrings = loadXcstrings(latestFile).strings || {};
+  return { strings: Object.assign({}, oldStrings, latestStrings) };
 }
 
 /**
@@ -202,9 +285,15 @@ function writeJson(file, obj) {
 }
 
 function main() {
-  // ---------- 1. 字符串 ----------
-  const localizable = loadXcstrings(path.join(IOS_MEMOIR, 'Localizable.xcstrings'));
-  const infoPlist = loadXcstrings(path.join(IOS_MEMOIR, 'InfoPlist.xcstrings'));
+  // ---------- 1. 字符串（ios + ios-latest 合并，见 mergeXcstrings 注释） ----------
+  const localizable = mergeXcstrings(
+    path.join(IOS_MEMOIR, 'Localizable.xcstrings'),
+    path.join(IOS_MEMOIR_LATEST, 'Localizable.xcstrings')
+  );
+  const infoPlist = mergeXcstrings(
+    path.join(IOS_MEMOIR, 'InfoPlist.xcstrings'),
+    path.join(IOS_MEMOIR_LATEST, 'InfoPlist.xcstrings')
+  );
   const entries = extractEntries(localizable, 'Localizable')
     .concat(extractEntries(infoPlist, 'InfoPlist'));
   assertNoCollisions(entries);
@@ -227,13 +316,13 @@ function main() {
     const generated = entries.map((e) => ({ name: e.name, value: e.values[ios] }));
     const file = path.join(ENTRY_RES, dir, 'element', 'string.json');
     // 七语言目录也走合并写：非 s_ 开头的手工资源（lang_name_* 等）不会被覆盖
-    mergeWriteStringJson(file, generated, [{ name: 'EntryAbility_label', value: appNameValues[ios] }]);
+    mergeWriteStringJson(file, generated, fixedEntriesFor(ios, appNameValues[ios]));
   }
   // base：保留模板条目，生成条目填 zh-Hans 值
   mergeWriteStringJson(
     path.join(ENTRY_RES, 'base', 'element', 'string.json'),
     entries.map((e) => ({ name: e.name, value: e.values['zh-Hans'] })),
-    [{ name: 'EntryAbility_label', value: appNameValues['zh-Hans'] }]
+    fixedEntriesFor('zh-Hans', appNameValues['zh-Hans'])
   );
 
   // AppScope：base + 七语言目录的 app_name（桌面图标下显示的 App 名）
@@ -265,11 +354,17 @@ function main() {
     }
     indexEntries[e.name] = item;
   }
+  // 手补文案也进索引（check_localization 要求 base 里的 s_ 资源都能按中文查到）
+  for (const [name, values] of Object.entries(HAND_STRINGS)) {
+    indexEntries[name] = { zh: values['zh-Hans'], source: 'Hand' };
+  }
   writeJson(INDEX_FILE, {
     note: '由 scripts/convert_materials.js 生成，勿手改。按简中原文（zh 字段）检索资源名；带参数的句子整句查（R-LANG-07）。',
     fixed: {
       app_name: 'AppScope 桌面 App 名（R-LANG-06）',
       EntryAbility_label: 'entry 任务栈 / 最近任务显示名（跟 App 名）',
+      microphone_permission_reason: 'module.json5 麦克风权限说明（手工维护；iOS 那份带 iCloud 措辞，不能照搬）',
+      hand_strings: 'HAND_STRINGS：历代卡片手补的鸿蒙侧文案（错误 Toast、纸张选项等，iOS 物料里没有），随脚本强制写入不丢',
     },
     entries: indexEntries,
   });

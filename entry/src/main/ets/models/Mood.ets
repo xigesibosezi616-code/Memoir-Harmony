@@ -79,3 +79,17 @@ export function isDefaultMoodKey(key: string): boolean {
   }
   return false;
 }
+
+/**
+ * 预设心情的代表色（'#RRGGBB'）；不是预设 key 返回 undefined。
+ * 大屏卡片 / 总览格子没照片时用心情色染底（R-HOME-06），从 entry.moodColorHex
+ * 取不到时（老数据）按 key 查预设兜底。
+ */
+export function presetMoodColorHex(key: string): string | undefined {
+  for (const preset of MOOD_PRESETS) {
+    if (preset.key === key) {
+      return preset.colorHex;
+    }
+  }
+  return undefined;
+}

@@ -33,10 +33,18 @@ export const PREF_KEY_LOCATION_PRECISION = 'locationPrecision';
 export const PREF_KEY_BOOK_CONTENTS_LAYOUT = 'bookContentsLayout';
 /** 眼动翻页引导页是否已展示过（只弹一次；3.5） */
 export const PREF_KEY_EYE_INTRO_SHOWN = 'eyeIntroShown';
+/** 手记页展示方式（对应 iOS `homeDisplayMode`，showcase / list，默认 showcase；U07 R-HOME-11） */
+export const PREF_KEY_HOME_DISPLAY_MODE = 'homeDisplayMode';
+/** 大屏一屏放几篇（对应 iOS `showcaseZoom`，0–3；U06 R-HOME-09 只存本机） */
+export const PREF_KEY_SHOWCASE_ZOOM = 'showcaseZoom';
 
 /** 目录版式取值（iOS `BookContentsView.Layout`） */
 export const BOOK_CONTENTS_LAYOUT_LIST = 'list';
 export const BOOK_CONTENTS_LAYOUT_GRID = 'grid';
+
+/** 手记页展示方式取值（iOS `HomeDisplayMode`） */
+export const HOME_DISPLAY_MODE_SHOWCASE = 'showcase';
+export const HOME_DISPLAY_MODE_LIST = 'list';
 
 // ---- AppStorage 镜像 key（EntryAbility 启动时由偏好算好写入，UI 用 @StorageLink/@StorageProp 观察）----
 
@@ -169,5 +177,35 @@ export class AppPrefs {
   static normalizedBookContentsLayout(raw: string): string {
     return raw === BOOK_CONTENTS_LAYOUT_GRID
       ? BOOK_CONTENTS_LAYOUT_GRID : BOOK_CONTENTS_LAYOUT_LIST;
+  }
+
+  // ---- 3.6 大屏模式（U06 / U07） ----
+
+  /**
+   * 手记页展示方式：没选过（新装 App）一律大屏（U07 R-HOME-11）；
+   * 非法值按大屏兜底（旧数据 / 手改坏了不崩）
+   */
+  static currentHomeDisplayMode(): string {
+    return AppPrefs.getString(PREF_KEY_HOME_DISPLAY_MODE, HOME_DISPLAY_MODE_SHOWCASE) === HOME_DISPLAY_MODE_LIST
+      ? HOME_DISPLAY_MODE_LIST : HOME_DISPLAY_MODE_SHOWCASE;
+  }
+
+  static setHomeDisplayMode(mode: string): void {
+    AppPrefs.putString(PREF_KEY_HOME_DISPLAY_MODE, mode === HOME_DISPLAY_MODE_LIST
+      ? HOME_DISPLAY_MODE_LIST : HOME_DISPLAY_MODE_SHOWCASE);
+  }
+
+  /** 大屏一屏放几篇（0–3）；越界 / 坏值按 0（一屏一篇）兜底，记住的级别只存本机 */
+  static currentShowcaseZoom(): number {
+    const raw = Number(AppPrefs.getString(PREF_KEY_SHOWCASE_ZOOM, '0'));
+    if (Number.isNaN(raw) || raw < 0 || raw > 3 || !Number.isInteger(raw)) {
+      return 0;
+    }
+    return raw;
+  }
+
+  static setShowcaseZoom(zoom: number): void {
+    const clamped = Math.min(3, Math.max(0, Math.round(zoom)));
+    AppPrefs.putString(PREF_KEY_SHOWCASE_ZOOM, `${clamped}`);
   }
 }

@@ -1,4 +1,4 @@
-import { AbilityConstant, UIAbility, Want } from '@kit.AbilityKit';
+import { AbilityConstant, UIAbility, Want, wantConstant } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { ThemeManager, STORAGE_KEY_THEME_ID, STORAGE_KEY_THEME_MANAGER } from '../theme/ThemeManager';
@@ -12,6 +12,16 @@ import { MigrationRunner } from '../services/MigrationRunner';
 import { AppEnvironment, STORAGE_KEY_APP_ENVIRONMENT } from '../environment/AppEnvironment';
 import { createDefaultErrorPresenter } from '../environment/ErrorPresenter';
 import { ImmersiveChrome } from '../services/ImmersiveChrome';
+import { DraftRepository } from '../data/DraftRepository';
+import { AppDatabase } from '../data/Database';
+import {
+  WANT_PARAM_DRAFT,
+  STORAGE_KEY_LIVE_DRAFT_JSON,
+  STORAGE_KEY_CONTINUED_DRAFT_JSON,
+  STORAGE_KEY_CONTINUE_TO_COMPOSE_TICK,
+  continuationPayloadFits,
+  encodeDraftForContinuation
+} from '../services/AppContinuation';
 
 const DOMAIN = 0x0000;
 const TAG = 'EntryAbility';
@@ -19,9 +29,75 @@ const TAG = 'EntryAbility';
 export default class EntryAbility extends UIAbility {
   /** 应用级依赖容器（onWindowStageCreate 创建；onForeground 回前台时取用） */
   private environment: AppEnvironment | null = null;
+  /** 内容加载防重入：Create / Restore 互斥触发，标志兜底防重复 loadContent 重置页面栈 */
+  private contentLoaded: boolean = false;
 
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onCreate');
+    this.stashContinuedDraftIfAny(want, launchParam);
+  }
+
+  /**
+   * 应用接续（源端）：系统把应用拖到另一台设备时回调。优先取 ComposeView
+   * 防抖发布的实时快照（编辑器里还没落库的字也在），没有再退回库里的草稿；
+   * 都没有就带空包 AGREE（对端打开首页，与 iOS 无此能力相比已是增量）。
+   * 负载超官方 100KB 约束 REJECT——不静默截断，用户会误以为接续成功。
+   */
+  async onContinue(wantParam: Record<string, Object>): Promise<AbilityConstant.OnContinueResult> {
+    try {
+      // 不迁移系统 router 页面栈：接续恢复走 HomeView 消费链（stash → 落库 →
+      // push Compose），系统栈直落 Compose 会读到还没落库的旧本地草稿；且文档
+      // 明说自动栈恢复仅支持 router、不支持我们用的 Navigation（bpta-continue-cast）
+      wantParam[wantConstant.Params.SUPPORT_CONTINUE_PAGE_STACK_KEY] = false;
+      let payload: string = AppStorage.get<string>(STORAGE_KEY_LIVE_DRAFT_JSON) ?? '';
+      if (payload.length === 0) {
+        const store = await AppDatabase.open(this.context);
+        const draft = await DraftRepository.loadCurrentDraft(store);
+        if (draft !== null) {
+          payload = encodeDraftForContinuation(draft);
+        }
+      }
+      if (payload.length > 0) {
+        if (!continuationPayloadFits(payload)) {
+          hilog.warn(DOMAIN, TAG, 'continue payload over 100KB limit, rejected');
+          return AbilityConstant.OnContinueResult.REJECT;
+        }
+        wantParam[WANT_PARAM_DRAFT] = payload;
+      }
+      return AbilityConstant.OnContinueResult.AGREE;
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'onContinue failed: %{public}s', JSON.stringify(err));
+      return AbilityConstant.OnContinueResult.REJECT;
+    }
+  }
+
+  /**
+   * 应用接续（对端）：LaunchReason.CONTINUATION 时把接续草稿 JSON 暂存进
+   * AppStorage 并 +1 信号。**不在这里写库**：冷启动时合规层（同意页 /
+   * 引导）还没走完，库写入和路由都等首页就绪后由 HomeView 消费
+   * （restoreContinuedDraftIfNeeded）。
+   */
+  private stashContinuedDraftIfAny(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    if (launchParam.launchReason !== AbilityConstant.LaunchReason.CONTINUATION) {
+      return;
+    }
+    const params: Record<string, Object> | undefined = want.parameters;
+    if (params === undefined) {
+      return;
+    }
+    const payload: Object | undefined = params[WANT_PARAM_DRAFT];
+    if (typeof payload !== 'string' || payload.length === 0) {
+      return;
+    }
+    AppStorage.setOrCreate(STORAGE_KEY_CONTINUED_DRAFT_JSON, payload);
+    AppStorage.setOrCreate(STORAGE_KEY_CONTINUE_TO_COMPOSE_TICK,
+      (AppStorage.get<number>(STORAGE_KEY_CONTINUE_TO_COMPOSE_TICK) ?? 0) + 1);
+    hilog.info(DOMAIN, TAG, 'continued draft stashed, waiting for home to restore');
+  }
+
+  onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
+    hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onNewWant');
+    this.stashContinuedDraftIfAny(want, launchParam);
   }
 
   onDestroy(): void {
@@ -30,6 +106,24 @@ export default class EntryAbility extends UIAbility {
 
   onWindowStageCreate(windowStage: window.WindowStage): void {
     hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onWindowStageCreate');
+    this.setupEnvironment(windowStage);
+    this.initThenLoad(windowStage);
+  }
+
+  /**
+   * 应用接续（对端）窗口还原：官方文档实锤——迁移启动（无论冷/热）只回调
+   * onWindowStageRestore，**不回调 onWindowStageCreate**（bpta-continue-cast
+   * 「对端恢复数据」；2026-10-23 80 Pro Max 白屏实测：onCreate → onWindowStageRestore
+   * → onForeground，缺此实现 loadContent 永不执行 = 白屏）。必须把 Create 里
+   * 做过的启动初始化在这里原样做一遍。contentLoaded 防重入：同一 UIAbility
+   * 存续期内若两回调都被触发，只 loadContent 一次，避免重置页面栈。
+   */
+  onWindowStageRestore(windowStage: window.WindowStage): void {
+    hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onWindowStageRestore');
+    if (this.contentLoaded) {
+      hilog.warn(DOMAIN, TAG, 'content already loaded, skip re-load in restore');
+      return;
+    }
     this.setupEnvironment(windowStage);
     this.initThenLoad(windowStage);
   }
@@ -70,6 +164,10 @@ export default class EntryAbility extends UIAbility {
    * 同意之前除这些本地初始化外什么都不能做。
    */
   private async initThenLoad(windowStage: window.WindowStage): Promise<void> {
+    if (this.contentLoaded) {
+      return;
+    }
+    this.contentLoaded = true;
     try {
       const manager = await ThemeManager.create(this.context);
       AppStorage.setOrCreate(STORAGE_KEY_THEME_MANAGER, manager);

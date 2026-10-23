@@ -72,6 +72,10 @@ import { DraftEntry, PlaceMode } from '../../models/Draft';
 import { generateUuid } from '../../models/Uuid';
 import { MediaStorageService } from '../../services/MediaStorageService';
 import { AppPrefs } from '../../services/AppPrefs';
+import {
+  STORAGE_KEY_LIVE_DRAFT_JSON,
+  encodeDraftForContinuation
+} from '../../services/AppContinuation';
 import { LocationWeatherManager } from '../../services/LocationWeatherManager';
 import { CircleIconButton } from './CircleIconButton';
 import { MoodSelector } from './MoodSelector';
@@ -193,10 +197,16 @@ export struct ComposeView {
   private draftBlocks: ContentBlock[] = [];
   /** 路由参数带入的日记本名（从某本点「写一篇」时预选；草稿的选择优先） */
   private initialNotebookName: string = '';
+  /** 实时草稿快照防抖定时器句柄（-1 = 没排着；应用接续 onContinue 取快照） */
+  private liveSnapshotTimer: number = -1;
 
   aboutToDisappear(): void {
     // 全屏浮层没关就被路由弹走（边滑返回）时，别把主框架 Tab 栏一直藏着
     AppStorage.setOrCreate(STORAGE_KEY_HIDE_TAB_BAR, false);
+    if (this.liveSnapshotTimer >= 0) {
+      clearTimeout(this.liveSnapshotTimer);
+      this.liveSnapshotTimer = -1;
+    }
   }
 
   aboutToAppear(): void {
@@ -207,6 +217,7 @@ export struct ComposeView {
     // 文本镜像（✓ 判定 / 字数）+ 照片锚点卡五路动作（长按全屏 / 功能条四项）
     this.bodyController.onTextChange = (text: string): void => {
       this.bodyText = text;
+      this.scheduleLiveDraftSnapshot();
     };
     this.bodyController.onPhotoTap = (blockId: string): void => {
       this.openPhotoFullscreen(blockId);
@@ -226,10 +237,12 @@ export struct ComposeView {
     this.bodyController.onPhotoRemoved = (_blockId: string): void => {
       // 两段式退格 / 范围删除出的照片（页面方法外路径）：张数镜像跟着走
       this.bodyPhotoCount = this.bodyController.photoCount();
+      this.scheduleLiveDraftSnapshot();
     };
     this.bodyController.onAudioRemoved = (_blockId: string): void => {
       // 卡片 ✕ / 两段式退格 / 范围删除出的录音（文件存盘时统一清）
       this.bodyAudioCount = this.bodyController.audioCount();
+      this.scheduleLiveDraftSnapshot();
     };
     const context = this.getUIContext().getHostContext();
     if (context !== undefined) {
@@ -330,6 +343,7 @@ export struct ComposeView {
               .onWillChange((value: RichEditorChangeValue): boolean => this.titleWillChange(value))
               .onDidChange((): void => {
                 this.title = this.titleEditor.toStyledString({}).getString();
+                this.scheduleLiveDraftSnapshot();
               })
 
             // 正文（2.5 RichBodyEditor，备忘录式：照片整行锚点卡 + 文字上下独立段；
@@ -356,6 +370,7 @@ export struct ComposeView {
                 onMoodPicked: (mood: MoodTag): void => {
                   this.moodName = mood.name;
                   this.moodColorHex = mood.colorHex;
+                  this.scheduleLiveDraftSnapshot();
                 }
               })
             }
@@ -648,6 +663,7 @@ export struct ComposeView {
           this.manualPlaceName = manualName;
         }
         this.showLocationPicker = false;
+        this.scheduleLiveDraftSnapshot();
       },
       onCancel: (): void => {
         this.showLocationPicker = false;
@@ -764,6 +780,7 @@ export struct ComposeView {
       if (block !== undefined) {
         block.paperStyle = style;
         this.bodyController.updatePhoto(block);
+        this.scheduleLiveDraftSnapshot();
       }
       return;
     }
@@ -797,6 +814,7 @@ export struct ComposeView {
       return;
     }
     this.bodyPhotoCount = this.bodyController.photoCount();
+    this.scheduleLiveDraftSnapshot();
   }
 
   /**
@@ -835,6 +853,7 @@ export struct ComposeView {
       return;
     }
     this.bodyPhotoCount = this.bodyController.photoCount();
+    this.scheduleLiveDraftSnapshot();
   }
 
   // ---- 2.6 照片：全屏查看与编辑（R-PHOTO-01 / R-RICH-05） ----
@@ -966,6 +985,7 @@ export struct ComposeView {
     }
     block.position = block.position === PhotoPosition.Left ? PhotoPosition.Right : PhotoPosition.Left;
     this.bodyController.updatePhoto(block);
+    this.scheduleLiveDraftSnapshot();
   }
 
   /** 设为 / 取消封面（一篇最多一张：开新的先清别的） */
@@ -982,6 +1002,7 @@ export struct ComposeView {
     });
     block.isCover = turningOn ? true : undefined;
     this.bodyController.updatePhoto(block);
+    this.scheduleLiveDraftSnapshot();
   }
 
   /** 换相纸：加载这张照片的缩略图重开相纸 sheet */
@@ -1183,6 +1204,7 @@ export struct ComposeView {
     this.insertedAudioPaths.add(relativePath);
     this.bodyAudioCount = this.bodyController.audioCount();
     this.showRecordingSheet = false;
+    this.scheduleLiveDraftSnapshot();
   }
 
   /** 存盘 / 存草稿时清没被引用的录音文件（照片 cleanupUnreferencedPhotos 同款） */
@@ -1399,6 +1421,9 @@ export struct ComposeView {
         this.manualPlaceName = draft.manualPlaceName ?? '';
         // RichEditor 不能用 text 参数绑定，草稿标题在 controller 就绪后注入
         this.injectDraftIntoEditors();
+        // 恢复出来的草稿立刻发一份实时快照：接续刚落地的场景 onContinue
+        // 马上再触发也有货（防抖等 pageDataLoaded 之后的发布）
+        this.scheduleLiveDraftSnapshot();
       }
       // 有无草稿都算数据就绪（空数组 = 空正文），装载信号二
       this.pageDataLoaded = true;
@@ -1489,6 +1514,8 @@ export struct ComposeView {
       // 转正的文件归日记了；这次新落盘又没进正文的清掉（iOS removeUnusedMedia）
       this.cleanupUnreferencedPhotos(blocks);
       this.cleanupUnreferencedAudios(blocks);
+      // 草稿已转正：实时快照摘掉，接续不再复活已转正的那篇
+      this.clearLiveDraftSnapshot();
       // 保存成功后主页刷新由 Index.onPageShow 的 reload tick 驱动
       //（主页被本页盖住时赋值不渲染，写入侧通知不可用，见 HomeLogic 注释）
     } catch (err) {
@@ -1517,7 +1544,27 @@ export struct ComposeView {
       this.presentSaveFailed();
       return false;
     }
-    const now = Date.now();
+    const draft = this.buildDraftFromEditor(Date.now());
+    try {
+      await DraftRepository.saveDraft(store, draft);
+      this.draft = draft;
+      // 草稿还引用的文件留给草稿；这次删掉没进草稿的清掉（iOS removeUnusedMedia）
+      this.cleanupUnreferencedPhotos(draft.contentBlocks);
+      this.cleanupUnreferencedAudios(draft.contentBlocks);
+      this.scheduleLiveDraftSnapshot(); // 存过 = 快照同步成本机库里的最新版
+      return true;
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'saveDraft failed: %{public}s', JSON.stringify(err));
+      this.presentSaveFailed();
+      return false;
+    }
+  }
+
+  /**
+   * 从编辑器当前状态构建草稿对象（不落库）。存草稿与**实时快照**共用同一条
+   * 构建链——接续到对端的快照和本机存下来的草稿永远同一形状。
+   */
+  private buildDraftFromEditor(now: number): DraftEntry {
     const draft = this.draft ?? new DraftEntry(generateUuid(), now, now);
     draft.title = this.title;
     // 正文块（编辑器文档读回 + 照片/录音侧表拆回，2.5 保存链路）
@@ -1537,18 +1584,41 @@ export struct ComposeView {
     draft.placeMode = this.placeMode;
     draft.manualPlaceName = this.placeMode === PlaceMode.Manual ? this.manualPlaceName : undefined;
     draft.audioURLs = blocksAudioPaths(blocks); // 录音从块派生（2.7）
-    try {
-      await DraftRepository.saveDraft(store, draft);
-      this.draft = draft;
-      // 草稿还引用的文件留给草稿；这次删掉没进草稿的清掉（iOS removeUnusedMedia）
-      this.cleanupUnreferencedPhotos(blocks);
-      this.cleanupUnreferencedAudios(blocks);
-      return true;
-    } catch (err) {
-      hilog.error(DOMAIN, TAG, 'saveDraft failed: %{public}s', JSON.stringify(err));
-      this.presentSaveFailed();
-      return false;
+    return draft;
+  }
+
+  // ---- 实时草稿快照（应用接续源端，services/AppContinuation） ----
+
+  /** 防抖 600ms：打字 / 选心情 / 加照片这类高频操作合并成一次快照发布 */
+  private scheduleLiveDraftSnapshot(): void {
+    if (this.liveSnapshotTimer >= 0) {
+      clearTimeout(this.liveSnapshotTimer);
     }
+    this.liveSnapshotTimer = setTimeout((): void => {
+      this.liveSnapshotTimer = -1;
+      this.publishLiveDraftSnapshot();
+    }, 600);
+  }
+
+  /**
+   * 实时快照发布到 AppStorage（onContinue 优先取它打包 wantParam——编辑器里
+   * 还没落库的字也接续得到）。转正 / 丢弃后由 clearLiveDraftSnapshot 摘掉，
+   * 防止接续把已作废的草稿复活。
+   */
+  private publishLiveDraftSnapshot(): void {
+    if (!this.pageDataLoaded) {
+      return; // 数据没备好：currentDocument 还不是用户的编辑结果
+    }
+    AppStorage.setOrCreate(STORAGE_KEY_LIVE_DRAFT_JSON,
+      encodeDraftForContinuation(this.buildDraftFromEditor(Date.now())));
+  }
+
+  private clearLiveDraftSnapshot(): void {
+    if (this.liveSnapshotTimer >= 0) {
+      clearTimeout(this.liveSnapshotTimer);
+      this.liveSnapshotTimer = -1;
+    }
+    AppStorage.setOrCreate(STORAGE_KEY_LIVE_DRAFT_JSON, '');
   }
 
   /**
@@ -1572,6 +1642,8 @@ export struct ComposeView {
     // 本次新落盘又没进草稿的照片 / 录音文件一并清掉（不留孤儿文件）
     this.deleteAllInsertedPhotos();
     this.deleteAllInsertedAudios();
+    // 草稿已作废：实时快照摘掉，接续不再复活被丢弃的那篇
+    this.clearLiveDraftSnapshot();
     this.getUIContext().getRouter().back();
   }
 
@@ -1580,6 +1652,7 @@ export struct ComposeView {
   /** 单选：点另一本 = 换，点已选 = 取消 */
   private toggleNotebook(name: string): void {
     this.selectedNotebookName = this.selectedNotebookName === name ? '' : name;
+    this.scheduleLiveDraftSnapshot();
   }
 
   /** 当场新建：撞名（忽略大小写 / 全半角）直接选中已有那本；建完自动选中 */

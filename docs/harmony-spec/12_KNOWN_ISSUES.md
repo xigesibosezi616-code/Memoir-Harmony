@@ -44,6 +44,11 @@
 | 20 | 🔵 | 2.5b | **WrapFlow 绕排全家桶下线保留**（引擎/适配器/视图/编辑器 + 278 单测，页面零引用） | 平台缺陷连环（strut 行高不生效/orphanChar×strut 零输出/heading 合并污染）回退备忘录式，产品拍板 | 恢复条件见 11 #1（平台修 strut 或后期重投入）；平时注意不要误引用 | 11 #1~#9 |
 | 21 | 🔵 | 5.x | **测试开关上架前关**：服务端 `LETTER_RHYTHM_OFF`、假开通会员 | 测试期预期行为 | 上架清单执行时关（iOS 清单 A0c 同款） | Q14 |
 | 22 | 🔵 | 2.5 | **键盘-工具条安全区空隙**：键盘展开时底部 safeAreaBottom padding 仍在，工具条与键盘间留背景条 | 无 keyboardHeight API 可订阅（当时）；2.5 真机验收未见明显问题，正式调优未做 | 已有 `keyboardHeightChange` 先例（3.4 用过），后续统一调优时接 | PROGRESS 2.5 |
+| 23 | 🟡 | 3.6 | **大屏模式平台能力偏差五项**：① 无「减弱动态效果」可读开关（换级转场恒 400ms FastOutSlowIn，iOS 读 Reduce Motion 走 crossfade——鸿蒙侧 `accessibility` 无对应设置项）② 无振动强度档（`vibrator` 只有 preset 触感，iOS `UIImpactFeedbackGenerator(style:)` 三档对齐不了，捏合换级统一 soft）③ `accessibilityActions` 自定义动作受限（换级只有滑动手势，读屏用户无等效按钮）④ **`scrollToItemInGroup` 锚点对齐（原记「无此参数」为事实错误，已纠错）**：第 4 参 `align: ScrollAlign`（START/CENTER/END）本 SDK 即有，换级定位已改 `ScrollAlign.CENTER` 近似 iOS `scrollTo(anchor:)`（锚点居中语义），12 #24-③ 修复落地⑤ **读屏基础版**：捏合层级只报「第 N 层」不报语义内容（大屏模式的照片墙对 VoiceOver/TalkBack 逐格朗读成本高，只做了格级 label） | 平台 API 缺失或能力降级，非实现缺陷 | ①②③④ 接受偏差；⑤ 后续版本若产品要求做逐格语义朗读再投入（iOS 侧也是基础版） | PROGRESS 3.6 · U06/U07 |
+| 24 | ✅ | 3.6 | **大屏模式真机走查六项（2026-10-23 全部收官）**：①溶解接缝 ②主色 R/B ③scrollToItemInGroup 定位 ④pinch focus 坐标系 ⑤换级方向/误触守卫 ⑥懒加载 | **①② 像素实测过（接缝逐行均差 ≤8.3；夜景染蓝 (r84,g88,b115) b>r）；③ 根因实锤+修复+四路径回归过（见下）；④ focus 定位在 ③ 回归中隐式验证（落点行与手指下篇一致）；⑤ 换级四级双向 + 误触守卫 400ms 冷却 + zoom 持久化冷启恢复实测过（`hdc shell uinput -T -m` 双指注入可替代真人捏合：每指 4 坐标 x1 y1 x2 y2 + 尾参 smoothTimeMs）；⑥ 9月组各位置滚入渲染完整（多 dump 序列）、尾部留白正常、SixtyFour 16 篇不满屏全渲染**。**③ 修复档案**：根因 = `scrollToItemInGroup` 默认 START 置顶，焦点在尾部月份组时目标 offset 超出 maxOffset 被钳到列表底（顶部显示其他月份、焦点行不可见；尾部留白 120→500vp 同路径落点即正确，实锤几何钳制非时序——600ms 延时版与 300ms 快速捏合均复现同样落点，证伪「组未建」「手势未结束」两假说）；iOS 基准 = `scrollTo(id:focus, anchor:)` 锚点对齐 + 尾部仅 96pt；修法 = 第 4 参 `ScrollAlign.CENTER`（组下标 +1 语义不变）+ setTimeout 回 66ms + 留白回 120vp，标定脚手架（S20/S14/SI2 按钮、calibLog、临时日志）全部移除。四路径回归（X6 16 篇 seed 数据）：Four 末页捏近主路径 offset 700px 焦点行屏显 59% 可见（bug 时钳底 924px 焦点行不可见）、(2,1) 深路径 CENTER 超限钳底但 9月组完整可见、SixtyFour 逆向内容不满屏全可见、(1,0) 对照路径无回归（offset 0 页首完整）。已知余量：66ms 转场中调用时布局为中间态，CENTER 落点与稳定几何有 ±170px 级偏差（焦点行始终在视口内，转场盖住，不追） | **③⑥ 收官；3.6 走查全过，待用户捏合手感终验后结案** | PROGRESS 3.6 |
+| 25 | 🟡 | W1 | **应用接续：照片/录音文件不随接续迁移**（端到端已验收 ✅） | wantParam 只装草稿数据（官方 <100KB 约束）；文件迁移官方路径 = 分布式文件目录 + commonType.Asset 封装分布式对象（后续项）；块引用原样保留，对端缺文件按既有占位渲染，正文文字完整接续。**双设备端到端验收通过（2026-10-23，X6 ↔ Mate 80 Pro Max，A→B→A 双向；首轮 B 端白屏根因 = 接续冷启动只回调 onWindowStageRestore 不回调 onWindowStageCreate，官方 bpta-continue-cast 明示，EntryAbility 补齐 Restore 实现 + onContinue 禁系统 router 页面栈迁移后全链落编辑页）** | 后续版本接文件资产迁移（分布式文件目录 + commonType.Asset） | PROGRESS W1 · faqs-free-flow-1 |
+| 26 | ⚪ | 3.6 | **捏合换级无振动（X6）——非 bug 结案**：换级振动（preset soft）不触发 | 用户 X6「系统触感反馈」开关为关（用户确认）；官方 faqs-sensor-service-3：系统触感反馈关闭时管控 usage 列表内的振动静默，属预期行为；无需修码 | 无需修复；真机验振动时先确认开关开启 | PROGRESS 3.6 |
+| 27 | 🟡 | 3.6 | **`componentUtils.getRectangleById` 实测返回 px（X6 本 SDK），与捏合手势 vp 坐标不同单位**（2026-10-23 页首固定改造连带暴露并修复）：fingerList（FingerInfo）与 `ListScroller.currentOffset().yOffset` 均为 vp，rect 为 px（实测 rect=(0,435,1080,2005.5)=px，与 uitest dumpLayout 同单位）；混算致 Sixteen→Four 分开定位恒落 p0（idx 恒 0），Four→Sixteen 方向被 row 粒度掩盖碰巧对 | 已修：`HomeView.componentRect` 统一 `px ÷ display.getDefaultDisplaySync().densityPixels` 折 vp（真机终验：Sixteen 滚动后分开落 p3 ✓ 修复前恒 p0）；**B 端（Mate 80 Pro Max）未复验** | B 端装机时回归一次捏合定位（density 3.4，px 语义需复验）；若官方后续版本改回 vp 语义需重标定 | PROGRESS 3.6 |
 
 ## 三、3.5 翻书手感专项档案（用户点名：一直优化不好，记录后修）
 
@@ -90,6 +95,32 @@
 
 ## 四、变更日志
 
+- 2026-10-23 页首固定改造 + 捏合定位单位混算修复：16/64 级页首（尺素标题+加号）
+  提出滚动流固定（用户拍板，对 iOS 偏差——iOS 页首跟滚+浮现小标题）；改造连带暴露
+  Sixteen→Four 分开定位恒落 p0：根因 = `getRectangleById` 实测返回 px 而捏合手势
+  （fingerList）/滚动量（currentOffset）均 vp，单位混算致 idx 恒 0；修法 =
+  componentRect 内 px÷densityPixels 折 vp（+1 项 #27，B 端待复验）；真机终验
+  四环（Four p3→捏近 9月可见→滚动→分开 p3→再捏近闭环）；临时标定日志
+  （calibLog/onDidScroll）全删；542 单测绿 / build 零 ERROR。
+- 2026-10-23 深夜 3.6 走查③④⑤⑥ 全部收官：#24 状态 ⚪→✅（③ 根因实锤（START 超界钳底，
+  留白实验定案）+ 修复（ScrollAlign.CENTER，第 4 参）+ 四路径回归过；④ focus 坐标系
+  隐式验证；⑤ 换级/守卫/持久化实测过（uinput 双指注入方法突破）；⑥ 懒加载 dump 覆盖）；
+  #23-④ 纠错（ScrollAlign 本 SDK 即有，原记「无锚点参数」为事实错误，已改用 CENTER）；
+  +1 项 #26（X6 捏合无振动 = 系统触感反馈开关关闭，非 bug 结案）；Seed15/Clear15 造数
+  验后清理库回 1 篇；542 单测绿 / build 零 ERROR。
+- 2026-10-23 W1 接续白屏攻坚：双设备实测 B 端白屏 → 真机日志实锤根因（接续冷启动
+  只回调 onWindowStageRestore、不回调 onWindowStageCreate，官方文档明示；我们只在
+  Create 里 loadContent）→ 修复（补 Restore 实现 + 禁系统 router 页面栈迁移）→
+  **A→B→A 双向端到端验收通过**（#25 端到端标记 ✅）；542 单测绿 / build 零 ERROR。
 - 2026-10-23 建档：推送前体检三绿（489 单测/build/本地化）；归档 3.5 翻书手感
   专项档案（§三）；汇总阶段 1~3.5 问题 22 项（阻塞 3 / 体验 3 / 偏差 6 / 欠账 7 / 工程 3）。
 - 2026-10-23 用户拍板：#1 包名修改排期到**阶段四**（4.x 网络与账号，随 AGC/签名/推送一起换）。
+- 2026-10-23 3.6 大屏模式建档：+2 项（#23 平台能力偏差五项（读屏基础版/无减弱动态
+  效果/振动无强度档/自定义无障碍动作受限/scrollToItemInGroup 无锚点）、#24 真机走查
+  六项待做（设备断开））；体检基线更新：529 单测全绿 / build 零 ERROR / 本地化过绿。
+- 2026-10-23 3.6 真机四修 + 走查进展：#24 ①②过（溶解接缝/主色 R/B 像素实测）；
+  细长/展开钳比、第三档尾行占位、捏合误触 400ms 冷却落库（534 单测绿）；
+  发现 `.test` 增量缓存吞新用例编译错误（计数不涨先清缓存）。
+- 2026-10-23 W1 跨设备应用接续建档：+1 项（#25 媒体文件不随接续迁移 + 双设备
+  端到端待验）；代码完成（continuable/onContinue 实时快照/CONTINUATION 恢复链），
+  542 单测绿。

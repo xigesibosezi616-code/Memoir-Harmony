@@ -254,7 +254,7 @@ export struct VoiceRecordingSheet {
       Text($r('app.string.s_7126a0f54e'))
         .fontSize(16)
         .fontColor(this.theme.textPrimary)
-      Text($r('app.string.s_966b6def6c'))
+      Text($r('app.string.microphone_permission_reason'))
         .fontSize(13)
         .fontColor(this.theme.textTertiary)
         .textAlign(TextAlign.Center)

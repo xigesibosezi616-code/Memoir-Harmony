@@ -44,8 +44,10 @@
 | 11 | 🟡 动态照片 | 2.9 | Q19：小图放大偏差遗留 |
 | 12 | 🟡 录音 / 天气地点卡片 | 2.7~2.10 | 各自卡片，v1 不做 |
 | 13 | 🟡 会员钩子（照片上限等） | 2.6 isMember 预留 | 7.2 接入 |
+| 14 | 🟡 用户间日记分享（隔空传送 / 碰一碰通道） | 3.6 收尾后工作项：A 写日记 → Share Kit（`harmonyShare` gesturesShare/knockShare）→ B 在尺素打开 | **2026-10-23 用户拍板：等后端搭建后做**。需求定位是「A 的日记只读分享给 B」（完整归档 + 只读），非跨设备文件传输（那由 W1 接续覆盖）。云端直达路线依赖：① 后端新增「日记分享」能力（现有 `02_BACKEND_API.md` 只有 auth/me/letters/subscription，**无用户间分享端点**，需先补进后端规划）；② App Linking（AGC 真包名，12_KNOWN_ISSUES #1）。Share Kit 传输层方案已调研定稿（gesturesShare/knockShare 双监听 + `target.share(SharedData)`，官方文档 bpta-application-gesture-share / bpta-application-knock-file-share），后端就绪即可实现 |
 
 ## 四、变更日志
 
+- 2026-10-23 新增 #14：用户间日记分享（隔空传送/碰一碰通道），用户拍板等后端搭建后做（云端直达需后端新增分享端点 + App Linking）。
 - 2026-10-18 建档；三页回退备忘录式（详情/编辑/写日记真机冒烟 ✓），
   绕排全家桶下线保留，本表 #1~#9 归档。

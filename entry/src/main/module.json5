@@ -16,7 +16,7 @@
     "requestPermissions": [
       {
         "name": "ohos.permission.MICROPHONE",
-        "reason": "$string:s_966b6def6c",
+        "reason": "$string:microphone_permission_reason",
         "usedScene": {
           "abilities": [
             "EntryAbility"
@@ -71,6 +71,7 @@
         "startWindowIcon": "$media:startIcon",
         "startWindowBackground": "$color:start_window_background",
         "exported": true,
+        "continuable": true,
         "skills": [
           {
             "entities": [

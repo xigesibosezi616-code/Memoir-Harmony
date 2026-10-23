@@ -29,8 +29,80 @@
       "value": "Español"
     },
     {
+      "name": "eye_flip_hint",
+      "value": "Al llegar al final de la pantalla, mira hacia arriba para pasar de página"
+    },
+    {
+      "name": "eye_flip_intro_title",
+      "value": "Pasa las páginas con la mirada, manos libres"
+    },
+    {
+      "name": "eye_flip_intro_usage",
+      "value": "Al llegar al final de la pantalla, mira hacia arriba para pasar de página"
+    },
+    {
+      "name": "eye_flip_intro_privacy",
+      "value": "La cámara frontal detecta el movimiento de la cabeza solo en este dispositivo. La imagen nunca se muestra, guarda ni envía."
+    },
+    {
+      "name": "eye_flip_intro_enable",
+      "value": "Probar ahora"
+    },
+    {
+      "name": "eye_flip_note_title",
+      "value": "Antes de empezar:"
+    },
+    {
+      "name": "eye_flip_note_1",
+      "value": "Limpia la zona del sensor en la parte superior de la pantalla antes de usarla"
+    },
+    {
+      "name": "eye_flip_note_2",
+      "value": "Mantén los ojos a menos de 50 cm de la pantalla"
+    },
+    {
+      "name": "eye_flip_note_3",
+      "value": "Úsalo en un entorno bien iluminado"
+    },
+    {
+      "name": "eye_flip_unavailable",
+      "value": "El paso de páginas con la mirada no está disponible temporalmente"
+    },
+    {
       "name": "EntryAbility_label",
       "value": "Añoranza"
+    },
+    {
+      "name": "microphone_permission_reason",
+      "value": "Añoranza necesita el micrófono para grabar notas de voz en tu diario. Las grabaciones se guardan solo en tu dispositivo."
+    },
+    {
+      "name": "s_e4c4ff3b29",
+      "value": "No se pudo reproducir la grabación"
+    },
+    {
+      "name": "s_7c3f9e2a",
+      "value": "Colocar en"
+    },
+    {
+      "name": "s_2e8d4f6b",
+      "value": "Izquierda"
+    },
+    {
+      "name": "s_9b5c1d3f",
+      "value": "Derecha"
+    },
+    {
+      "name": "s_094be81a60",
+      "value": "No se pudo iniciar la grabación"
+    },
+    {
+      "name": "s_7126a0f54e",
+      "value": "No se puede acceder al micrófono"
+    },
+    {
+      "name": "s_36205e6628",
+      "value": "Servicio de ubicación temporalmente no disponible"
     },
     {
       "name": "s_00360964eb",
@@ -53,8 +125,16 @@
       "value": "Al vincularlo podrás iniciar sesión en la misma cuenta con Apple en este dispositivo"
     },
     {
+      "name": "s_00dd5e7c19",
+      "value": "Muy desagradable"
+    },
+    {
       "name": "s_00e69bd114",
       "value": "Sesión iniciada"
+    },
+    {
+      "name": "s_01542f8ad2",
+      "value": "%d entradas · %d fotos"
     },
     {
       "name": "s_01d498446e",
@@ -63,6 +143,10 @@
     {
       "name": "s_022bf3283d",
       "value": "Insertar"
+    },
+    {
+      "name": "s_02519f32e9",
+      "value": "Toca + arriba a la derecha para escribir la historia de hoy"
     },
     {
       "name": "s_02abbe99ce",
@@ -77,6 +161,10 @@
       "value": "«Tu yo futuro agradecerá al que escribe hoy.»"
     },
     {
+      "name": "s_044fc3ac8d",
+      "value": "…y suelta el aire despacio"
+    },
+    {
       "name": "s_04543b3673",
       "value": "Cada mes, una carta sobre «tú este mes», y a fin de año, «tu año»."
     },
@@ -87,6 +175,14 @@
     {
       "name": "s_0498f1dcc0",
       "value": "Cambiar foto"
+    },
+    {
+      "name": "s_04e86ea902",
+      "value": "Estrés"
+    },
+    {
+      "name": "s_05aa9400bd",
+      "value": "Asco"
     },
     {
       "name": "s_06829794c0",
@@ -153,6 +249,10 @@
       "value": "«Permitirte estar mal también es una forma de ternura.»"
     },
     {
+      "name": "s_09f81f62fd",
+      "value": "Emoción"
+    },
+    {
       "name": "s_0ae0dc846a",
       "value": "«Toda espera es la espera de un yo mejor.»"
     },
@@ -181,6 +281,10 @@
       "value": "Nuevo"
     },
     {
+      "name": "s_0cfa09d980",
+      "value": "Enfado"
+    },
+    {
       "name": "s_0cfc3b0e21",
       "value": "La ubicación está desactivada; actívala en Ajustes"
     },
@@ -191,6 +295,10 @@
     {
       "name": "s_0e37efff8d",
       "value": "Tu sesión ha caducado. Vuelve a iniciar sesión."
+    },
+    {
+      "name": "s_0e978c435e",
+      "value": "Ha sido duro. Quédate aquí, con el teléfono en la mano: no tienes que hacer nada."
     },
     {
       "name": "s_0f2fc67cd3",
@@ -229,8 +337,16 @@
       "value": "Buzón"
     },
     {
+      "name": "s_11d0241540",
+      "value": "Atrás"
+    },
+    {
       "name": "s_121c1f2d8e",
       "value": "Compartir copia (%s)"
+    },
+    {
+      "name": "s_12316406a8",
+      "value": "Responde en dos o tres días"
     },
     {
       "name": "s_129af6c2eb",
@@ -241,6 +357,14 @@
       "value": "No se pudo guardar el vídeo de la Live Photo. Se insertó como foto fija."
     },
     {
+      "name": "s_12d09b2cba",
+      "value": "Verano"
+    },
+    {
+      "name": "s_12e33f7397",
+      "value": "Asombro"
+    },
+    {
       "name": "s_132f0d719a",
       "value": "Reenviar (%ds)"
     },
@@ -249,8 +373,16 @@
       "value": "Solo la ciudad, p. ej. «Guangzhou»"
     },
     {
+      "name": "s_13d655e2da",
+      "value": "%s es un amigo por carta ficticio con IA de Añoranza."
+    },
+    {
       "name": "s_13ff717165",
       "value": "Días de recordatorio del sello"
+    },
+    {
+      "name": "s_14c21c8141",
+      "value": "Maquetando…"
     },
     {
       "name": "s_14c9516e3f",
@@ -263,6 +395,10 @@
     {
       "name": "s_16070acfe0",
       "value": "%d"
+    },
+    {
+      "name": "s_1623a38e8e",
+      "value": "Está bien andar un poco de bajón. Haz una pausa, despacio."
     },
     {
       "name": "s_16460eb17d",
@@ -289,6 +425,14 @@
       "value": "Verde pino"
     },
     {
+      "name": "s_181e010524",
+      "value": "Bochorno"
+    },
+    {
+      "name": "s_18cb8ddf9d",
+      "value": "Ver el original"
+    },
+    {
       "name": "s_1a4cb39357",
       "value": "Lo que se escribe de madrugada suele ser lo más sincero."
     },
@@ -303,6 +447,10 @@
     {
       "name": "s_1b0adeee54",
       "value": "Bajo los Tang, el bambú se cortaba y se hundía en el estanque cien días, hasta que la corteza verde se desprendía: un paso que los papeleros llamaban shaqing, «matar el verde». La pasta daba un papel algo amarillento y sorprendentemente resistente: los Song imprimieron libros en él; los Ming, cartas. Los cinco pasos que Song Yingxing anotó en 1637 se siguen usando hoy."
+    },
+    {
+      "name": "s_1bb8716350",
+      "value": "Noche polar"
     },
     {
       "name": "s_1be7ae4fc2",
@@ -349,6 +497,10 @@
       "value": "Abrir Ajustes"
     },
     {
+      "name": "s_1f316e471f",
+      "value": "Maquetado por Memoir el %s"
+    },
+    {
       "name": "s_1fdf0d90c3",
       "value": "·"
     },
@@ -359,6 +511,14 @@
     {
       "name": "s_212c3cace3",
       "value": "Así te llamará tu amigo por carta. Déjalo en blanco si prefieres no ponerlo."
+    },
+    {
+      "name": "s_213a16c5c5",
+      "value": "Enviar a %s"
+    },
+    {
+      "name": "s_2145aebdd9",
+      "value": "Desliza las entradas marcadas hasta la ranura para enviarlas a %s"
     },
     {
       "name": "s_215574245b",
@@ -397,6 +557,10 @@
       "value": "«Lo pequeño de hoy quizá sea grande mañana.»"
     },
     {
+      "name": "s_231468e491",
+      "value": "Culpa"
+    },
+    {
       "name": "s_234289679b",
       "value": "Tarjeta mínima"
     },
@@ -411,6 +575,10 @@
     {
       "name": "s_25124ed74c",
       "value": "Nombre"
+    },
+    {
+      "name": "s_25a56f877d",
+      "value": "Ha sido duro. Sin prisa: quédate aquí, con el teléfono en la mano."
     },
     {
       "name": "s_25fbc95421",
@@ -435,6 +603,10 @@
     {
       "name": "s_287dbc9adc",
       "value": "Reflexivo"
+    },
+    {
+      "name": "s_28c46f23f7",
+      "value": "Soledad"
     },
     {
       "name": "s_28cfd5c34e",
@@ -469,8 +641,20 @@
       "value": "«Lo que no se puede decir, se puede escribir.»"
     },
     {
+      "name": "s_2b59026359",
+      "value": "¿Qué palabra describe mejor este momento?"
+    },
+    {
       "name": "s_2bbc8185e3",
       "value": "Inicia sesión para que tu amigo por correspondencia pueda escribirte"
+    },
+    {
+      "name": "s_2bf9c54792",
+      "value": "Revista"
+    },
+    {
+      "name": "s_2c0b8a9d86",
+      "value": "Cómo imprimir este cuaderno"
     },
     {
       "name": "s_2c6afc5f55",
@@ -509,6 +693,10 @@
       "value": "Acuerdo de privacidad"
     },
     {
+      "name": "s_2ea1523acf",
+      "value": "Responde en tres a cinco días"
+    },
+    {
       "name": "s_2ed0fae234",
       "value": "%s al mes. Se renueva automáticamente en las 24 horas previas al vencimiento. Cancela cuando quieras en Ajustes → Cuenta de Apple → Suscripciones."
     },
@@ -529,12 +717,24 @@
       "value": "Ánimo"
     },
     {
+      "name": "s_3017ebc38b",
+      "value": "Orgullo"
+    },
+    {
       "name": "s_30f4d7cfe8",
       "value": "o"
     },
     {
       "name": "s_3150ea0d70",
       "value": "Qué se incluye"
+    },
+    {
+      "name": "s_32256643cf",
+      "value": "Si ahora mismo lo estás pasando muy mal"
+    },
+    {
+      "name": "s_3225d1a315",
+      "value": "Confianza"
     },
     {
       "name": "s_328070e3ac",
@@ -555,6 +755,10 @@
     {
       "name": "s_33a1272ec8",
       "value": "Confirmar cambio"
+    },
+    {
+      "name": "s_33be7bd82b",
+      "value": "Con el corazón encogido"
     },
     {
       "name": "s_34028338a4",
@@ -581,12 +785,24 @@
       "value": "Puedes omitirlo y cambiarlo luego en Ajustes"
     },
     {
+      "name": "s_36c6be2be0",
+      "value": "Añadido"
+    },
+    {
+      "name": "s_36f485a94d",
+      "value": "Indiferencia"
+    },
+    {
       "name": "s_3755f56f2f",
       "value": "Eliminar"
     },
     {
       "name": "s_375d6fd193",
       "value": "Exporta un cuaderno como PDF encuadernado, listo para imprimir."
+    },
+    {
+      "name": "s_37a8ee52ac",
+      "value": "Activa la ubicación para ver cuánto viaja cada carta"
     },
     {
       "name": "s_37eb470096",
@@ -607,6 +823,14 @@
     {
       "name": "s_39bd23b773",
       "value": "Calendario de escritura"
+    },
+    {
+      "name": "s_3a31adc3b5",
+      "value": "Bienestar"
+    },
+    {
+      "name": "s_3a5fd35d41",
+      "value": "La ubicación está desactivada: cada respuesta tarda uno o dos días"
     },
     {
       "name": "s_3aaae04c18",
@@ -663,6 +887,10 @@
     {
       "name": "s_3d39e30c5a",
       "value": "Toca para grabar"
+    },
+    {
+      "name": "s_3d7a66408e",
+      "value": "Qué bien. Guarda este momento con cariño."
     },
     {
       "name": "s_3d93dce578",
@@ -741,6 +969,10 @@
       "value": "Diseño"
     },
     {
+      "name": "s_4358147908",
+      "value": "Este cuaderno está maquetado en A5 (148 × 210 mm). Los márgenes laterales son distintos: el más ancho es para la encuadernación."
+    },
+    {
       "name": "s_4361b1e753",
       "value": "iCloud restringido"
     },
@@ -759,6 +991,10 @@
     {
       "name": "s_446462a28f",
       "value": "«Incluso un día corriente guarda algo extraordinario.»"
+    },
+    {
+      "name": "s_4494ba640a",
+      "value": "Ver la traducción"
     },
     {
       "name": "s_44fd049d7d",
@@ -801,12 +1037,24 @@
       "value": "Gratis: una carta por semana. Con Plus, tu amigo por correspondencia responde a cada entrada."
     },
     {
+      "name": "s_48b785f88a",
+      "value": "Levanta la solapa con el dedo, o toca"
+    },
+    {
       "name": "s_48f55a18f1",
       "value": "Hay una respuesta en camino"
     },
     {
       "name": "s_497b5a5707",
       "value": "Unirse a Memoir Plus"
+    },
+    {
+      "name": "s_498e49bbe4",
+      "value": "Hasta un poquito de bien merece quedar escrito."
+    },
+    {
+      "name": "s_49c5ce566f",
+      "value": "Mostrar menos por pantalla"
     },
     {
       "name": "s_49f055a8cc",
@@ -853,6 +1101,10 @@
       "value": "Cancelar"
     },
     {
+      "name": "s_4db728d201",
+      "value": "¿Quieres empezar un cuaderno nuevo?"
+    },
+    {
       "name": "s_4e09cf222e",
       "value": "Código enviado"
     },
@@ -877,6 +1129,10 @@
       "value": "Introduce el nuevo número"
     },
     {
+      "name": "s_5017313c4e",
+      "value": "%1$s allí · %2$s"
+    },
+    {
       "name": "s_502b05fb33",
       "value": "¿Seguro que quieres eliminar esta entrada? No se puede deshacer."
     },
@@ -885,8 +1141,16 @@
       "value": "Fuentes"
     },
     {
+      "name": "s_50a5de527c",
+      "value": "Alivio"
+    },
+    {
       "name": "s_50f87ef514",
       "value": "Sin estados de ánimo registrados en este periodo"
+    },
+    {
+      "name": "s_514c04d14d",
+      "value": "Sin dirección · siempre a tu lado"
     },
     {
       "name": "s_514dbb7b7e",
@@ -895,6 +1159,10 @@
     {
       "name": "s_518462faa6",
       "value": "Elegir de Fotos"
+    },
+    {
+      "name": "s_51ebe277ee",
+      "value": "Color del papel"
     },
     {
       "name": "s_524e22ba8d",
@@ -921,10 +1189,6 @@
       "value": "No se encontraron lugares cerca"
     },
     {
-      "name": "s_36205e6628",
-      "value": "Servicio de ubicación temporalmente no disponible"
-    },
-    {
       "name": "s_534de73969",
       "value": "Empaquetando…"
     },
@@ -945,6 +1209,10 @@
       "value": "El tafilete es piel de cabra de grano fino, el mejor fondo para el oro; el becerro, liso y de poca veta, fue la base de la encuadernación fina inglesa entre los siglos XVII y XIX."
     },
     {
+      "name": "s_555caf4a22",
+      "value": "Seguidas"
+    },
+    {
       "name": "s_559a6ba154",
       "value": "Gestionar ánimos"
     },
@@ -953,12 +1221,32 @@
       "value": "Crea una contraseña (mín. 4 caracteres)"
     },
     {
+      "name": "s_5630b886f9",
+      "value": "Tú"
+    },
+    {
+      "name": "s_566dd5a48b",
+      "value": "¿Tu impresora no imprime a doble cara? Las páginas a una cara se encuadernan igual."
+    },
+    {
       "name": "s_5720afd3c4",
       "value": "Li Zhao, Suplemento a la historia de los Tang (s. IX): «en cuanto al papel, está el papel de bambú de Shao». Song Yingxing, Tiangong Kaiwu, capítulo «Matar el verde» (1637), recoge cinco pasos: macerar el bambú cortado, cocerlo con cal, sumergir la forma, depositar la hoja y secarla al fuego. El papel de bambú de Jiajiang (Sichuan) se equipara al papel Xuan; Zhang Daqian llamó a ambos «los dos tesoros del país»."
     },
     {
+      "name": "s_57ce7f1870",
+      "value": "Únete a Memoir Plus para exportar este cuaderno"
+    },
+    {
       "name": "s_582c50066c",
       "value": "car."
+    },
+    {
+      "name": "s_584109b412",
+      "value": "Cada una aparte"
+    },
+    {
+      "name": "s_587b4e19dc",
+      "value": "Muy pronto"
     },
     {
       "name": "s_589be40a92",
@@ -1013,6 +1301,10 @@
       "value": "Las dos entradas no coinciden"
     },
     {
+      "name": "s_5c7cc8abd6",
+      "value": "Llamar al %s"
+    },
+    {
       "name": "s_5cd32361fa",
       "value": "Cuadrícula"
     },
@@ -1029,12 +1321,20 @@
       "value": "Cambiar nombre del cuaderno"
     },
     {
+      "name": "s_5d5815647c",
+      "value": "Plegar"
+    },
+    {
       "name": "s_5d701678ab",
       "value": "Memoir"
     },
     {
       "name": "s_5e03599e74",
       "value": "«Este lugar sigue aquí, para cuando quieras hablar.»"
+    },
+    {
+      "name": "s_5e8b69140c",
+      "value": "Responde en menos de un día"
     },
     {
       "name": "s_5eb5a366c6",
@@ -1077,6 +1377,10 @@
       "value": "«La soledad no es mala: es tiempo contigo.»"
     },
     {
+      "name": "s_60f0393ca0",
+      "value": "Preocupación"
+    },
+    {
       "name": "s_613b4f74e0",
       "value": "Mover a la derecha"
     },
@@ -1097,12 +1401,28 @@
       "value": "Icono de ánimo"
     },
     {
+      "name": "s_643e29f431",
+      "value": "Ya está escrito. ¿Cómo te sientes ahora?"
+    },
+    {
       "name": "s_644c1623fe",
       "value": "No se pudo enviar el código"
     },
     {
       "name": "s_654040bb31",
       "value": "¿Guardar este borrador?"
+    },
+    {
+      "name": "s_65fc81e161",
+      "value": "Activar"
+    },
+    {
+      "name": "s_674bd11a2a",
+      "value": "En el séptimo cielo"
+    },
+    {
+      "name": "s_6753381261",
+      "value": "No se pudo exportar"
     },
     {
       "name": "s_677df5aca2",
@@ -1161,6 +1481,10 @@
       "value": "Vincular"
     },
     {
+      "name": "s_6afac68dca",
+      "value": "No se pudo descargar la tipografía del libro, así que esta copia usa la del sistema. Vuelve a exportar cuando tengas conexión para obtenerla."
+    },
+    {
       "name": "s_6b16103d80",
       "value": "Tafilete de cabra: ningún fondo luce mejor el dorado"
     },
@@ -1201,8 +1525,16 @@
       "value": "Mostrar el tiempo automáticamente al escribir"
     },
     {
+      "name": "s_6ceae6c8b0",
+      "value": "Algunas entradas no llenan una página. ¿La siguiente empieza en una página nueva o va seguida?"
+    },
+    {
       "name": "s_6d1f3e58bb",
       "value": "«Ningún paso se pierde: todos cuentan.»"
+    },
+    {
+      "name": "s_6d33b0d1f9",
+      "value": "Radiante"
     },
     {
       "name": "s_6e5c04b091",
@@ -1233,12 +1565,20 @@
       "value": "Página de registros"
     },
     {
+      "name": "s_714152477b",
+      "value": "Otoño"
+    },
+    {
       "name": "s_7147dd5d08",
       "value": "¿Limpiar %d archivos residuales y liberar %s?"
     },
     {
       "name": "s_71cfa4ee81",
       "value": "Para %s"
+    },
+    {
+      "name": "s_72c38981e7",
+      "value": "Alegría"
     },
     {
       "name": "s_72ca690ff2",
@@ -1257,6 +1597,14 @@
       "value": "Aún sin copia de seguridad"
     },
     {
+      "name": "s_733f4ad13a",
+      "value": "Vergüenza"
+    },
+    {
+      "name": "s_73cc66ab46",
+      "value": "Frustración"
+    },
+    {
       "name": "s_73f8dc416c",
       "value": "Aún no hay cartas"
     },
@@ -1267,6 +1615,10 @@
     {
       "name": "s_74bd07ef78",
       "value": "Hoy quiero decir…"
+    },
+    {
+      "name": "s_74fd338158",
+      "value": "A %s de ti"
     },
     {
       "name": "s_7549a61e00",
@@ -1333,12 +1685,32 @@
       "value": "Cambiar número"
     },
     {
+      "name": "s_7afd163467",
+      "value": "Ojalá este breve momento te haya hecho sentir un poco mejor."
+    },
+    {
+      "name": "s_7bb5b11a5d",
+      "value": "Gratitud"
+    },
+    {
       "name": "s_7bf3cf769a",
       "value": "Conviértelo en un libro"
     },
     {
+      "name": "s_7c124dbbca",
+      "value": "Buscar una línea de ayuda cerca de ti"
+    },
+    {
       "name": "s_7c130d80b8",
       "value": "Ciudad"
+    },
+    {
+      "name": "s_7d048ef485",
+      "value": "Tristeza"
+    },
+    {
+      "name": "s_7d07a38a9f",
+      "value": "Te quedaste sin sellos. Pronto llega un nuevo paquete"
     },
     {
       "name": "s_7d84c682b8",
@@ -1349,12 +1721,24 @@
       "value": "No has marcado ninguna: el sobre está vacío"
     },
     {
+      "name": "s_7dc6ec1c5c",
+      "value": "Invierno"
+    },
+    {
       "name": "s_7debf9cb03",
       "value": "Ajustes"
     },
     {
       "name": "s_7ebd4ae074",
       "value": "Kent"
+    },
+    {
+      "name": "s_7f0145172f",
+      "value": "Cómo te sientes ahora"
+    },
+    {
+      "name": "s_7fba459a97",
+      "value": "Predeterminado · %d entradas"
     },
     {
       "name": "s_7fbe49401c",
@@ -1377,6 +1761,18 @@
       "value": "Empezar a escribir"
     },
     {
+      "name": "s_810e1db235",
+      "value": "A gusto"
+    },
+    {
+      "name": "s_8174d1e505",
+      "value": "Agotamiento"
+    },
+    {
+      "name": "s_819dedd1a1",
+      "value": "Desliza hacia arriba o toca para sacar la carta"
+    },
+    {
       "name": "s_81d3179a26",
       "value": "Tu ubicación solo queda en las entradas de este dispositivo y nunca se sube. Los cambios afectan solo a lo que escribas a partir de ahora."
     },
@@ -1387,6 +1783,14 @@
     {
       "name": "s_824e119909",
       "value": "Bajón"
+    },
+    {
+      "name": "s_82aa40f702",
+      "value": "%d páginas · unos %s"
+    },
+    {
+      "name": "s_833e892fa2",
+      "value": "Decepción"
     },
     {
       "name": "s_83a302c43c",
@@ -1421,12 +1825,20 @@
       "value": "Combinar con los cuadernos existentes"
     },
     {
+      "name": "s_85dc6e7aed",
+      "value": "Calma"
+    },
+    {
       "name": "s_85f02cfb34",
       "value": "Nueva entrada"
     },
     {
       "name": "s_85f84428c2",
       "value": "Si lo desactivas, las Live Photos se verán como imágenes fijas en tus otros dispositivos."
+    },
+    {
+      "name": "s_869f037ff5",
+      "value": "Descargando la tipografía %d %%"
     },
     {
       "name": "s_86ef74c64f",
@@ -1453,6 +1865,14 @@
       "value": "Cortar, soltar, desapegarse: en el minimalismo moderno, menos es más"
     },
     {
+      "name": "s_88dd24c6f2",
+      "value": "Desesperanza"
+    },
+    {
+      "name": "s_8921bcd103",
+      "value": "Te quedaste sin sellos. Un nuevo paquete llega %s"
+    },
+    {
       "name": "s_89345cda95",
       "value": "No enviar"
     },
@@ -1463,6 +1883,14 @@
     {
       "name": "s_895ec8fd1b",
       "value": "Error al empaquetar: %s"
+    },
+    {
+      "name": "s_89c7b03a96",
+      "value": "Disposición"
+    },
+    {
+      "name": "s_89e57b7930",
+      "value": "Desánimo"
     },
     {
       "name": "s_8a7a73f2b2",
@@ -1505,12 +1933,20 @@
       "value": "«En algún rincón, alguien mira el mismo cielo.»"
     },
     {
+      "name": "s_8cb44af50f",
+      "value": "Sigue la vibración, inspira despacio…"
+    },
+    {
       "name": "s_8cd62ee39c",
       "value": "«Eres más valiente de lo que crees.»"
     },
     {
       "name": "s_8d1a970c8d",
       "value": "Estilo predeterminado"
+    },
+    {
+      "name": "s_8d34f398c2",
+      "value": "Diversión"
     },
     {
       "name": "s_8d6bc0a28f",
@@ -1545,6 +1981,10 @@
       "value": "Toca el sobre de arriba a la derecha y %s te escribirá"
     },
     {
+      "name": "s_8f9a55ccb3",
+      "value": "Miedo"
+    },
+    {
       "name": "s_8fad83c181",
       "value": "«Sin prisa: la historia acaba de empezar.»"
     },
@@ -1567,6 +2007,10 @@
     {
       "name": "s_9101853a76",
       "value": "Subtítulo (opcional)"
+    },
+    {
+      "name": "s_9131b3c5b6",
+      "value": "Fastidio"
     },
     {
       "name": "s_91732e25ee",
@@ -1593,6 +2037,10 @@
       "value": "«Cuando estás solo, las palabras son la mejor compañía.»"
     },
     {
+      "name": "s_935aabaeb1",
+      "value": "Este amigo por carta aún no está listo: la carta no se pudo enviar"
+    },
+    {
       "name": "s_9392c3c977",
       "value": "Estadísticas"
     },
@@ -1603,6 +2051,10 @@
     {
       "name": "s_9401eee769",
       "value": "30 días"
+    },
+    {
+      "name": "s_948a67b305",
+      "value": "Habla con alguien de confianza o contacta con una línea de ayuda."
     },
     {
       "name": "s_9545e4dc22",
@@ -1617,8 +2069,16 @@
       "value": "Este momento ya está en el papel"
     },
     {
+      "name": "s_974bfbcc56",
+      "value": "Noche polar: periodo en que, dentro de los círculos polares, el sol permanece todo el día bajo el horizonte; en Tromsø (Noruega), aproximadamente de finales de noviembre a mediados de enero. Modo oscuro de todo el sistema: Apple lo introdujo en 2019 con iOS 13 y ese mismo año Google añadió un tema oscuro del sistema en Android 10. En una pantalla OLED, un píxel negro no emite luz."
+    },
+    {
       "name": "s_975ac3e011",
       "value": "Adjunta a la carta"
+    },
+    {
+      "name": "s_9854b63ae3",
+      "value": "Por mes"
     },
     {
       "name": "s_9860e2406f",
@@ -1633,8 +2093,16 @@
       "value": "Se agotó el tiempo de espera; inténtalo más tarde"
     },
     {
+      "name": "s_98be827150",
+      "value": "Escribir en este"
+    },
+    {
       "name": "s_9908c922f2",
       "value": "Comprobando…"
+    },
+    {
+      "name": "s_994a9fe7f9",
+      "value": "Un buen ánimo así merece quedarse un rato más."
     },
     {
       "name": "s_997b9c5847",
@@ -1661,6 +2129,14 @@
       "value": "No has iniciado sesión en iCloud, así que las entradas se quedan en este dispositivo. Inicia sesión en Ajustes → Cuenta de Apple y la sincronización empezará sola."
     },
     {
+      "name": "s_9c1c6f5d81",
+      "value": "%s allí"
+    },
+    {
+      "name": "s_9c44ec8a2f",
+      "value": "PDF encuadernado"
+    },
+    {
       "name": "s_9c92f8559a",
       "value": "Estos archivos no pertenecen a ninguna entrada. Borrarlos no afectará a tu contenido."
     },
@@ -1677,6 +2153,10 @@
       "value": "Borrador guardado"
     },
     {
+      "name": "s_9ddfc6f8d5",
+      "value": "Elegir destinatarios"
+    },
+    {
       "name": "s_9e19a026db",
       "value": "En esta carta"
     },
@@ -1691,6 +2171,10 @@
     {
       "name": "s_9f0103656b",
       "value": "Color de la tela"
+    },
+    {
+      "name": "s_9f24026626",
+      "value": "Tocando fondo"
     },
     {
       "name": "s_9f9a88b0c8",
@@ -1733,6 +2217,10 @@
       "value": "#%s"
     },
     {
+      "name": "s_a305bdce5e",
+      "value": "El corazón contento"
+    },
+    {
       "name": "s_a33bda51e5",
       "value": "Contraseña incorrecta: inténtalo de nuevo"
     },
@@ -1745,6 +2233,10 @@
       "value": "No se pudo completar la compra. Inténtalo más tarde."
     },
     {
+      "name": "s_a462c30c72",
+      "value": "Zoom"
+    },
+    {
       "name": "s_a4e6f10bf1",
       "value": "Reenviar"
     },
@@ -1753,12 +2245,20 @@
       "value": "Formato de archivo incorrecto; puede estar dañado"
     },
     {
+      "name": "s_a5b49a429e",
+      "value": "Valentía"
+    },
+    {
       "name": "s_a612e01da7",
       "value": "Escribir la primera entrada"
     },
     {
       "name": "s_a671f238f1",
       "value": "Calle"
+    },
+    {
+      "name": "s_a7e0766525",
+      "value": "Todas"
     },
     {
       "name": "s_a7f814c0a4",
@@ -1781,8 +2281,24 @@
       "value": "La carta de hoy acaba de salir; aún no ha ido lejos. Escribe mañana y mañana llegará la respuesta."
     },
     {
+      "name": "s_a9583b5773",
+      "value": "Responde en unas horas"
+    },
+    {
+      "name": "s_a9c3c6683b",
+      "value": "Donde los píxeles se apagan empieza la noche más honda"
+    },
+    {
+      "name": "s_a9c8397cce",
+      "value": "Amigos por carta del mundo"
+    },
+    {
       "name": "s_a9d57f8585",
       "value": "Escribe este momento"
+    },
+    {
+      "name": "s_aa6bbe90c2",
+      "value": "%s · a %s de ti"
     },
     {
       "name": "s_aaa25533ca",
@@ -1817,6 +2333,10 @@
       "value": "Vista previa:"
     },
     {
+      "name": "s_ad70ab4ff7",
+      "value": "Exportando %d %%"
+    },
+    {
       "name": "s_ad8012ee9f",
       "value": "Temas"
     },
@@ -1837,6 +2357,10 @@
       "value": "Toca el buzón para enviar a %s las entradas marcadas"
     },
     {
+      "name": "s_af52700ce1",
+      "value": "Un día así merece unas líneas más."
+    },
+    {
       "name": "s_af5a2c8bff",
       "value": "Cursiva"
     },
@@ -1851,6 +2375,14 @@
     {
       "name": "s_b065d573da",
       "value": "No se pudo escribir la carta"
+    },
+    {
+      "name": "s_b0e24833f7",
+      "value": "Desplegar"
+    },
+    {
+      "name": "s_b107678c2e",
+      "value": "Compartir, guardar o imprimir (%s)"
     },
     {
       "name": "s_b1a9ba7930",
@@ -1949,8 +2481,20 @@
       "value": "Demasiadas solicitudes; inténtalo en unos %d segundos"
     },
     {
+      "name": "s_b7ebc71b40",
+      "value": "Hazte miembro para escribir a %s"
+    },
+    {
+      "name": "s_b83ba48b71",
+      "value": "Melancolía"
+    },
+    {
       "name": "s_b869f3199c",
       "value": "Palabras"
+    },
+    {
+      "name": "s_b86ded4a21",
+      "value": "Ni triste ni alegre"
     },
     {
       "name": "s_b8bb31e170",
@@ -1961,8 +2505,16 @@
       "value": "Suelta para colocar aquí"
     },
     {
+      "name": "s_b972a94c85",
+      "value": "Por remitente"
+    },
+    {
       "name": "s_b981bb73cb",
       "value": "La luz de la tarde es suave. Tú también."
+    },
+    {
+      "name": "s_b9c6b284ee",
+      "value": "El amigo por carta al que pusiste nombre. Escribe en tu idioma."
     },
     {
       "name": "s_bb69e30f5a",
@@ -1971,6 +2523,10 @@
     {
       "name": "s_bb7874b421",
       "value": "Subtítulo"
+    },
+    {
+      "name": "s_bb8a65d0b7",
+      "value": "Carta en camino"
     },
     {
       "name": "s_bb9da11863",
@@ -1995,6 +2551,10 @@
     {
       "name": "s_bd1775eabd",
       "value": "Escribe unas líneas antes de que se recoja el sol."
+    },
+    {
+      "name": "s_bd6bd4738c",
+      "value": "Sorpresa"
     },
     {
       "name": "s_bd7fc4488b",
@@ -2025,12 +2585,20 @@
       "value": "«Detente de vez en cuando y mira el camino recorrido.»"
     },
     {
+      "name": "s_bf72168234",
+      "value": "Sellos: %d"
+    },
+    {
       "name": "s_bfae481139",
       "value": "No has iniciado sesión en iCloud. Tus diarios solo están en este dispositivo y se perderán si eliminas la app. Inicia sesión en «Ajustes → Cuenta de Apple» y la sincronización comenzará automáticamente."
     },
     {
       "name": "s_bfd6de1bee",
       "value": "Vuelve a escribirla"
+    },
+    {
+      "name": "s_bfe4c57f10",
+      "value": "Para"
     },
     {
       "name": "s_c06a9a8733",
@@ -2047,6 +2615,10 @@
     {
       "name": "s_c15e3efa81",
       "value": "«Las emociones no son buenas ni malas: solo escuchadas o ignoradas.»"
+    },
+    {
+      "name": "s_c19e7282f7",
+      "value": "Primer año: unos %1$s/mes, después %2$s/año"
     },
     {
       "name": "s_c20e6cdf1d",
@@ -2085,6 +2657,10 @@
       "value": "Eliminar foto"
     },
     {
+      "name": "s_c4e973e803",
+      "value": "En casa: con papel A5, elige A5 y doble cara (giro por el borde largo). También sirve A4: tiene las mismas proporciones, así que cada página sale más grande."
+    },
+    {
       "name": "s_c5096164af",
       "value": "MEMOIR"
     },
@@ -2095,6 +2671,14 @@
     {
       "name": "s_c567ba63ab",
       "value": "«Hay caminos que se andan solo, pero no hay que cargarlo todo solo.»"
+    },
+    {
+      "name": "s_c57af70474",
+      "value": "Irritación"
+    },
+    {
+      "name": "s_c5b5636641",
+      "value": "Mostrar más por pantalla"
     },
     {
       "name": "s_c5c198d890",
@@ -2133,6 +2717,10 @@
       "value": "Predeterminado"
     },
     {
+      "name": "s_c9ac2abd66",
+      "value": "Esta carta va para"
+    },
+    {
       "name": "s_ca2e64e0b5",
       "value": "De pago"
     },
@@ -2161,6 +2749,10 @@
       "value": "Memoir necesita guardar tu número de teléfono para iniciar sesión y enviar el texto de tus entradas para redactar una respuesta cuando pidas una carta. Sin tu consentimiento no podemos ofrecer estas funciones. Lo sentimos."
     },
     {
+      "name": "s_cb63c62e50",
+      "value": "Entendido"
+    },
+    {
       "name": "s_cb7f4c5817",
       "value": "Seguir el tema"
     },
@@ -2175,6 +2767,14 @@
     {
       "name": "s_cbcc5a7c11",
       "value": "Enviando…"
+    },
+    {
+      "name": "s_cbefa1b42e",
+      "value": "%d amigos por carta, repartidos por el mundo"
+    },
+    {
+      "name": "s_cc10aa451b",
+      "value": "No pasa nada. Quédate aquí, con el teléfono en la mano, y ve más despacio."
     },
     {
       "name": "s_cca54b96ed",
@@ -2225,6 +2825,10 @@
       "value": "Enviado. Cuando escribas algo nuevo, puedes volver a enviar."
     },
     {
+      "name": "s_ceab2d4c71",
+      "value": "Mapa de amigos por carta"
+    },
+    {
       "name": "s_cf9d76b498",
       "value": "Conoce Memoir Plus"
     },
@@ -2249,6 +2853,10 @@
       "value": "Muy pronto"
     },
     {
+      "name": "s_d39917428a",
+      "value": "Con el ánimo bajo"
+    },
+    {
       "name": "s_d3fc6fa5bc",
       "value": "A sangre"
     },
@@ -2257,12 +2865,24 @@
       "value": "Lista"
     },
     {
+      "name": "s_d48fd5f69b",
+      "value": "Celos"
+    },
+    {
+      "name": "s_d51054a2b4",
+      "value": "La noche polar es ese tramo del invierno, en las latitudes altas, en que el sol ya no sale. Hoy vive en todos los teléfonos: el modo oscuro hunde la pantalla en un solo plano negro y, en una pantalla OLED, los píxeles negros simplemente se apagan, así que las palabras parecen salir de la noche. Limpio, con un aire futurista, y suave en una habitación a oscuras: unas líneas a deshoras, sin despertar a quien duerme a tu lado."
+    },
+    {
       "name": "s_d55de11445",
       "value": "Sincronizado con el App Store"
     },
     {
       "name": "s_d567eeebd2",
       "value": "⚠️ Sin contraseña, cualquiera que consiga este archivo podrá leer todas tus entradas."
+    },
+    {
+      "name": "s_d58b0502e6",
+      "value": "Exportar PDF"
     },
     {
       "name": "s_d5af163131",
@@ -2291,6 +2911,10 @@
     {
       "name": "s_d84664c768",
       "value": "Tras el cambio, inicia sesión con el nuevo número."
+    },
+    {
+      "name": "s_d946dacd50",
+      "value": "Felicidad"
     },
     {
       "name": "s_d9b91c877d",
@@ -2333,12 +2957,24 @@
       "value": "**El texto, las fotos y las grabaciones que escribes nunca se suben a nuestros servidores.** Permanecen en tu dispositivo y se sincronizan entre tus dispositivos mediante tu propio iCloud, al que no tenemos acceso."
     },
     {
+      "name": "s_df6331be72",
+      "value": "Los amigos por carta del mundo son para miembros: esta carta no se pudo enviar"
+    },
+    {
       "name": "s_df73c654d2",
       "value": "Crear copia"
     },
     {
+      "name": "s_dfac3b9d59",
+      "value": "Un día corriente también es un día bien vivido."
+    },
+    {
       "name": "s_dfd9e22f59",
       "value": "Enviaremos un código al número vinculado a tu cuenta"
+    },
+    {
+      "name": "s_e141654f13",
+      "value": "Centro de Investigación e Intervención en Crisis Psicológicas de Pekín · 24 horas"
     },
     {
       "name": "s_e162d4656a",
@@ -2357,6 +2993,10 @@
       "value": "Tu última carta acaba de salir. Envía la siguiente dentro de un rato."
     },
     {
+      "name": "s_e249c526c7",
+      "value": "Muy agradable"
+    },
+    {
       "name": "s_e2aedf50f2",
       "value": "«Aceptarte como eres ahora es el mejor comienzo.»"
     },
@@ -2367,6 +3007,10 @@
     {
       "name": "s_e488fa1386",
       "value": "Toca el botón de abajo para escribir la historia de hoy"
+    },
+    {
+      "name": "s_e4eb902363",
+      "value": "Responde en uno o dos días"
     },
     {
       "name": "s_e524dcf71e",
@@ -2397,6 +3041,10 @@
       "value": "Hasta la luna espera a que termines la historia de hoy."
     },
     {
+      "name": "s_e75c0baca3",
+      "value": "Una grabación de voz"
+    },
+    {
       "name": "s_e775910242",
       "value": "Un diario escrito para ti"
     },
@@ -2423,6 +3071,10 @@
     {
       "name": "s_ea0ef2ae72",
       "value": "Siguiente"
+    },
+    {
+      "name": "s_ea7061a8e3",
+      "value": "¿En qué cuaderno vas a escribir?"
     },
     {
       "name": "s_eaa6b0540d",
@@ -2489,6 +3141,10 @@
       "value": "count"
     },
     {
+      "name": "s_eedf364579",
+      "value": "No se guardó el estado de ánimo, pero tu entrada está a salvo."
+    },
+    {
       "name": "s_ef6e0d1008",
       "value": "Elegir icono"
     },
@@ -2521,6 +3177,14 @@
       "value": "Tus entradas se sincronizan solas con iCloud, así que no se pierden al cambiar de dispositivo. Están en tu cuenta y nosotros no podemos verlas."
     },
     {
+      "name": "s_f2544d8e37",
+      "value": "Esperanza"
+    },
+    {
+      "name": "s_f27c1cada1",
+      "value": "Para un libro de verdad, envía el PDF a una imprenta o a un servicio de impresión en línea y pide «A5, doble cara, encuadernado». La primera página es la portada y la última, la contraportada."
+    },
+    {
       "name": "s_f29761cd03",
       "value": "MEMOIR"
     },
@@ -2531,6 +3195,10 @@
     {
       "name": "s_f2a27892d0",
       "value": "Activado"
+    },
+    {
+      "name": "s_f2d2c96c62",
+      "value": "Agobio"
     },
     {
       "name": "s_f32f4dac3a",
@@ -2547,6 +3215,10 @@
     {
       "name": "s_f4ae8c66ad",
       "value": "Polaroid"
+    },
+    {
+      "name": "s_f4b0ec3120",
+      "value": "Serenidad"
     },
     {
       "name": "s_f60d7d12e4",
@@ -2581,12 +3253,28 @@
       "value": "Necesitamos tu consentimiento para continuar"
     },
     {
+      "name": "s_f73492117c",
+      "value": "Estados Unidos · 988 Suicide & Crisis Lifeline"
+    },
+    {
+      "name": "s_f84fe41dd6",
+      "value": "Elige la que más se parezca"
+    },
+    {
       "name": "s_f85412ce62",
       "value": "Califícanos"
     },
     {
+      "name": "s_f867d672f3",
+      "value": "Primavera"
+    },
+    {
       "name": "s_f8778319a6",
       "value": "Importar como cuadernos nuevos"
+    },
+    {
+      "name": "s_f893902ee4",
+      "value": "Ansiedad"
     },
     {
       "name": "s_f8d820eebf",
@@ -2617,8 +3305,20 @@
       "value": "«Dar el primer paso importa más que la dirección.»"
     },
     {
+      "name": "s_fa6a5ccde2",
+      "value": "Estás aquí"
+    },
+    {
       "name": "s_fa78a6eba6",
       "value": "No se pudo generar: %s"
+    },
+    {
+      "name": "s_fabe6d8d19",
+      "value": "Toca o desliza hacia arriba para romper el sello"
+    },
+    {
+      "name": "s_fac14ac621",
+      "value": "Listo"
     },
     {
       "name": "s_fac430ea0c",
@@ -2637,8 +3337,16 @@
       "value": "Crear"
     },
     {
+      "name": "s_fda7539bde",
+      "value": "Satisfacción"
+    },
+    {
       "name": "s_fdc1a10b4f",
       "value": "Nostálgico"
+    },
+    {
+      "name": "s_fddfaa4339",
+      "value": "Por fecha"
     },
     {
       "name": "s_fe06546672",
@@ -2647,6 +3355,10 @@
     {
       "name": "s_fe1629f682",
       "value": "p. ej.: 2025 · Kioto"
+    },
+    {
+      "name": "s_fe2161f91d",
+      "value": "Pasión"
     },
     {
       "name": "s_fe9ea3f070",
@@ -2686,7 +3398,7 @@
     },
     {
       "name": "s_6ccf6187f5",
-      "value": "Añoranza usa tu ubicación para registrar el tiempo que hace al escribir."
+      "value": "Añoranza usa tu ubicación para registrar el tiempo al escribir y mostrar en el mapa de amigos por carta cuánto viajan tus cartas. Nunca se envía a nuestros servidores."
     },
     {
       "name": "s_8d037e1dca",
@@ -2703,74 +3415,6 @@
     {
       "name": "s_e15f73bdc6",
       "value": "Añoranza usa la cámara para añadir fotos a tus entradas."
-    },
-    {
-      "name": "s_7c3f9e2a",
-      "value": "Colocar en"
-    },
-    {
-      "name": "s_2e8d4f6b",
-      "value": "Izquierda"
-    },
-    {
-      "name": "s_9b5c1d3f",
-      "value": "Derecha"
-    },
-    {
-      "name": "s_7126a0f54e",
-      "value": "No se puede acceder al micrófono"
-    },
-    {
-      "name": "s_094be81a60",
-      "value": "No se pudo iniciar la grabación"
-    },
-    {
-      "name": "s_e4c4ff3b29",
-      "value": "No se pudo reproducir la grabación"
-    },
-    {
-      "name": "s_966b6def6c",
-      "value": "Añoranza necesita el micrófono para grabar notas de voz en tu diario. Las grabaciones se guardan solo en tu dispositivo."
-    },
-    {
-      "name": "eye_flip_hint",
-      "value": "Al llegar al final de la pantalla, mira hacia arriba para pasar de página"
-    },
-    {
-      "name": "eye_flip_intro_title",
-      "value": "Pasa las páginas con la mirada, manos libres"
-    },
-    {
-      "name": "eye_flip_intro_usage",
-      "value": "Al llegar al final de la pantalla, mira hacia arriba para pasar de página"
-    },
-    {
-      "name": "eye_flip_intro_privacy",
-      "value": "La cámara frontal detecta el movimiento de la cabeza solo en este dispositivo. La imagen nunca se muestra, guarda ni envía."
-    },
-    {
-      "name": "eye_flip_intro_enable",
-      "value": "Probar ahora"
-    },
-    {
-      "name": "eye_flip_note_title",
-      "value": "Antes de empezar:"
-    },
-    {
-      "name": "eye_flip_note_1",
-      "value": "Limpia la zona del sensor en la parte superior de la pantalla antes de usarla"
-    },
-    {
-      "name": "eye_flip_note_2",
-      "value": "Mantén los ojos a menos de 50 cm de la pantalla"
-    },
-    {
-      "name": "eye_flip_note_3",
-      "value": "Úsalo en un entorno bien iluminado"
-    },
-    {
-      "name": "eye_flip_unavailable",
-      "value": "El paso de páginas con la mirada no está disponible temporalmente"
     }
   ]
 }

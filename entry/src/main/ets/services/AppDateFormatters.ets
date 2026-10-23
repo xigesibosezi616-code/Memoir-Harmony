@@ -79,6 +79,18 @@ export function shortDate(date: Date, appLanguage: string): string {
 }
 
 /**
+ * 「17日 周六」/「Sat 17」——大屏总览 16 篇格子的小字日期（U06 R-HOME-08）。
+ * 非（简繁）中文用 CLDR 缩写星期 + 日号，中文手动拼接。
+ */
+export function dayShortWithWeekday(date: Date, appLanguage: string): string {
+  if (isChineseLanguage(appLanguage)) {
+    return `${date.getDate()}日 周${chineseWeekdayChar(date)}`;
+  }
+  const weekday = new Intl.DateTimeFormat(appLanguage, { weekday: 'short' }).format(date);
+  return `${weekday} ${date.getDate()}`;
+}
+
+/**
  * 「10月12日」/「Oct 12」——墨迹痕迹与「补记 · 最近」的日期（2.8，iOS `InkText.day`）：
  * 不是今年的带上年份（「2025年10月12日」/「Oct 12, 2025」）。
  */
