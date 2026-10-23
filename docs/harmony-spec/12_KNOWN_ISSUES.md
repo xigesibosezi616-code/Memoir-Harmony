@@ -22,9 +22,9 @@
 
 | # | 级别 | 阶段 | 问题 | 现状 / 根因 | 修复方向 | 关联 |
 |---|------|------|------|------------|---------|------|
-| 1 | 🔴 | 横切 | **包名是占位符** `com.example.temproject`（AppScope/app.json5） | 临时工程名一直未换；正式签名、AGC 应用、推送服务绑定都要正式包名 | **用户拍板（2026-10-23）：阶段四（4.x 网络与账号）改**——届时接 AGC/签名/推送一起换；定包名（Q18 候选 `com.sinaratech.memoir.harmony`，以 AGC 实际创建为准）后全局替换 + 重配签名/AGC | Q18 |
+| 1 | 🔵 | 横切 | **包名是占位符** `com.example.temproject`（AppScope/app.json5） | **已解决（2026-10-23）**：包名切到正式 **`com.sinaratech.memoir.hmos`**（AGC 实测 `harmony` 是保留字符不能做独立段，Q18 旧候选 `com.sinaratech.memoir.harmony` 不合规作废）——AGC 新建应用（app_id 6917619854007528919）+ 新调试 Profile（`Memoir 尺素Debug.p7b`，证书 = AGC「Memoir」调试证书 4D:C9:10:7B…，双测试机 UDID 齐全）+ 新 agconnect-services.json（entry/）+ app.json5/build-profile 全局替换；build 零 ERROR + X6 装机启动 Smoke PASS。**剩余（阶段 8 上架前）**：发布证书/发布 Profile、AGC 正式「SHA256 公钥指纹」复核（账号 Kit 用）、上架审核材料 | Q18 |
 | 2 | 🔴 | 1.5/8 | **隐私协议 / 用户协议是 iOS 逐字拷贝占位**（rawfile 两份 md） | 写的是 Apple 登录/iCloud/Apple 天气/Apple 支付，与鸿蒙事实不符；法务改前不可上架 | 法务出鸿蒙版；**须加彩云天气第三方清单**（2.10 坐标发彩云） | Q12 · Q8 |
-| 3 | 🔴 | 横切 | **调试脚手架随包发布**：ThemeDebug / LanguageDebug / LocationDebug 注册在 main_pages.json | 计划内脚手架（6.x 删），但当前配置下会进发布包 | 发布前从 main_pages.json / 路由入口移除（或 build-profile 分离 debug/release 页面） | 1.1/1.2/2.10 |
+| 3 | 🔴 | 横切 | **调试脚手架随包发布**：ThemeDebug / LanguageDebug / LocationDebug 注册在 main_pages.json；HomeView 调试区 Seed15/Clear15 造数按钮 + **2 条硬编码中文**（HomeView.ets:916-917「测试日记 x月x日」「自动验证用测试日记…」，check_localization 报红） | 计划内脚手架（6.x 删），但当前配置下会进发布包；Seed15 造数文案未走字符串资源 | 发布前从 main_pages.json / 路由入口移除（或 build-profile 分离 debug/release 页面）；Seed15/Clear15 随 6.x 一并删（删后 check_localization 自然归零，不单独补七语） | 1.1/1.2/2.10/3.6 |
 | 4 | 🟠 | 3.5 | **翻书手感多轮调教未达产品关**（专项跟踪，详见 §三） | 角卷两轮被否 → 2026-10-23 统一 Edge 整页卷曲 + foldFromDrag + 持久节点性能修复，**待用户真机复测**；Edge 材质标定精度、松手参数对照等遗留 | 见 §三清单 | Q36 |
 | 5 | 🟠 | 3.2 | **拖书手感四项**：① 32° 转身露书脊透视不对 ② 侧转一瞬红线 ③ 动画生硬卡顿 ④ 落格/让位与 iOS 差距大 | 逻辑与 398 单测绿，手感多轮未过；初步假设见 Q32（eyeDistance 口径/双面栅格化拼缝/setInterval 状态驱动/smooth 曲线形状） | 专项修复 + 录屏过产品验收，**过验收前 3.2 不结案** | Q32 |
 | 6 | 🟠 | 2.5 | **荧光笔整块色底**，画不出 iOS「只压文字中下部的圆头条」 | RichEditor `textBackgroundStyle` 能力所限；圆头自绘需绕排 paint 桥（已下线） | 整块色底观感可接受先用；圆头条候选 = `Run.getPositions` 字形级自绘（依赖 11 #7 恢复条件） | Q23 · 11 #7 |
@@ -95,6 +95,11 @@
 
 ## 四、变更日志
 
+- 2026-10-23 阶段 1~3 体检（包名切换后）：542 单测全绿（清缓存全量真执行，
+  Failure 0 / Error 0）/ build 零 ERROR / console.log 零残留 / TODO 仅计划内 2 钩子；
+  check_localization 报 2 条硬编码中文（HomeView Seed15 造数文案）→ #3 追记
+  （随 6.x 删脚手架一并清理，不单独补七语）；推送代码确认未接（5.4 事项，无
+  app_id 变更绑定失效问题）；体检无新增独立问题项。
 - 2026-10-23 页首固定改造 + 捏合定位单位混算修复：16/64 级页首（尺素标题+加号）
   提出滚动流固定（用户拍板，对 iOS 偏差——iOS 页首跟滚+浮现小标题）；改造连带暴露
   Sixteen→Four 分开定位恒落 p0：根因 = `getRectangleById` 实测返回 px 而捏合手势

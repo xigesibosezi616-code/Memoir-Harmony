@@ -6,11 +6,11 @@
         "type": "HarmonyOS",
         "material": {
           "storeFile": "/Users/gavin/Desktop/Memoir-Harmony/Memoir.p12",
-          "storePassword": "00000022670DF92F3F04D1BCEA70C6047654632C4BDAB5834A9F2F64AF0E24EE68D666504EA37756A1F04A9E4295E127B0F3",
+          "storePassword": "000000223B2CD51048487B5BAE21E7A90E2CC20F95565A4314C92EF80E1BCC8A7F96E84F2AA6C1D1ECCC9195E94BC08DCC66",
           "keyAlias": "Memoir",
-          "keyPassword": "00000022F5AC680D0504D066CC7A64E1286BA091793BC3B1EBCF6CD6D9356E519ECFB4EF3E45FC7DA5EF02466A99B3198B38",
+          "keyPassword": "00000022C7B7992CACEB52F8C31C0EEBC66E7C5578CDEB67FC5EB934BA2784D38AF6BE9E3AD6CE18B29377015EA030E6143B",
           "signAlg": "SHA256withECDSA",
-          "profile": "/Users/gavin/Desktop/Memoir-Harmony/MemoirDebug.p7b",
+          "profile": "/Users/gavin/Desktop/Memoir-Harmony/尺素Debug.p7b",
           "certpath": "/Users/gavin/Desktop/Memoir-Harmony/Memoir.cer"
         }
       }
@@ -40,7 +40,7 @@
     ],
     "capabilities": [
       {
-        "bundleName": "com.example.temproject",
+        "bundleName": "com.sinaratech.memoir.hmos",
         "config": [
           {
             "name": "Semantic location",

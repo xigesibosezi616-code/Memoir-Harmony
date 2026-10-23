@@ -38,6 +38,7 @@ import showcaseDigestTest from './test/ShowcaseDigest.test'
 import dominantColorTest from './test/DominantColor.test'
 import entryPhotoStoreTest from './test/EntryPhotoStore.test'
 import appContinuationTest from './test/AppContinuation.test'
+import httpApiTest from './test/HttpApi.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -80,4 +81,5 @@ export default function testsuite() {
   dominantColorTest()
   entryPhotoStoreTest()
   appContinuationTest()
+  httpApiTest()
 }

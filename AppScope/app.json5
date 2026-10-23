@@ -1,6 +1,6 @@
 {
   "app": {
-    "bundleName": "com.example.temproject",
+    "bundleName": "com.sinaratech.memoir.hmos",
     "vendor": "example",
     "versionCode": 1000000,
     "versionName": "1.0.0",
