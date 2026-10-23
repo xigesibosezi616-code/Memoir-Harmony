@@ -21,6 +21,9 @@ export class ApiConfig {
   /** GET /me/rhythm 来信节奏（判定权在服务端，只是提前问一声） */
   static readonly TIMEOUT_RHYTHM_S: number = 15;
 
+  /** auth 链路（发码 / 验码 / /me）：登录链路轻量点查，30s 太久（iOS LiveAuthService 同款） */
+  static readonly TIMEOUT_AUTH_S: number = 15;
+
   /** 其余请求默认超时（与 iOS HTTPRequest.timeout 30s 一致） */
   static readonly TIMEOUT_DEFAULT_S: number = 30;
 }

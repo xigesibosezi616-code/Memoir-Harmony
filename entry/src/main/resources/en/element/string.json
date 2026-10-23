@@ -105,6 +105,30 @@
       "value": "Location service is temporarily unavailable"
     },
     {
+      "name": "s_f2d81a9c46",
+      "value": "Phone sign-in"
+    },
+    {
+      "name": "s_5c3e9b7a12",
+      "value": "Enter the code"
+    },
+    {
+      "name": "s_8d4a2f6e90",
+      "value": "Signed in"
+    },
+    {
+      "name": "s_a9b3c1d5e7",
+      "value": "Could not sign in. Please try again later"
+    },
+    {
+      "name": "s_e6f8a0b2c4",
+      "value": "Could not send the code. Please try again later"
+    },
+    {
+      "name": "s_0b7e2d4a9c",
+      "value": "Signed in"
+    },
+    {
       "name": "s_00360964eb",
       "value": "Japan Federation of Printing Industries, glossary of printing terms; Musashino Art University, Zokei File. The claim that the name was coined in Japan appears in Tokushu Paper Manufacturing's fifty-year history."
     },

@@ -19,6 +19,11 @@
       "name": "DiaryReader",
       "pageSourceFile": "src/main/ets/views/reader/DiaryReaderView.ets",
       "buildFunction": "DiaryReaderBuilder"
+    },
+    {
+      "name": "Login",
+      "pageSourceFile": "src/main/ets/views/auth/LoginView.ets",
+      "buildFunction": "LoginBuilder"
     }
   ]
 }

@@ -10,6 +10,8 @@
  */
 import { ErrorPresenter } from './ErrorPresenter';
 import { ImmersiveChrome } from '../services/ImmersiveChrome';
+import { UserSession } from '../services/auth/UserSession';
+import { AuthService } from '../services/auth/AuthService';
 
 /** AppStorage key：AppEnvironment 实例（EntryAbility 创建，Index 取出 @Provide） */
 export const STORAGE_KEY_APP_ENVIRONMENT = 'appEnvironment';
@@ -20,11 +22,20 @@ export class AppEnvironment {
   /** 沉浸式全屏控制器（Index 观察主题变化时驱动系统栏配色；拿不到主窗口时缺省） */
   readonly chrome?: ImmersiveChrome;
 
+  /** 登录会话（token + 用户快照；4.2 手机号登录） */
+  readonly session?: UserSession;
+
+  /** 认证接口客户端（发码 / 验码 / /me；4.2） */
+  readonly auth?: AuthService;
+
   private readonly foregroundHooks: Array<() => void> = [];
 
-  constructor(errors: ErrorPresenter, chrome?: ImmersiveChrome) {
+  constructor(errors: ErrorPresenter, chrome?: ImmersiveChrome,
+    session?: UserSession, auth?: AuthService) {
     this.errors = errors;
     this.chrome = chrome;
+    this.session = session;
+    this.auth = auth;
   }
 
   /** 注册回到前台钩子（后续挂通知重排、寄信队列、同名合并等） */

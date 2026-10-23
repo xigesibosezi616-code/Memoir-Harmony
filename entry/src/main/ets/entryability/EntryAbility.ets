@@ -14,6 +14,10 @@ import { createDefaultErrorPresenter } from '../environment/ErrorPresenter';
 import { ImmersiveChrome } from '../services/ImmersiveChrome';
 import { DraftRepository } from '../data/DraftRepository';
 import { AppDatabase } from '../data/Database';
+import { AssetSessionStore } from '../services/auth/AssetSessionStore';
+import { UserSession, STORAGE_KEY_SESSION_TICK } from '../services/auth/UserSession';
+import { AuthService } from '../services/auth/AuthService';
+import { HarmonyHttpClient } from '../services/http/HarmonyHttpClient';
 import {
   WANT_PARAM_DRAFT,
   STORAGE_KEY_LIVE_DRAFT_JSON,
@@ -147,7 +151,16 @@ export default class EntryAbility extends UIAbility {
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'getMainWindowSync failed, immersive degraded: %{public}s', JSON.stringify(err));
     }
-    const env = new AppEnvironment(createDefaultErrorPresenter(), chrome);
+    // 4.2 会话装配：安全存储（Asset Store Kit）→ UserSession（同步恢复登录态）
+    // → HarmonyHttpClient（401 闸门清会话 + 广播 tick）→ AuthService → 容器
+    const session = new UserSession(new AssetSessionStore());
+    const client = new HarmonyHttpClient((): void => {
+      session.clear();
+      AppStorage.setOrCreate(STORAGE_KEY_SESSION_TICK,
+        (AppStorage.get<number>(STORAGE_KEY_SESSION_TICK) ?? 0) + 1);
+    });
+    const auth = new AuthService(client);
+    const env = new AppEnvironment(createDefaultErrorPresenter(), chrome, session, auth);
     this.environment = env;
     AppStorage.setOrCreate(STORAGE_KEY_APP_ENVIRONMENT, env);
   }

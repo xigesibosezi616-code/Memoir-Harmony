@@ -105,6 +105,30 @@
       "value": "Servicio de ubicación temporalmente no disponible"
     },
     {
+      "name": "s_f2d81a9c46",
+      "value": "Iniciar sesión con teléfono"
+    },
+    {
+      "name": "s_5c3e9b7a12",
+      "value": "Introducir el código"
+    },
+    {
+      "name": "s_8d4a2f6e90",
+      "value": "Sesión iniciada"
+    },
+    {
+      "name": "s_a9b3c1d5e7",
+      "value": "No se pudo iniciar sesión. Inténtalo de nuevo más tarde"
+    },
+    {
+      "name": "s_e6f8a0b2c4",
+      "value": "No se pudo enviar el código. Inténtalo de nuevo más tarde"
+    },
+    {
+      "name": "s_0b7e2d4a9c",
+      "value": "Sesión iniciada"
+    },
+    {
       "name": "s_00360964eb",
       "value": "Federación Japonesa de Industrias de la Impresión, glosario de términos de imprenta; Universidad de Arte Musashino, archivo Zokei. La atribución del nombre a Japón consta en la historia de los cincuenta años de Tokushu Paper Manufacturing."
     },

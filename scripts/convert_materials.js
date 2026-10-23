@@ -102,6 +102,39 @@ const HAND_STRINGS = {
     'ko': '위치 서비스를 일시적으로 사용할 수 없어요',
     'fr': 'Service de localisation temporairement indisponible',
     'es': 'Servicio de ubicación temporalmente no disponible' },
+  // ---- 4.2 手机号登录（iOS xcstrings 缺的短 UI 词，LoginView 疏漏的 Text(String) 在鸿蒙侧补齐）----
+  s_f2d81a9c46: { // 手机号登录
+    'zh-Hans': '手机号登录', 'zh-Hant': '手機號登入',
+    'en': 'Phone sign-in', 'ja': '電話番号でログイン',
+    'ko': '전화번호 로그인',
+    'fr': 'Connexion par téléphone',
+    'es': 'Iniciar sesión con teléfono' },
+  s_5c3e9b7a12: { // 输入验证码
+    'zh-Hans': '输入验证码', 'zh-Hant': '輸入驗證碼',
+    'en': 'Enter the code', 'ja': '確認コードを入力',
+    'ko': '인증번호 입력', 'fr': 'Saisir le code', 'es': 'Introducir el código' },
+  s_8d4a2f6e90: { // 登录成功
+    'zh-Hans': '登录成功', 'zh-Hant': '登入成功',
+    'en': 'Signed in', 'ja': 'ログインしました',
+    'ko': '로그인했어요', 'fr': 'Connecté', 'es': 'Sesión iniciada' },
+  s_a9b3c1d5e7: { // 登录失败，请稍后再试
+    'zh-Hans': '登录失败，请稍后再试', 'zh-Hant': '登入失敗，請稍後再試',
+    'en': 'Could not sign in. Please try again later',
+    'ja': 'ログインできませんでした。しばらくしてからもう一度お試しください',
+    'ko': '로그인에 실패했어요. 잠시 후 다시 시도해 주세요',
+    'fr': 'Impossible de se connecter. Veuillez réessayer plus tard',
+    'es': 'No se pudo iniciar sesión. Inténtalo de nuevo más tarde' },
+  s_e6f8a0b2c4: { // 验证码发送失败，请稍后再试
+    'zh-Hans': '验证码发送失败，请稍后再试', 'zh-Hant': '驗證碼發送失敗，請稍後再試',
+    'en': 'Could not send the code. Please try again later',
+    'ja': '確認コードを送信できませんでした。しばらくしてからもう一度お試しください',
+    'ko': '인증번호를 보내지 못했어요. 잠시 후 다시 시도해 주세요',
+    'fr': 'Impossible d\'envoyer le code. Veuillez réessayer plus tard',
+    'es': 'No se pudo enviar el código. Inténtalo de nuevo más tarde' },
+  s_0b7e2d4a9c: { // 已登录
+    'zh-Hans': '已登录', 'zh-Hant': '已登入',
+    'en': 'Signed in', 'ja': 'ログイン済み',
+    'ko': '로그인됨', 'fr': 'Connecté', 'es': 'Sesión iniciada' },
 };
 
 /** 把 LANGS 之外的固定条目（keepOriginals）按语言拼出来；appName 来自 xcstrings */
