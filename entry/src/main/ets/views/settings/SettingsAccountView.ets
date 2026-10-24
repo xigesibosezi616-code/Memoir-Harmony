@@ -8,6 +8,9 @@
  * - 昵称：编辑弹窗 → PATCH /me（≤64，空串 = 清空，R-ACCOUNT-06）。成功就地拷贝
  *   快照（updateUser），不为一个字段再跑一趟 GET /me（iOS 同款；下次进页与服务端对齐）
  * - 手机号：已绑 → ChangePhone 换绑两步流；未绑 → Login bindPhone 模式
+ * - 华为账号（U02 R-ACCOUNT-10）：没绑 →「绑定华为账号」+ 小字，点行走华为账号授权
+ *   （请求式 forceLogin）拿 idToken → POST /me/bindings/huawei → GET /me 刷快照；
+ *   409 服务端文案透传；已绑 →「已绑定」，v1 不做解绑（和 iOS 的 Apple ID 一样）
  * - 退出登录：官方 AlertDialog 确认（按钮纯官方默认样式，随明暗自适应）
  *   → session.clear()；本地日记一律不动（R-ACCOUNT-08）
  * - 注销账号：单独一组、红色、放最底 + footer 说明日记不受影响（上架清单 A9：
@@ -16,8 +19,8 @@
  *   别把用户留在一张空页上
  *
  * 路由：系统路由表（router_map.json → name `Account`），设置页账户卡推入。
- * 华为账号绑定行（U02）后端 /auth/huawei 未实现（09 Q1），4.4 再加，不预留死 UI。
  */
+import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
@@ -27,8 +30,13 @@ import { STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP } from '../../services/ImmersiveChrome';
 import { STORAGE_KEY_SESSION_TICK } from '../../services/auth/UserSession';
 import { AuthLogic } from '../../services/auth/AuthLogic';
+import { HuaweiIdProof, HuaweiAuthLogic } from '../../services/auth/HuaweiAuthLogic';
+import { HuaweiIdAuth, HuaweiIdAuthError } from '../../services/auth/HuaweiIdAuth';
 import { HttpError } from '../../services/http/HttpError';
 import { UserDTO } from '../../models/Api';
+
+const DOMAIN = 0x0000;
+const TAG = 'SettingsAccountView';
 
 /** 顶栏一行的高（返回圆钮 + 居中标题） */
 const TOP_BAR_ROW_HEIGHT_VP: number = 44;
@@ -50,6 +58,10 @@ export struct SettingsAccountView {
   @State private maskedPhone: string = '';
   /** '' = 未绑定手机号（行值标红 + 红色 footer） */
   @State private phoneBound: boolean = false;
+  /** 华为账号绑定态（bindings 含 'huawei'；已绑只展示，v1 不做解绑） */
+  @State private huaweiBound: boolean = false;
+  /** 华为授权/绑定进行中（防重入；授权界面接管期间无感知） */
+  @State private bindingHuawei: boolean = false;
   @State private showNicknameEditor: boolean = false;
   @State private nicknameDraft: string = '';
   @State private savingNickname: boolean = false;
@@ -68,7 +80,7 @@ export struct SettingsAccountView {
 
           Scroll() {
             Column({ space: 20 }) {
-              // 账户信息组：昵称 + 手机号（未绑时为绑定入口 + 红色 footer）
+              // 账户信息组：昵称 + 手机号（未绑时为绑定入口 + 红色 footer）+ 华为账号
               Column() {
                 this.nicknameRow()
                 Divider()
@@ -76,6 +88,11 @@ export struct SettingsAccountView {
                   .strokeWidth(0.5)
                   .margin({ left: 20 })
                 this.phoneRow()
+                Divider()
+                  .color(this.theme.border)
+                  .strokeWidth(0.5)
+                  .margin({ left: 20 })
+                this.huaweiRow()
               }
               .borderRadius(16)
               .backgroundColor(this.theme.cardBackground)
@@ -331,6 +348,65 @@ export struct SettingsAccountView {
     .alignItems(HorizontalAlign.Start)
   }
 
+  // ---- 华为账号行（U02 R-ACCOUNT-10）：没绑 → 点行授权绑定；已绑 → 只展示不解绑 ----
+
+  @Builder
+  private huaweiRow() {
+    Column() {
+      Row({ space: 10 }) {
+        SymbolGlyph($r('sys.symbol.person_crop_circle_fill'))
+          .fontSize(14)
+          .fontWeight(FontWeight.Medium)
+          .fontColor([this.theme.textSecondary])
+          .width(20)
+        Text($r('app.string.s_c57df07ccd'))
+          .fontSize(this.theme.bodyFont.size)
+          .fontWeight(this.theme.bodyFont.weight)
+          .fontFamily(this.theme.bodyFont.family)
+          .fontColor(this.theme.textPrimary)
+        Blank()
+        if (this.huaweiBound) {
+          // 已绑：v1 不做解绑（和 iOS 的 Apple ID 一样），行不可点
+          Text($r('app.string.s_b3addb5e3f'))
+            .fontSize(this.theme.captionFont.size)
+            .fontWeight(this.theme.captionFont.weight)
+            .fontFamily(this.theme.captionFont.family)
+            .fontColor(this.theme.textTertiary)
+        } else {
+          Text($r('app.string.s_86abec87ab'))
+            .fontSize(this.theme.captionFont.size)
+            .fontWeight(this.theme.captionFont.weight)
+            .fontFamily(this.theme.captionFont.family)
+            .fontColor(this.theme.textTertiary)
+          SymbolGlyph($r('sys.symbol.chevron_right'))
+            .fontSize(13)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([this.theme.textTertiary])
+        }
+      }
+      .width('100%')
+      .padding({ top: 15, bottom: 15, left: 20, right: 20 })
+      .alignItems(VerticalAlign.Center)
+      .onClick((): void => {
+        if (!this.huaweiBound && !this.bindingHuawei) {
+          this.bindHuawei();
+        }
+      })
+
+      if (!this.huaweiBound) {
+        // 小字：绑定价值说明（U02 文案表）
+        Text($r('app.string.s_614f6c3b3d'))
+          .fontSize(this.theme.labelFont.size)
+          .fontWeight(this.theme.labelFont.weight)
+          .fontFamily(this.theme.labelFont.family)
+          .fontColor(this.theme.textTertiary)
+          .padding({ left: 20, right: 20, bottom: 14 })
+      }
+    }
+    .width('100%')
+    .alignItems(HorizontalAlign.Start)
+  }
+
   // ---- 昵称编辑弹窗（BookDetail deleteConfirmDialog 同款内联浮层） ----
 
   @Builder
@@ -491,6 +567,67 @@ export struct SettingsAccountView {
     this.bumpSessionTick();
   }
 
+  // ---- 绑定华为账号（U02-2）----
+
+  /** 绑定华为账号：请求式授权（forceLogin，与登录同一套授权界面）拿 idToken →
+   *  POST /me/bindings/huawei → GET /me 刷快照（响应只有 {ok:true} 不带 user）。
+   *  409 服务端文案透传；取消/未登录静默；其余 kit 失败提示授权失败 + 完整日志。 */
+  private async bindHuawei(): Promise<void> {
+    if (this.bindingHuawei || this.huaweiBound) {
+      return;
+    }
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const session = this.env.session;
+    const token: string | null = session === undefined ? null : session.token;
+    if (token === null) {
+      this.presentResourceToast($r('app.string.s_0e37efff8d'), ErrorToastKind.Error);
+      return;
+    }
+    this.bindingHuawei = true;
+    try {
+      const proof: HuaweiIdProof = await HuaweiIdAuth.authorize(context);
+      const auth = this.env.auth;
+      if (auth === undefined) {
+        return;
+      }
+      await auth.bindHuawei(proof.idToken, token);
+      // 绑定已成（{ok:true}）：以 GET /me 为准刷快照；刷新失败不打扰——绑定本身成功了
+      try {
+        const me = await auth.fetchMe(token);
+        if (session !== undefined) {
+          session.updateUser(me.user);
+        }
+      } catch (e) {
+        hilog.warn(DOMAIN, TAG, 'refresh me after huawei bind failed: %{public}s',
+          JSON.stringify(e));
+      }
+      this.presentResourceToast($r('app.string.s_35744f9bac'), ErrorToastKind.Success);
+      this.refreshFromSession();
+      this.bumpSessionTick();
+    } catch (e) {
+      this.presentHuaweiError(e);
+    } finally {
+      this.bindingHuawei = false;
+    }
+  }
+
+  /** 华为授权/绑定错误分流：取消静默、kit 失败提示授权失败、服务端文案透传（409 同路） */
+  private presentHuaweiError(e: Object): void {
+    if (e instanceof HuaweiIdAuthError) {
+      if (HuaweiAuthLogic.isSilentKitError(e.code)) {
+        return;
+      }
+      hilog.error(DOMAIN, TAG, 'huawei authorize failed: %{public}d %{public}s',
+        e.code, e.message);
+      this.presentResourceToast($r('app.string.s_a23663f119'), ErrorToastKind.Error);
+      return;
+    }
+    this.presentAuthError(e, $r('app.string.s_a23663f119'));
+  }
+
   /** 登录 / 401 / 注销信号 → 刷新字段；登录态空了自动退回（iOS onChange 同款） */
   onSessionTick(): void {
     const session = this.env.session;
@@ -509,11 +646,13 @@ export struct SettingsAccountView {
       this.displayName = '';
       this.maskedPhone = '';
       this.phoneBound = false;
+      this.huaweiBound = false;
       return;
     }
     this.displayName = user.displayName;
     this.phoneBound = user.phone.length > 0;
     this.maskedPhone = AuthLogic.maskedPhone(user.phone);
+    this.huaweiBound = user.bindings.indexOf('huawei') >= 0;
   }
 
   /** 未设置占位词条（独立方法防 @Builder 内三元过载） */

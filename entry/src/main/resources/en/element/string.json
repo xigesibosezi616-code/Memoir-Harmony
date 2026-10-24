@@ -161,6 +161,42 @@
       "value": "The diary entries, photos, recordings, and letters already received on this phone and in your Huawei cloud space. They're yours, and they stay after deletion."
     },
     {
+      "name": "s_c57df07ccd",
+      "value": "HUAWEI ID"
+    },
+    {
+      "name": "s_86abec87ab",
+      "value": "Link HUAWEI ID"
+    },
+    {
+      "name": "s_614f6c3b3d",
+      "value": "Once linked, you can sign in to the same account with your HUAWEI ID on this device"
+    },
+    {
+      "name": "s_a23663f119",
+      "value": "HUAWEI ID authorization failed"
+    },
+    {
+      "name": "s_2b42a64cab",
+      "value": "HUAWEI ID authorization failed: no credential received"
+    },
+    {
+      "name": "s_c3758b0795",
+      "value": "Signing in with HUAWEI ID isn't available yet. Please use your phone number for now."
+    },
+    {
+      "name": "s_573a605055",
+      "value": "Or verify with HUAWEI ID"
+    },
+    {
+      "name": "s_76923ad872",
+      "value": "Verify with your linked HUAWEI ID"
+    },
+    {
+      "name": "s_35744f9bac",
+      "value": "HUAWEI ID linked"
+    },
+    {
       "name": "s_00360964eb",
       "value": "Japan Federation of Printing Industries, glossary of printing terms; Musashino Art University, Zokei File. The claim that the name was coined in Japan appears in Tokushu Paper Manufacturing's fifty-year history."
     },

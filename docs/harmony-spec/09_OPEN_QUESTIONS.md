@@ -7,7 +7,7 @@
 
 | # | 级别 | 事项 | 卡哪一步 | 谁来定 | 结论 |
 |---|---|---|---|---|---|
-| Q1 | 🔴 | 后端 **`POST /auth/huawei`、`POST /me/bindings/huawei` 未实现** | 4.4 华为账号登录 | 后端 | |
+| Q1 | ✅ | 后端 **`POST /auth/huawei`、`POST /me/bindings/huawei` 未实现** | 4.4 华为账号登录 | 后端 | **2026-10-25 真机全通，结案**：AGC 密钥已配齐，`POST /auth/huawei` 实测返回 AuthResponse（Mate X6 静默再授权登录闭环 U02-1 ✓，后端解析 idToken 出昵称「你好」）。剩余尾巴在 Q17（/me/delete 华为分支 500）、Q38（/me/bindings/phone 500）与绑定行 E2E（需「已登录未绑华为」账号——当前账号建号即绑恒已绑，需第二手机号 SMS 建新号，U02-2 客户端 authorize 已修见 4.4 卡） |
 | Q2 | 🔴 | `POST /subscription/sync-huawei` **只是占位**（只落库、不验证），华为 IAP 产品 ID 也没建 | 7.x 会员 | 后端 + 产品 | |
 | Q3 | 🔴 | 鸿蒙**云同步用什么** | 6.6 云同步 | 产品 + 鸿蒙 | |
 | Q4 | 🟡 | 回信的**到达时刻、已读状态只在客户端** | 5.x 邮筒 | 产品 + 后端 | |
@@ -23,7 +23,7 @@
 | Q14 | ⚪ | 测试开关（来信不设限、假开通会员） | 8 上架 | — | 上架前关 |
 | Q15 | ⚪ | 后端域名 | 4.1 | 运维 | |
 | Q16 | ⚪ | 「内容审核没过」**后端没有专门的错误码** | 5.3 | 后端 | |
-| Q17 | ⚪ | 接华为账号后，**注销时撤销华为授权** | 4.4 | 后端 | |
+| Q17 | 🔴 | 接华为账号后，**注销时撤销华为授权** | 4.4 | 后端 | 2026-10-24 后端已实现：`POST /me/delete` 带 `{huaweiIdToken, huaweiAuthorizationCode}` → `{ok, huaweiRevoked?}`，撤销失败不阻断注销（客户端不区别对待）；鸿蒙端已接（DeleteAccountView 华为验证分支）。**2026-10-25 真机实测（Mate X6）：500 复现 2/2**——`POST /me/delete` 返 `500 {"error":{"code":"internal","message":"服务器内部错误"}}`（服务端兜底 envelope，非撤销失败分支——撤销失败应 ok 照判），账号未删、客户端会话完好；客户端载荷按契约（{huaweiIdToken, huaweiAuthorizationCode} + bearer），华为验证步静默通过。**需后端（尺素）查 FC 日志定位 internal 异常**；客户端已加诊断日志（DeleteAccountView.deleteAccountWithHuawei catch 打 kind/status/body）。注销 E2E（U02-3）在此修复前收不了尾 |
 | Q18 | ⚪ | 鸿蒙**包名 / 应用市场主体** | 0.3 | 产品 | |
 | Q19 | 🟡 | 正文小图加载**不放大**（iOS `loadImage` 的 `preparingThumbnail` 会把小图放大到 600） | 2.6 照片相纸 | 鸿蒙 + 产品 | |
 | Q20 | 🟡 | **智感握姿实现路径**：`HdsTabs` 不在本 SDK（26），自行用 motion `operatingHandChanged` + `ACTIVITY_MOTION` 实现 | 1.6 主框架 · 真机验收 | 鸿蒙 | 2026-10-15 整体移除：Tabs 系统底栏无横移落点，且 SDK 权限清单证实 `DETECT_GESTURE`（normal + system_grant）后 `holdingHandChanged` 也只是普通权限——智感握姿收益存疑，服务、权限声明、理由文案全部删除（git 历史可寻回），真机验收 `operatingHand` 授权率与灵敏度后若确需再重启 |
@@ -44,6 +44,8 @@
 | Q34 | 🟡 | 3.3 大图照片加载复用 600px 缓存（iOS 独立 300px） | 3.3 日记本主页 | 鸿蒙 | 2026-10-21（详述见下 Q34） |
 | Q35 | 🟡 | 3.3 大图高度/布面标题/顶栏磨砂等真机验收四轮定稿 | 3.3 日记本主页 | 产品 + 鸿蒙 | 2026-10-21 定稿（详述见下 Q35） |
 | Q36 | 🟡 | **3.5 阅读器三条声明偏差 + 仿真翻页技术坑**：① 仿真翻页（官方最佳实践配方）替代 iOS `UIPageViewController(.pageCurl)`，华为 Reader Kit 排除；② 大屏单列页宽封顶 420vp；③ trace 25 / audio 60 / photoHeight 剪裁等尺寸常量待真机核对 | 3.5 阅读器 | 鸿蒙 + 产品（录屏验收） | 2026-10-22 代码完成待真机验收（详述见下 Q36） |
+| Q37 | ⚪ | **一键登录（LoginType.QUICK_LOGIN）要不要做** | v1.1 候选 | 产品 + 后端（尺素） | 2026-10-25 SDK 调研结论（详述见下 Q37） |
+| Q38 | 🔴 | **线上 `POST /me/bindings/phone` 500**（消费验证码后绑定步崩溃） | 4.3 补绑手机号 | 后端（尺素） | 2026-10-25 真机实测复现（详述见下 Q38） |
 
 ---
 
@@ -51,10 +53,11 @@
 
 ### Q1 🔴 华为账号登录接口未实现
 
-后端只有 `/auth/send-code`、`/auth/verify-code`、`/auth/apple`、`/auth/third-party`（微信，v1 不做）。
-**鸿蒙 v1 先只做手机号登录**（今天就能用，iOS 也是这套）。华为账号要等后端补：
-`POST /auth/huawei { idToken }` → 验证 → 颁发 JWT；`POST /me/bindings/huawei` 契约照搬 Apple 那套。
-⚠️ 有了华为登录之后，手机号必绑的警告（R-ACCOUNT-03）一样要做。
+**2026-10-24 更新：后端三端点已部署**（`POST /auth/huawei {idToken}`→AuthResponse、`POST /me/bindings/huawei {idToken}`→`{ok:true}`、`POST /me/delete` 华为分支→`{ok,huaweiRevoked?}`），但服务端 AGC 密钥未配 → 实测恒返 **503 `huawei_disabled`**（U02 卡设计如此：客户端先写好按 503 分支自测）。
+鸿蒙客户端已全部接好：LoginView 华为官方按钮（LoginWithHuaweiIDButton，503 专判「华为账号登录暂未开放，请先用手机号登录」）、SettingsAccountView 绑定行（请求式 API）、DeleteAccountView 华为验证注销。**打通只差后端配 AGC 密钥**：Client ID=6917619854007528919（=APP ID）+ OAuth 客户端 Secret（client_credentials 拿应用级 token；ID Token 验签走华为 JWKS 公钥；aud 校验值=6917619854007528919）。**公钥指纹调试阶段免配**（2026-10-24 核官方《配置签名和指纹》：compatibleSdkVersion≥20 豁免，本项目 26 满足；AGC 里 0A:4E:B0:D8… 为旧自动签名证书残留）；客户端 module.json5 client_id 已修正为 6917619854007528919（原 2067731667488866304 是 agconnect 旧值）。
+手机号必绑警告（R-ACCOUNT-03）照做：华为登录若返回未绑手机号的 user，设置页红色警告行同样生效。
+
+历史（已过时）：后端只有 `/auth/send-code`、`/auth/verify-code`、`/auth/apple`、`/auth/third-party`（微信，v1 不做）时期，鸿蒙 v1 先只做手机号登录。
 
 ### Q2 🔴 华为 IAP
 
@@ -163,7 +166,9 @@ iOS 定义了「日记内容未通过审核，这次没能寄出」，但服务�
 
 ### Q17 ⚪ 注销时撤销华为授权
 
-接了华为账号（Q1）之后，注销账号时服务端要像 Apple 那样撤销授权，需要后端加分支。
+**2026-10-24 已闭环（待真机验收）**：后端 `POST /me/delete` 带 `{huaweiIdToken, huaweiAuthorizationCode}` → `{ok, huaweiRevoked?}`，撤销失败不阻断注销；鸿蒙端 DeleteAccountView 华为验证分支已接（授权码不缓存、AlertDialog 取消即丢、finally 恒清）。
+
+历史：接了华为账号（Q1）之后，注销账号时服务端要像 Apple 那样撤销授权，需要后端加分支。
 
 ### Q18 ⚪ 包名与主体
 
@@ -718,3 +723,46 @@ R-RICH-09 要求打开编辑时就地转成正文里的录音块。纯逻辑已�
     - **验证**：488 单测全绿、`assembleHap` BUILD SUCCESSFUL、
       `check_localization` 过绿；字体真机截图已验；纸感重构后 USB 断开，
       真机录屏 / 像素对比待设备重连（模拟器冒烟另记）。
+
+### Q37 ⚪ 一键登录（LoginType.QUICK_LOGIN）调研结论（2026-10-25）
+
+**是什么**：`LoginWithHuaweiIDButton` 的第三种登录形态（`LoginType.QUICK_LOGIN = 3`，API 5.0.0(12)+）。
+用户点一下按钮 → Account Kit 返回华为账号的**匿名手机号**（脱敏）+ openID/unionID/authorizationCode/idToken →
+**服务端**拿 authorizationCode 调华为 REST `/oauth2/v6/quickLogin/getPhoneNumber`（需应用级 token，
+即 Client ID + Client Secret 的 client_credentials，Q1 已配）换**真实手机号** → 以该手机号直接建/登账号。
+等价于「运营商一键登录」的华为账号版：**免验证码、登录即绑手机号**。
+
+**关键约束**（d.ts 官方注释）：
+- 匿名号拿不到时须降级其他登录形态（华为账号未绑手机号的用户走不了）
+- 不支持 icon / 图文按钮形态，**只能纯文本按钮**
+- 手机 / PC 二合一 / 平板 / TV(仅 5.1.1) 可用，其余设备 1001500003
+- 响应字段与 ID 型相同（openID/unionID/authorizationCode/idToken），多一个匿名手机号
+
+**对尺素的价值**：R-ACCOUNT-03「手机号必绑」红警告的根治——现在华为登录建号不带手机号，
+用户要手动补绑（SMS 验证码 + 输入）；QUICK_LOGIN 登录即有手机号，红警告场景大幅消失。
+
+**建议**：**v1 不做，v1.1 候选**。理由：① 服务端要加 `/auth/huawei` 的 quickLogin 分支
+（authorizationCode → 应用级 token → 华为 REST 换手机号 → 手机号建号逻辑），而服务端当前
+连 `/me/delete` 华为分支还有 500 待修（Q17），带宽有限；② 手机号补绑流程（4.3）已覆盖痛点；
+③ 客户端侧改动小（登录页加一个文本按钮 + LoginType 切换），随时可加。
+产品拍板要做时：客户端 LoginView 加 QUICK_LOGIN 文本按钮（「华为账号一键登录」），
+服务端加分支，验收口径 = 登录后 user.phone 非空、账户页无红警告。
+
+### Q38 🔴 线上 POST /me/bindings/phone 500（2026-10-25 实测）
+
+**现象**（Mate X6 真机，4.4 收尾顺带复测 4.3 补绑手机号 E2E）：
+- 发码正常（`/auth/send-code` 200，倒计时 59s，次日额度已重置）；
+- 输入**新鲜验证码**（965973，发送后 ~1 分钟内提交）→ 6 位自动提交 →
+  服务端返 `500 {"error":{"code":"internal","message":"服务器内部错误"}}`；
+- **验证码已通过校验**（错误桶从「请先获取验证码」变为「服务器内部错误」），
+  且**码已被消费**（重输同码报「请先获取验证码」）——即崩在校验通过后的绑定写库步。
+- 首次提交（590321，用户误读昨日遗留短信）被拒「请先获取验证码」属预期，
+  非 bug；真 500 观测 1 次（重试需新短信，未烧额度复测第二次）。
+
+**客户端已核对无误**：请求体 `{target, code}` 与契约一致（sendCode `{target}`、
+login `{target, code}` 同构）；bearer 带上；envelope.message 正确透出。
+已加诊断日志（LoginView.bindPhone catch，status≥500 打 kind/status/body）。
+
+**待后端（尺素）排查**：switchedAccount 转移路径（17375778851 疑似挂着 4.2/4.3
+时期测试账号，转移逻辑可能崩）或绑定写库约束。与 Q17（/me/delete 华为分支 500）
+同日出现，疑似同一部署引入的写路径回归。修复前补绑手机号 E2E 收不了尾。

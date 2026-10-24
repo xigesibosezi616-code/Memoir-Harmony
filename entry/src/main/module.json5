@@ -13,6 +13,12 @@
     "installationFree": false,
     "pages": "$profile:main_pages",
     "routerMap": "$profile:router_map",
+    "metadata": [
+      {
+        "name": "client_id",
+        "value": "6917619854007528919"
+      }
+    ],
     "requestPermissions": [
       {
         "name": "ohos.permission.MICROPHONE",

@@ -184,15 +184,74 @@ const HAND_STRINGS = {
     'ko': '저희 서버에 있는 회원님의 모든 데이터: Memoir 계정, 연결된 휴대폰 번호와 HUAWEI ID, 닉네임, 펜팔 호칭, 편지 기록.',
     'fr': 'Toutes vos données sur nos serveurs : votre compte Memoir, le numéro de téléphone et le HUAWEI ID associés, votre surnom, le nom de votre correspondant et l\'historique des lettres.',
     'es': 'Todos tus datos en nuestros servidores: tu cuenta de Memoir, el número de teléfono y el HUAWEI ID vinculados, tu apodo, el nombre de tu amigo por correspondencia y el registro de cartas.' },
-  // 不会被删除正文：鸿蒙没有 iCloud，去掉 iOS 版里的 iCloud 表述（自译，术语对齐既有词条）
-  s_10a55ee848: { // 这台手机里的日记、照片、录音，以及已经收到的信。它们是你自己的，注销后照样都在。
-    'zh-Hans': '这台手机里的日记、照片、录音，以及已经收到的信。它们是你自己的，注销后照样都在。',
-    'zh-Hant': '這台手機裡的日記、照片、錄音，以及已經收到的信。它們是你自己的，註銷後照樣都在。',
-    'en': 'The diary entries, photos, recordings, and letters already received on this phone. They\'re yours, and they stay after deletion.',
-    'ja': 'この端末内の日記、写真、録音、そしてすでに受け取った手紙。それらはあなたのものなので、退会後もそのまま残ります。',
-    'ko': '이 휴대폰의 일기, 사진, 녹음, 그리고 이미 받은 편지. 모두 회원님의 것이므로 탈퇴 후에도 그대로 남아 있어요.',
-    'fr': 'Les journaux, photos, enregistrements et lettres déjà reçues sur ce téléphone. Ils vous appartiennent et restent en place après la suppression.',
-    'es': 'Los diarios, fotos, grabaciones y cartas ya recibidas en este teléfono. Son tuyos y permanecen ahí tras eliminar la cuenta.' },
+  // 不会被删除正文：鸿蒙没有 iCloud，去掉 iOS 版里的 iCloud 表述；
+  // 2026-10-24 追记「华为云空间」（4.3 真机验收后补的铺云同步说明，八语言同步于此，
+  // 防 convert 重跑把 string.json 里已修的版本冲回旧文）
+  s_10a55ee848: { // 这台手机和你的华为云空间里的日记、照片、录音，以及已经收到的信。它们是你自己的，注销后照样都在。
+    'zh-Hans': '这台手机和你的华为云空间里的日记、照片、录音，以及已经收到的信。它们是你自己的，注销后照样都在。',
+    'zh-Hant': '這台手機和你的華為雲空間裡的日記、照片、錄音，以及已經收到的信。它們是你自己的，註銷後照樣都在。',
+    'en': 'The diary entries, photos, recordings, and letters already received on this phone and in your Huawei cloud space. They\'re yours, and they stay after deletion.',
+    'ja': 'この端末とHUAWEIクラウド内の日記、写真、録音、そしてすでに受け取った手紙。それらはあなたのものなので、退会後もそのまま残ります。',
+    'ko': '이 휴대폰과 HUAWEI 클라우드의 일기, 사진, 녹음, 그리고 이미 받은 편지. 모두 회원님의 것이므로 탈퇴 후에도 그대로 남아 있어요.',
+    'fr': 'Les journaux, photos, enregistrements et lettres déjà reçues sur ce téléphone et dans votre espace cloud HUAWEI. Ils vous appartiennent et restent en place après la suppression.',
+    'es': 'Los diarios, fotos, grabaciones y cartas ya recibidas en este teléfono y en tu espacio en la nube de HUAWEI. Son tuyos y permanecen ahí tras eliminar la cuenta.' },
+  // ---- U02 华为账号（4.4；除绑定成功 toast 外译文取自 U02「七种语言的新文案」，勿机翻）----
+  s_c57df07ccd: { // 华为账号
+    'zh-Hans': '华为账号', 'zh-Hant': '華為帳號',
+    'en': 'HUAWEI ID', 'ja': 'HUAWEI ID', 'ko': 'HUAWEI ID',
+    'fr': 'HUAWEI ID', 'es': 'HUAWEI ID' },
+  s_86abec87ab: { // 绑定华为账号
+    'zh-Hans': '绑定华为账号', 'zh-Hant': '綁定華為帳號',
+    'en': 'Link HUAWEI ID', 'ja': 'HUAWEI IDを連携',
+    'ko': 'HUAWEI ID 연결', 'fr': 'Associer le HUAWEI ID',
+    'es': 'Vincular HUAWEI ID' },
+  s_614f6c3b3d: { // 绑定后可在此设备用华为账号快捷登录同一账号
+    'zh-Hans': '绑定后可在此设备用华为账号快捷登录同一账号',
+    'zh-Hant': '綁定後可在此裝置用華為帳號快速登入同一帳號',
+    'en': 'Once linked, you can sign in to the same account with your HUAWEI ID on this device',
+    'ja': '連携すると、この端末でHUAWEI IDを使って同じアカウントにサインインできます',
+    'ko': '연결하면 이 기기에서 HUAWEI ID로 같은 계정에 간편하게 로그인할 수 있습니다',
+    'fr': 'Une fois associé, vous pourrez vous connecter au même compte avec votre HUAWEI ID sur cet appareil',
+    'es': 'Al vincularlo podrás iniciar sesión en la misma cuenta con tu HUAWEI ID en este dispositivo' },
+  s_a23663f119: { // 华为账号授权失败
+    'zh-Hans': '华为账号授权失败', 'zh-Hant': '華為帳號授權失敗',
+    'en': 'HUAWEI ID authorization failed',
+    'ja': 'HUAWEI ID の認証に失敗しました',
+    'ko': 'HUAWEI ID 인증에 실패했습니다',
+    'fr': 'Échec de l\'autorisation HUAWEI ID',
+    'es': 'Error en la autorización de HUAWEI ID' },
+  s_2b42a64cab: { // 华为账号授权失败：未获取到凭证
+    'zh-Hans': '华为账号授权失败：未获取到凭证',
+    'zh-Hant': '華為帳號授權失敗：未取得憑證',
+    'en': 'HUAWEI ID authorization failed: no credential received',
+    'ja': 'HUAWEI ID の認証に失敗しました：資格情報を取得できませんでした',
+    'ko': 'HUAWEI ID 인증 실패: 자격 증명을 받지 못했습니다',
+    'fr': 'Échec de l\'autorisation HUAWEI ID : aucun identifiant reçu',
+    'es': 'Error en la autorización de HUAWEI ID: no se recibió ninguna credencial' },
+  s_c3758b0795: { // 华为账号登录暂未开放，请先用手机号登录
+    'zh-Hans': '华为账号登录暂未开放，请先用手机号登录',
+    'zh-Hant': '華為帳號登入暫未開放，請先用手機號登入',
+    'en': 'Signing in with HUAWEI ID isn\'t available yet. Please use your phone number for now.',
+    'ja': 'HUAWEI ID でのサインインはまだご利用いただけません。電話番号でサインインしてください。',
+    'ko': 'HUAWEI ID 로그인은 아직 지원되지 않아요. 우선 휴대폰 번호로 로그인해 주세요.',
+    'fr': 'La connexion avec un HUAWEI ID n\'est pas encore disponible. Utilisez votre numéro de téléphone pour l\'instant.',
+    'es': 'Todavía no se puede iniciar sesión con HUAWEI ID. Por ahora, usa tu número de teléfono.' },
+  s_573a605055: { // 或者用华为账号验证
+    'zh-Hans': '或者用华为账号验证', 'zh-Hant': '或者用華為帳號驗證',
+    'en': 'Or verify with HUAWEI ID', 'ja': 'または HUAWEI ID で確認',
+    'ko': '또는 HUAWEI ID로 인증', 'fr': 'Ou vérifiez avec votre HUAWEI ID',
+    'es': 'O verifica con tu HUAWEI ID' },
+  s_76923ad872: { // 用你绑定的华为账号验证
+    'zh-Hans': '用你绑定的华为账号验证', 'zh-Hant': '用你綁定的華為帳號驗證',
+    'en': 'Verify with your linked HUAWEI ID',
+    'ja': '登録済みの HUAWEI ID で確認',
+    'ko': '연결된 HUAWEI ID로 인증', 'fr': 'Vérifiez avec le HUAWEI ID associé',
+    'es': 'Verifica con tu HUAWEI ID vinculado' },
+  s_35744f9bac: { // 华为账号绑定成功（成功 toast；U02 文案表没有，鸿蒙侧自拟，句式对齐 s_cecceb5a0a 手机号绑定成功）
+    'zh-Hans': '华为账号绑定成功', 'zh-Hant': '華為帳號綁定成功',
+    'en': 'HUAWEI ID linked', 'ja': 'HUAWEI ID を連携しました',
+    'ko': 'HUAWEI ID가 연결되었어요', 'fr': 'HUAWEI ID associé',
+    'es': 'HUAWEI ID vinculado' },
 };
 
 /** 把 LANGS 之外的固定条目（keepOriginals）按语言拼出来；appName 来自 xcstrings */

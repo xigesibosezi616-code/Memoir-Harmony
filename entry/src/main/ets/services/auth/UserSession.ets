@@ -53,7 +53,9 @@ export class UserSession {
     return this.tokenValue !== null;
   }
 
-  /** 登录 / 换绑成功：token + 用户快照落内存并持久化 */
+  /** 登录 / 换绑成功：token + 用户快照落内存并持久化。
+   *  快照持久化格式 = UserDTO 的 JSON（bindings 是 provider 字符串数组）；
+   *  恢复走 parseUserDto，其 UserRaw 对该形状与线格式都兼容（Api.ets）。 */
   establish(token: string, user: UserDTO): void {
     this.tokenValue = token;
     this.userValue = user;

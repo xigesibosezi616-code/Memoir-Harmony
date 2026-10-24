@@ -16,14 +16,17 @@ interface BindingRaw {
   provider?: string;
 }
 
-/** GET /auth/* 响应里 user 对象的原样形状（types.ts UserDTO） */
+/** GET /auth/* 响应里 user 对象的原样形状（types.ts UserDTO）。
+ *  bindings 元素额外容忍 string：会话持久化（UserSession → JSON.stringify(UserDTO)）
+ *  落盘的是 provider 字符串数组，恢复时与线格式同路解析（2026-10-24 真机：
+ *  恢复丢绑定态 → 华为行重启后翻转未绑）。 */
 interface UserRaw {
   id?: number | string;
   phone?: string;
   email?: string;
   displayName?: string;
   penPalName?: string;
-  bindings?: BindingRaw[];
+  bindings?: (BindingRaw | string)[];
 }
 
 interface AuthResponseRaw {
@@ -194,8 +197,10 @@ function userFromRaw(r: UserRaw): UserDTO {
   const providers: string[] = [];
   if (r.bindings !== undefined) {
     for (const b of r.bindings) {
-      if (typeof b.provider === 'string' && b.provider.length > 0) {
-        providers.push(b.provider);
+      // 线格式 {provider} 或会话持久化的裸字符串（见 UserRaw 注释）都收
+      const provider: string = typeof b === 'string' ? b : (b.provider ?? '');
+      if (provider.length > 0) {
+        providers.push(provider);
       }
     }
   }

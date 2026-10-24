@@ -10,6 +10,7 @@ import { describe, it, expect } from '@ohos/hypium';
 import { AuthLogic } from '../../main/ets/services/auth/AuthLogic';
 import { SessionStore, SESSION_KEY_TOKEN, SESSION_KEY_USER } from '../../main/ets/services/auth/SessionStore';
 import { UserSession } from '../../main/ets/services/auth/UserSession';
+import { HuaweiIdProof, HuaweiAuthLogic } from '../../main/ets/services/auth/HuaweiAuthLogic';
 import { parseUserDto, parseAuthResponse, parseSendCodeResponse,
   parseMeResponse, parseBindPhoneResponse, parseChangePhoneResponse,
   parseDeleteAccountResponse, parseOkResponse, UserDTO } from '../../main/ets/models/Api';
@@ -186,6 +187,19 @@ export default function authSessionTest() {
       expect(restored.user?.phone).assertEqual('13800138000');
     })
 
+    it('sessionRestoreKeepsBindingsAcrossRestart', 0, () => {
+      // 2026-10-24 真机回归：establish 落盘的快照是 UserDTO JSON（bindings 为
+      // provider 字符串数组），恢复走 parseUserDto——重启后绑定态不得丢
+      // （华为行曾因恢复丢 bindings 翻转成未绑态）
+      const store = new MemorySessionStore();
+      const session = new UserSession(store);
+      session.establish('jwt-token-abc', userFromJson(USER_JSON));
+      const restored = new UserSession(store);
+      expect(restored.user?.bindings.length).assertEqual(2);
+      expect(restored.user?.bindings[0]).assertEqual('phone');
+      expect(restored.user?.bindings[1]).assertEqual('apple');
+    })
+
     it('sessionClearWipesMemoryAndStore', 0, () => {
       const store = new MemorySessionStore();
       const session = new UserSession(store);
@@ -345,6 +359,43 @@ export default function authSessionTest() {
       expect(session.isLoggedIn()).assertFalse();
       expect(store.get(SESSION_KEY_TOKEN)).assertNull();
       expect(new UserSession(store).isLoggedIn()).assertFalse();
+    })
+
+    // ---- 4.4 U02 华为账号授权纯逻辑（kit 壳跑不了本地，口径在这锁死）----
+
+    it('huaweiSilentKitErrorCodeClassification', 0, () => {
+      // 取消 / 未登录华为账号 → 静默回页面不弹错（U02 R-ACCOUNT-09）
+      expect(HuaweiAuthLogic.isSilentKitError(HuaweiAuthLogic.CODE_USER_CANCEL)).assertTrue();
+      expect(HuaweiAuthLogic.isSilentKitError(HuaweiAuthLogic.CODE_NOT_LOGGED_IN)).assertTrue();
+      // 其他 kit 错误（指纹校验失败/网络错误/内部错误）要提示，不静默
+      expect(HuaweiAuthLogic.isSilentKitError(1001500001)).assertFalse();
+      expect(HuaweiAuthLogic.isSilentKitError(1001502005)).assertFalse();
+      expect(HuaweiAuthLogic.isSilentKitError(1001502009)).assertFalse();
+      expect(HuaweiAuthLogic.isSilentKitError(0)).assertFalse();
+    })
+
+    it('huaweiProofForLoginRequiresIdTokenOnly', 0, () => {
+      const proof: HuaweiIdProof | null = HuaweiAuthLogic.proofFor('jwt-id-token', 'DQB6code');
+      expect(proof?.idToken).assertEqual('jwt-id-token');
+      expect(proof?.authorizationCode).assertEqual('DQB6code');
+      // authorizationCode 可缺（登录 / 绑定只交 idToken）
+      const bare: HuaweiIdProof | null = HuaweiAuthLogic.proofFor('jwt-id-token', undefined);
+      expect(bare?.idToken).assertEqual('jwt-id-token');
+      expect(bare?.authorizationCode).assertEqual('');
+      // idToken 缺 / 空 → null（「未获取到凭证」分支）
+      expect(HuaweiAuthLogic.proofFor(undefined, 'DQB6code')).assertNull();
+      expect(HuaweiAuthLogic.proofFor('', 'DQB6code')).assertNull();
+    })
+
+    it('huaweiDeleteProofRequiresIdTokenAndAuthorizationCode', 0, () => {
+      const proof: HuaweiIdProof | null =
+        HuaweiAuthLogic.deleteProofFor('jwt-id-token', 'DQB6code');
+      expect(proof?.idToken).assertEqual('jwt-id-token');
+      expect(proof?.authorizationCode).assertEqual('DQB6code');
+      // /me/delete 两个一起交，缺一个服务端撤销不了华为授权（U02 R-ACCOUNT-07）
+      expect(HuaweiAuthLogic.deleteProofFor('jwt-id-token', undefined)).assertNull();
+      expect(HuaweiAuthLogic.deleteProofFor('jwt-id-token', '')).assertNull();
+      expect(HuaweiAuthLogic.deleteProofFor(undefined, 'DQB6code')).assertNull();
     })
   })
 }
