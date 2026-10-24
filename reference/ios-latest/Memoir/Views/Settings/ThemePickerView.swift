@@ -116,21 +116,15 @@ struct ThemePickerView: View {
     }
 
     private func themePreview(id: String) -> some View {
-        let colors: (bg: Color, fg: Color) = switch id {
-        case "bamboo": (Color(hex: "#FAF7F2"), Color(hex: "#8B7E6A"))
-        case "leather": (Color(hex: "#1C1410"), Color(hex: "#C8A87C"))
-        case "kent": (Color(hex: "#FFFFFF"), Color(hex: "#1A1A1A"))
-        case "polar": (Color(hex: "#000000"), Color(hex: "#8FA8BF"))
-        default: (Color(hex: "#FAF7F2"), Color(hex: "#8B7E6A"))
-        }
+        let colors = ThemeSwatch.colors(for: id)
 
         return RoundedRectangle(cornerRadius: 8)
-            .fill(colors.bg)
+            .fill(colors.background)
             .frame(width: 48, height: 48)
             .overlay(
                 Text("文")
                     .font(.system(size: 18, weight: .light, design: .serif))
-                    .foregroundStyle(colors.fg)
+                    .foregroundStyle(colors.ink)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 8)

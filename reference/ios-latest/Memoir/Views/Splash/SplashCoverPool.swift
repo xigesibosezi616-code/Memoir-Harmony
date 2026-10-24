@@ -2,6 +2,10 @@ import Foundation
 
 /// 启动封面池 —— **按当前主题取一张静态封面**。把图片放进目录就生效，不用改代码。
 ///
+/// 2026-10-24 起封面上**只有主题底色和底部的「from Sinara」**：中间原来画的笔记本（旧图标）已经抹掉，
+/// 那个位置由 `SplashView` 现写一个手写的「m.」（`HandwrittenMark`）。新封面中间要留空，
+/// 字的位置按 `SplashView.markCenterY` 对的是封面高度的 45%。
+///
 /// ## 怎么加 / 换封面
 ///
 /// 放进 **`Memoir/Resources/SplashCovers/`**，按主题 ID 命名：

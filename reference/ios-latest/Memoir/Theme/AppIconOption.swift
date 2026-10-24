@@ -4,7 +4,9 @@ import SwiftUI
 ///
 /// ## 加一个新图标要动的三处（**新增主题时照着做**）
 ///
-/// 1. `Assets.xcassets` 里新建一个 **`<名字>Icon.appiconset`**，放 1024×1024 PNG（**不能带透明通道**）
+/// 1. 在 `Scripts/make_app_icon.py` 的 `THEMES` 里加一行（底色、字色 = `ThemePickerView` 的两个色块）再跑，
+///    生成 `Memoir/AppIcons/<名字>Icon.icon`（Icon Composer 分层图标）和设置页预览图。
+///    🔴 不要再用 `.appiconset` 放单张 PNG：iOS 26 起系统会给单色字的 PNG 图标自动套玻璃，字色发灰、边发虚
 /// 2. pbxproj 的 `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` 里**追加**这个名字
 ///    （空格分隔；**漏了这步图标不会被打包**，`setAlternateIconName` 会在运行时报错）
 /// 3. 在下面的 `allCases` 里加一条 case，填好 `alternateName` / `themeID` / `previewAsset`
