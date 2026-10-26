@@ -26,7 +26,7 @@ import {
 } from '../../services/ImmersiveChrome';
 import { HomeView } from '../home/HomeView';
 import { BookshelfView } from '../shelf/BookshelfView';
-import { PostBoxTabView } from '../postbox/PostBoxTabView';
+import { PostBoxTabView, STORAGE_KEY_POSTBOX_VISIBLE_TICK } from '../postbox/PostBoxTabView';
 import { SettingsTabView } from '../settings/SettingsTabView';
 import { ErrorToastView } from './ErrorToastView';
 
@@ -126,6 +126,12 @@ export struct MainTabsView {
       .scrollable(false)
       .onChange((index: number): void => {
         this.currentTab = index;
+        // 邮筒 tab 内容常驻不重建：切过去时写 tick 驱动它重查
+        // （别的 tab 里写了日记 / 寄了信 / 登录态变，回来都是最新的）
+        if (index === 2) {
+          AppStorage.setOrCreate(STORAGE_KEY_POSTBOX_VISIBLE_TICK,
+            (AppStorage.get<number>(STORAGE_KEY_POSTBOX_VISIBLE_TICK) ?? 0) + 1);
+        }
       })
       .clip(false)
       .width('100%')

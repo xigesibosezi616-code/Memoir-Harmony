@@ -12,10 +12,10 @@ import { ApiConfig } from '../http/ApiConfig';
 import { HttpRequest } from '../http/HttpRequest';
 import { HarmonyHttpClient } from '../http/HarmonyHttpClient';
 import { AuthResponse, MeResponse, SendCodeResponse, BindPhoneResponse,
-  ChangePhoneResponse, DeleteAccountResponse,
+  ChangePhoneResponse, DeleteAccountResponse, RhythmResponse,
   parseAuthResponse, parseMeResponse, parseSendCodeResponse,
   parseBindPhoneResponse, parseChangePhoneResponse, parseDeleteAccountResponse,
-  parseOkResponse } from '../../models/Api';
+  parseRhythmResponse, parseOkResponse } from '../../models/Api';
 
 export class AuthService {
   private readonly client: HarmonyHttpClient;
@@ -109,5 +109,13 @@ export class AuthService {
     const request = HttpRequest.postJSON(`${ApiConfig.BASE_URL}/me/delete`, body,
       HttpRequest.bearer(token), ApiConfig.TIMEOUT_AUTH_S);
     return this.client.send<DeleteAccountResponse>(request, parseDeleteAccountResponse);
+  }
+
+  /** GET /me/rhythm（5.2 邮筒页进页面就问）：现在能不能寄信。判定权只在服务端，
+   *  客户端只拿它提前说明（R-POST-05/12）；问不到由调用方当能寄，最终由服务端拦 */
+  async fetchRhythm(token: string): Promise<RhythmResponse> {
+    const request = HttpRequest.get(`${ApiConfig.BASE_URL}/me/rhythm`,
+      HttpRequest.bearer(token), ApiConfig.TIMEOUT_RHYTHM_S);
+    return this.client.send<RhythmResponse>(request, parseRhythmResponse);
   }
 }

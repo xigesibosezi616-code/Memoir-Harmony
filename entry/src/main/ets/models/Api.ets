@@ -67,6 +67,14 @@ interface DeleteAccountResponseRaw {
   appleRevoked?: boolean;
 }
 
+/** GET /me/rhythm 响应的原样形状（types.ts RhythmResponse） */
+interface RhythmResponseRaw {
+  tier?: string;
+  canRequestNow?: boolean;
+  reason?: string;
+  nextLetterAt?: string | null;
+}
+
 /** 只回 {ok:true} 的轻响应（PATCH /me 等）的原始形状 */
 interface OkResponseRaw {
   ok?: boolean;
@@ -169,6 +177,28 @@ export class DeleteAccountResponse {
 
   constructor(ok: boolean) {
     this.ok = ok;
+  }
+}
+
+/**
+ * GET /me/rhythm 成功响应（5.2 邮筒页进页面就问，提前说明「这周已经寄过了」）。
+ * 判定权只在服务端，客户端不算额度（02_BACKEND_API.md；R-POST-05）。
+ */
+export class RhythmResponse {
+  /** 服务端认的档位：'free' / 'subscribed' */
+  readonly tier: string;
+  /** 现在能不能寄 */
+  readonly canRequestNow: boolean;
+  /** 'ok' / 'weekly_pending' / 'daily_cap' / 'monthly_cap' / 'welcome_pending'（R-POST-12 文案键） */
+  readonly reason: string;
+  /** 下一封最早什么时候能寄（ISO 串）；现在就能寄时为 '' */
+  readonly nextLetterAt: string;
+
+  constructor(tier: string, canRequestNow: boolean, reason: string, nextLetterAt: string) {
+    this.tier = tier;
+    this.canRequestNow = canRequestNow;
+    this.reason = reason;
+    this.nextLetterAt = nextLetterAt;
   }
 }
 
@@ -282,6 +312,15 @@ export function parseDeleteAccountResponse(raw: string): DeleteAccountResponse {
     throw new Error('deleteAccount.ok missing');
   }
   return new DeleteAccountResponse(true);
+}
+
+export function parseRhythmResponse(raw: string): RhythmResponse {
+  const r = requireObject<RhythmResponseRaw>(raw);
+  if (typeof r.canRequestNow !== 'boolean') {
+    throw new Error('rhythm.canRequestNow missing');
+  }
+  return new RhythmResponse(optionalString(r.tier), r.canRequestNow,
+    optionalString(r.reason), optionalString(r.nextLetterAt ?? undefined));
 }
 
 /** 校验 {ok:true} 轻响应（PATCH /me；非 ok 折 Decoding 档，防 200 空/坏体静默通过） */

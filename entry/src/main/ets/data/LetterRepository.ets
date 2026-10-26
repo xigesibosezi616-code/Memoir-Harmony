@@ -146,4 +146,34 @@ export class LetterRepository {
       throw new Error('LetterRepository.deleteAllLetters: 清空失败');
     }
   }
+
+  /** 这几封信各自关联的日记 id 并集（letter_entry 关联表，多对多）。
+   *  邮筒页拿退回信关联的日记，让它们不重新出现在候选里（R-POST-03） */
+  static async entryIdsForLetters(store: relationalStore.RdbStore,
+    letterIds: string[]): Promise<Set<string>> {
+    const ids = new Set<string>();
+    if (letterIds.length === 0) {
+      return ids;
+    }
+    const predicates = new relationalStore.RdbPredicates('letter_entry');
+    predicates.in('letter_id', letterIds);
+    try {
+      const result = await store.query(predicates, ['entry_id']);
+      try {
+        while (result.goToNextRow()) {
+          ids.add(result.getString(result.getColumnIndex('entry_id')));
+        }
+      } finally {
+        try {
+          result.close();
+        } catch (err) {
+          hilog.warn(DOMAIN, TAG, 'close resultSet failed: %{public}s', JSON.stringify(err));
+        }
+      }
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'query letter_entry failed: %{public}s', JSON.stringify(err));
+      throw new Error('LetterRepository.entryIdsForLetters: 查询失败');
+    }
+    return ids;
+  }
 }
