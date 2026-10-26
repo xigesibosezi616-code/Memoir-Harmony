@@ -283,9 +283,9 @@ export struct LetterboxView {
       .layoutWeight(1)
       .alignItems(HorizontalAlign.Start)
 
-      // 未读红点：保持占位、不跳动（iOS opacity 同款）
+      // 未读红点：保持占位、不跳动（iOS 同款占位）；红色用 destructive（accent 在部分主题是墨色会看成黑点）
       Circle()
-        .fill(this.theme.accent)
+        .fill(this.theme.destructive)
         .width(8)
         .height(8)
         .margin({ top: 6 })

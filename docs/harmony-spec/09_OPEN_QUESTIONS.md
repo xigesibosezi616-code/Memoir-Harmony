@@ -23,7 +23,7 @@
 | Q14 | ⚪ | 测试开关（来信不设限、假开通会员） | 8 上架 | — | 上架前关 |
 | Q15 | ⚪ | 后端域名 | 4.1 | 运维 | |
 | Q16 | ⚪ | 「内容审核没过」**后端没有专门的错误码** | 5.3 | 后端 | |
-| Q17 | 🔴 | 接华为账号后，**注销时撤销华为授权** | 4.4 | 后端 | 2026-10-24 后端已实现：`POST /me/delete` 带 `{huaweiIdToken, huaweiAuthorizationCode}` → `{ok, huaweiRevoked?}`，撤销失败不阻断注销（客户端不区别对待）；鸿蒙端已接（DeleteAccountView 华为验证分支）。**2026-10-25 真机实测（Mate X6）：500 复现 2/2**——`POST /me/delete` 返 `500 {"error":{"code":"internal","message":"服务器内部错误"}}`（服务端兜底 envelope，非撤销失败分支——撤销失败应 ok 照判），账号未删、客户端会话完好；客户端载荷按契约（{huaweiIdToken, huaweiAuthorizationCode} + bearer），华为验证步静默通过。**需后端（尺素）查 FC 日志定位 internal 异常**；客户端已加诊断日志（DeleteAccountView.deleteAccountWithHuawei catch 打 kind/status/body）。注销 E2E（U02-3）在此修复前收不了尾 |
+| Q17 | 🔴 | 接华为账号后，**注销时撤销华为授权** | 4.4 | 后端 | 2026-10-24 后端已实现：`POST /me/delete` 带 `{huaweiIdToken, huaweiAuthorizationCode}` → `{ok, huaweiRevoked?}`，撤销失败不阻断注销（客户端不区别对待）；鸿蒙端已接（DeleteAccountView 华为验证分支）。**2026-10-25 真机实测（Mate X6）：500 复现 2/2**——`POST /me/delete` 返 `500 {"error":{"code":"internal","message":"服务器内部错误"}}`（服务端兜底 envelope，非撤销失败分支——撤销失败应 ok 照判），账号未删、客户端会话完好；客户端载荷按契约（{huaweiIdToken, huaweiAuthorizationCode} + bearer），华为验证步静默通过。**需后端（尺素）查 FC 日志定位 internal 异常**；客户端已加诊断日志（DeleteAccountView.deleteAccountWithHuawei catch 打 kind/status/body）。**2026-10-27 结案 ✅（Higgs 修复已部署）**：真机 E2E 全通——说明→华为静默验证（双凭证）→AlertDialog 确认→`POST /me/delete` 华为分支成功→账号删除、回未登录设置页，本地数据无恙。U02-3 注销 E2E 收尾完成 |
 | Q18 | ⚪ | 鸿蒙**包名 / 应用市场主体** | 0.3 | 产品 | |
 | Q19 | 🟡 | 正文小图加载**不放大**（iOS `loadImage` 的 `preparingThumbnail` 会把小图放大到 600） | 2.6 照片相纸 | 鸿蒙 + 产品 | |
 | Q20 | 🟡 | **智感握姿实现路径**：`HdsTabs` 不在本 SDK（26），自行用 motion `operatingHandChanged` + `ACTIVITY_MOTION` 实现 | 1.6 主框架 · 真机验收 | 鸿蒙 | 2026-10-15 整体移除：Tabs 系统底栏无横移落点，且 SDK 权限清单证实 `DETECT_GESTURE`（normal + system_grant）后 `holdingHandChanged` 也只是普通权限——智感握姿收益存疑，服务、权限声明、理由文案全部删除（git 历史可寻回），真机验收 `operatingHand` 授权率与灵敏度后若确需再重启 |
@@ -45,7 +45,7 @@
 | Q35 | 🟡 | 3.3 大图高度/布面标题/顶栏磨砂等真机验收四轮定稿 | 3.3 日记本主页 | 产品 + 鸿蒙 | 2026-10-21 定稿（详述见下 Q35） |
 | Q36 | 🟡 | **3.5 阅读器三条声明偏差 + 仿真翻页技术坑**：① 仿真翻页（官方最佳实践配方）替代 iOS `UIPageViewController(.pageCurl)`，华为 Reader Kit 排除；② 大屏单列页宽封顶 420vp；③ trace 25 / audio 60 / photoHeight 剪裁等尺寸常量待真机核对 | 3.5 阅读器 | 鸿蒙 + 产品（录屏验收） | 2026-10-22 代码完成待真机验收（详述见下 Q36） |
 | Q37 | ⚪ | **一键登录（LoginType.QUICK_LOGIN）要不要做** | v1.1 候选 | 产品 + 后端（尺素） | 2026-10-25 SDK 调研结论（详述见下 Q37） |
-| Q38 | 🔴 | **线上 `POST /me/bindings/phone` 500**（消费验证码后绑定步崩溃） | 4.3 补绑手机号 | 后端（尺素） | 2026-10-25 真机实测复现（详述见下 Q38） |
+| Q38 | ✅ | **线上 `POST /me/bindings/phone` 500**（消费验证码后绑定步崩溃） | 4.3 补绑手机号 | 后端（尺素） | 2026-10-25 真机实测复现（详述见下 Q38）。**2026-10-27 结案 ✅（Higgs 修复已部署）**：真机 E2E 全通——发码（真实阿里云短信）→221716→`POST /me/bindings/phone` 成功，返回 switchedAccount 合并到既有手机号账户，账户页手机号行翻已绑、警告消失 |
 
 ---
 
