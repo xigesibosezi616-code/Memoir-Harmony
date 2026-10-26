@@ -689,6 +689,18 @@ export struct HomeView {
           .onClick((): void => {
             this.getUIContext().getRouter().pushUrl({ url: 'pages/LocationDebug' });
           })
+      }
+      .justifyContent(FlexAlign.Center)
+
+      Row({ space: 12 }) {
+        Button('LetterDebug')
+          .fontSize(this.theme.bodyFont.size)
+          .fontColor(this.theme.accent)
+          .backgroundColor(this.theme.accentBackground)
+          .borderRadius(10)
+          .onClick((): void => {
+            this.getUIContext().getRouter().pushUrl({ url: 'pages/LetterDebug' });
+          })
         Button('ToastDebug')
           .fontSize(this.theme.bodyFont.size)
           .fontColor(this.theme.accent)

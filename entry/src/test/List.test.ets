@@ -40,6 +40,7 @@ import entryPhotoStoreTest from './test/EntryPhotoStore.test'
 import appContinuationTest from './test/AppContinuation.test'
 import httpApiTest from './test/HttpApi.test'
 import authSessionTest from './test/AuthSession.test'
+import letterRepositoryTest from './test/LetterRepository.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -84,4 +85,5 @@ export default function testsuite() {
   appContinuationTest()
   httpApiTest()
   authSessionTest()
+  letterRepositoryTest()
 }

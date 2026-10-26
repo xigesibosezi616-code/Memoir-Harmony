@@ -26,6 +26,7 @@ import {
 } from '../../services/ImmersiveChrome';
 import { HomeView } from '../home/HomeView';
 import { BookshelfView } from '../shelf/BookshelfView';
+import { PostBoxTabView } from '../postbox/PostBoxTabView';
 import { SettingsTabView } from '../settings/SettingsTabView';
 import { ErrorToastView } from './ErrorToastView';
 
@@ -111,7 +112,7 @@ export struct MainTabsView {
         .tabBar(this.tabBarItem(1))
 
         TabContent() {
-          this.tabBody($r('app.string.s_11ab7804df'))
+          PostBoxTabView()
         }
         .tabBar(this.tabBarItem(2))
 
@@ -185,24 +186,6 @@ export struct MainTabsView {
       this.containerWidthVp = typeof w === 'number' ? w : 0;
       AppStorage.setOrCreate(STORAGE_KEY_APP_BREAKPOINT, breakpointForWidth(this.containerWidthVp));
     })
-  }
-
-  /** 非 records tab 的占位正文（标题 + 限宽居中；后续卡片逐个换成真实页面） */
-  @Builder
-  private tabBody(titleRes: Resource) {
-    Column() {
-      Text(titleRes)
-        .fontSize(this.theme.headingFont.size)
-        .fontWeight(this.theme.headingFont.weight)
-        .fontFamily(this.theme.headingFont.family)
-        .fontColor(this.theme.textSecondary)
-    }
-    .constraintSize({ maxWidth: 840 })
-    .width('100%')
-    .height('100%')
-    .backgroundColor(this.theme.background)
-    .justifyContent(FlexAlign.Center)
-    .alignItems(HorizontalAlign.Center)
   }
 
   /** 每个 tab 的图标 + 文字（带主题着色与选中高亮） */

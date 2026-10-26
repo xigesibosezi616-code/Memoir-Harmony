@@ -4,6 +4,7 @@
     "pages/ThemeDebug",
     "pages/LanguageDebug",
     "pages/LocationDebug",
+    "pages/LetterDebug",
     "pages/Compose",
     "pages/EditEntry"
   ]
