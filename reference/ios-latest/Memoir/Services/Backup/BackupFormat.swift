@@ -112,6 +112,14 @@ nonisolated struct BackupEntriesFile: Codable {
     var entries: [BackupEntry]
     /// 情绪小结（会员，2026-10-27）。**可选，不升 `formatVersion`** —— 老包、鸿蒙包没有这个字段就是没有
     var moodSummaries: [BackupMoodSummary]? = nil
+    /// 写作统计里要跟着走的数（2026-10-28）。**可选，不升 `formatVersion`**
+    var writingStats: BackupWritingStats? = nil
+}
+
+/// 写作统计里存下来、日记本身算不回来的数
+nonisolated struct BackupWritingStats: Codable {
+    /// 最长连续写作的天数（`WritingStreak`）：导入时和本机的取大的，只升不降
+    var bestStreakDays: Int
 }
 
 /// 一期情绪小结（`MoodSummary`）。按 `id` 去重；本机已有同一期（`period` + `periodStart`）的也不导
@@ -151,9 +159,12 @@ nonisolated struct BackupEntry: Codable {
     var blocks: [BackupBlock]
     /// 写完时的心情（2026-10-17，见 `JournalEntry.moodValence`）：愉悦度 -1…1。
     /// **可选，不升 `formatVersion`** —— 老包、鸿蒙包没有这个字段就是「没记心情」
-    var moodValence: Double? = nil
-    /// 选的情绪词（`MoodLabel` 的英文 key，目前一篇一个）。可选，同上；不认识的 key 原样保留、显示时跳过
-    var moodLabels: [String]? = nil
+    ///
+    /// 🔴 **故意用 `let`、不给默认值**：成员初始化时必须传，导出时漏了就编译不过。
+    /// 2026-10-17 到 10-28 导出的包全没有心情 —— 就是导出那头漏传、按默认 nil 写出去了，导入那头一直是对的
+    let moodValence: Double?
+    /// 选的情绪词（`MoodLabel` 的英文 key，目前一篇一个）。可选，同上；不认识的 key 原样保留、显示时跳过。`let` 的原因同上
+    let moodLabels: [String]?
 }
 
 nonisolated struct BackupBlock: Codable {

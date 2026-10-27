@@ -121,7 +121,9 @@ enum BackupExporter {
                     BackupMoodSummary(id: $0.id, period: $0.period, periodStart: $0.periodStart, periodEnd: $0.periodEnd,
                                       text: $0.text, suggestions: $0.suggestionList, language: $0.language,
                                       entryCount: $0.entryCount, heavy: $0.heavy, createdAt: $0.createdAt)
-                }
+                },
+                // 最长连续写作：记下的和这些日记里算出来的取大的
+                writingStats: BackupWritingStats(bestStreakDays: WritingStreak.update(with: entries))
             )
             try BackupFormat.jsonEncoder.encode(entriesFile)
                 .write(to: stage.appendingPathComponent(BackupFormat.entriesFile))
@@ -307,7 +309,10 @@ enum BackupExporter {
                     traceOf: block.traceOf,
                     removedAt: block.removedAt
                 )
-            }
+            },
+            // 🔴 写完时的心情：2026-10-17 加了字段却一直没传，10-28 才发现导出的包全没有心情
+            moodValence: entry.moodValence,
+            moodLabels: entry.moodLabels
         )
     }
 

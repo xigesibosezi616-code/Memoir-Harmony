@@ -548,7 +548,12 @@ nonisolated enum BackupImporter {
             noteIDs.insert(bn.id)
         }
 
-        // 5. 情绪小结：按 id 去重；本机已经有同一期的也不导（各自写过一份，留本机的）
+        // 5. 最长连续写作：包里的和本机的取大的，再用合并后的全部日记算一次（只升不降）
+        if let days = decodeWritingStats(in: package)?.bestStreakDays, days > 0 {
+            WritingStreak.raise(to: days)
+        }
+
+        // 6. 情绪小结：按 id 去重；本机已经有同一期的也不导（各自写过一份，留本机的）
         let existingSummaries = (try? context.fetch(FetchDescriptor<MoodSummary>())) ?? []
         var summaryIDs = Set(existingSummaries.map(\.id))
         var summaryPeriods = existingSummaries
@@ -569,6 +574,13 @@ nonisolated enum BackupImporter {
             try context.save()
         } catch {
             throw ImportError.saveFailed(error.localizedDescription)
+        }
+        // 合并后的全部日记再算一次最长连续（导进来的日记可能把两段接成了更长的一段）
+        do {
+            WritingStreak.update(with: try context.fetch(FetchDescriptor<JournalEntry>()))
+        } catch {
+            let ns = error as NSError
+            NSLog("⚠️ [Backup] 导入后算最长连续写作失败 domain=%@ code=%ld", ns.domain, ns.code)
         }
         return summary
     }
@@ -639,6 +651,15 @@ nonisolated enum BackupImporter {
     }
 
     /// 「他记得的事」：这一项坏了不影响信和日记（单独解，解不动就当没有）
+    /// 写作统计的数坏了不影响日记的导入：单独解析，解不动就当没有
+    private static func decodeWritingStats(in package: Package) -> BackupWritingStats? {
+        struct StatsOnly: Decodable { var writingStats: Lenient<BackupWritingStats>? }
+        guard let data = try? Data(contentsOf: package.root.appendingPathComponent(BackupFormat.entriesFile)),
+              let file = try? BackupFormat.jsonDecoder.decode(StatsOnly.self, from: data)
+        else { return nil }
+        return file.writingStats?.value
+    }
+
     /// 情绪小结坏了不影响日记的导入：单独解析，解不动就当没有
     private static func decodeMoodSummaries(in package: Package) -> [BackupMoodSummary] {
         struct SummariesOnly: Decodable { var moodSummaries: [Lenient<BackupMoodSummary>]? }

@@ -7438,6 +7438,53 @@
         }
       }
     },
+    "最长连续" : {
+      "comment" : "写作统计第一张卡片：历史上最长的连续写作天数（只升不降）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Longest streak"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racha más larga"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus longue série"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最長連続"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "최장 연속"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最长连续"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最長連續"
+          }
+        }
+      }
+    },
     "写一个名字" : {
       "comment" : "给笔友起名的输入框里的提示（首启页、补起名页、设置里的笔友名）。笔友没有默认名，必须由用户自己起",
       "localizations" : {

@@ -1,7 +1,7 @@
 # iOS 源码快照（最新）
 
-- 来源：iOS 仓库提交 `b984fd7`（2026-10-28，schema V12）
-- 对应的更新包：`docs/harmony-updates/` 里的 U01–U14 —— U02、U03、U04、U06、U07、U08、U09、**U14** **已交付**（按任务卡做）；
+- 来源：iOS 仓库提交 `07cfbd1`（2026-10-28，schema V12；含备份包导出心情的修复，见 U15）
+- 对应的更新包：`docs/harmony-updates/` 里的 U01–U16 —— U02、U03、U04、U06、U07、U08、U09、U14、**U15、U16** **已交付**（按任务卡做；🔴 U15 是一级 bug，先做）；
   U01 世界笔友（含笔友手记）、U05 邮筒、U10 设置首页与「关注我们」、U11 要删掉的东西、U12 搜日记、U13 新手一串还是**草稿**（只看不做）。
   快照里这些草稿对应的代码是 iOS 现在的样子，等那几包交付再照着做
 - 内容和 `reference/ios/` 同一个范围：App 源码 `Memoir/`（含 `Assets.xcassets`、`AppIcons/`（桌面图标，U09）、`Resources/`、`Localizable.xcstrings`、`InfoPlist.xcstrings`）、

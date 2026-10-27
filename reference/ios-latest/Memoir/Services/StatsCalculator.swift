@@ -67,7 +67,6 @@ struct MoodChartData {
 struct WritingStats {
     var totalEntries: Int = 0
     var totalWords: Int = 0
-    var streakDays: Int = 0
     var datesWithEntries: Set<String> = []
 }
 
@@ -83,9 +82,6 @@ struct StatsCalculator {
         for entry in entries {
             stats.datesWithEntries.insert(dayFormatter.string(from: entry.date))
         }
-
-        // Streak calculation
-        stats.streakDays = calculateStreak(entries: entries)
 
         return stats
     }
@@ -111,24 +107,5 @@ struct StatsCalculator {
             return MoodSlice(level: level, count: count, percentage: Double(count) / Double(levels.count) * 100)
         }
         return MoodChartData(slices: slices, total: levels.count)
-    }
-
-    private static func calculateStreak(entries: [JournalEntry]) -> Int {
-        guard !entries.isEmpty else { return 0 }
-
-        let calendar = Calendar.current
-        let today = calendar.startOfDay(for: .now)
-        let entryDays = Set(entries.map { calendar.startOfDay(for: $0.date) })
-
-        var streak = 0
-        var checkDate = today
-
-        while entryDays.contains(checkDate) {
-            streak += 1
-            guard let prev = calendar.date(byAdding: .day, value: -1, to: checkDate) else { break }
-            checkDate = prev
-        }
-
-        return streak
     }
 }

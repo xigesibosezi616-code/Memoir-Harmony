@@ -93,13 +93,25 @@ iOS 端的实现除 `formatVersion` 外全部有缺省值兜底（缺 `encrypted
           "rotationAngle": -1.4, "isCover": true }
       ]
     }
-  ]
+  ],
+  // ↓ 2026-10-27 新增，可选：情绪小结（会员），按 id 去重；本机已有同一期的不导
+  "moodSummaries": [
+    { "id": "UUID", "period": "week", "periodStart": "...", "periodEnd": "...",
+      "text": "这一周整体比较平稳……", "suggestions": ["……"], "language": "zh-Hans",
+      "entryCount": 9, "heavy": false, "createdAt": "..." }
+  ],
+  // ↓ 2026-10-28 新增，可选：写作统计里日记算不回来的数
+  "writingStats": { "bestStreakDays": 30 }   // 最长连续写作，导入时和本机的取大的、只升不降
 }
 ```
 
 **写完时的心情**（2026-10-17，鸿蒙更新包 U03）：`moodValence` 是愉悦度 -1…1（九档滑杆的值），
 `moodLabels` 是情绪词的英文 key（苹果「健康」的情绪标签，如 `drained`），**都可选、不升 `formatVersion`**，老包没有 = 没记心情。
 导入时 `moodValence` 夹到 -1…1，`moodLabels` 原样收（认不出的 key 留着，显示时跳过）。
+🔴 **2026-10-17 – 10-28 iOS 导出的包没有这两个字段**（导出漏写，导入一直是对的；10-28 修好，鸿蒙 U15）：那段时间的包导回去是「没记心情」，补不回来。
+导出时**每一篇记了心情的都必须写出这两个字段**；动过备份包就跑一次「导出 → 导入空库」的往返测试，逐篇比对心情。
+
+**情绪小结 `moodSummaries`**（2026-10-27，鸿蒙 U14）、**最长连续 `writingStats.bestStreakDays`**（2026-10-28，鸿蒙 U16）：都可选、不升 `formatVersion`，单独解析，坏了不影响日记导入。
 
 **旧心情 `mood` / `moodColorHex` 和 `taxonomy.json` 的 `moods` 作废但保留**（2026-10-17 删了旧心情标签）：
 导出写 `""`、`null`、`[]`，导入忽略（不建心情标签、不换算）。字段不删，是为了照旧格式实现的读取方
@@ -133,10 +145,12 @@ iOS 端的实现除 `formatVersion` 外全部有缺省值兜底（缺 `encrypted
       "postage": 1                  // 贴了几张邮票（南极 2）
     }
   ],
-  // ↓ 2026-10-16 新增，可选：「他记得的关于你的事」，按 id 去重合并
+  // ↓ 2026-10-16 新增，可选：笔友手记，按 id 去重合并（2026-10-27 起自己起名的那位 penPalID = "own"，并分画像 / 大事）
   "penPalNotes": [
     { "id": "UUID", "penPalID": "mcrae", "text": "2026-10-23 要去很想去的公司面试",
-      "notedAt": "...", "createdAt": "..." }
+      "notedAt": "...", "createdAt": "...",
+      "kind": "recent",        // 可选（2026-10-27）："profile" 画像 / "recent" 大事；缺了当 recent
+      "updatedAt": "..." }     // 可选（2026-10-27）：笔友改写过的时刻
   ]
 }
 ```

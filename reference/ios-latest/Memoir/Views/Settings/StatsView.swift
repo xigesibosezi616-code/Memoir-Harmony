@@ -44,7 +44,8 @@ struct StatsView: View {
             VStack(spacing: 16) {
                 // Stats cards
                 HStack(spacing: 12) {
-                    statCard("连续写作", value: "\(stats.streakDays)", unit: "天", theme: theme)
+                    // 最长连续写作（2026-10-28）：只升不降，断了也不归零，规则见 `WritingStreak`
+                    statCard("最长连续", value: "\(WritingStreak.best(in: entries))", unit: "天", theme: theme)
                     statCard("总篇数", value: "\(stats.totalEntries)", unit: "篇", theme: theme)
                     statCard("总字数", value: "\(stats.totalWords)", unit: "字", theme: theme)
                 }
@@ -159,6 +160,8 @@ struct StatsView: View {
             }
         }
         .paywallCover(isPresented: $showPaywall)
+        // 最长连续写作：看一眼就记一次（显示本身不写入）
+        .onAppear { WritingStreak.update(with: entries) }
         // 会员打开写作统计时，把刚结束、还没写的那几期小结写了（规则见 `MoodSummaryWriter`）
         .task(id: store.isMember) { await writeDueSummaries() }
         // 用 sheet 而不是 push：统计页是「看数据」的地方，点一天只是顺手翻一眼，
