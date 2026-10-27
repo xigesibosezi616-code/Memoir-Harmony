@@ -1,7 +1,11 @@
 /**
  * 邮筒页下方那一叠「这次寄出的日记」（10_BUILD_MANUAL.md 5.2）。
- * 对应 iOS `Views/PostBox/Posting/OutgoingPile.swift`，尺寸逐字一致
- * （headerHeight 34 / rowHeight 40 / visibleRows 3.5 / 整叠高 188）。
+ * 对应 iOS `Views/PostBox/Posting/OutgoingPile.swift`。
+ *
+ * 版式度量（整叠高 / 头行 / 行高 / 渐隐）由 `PostBoxMetrics` 按
+ * 机型/形态算好从父组件传入（叠纸 ≈ 窗高 22%，夹在 iOS 绝对值
+ * 132~188 之间；高窗时逐字等于 iOS 34/40/188/24），默认值即 iOS
+ * 绝对值。visibleRows 3.5 恒定（纸里滚动的判定不随机型变）。
  *
  * 一页信纸上按格线列出日期 + 标题，默认全勾；取消勾选的这次不寄
  * （R-POST-04；勾选状态存在父组件，投信那一刻才快照）。底下垫两张
@@ -18,17 +22,8 @@ import { OutgoingItem } from '../../models/PostBoxLogic';
 import { shortDate } from '../../services/AppDateFormatters';
 import { LetterPalette } from './LetterPalette';
 
-/** 头一行「这次寄出的日记 N / M」的高 */
-const HEADER_HEIGHT_VP: number = 34;
-/** 一行日记的高。超过 VISIBLE_ROWS 行就在纸里滚动 */
-const ROW_HEIGHT_VP: number = 40;
 /** 纸上看得见的行数（半行露头 = 底下还有） */
 const VISIBLE_ROWS: number = 3.5;
-/** 整叠纸占的高（含垫在下面的两张露出来的边）；纸本体矮 8vp */
-export const OUTGOING_PILE_HEIGHT_VP: number =
-  HEADER_HEIGHT_VP + ROW_HEIGHT_VP * VISIBLE_ROWS + 14;
-/** 最后半行渐隐的高（iOS rowHeight * 0.6） */
-const FADE_HEIGHT_VP: number = 24;
 
 /** '#RRGGBB' + 透明度 → '#AARRGGBB'（Rule/墨的半透明都这样算，不叠 opacity） */
 function withAlpha(hex: string, alpha01: number): string {
@@ -51,9 +46,20 @@ export struct OutgoingPile {
   interactive: boolean = true;
   /** 勾 / 取消勾一篇（interactive 才会调） */
   onToggle: (id: string) => void = (_id: string): void => {};
+  // ---- 版式度量（PostBoxMetrics 按机型/形态算好传入；默认 = iOS 绝对值） ----
+  /** 整叠纸占的高（含垫纸露边 8）；同一形态内恒定（5.3 投信动画依赖） */
+  @Prop totalHeightVp: number = 188;
+  /** 头一行「这次寄出的日记 N / M」的高 */
+  @Prop headerHeightVp: number = 34;
+  /** 一行日记的高。超过 VISIBLE_ROWS 行就在纸里滚动 */
+  @Prop rowHeightVp: number = 40;
+  /** 最后半行渐隐的高（iOS rowHeight × 0.6） */
+  @Prop fadeHeightVp: number = 24;
 
   /** 纸本体的高（整叠高 - 露边） */
-  private readonly paperHeightVp: number = OUTGOING_PILE_HEIGHT_VP - 8;
+  private paperHeightVp(): number {
+    return this.totalHeightVp - 8;
+  }
 
   private isExcluded(item: OutgoingItem): boolean {
     return this.excludedIds.indexOf(item.id) >= 0;
@@ -98,7 +104,7 @@ export struct OutgoingPile {
                   Column() {
                     Column()
                       .width('100%')
-                      .height(ROW_HEIGHT_VP)
+                      .height(this.rowHeightVp)
                   }
                   .width('100%')
                   .alignItems(HorizontalAlign.Start)
@@ -118,7 +124,7 @@ export struct OutgoingPile {
           if (this.isScrollable()) {
             Column()
               .width('100%')
-              .height(FADE_HEIGHT_VP)
+              .height(this.fadeHeightVp)
               .linearGradient({
                 angle: 270,
                 colors: [[this.palette.paper, 0], [Color.Transparent, 1]]
@@ -130,12 +136,12 @@ export struct OutgoingPile {
         .layoutWeight(1)
       }
       .width('100%')
-      .height(this.paperHeightVp)
+      .height(this.paperHeightVp())
       .backgroundColor(this.palette.paper)
       .shadow({ radius: 2, color: '#1F000000', offsetX: 0, offsetY: 1 })
     }
     .width('100%')
-    .height(OUTGOING_PILE_HEIGHT_VP)
+    .height(this.totalHeightVp)
   }
 
   /** 垫纸（主纸后面错开的那两张，纯画） */
@@ -143,7 +149,7 @@ export struct OutgoingPile {
   private backingSheet(angleDeg: number, dxVp: number, dyVp: number, opacity01: number) {
     Column()
       .width('100%')
-      .height(this.paperHeightVp)
+      .height(this.paperHeightVp())
       .backgroundColor(this.palette.paper)
       .shadow({ radius: 2, color: '#1F000000', offsetX: 0, offsetY: 1 })
       .rotate({ z: 1, angle: angleDeg })
@@ -171,7 +177,7 @@ export struct OutgoingPile {
           .fontColor(withAlpha(this.palette.ink, 0.55))
       }
       .width('100%')
-      .height(HEADER_HEIGHT_VP)
+      .height(this.headerHeightVp)
       .padding({ left: 18, right: 18 })
       .alignItems(VerticalAlign.Center)
     }
@@ -212,7 +218,7 @@ export struct OutgoingPile {
         }
       }
       .width('100%')
-      .height(ROW_HEIGHT_VP)
+      .height(this.rowHeightVp)
       .padding({ left: 18, right: 18 })
       .alignItems(VerticalAlign.Center)
       .opacity(this.isExcluded(item) ? 0.38 : 1)

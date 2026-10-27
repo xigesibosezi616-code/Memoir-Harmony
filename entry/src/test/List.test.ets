@@ -42,6 +42,7 @@ import httpApiTest from './test/HttpApi.test'
 import authSessionTest from './test/AuthSession.test'
 import letterRepositoryTest from './test/LetterRepository.test'
 import postBoxLogicTest from './test/PostBoxLogic.test'
+import postBoxMetricsTest from './test/PostBoxMetrics.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -88,4 +89,5 @@ export default function testsuite() {
   authSessionTest()
   letterRepositoryTest()
   postBoxLogicTest()
+  postBoxMetricsTest()
 }

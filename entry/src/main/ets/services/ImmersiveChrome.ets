@@ -36,6 +36,10 @@ export const STORAGE_KEY_CUTOUT_TOP_VP = 'cutoutTopVp';
 export const STORAGE_KEY_CUTOUT_WIDTH_VP = 'cutoutWidthVp';
 /** AppStorage key：挖孔高（vp；无挖孔 = 0。>0 即灵动岛机型） */
 export const STORAGE_KEY_CUTOUT_HEIGHT_VP = 'cutoutHeightVp';
+/** AppStorage key：窗口宽（vp，沉浸式页面按窗高/宽做形态适配用；折叠/旋转/改窗跟着变） */
+export const STORAGE_KEY_WINDOW_WIDTH_VP = 'windowWidthVp';
+/** AppStorage key：窗口高（vp；同上） */
+export const STORAGE_KEY_WINDOW_HEIGHT_VP = 'windowHeightVp';
 /**
  * AppStorage key：照片全屏查看期间藏主框架浮动 Tab 栏。
  * 页面内浮层（弃用 bindContentCover 后）盖不住 HdsTabs 的 barOverlap 层，
@@ -130,9 +134,11 @@ export class ImmersiveChrome {
       hilog.error(DOMAIN, TAG, 'setWindowLayoutFullScreen failed: %{public}s', JSON.stringify(err));
     }
     this.publishAvoidAreas();
+    this.publishWindowSize();
     // expandSafeArea 生效 / 避让区就绪都可能晚于首查：延迟再查一遍兜底
     setTimeout((): void => {
       this.publishAvoidAreas();
+      this.publishWindowSize();
     }, 1500);
     try {
       this.mainWindow.on('avoidAreaChange', (): void => {
@@ -140,6 +146,15 @@ export class ImmersiveChrome {
       });
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'on avoidAreaChange failed: %{public}s', JSON.stringify(err));
+    }
+    try {
+      // 折叠/旋转/2in1 改窗 → 重发窗口宽高（vp；密度在折叠时会变，回调里重取）
+      this.mainWindow.on('windowSizeChange', (): void => {
+        this.publishAvoidAreas();
+        this.publishWindowSize();
+      });
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'on windowSizeChange failed: %{public}s', JSON.stringify(err));
     }
   }
 
@@ -164,6 +179,18 @@ export class ImmersiveChrome {
         });
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'setWindowSystemBarProperties failed: %{public}s', JSON.stringify(err));
+    }
+  }
+
+  /** 窗口宽高（vp）发布：读窗口自身矩形（display 是整屏，2in1 自由窗不等），密度随取随算 */
+  private publishWindowSize(): void {
+    try {
+      const density: number = display.getDefaultDisplaySync().densityPixels;
+      const rect = this.mainWindow.getWindowProperties().windowRect;
+      AppStorage.setOrCreate(STORAGE_KEY_WINDOW_WIDTH_VP, vpFromPx(rect.width, density));
+      AppStorage.setOrCreate(STORAGE_KEY_WINDOW_HEIGHT_VP, vpFromPx(rect.height, density));
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'publishWindowSize failed: %{public}s', JSON.stringify(err));
     }
   }
 

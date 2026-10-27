@@ -43,9 +43,14 @@ import {
 } from '../../models/PostBoxLogic';
 import { AppPrefs, PREF_KEY_PEN_PAL_NAME } from '../../services/AppPrefs';
 import { mailboxPageColor } from '../../services/MailboxPageColor';
-import { STORAGE_KEY_SAFE_AREA_BOTTOM_VP } from '../../services/ImmersiveChrome';
+import {
+  STORAGE_KEY_SAFE_AREA_BOTTOM_VP,
+  STORAGE_KEY_SAFE_AREA_TOP_VP,
+  STORAGE_KEY_WINDOW_HEIGHT_VP
+} from '../../services/ImmersiveChrome';
 import { LetterPalette } from './LetterPalette';
-import { OutgoingPile, OUTGOING_PILE_HEIGHT_VP } from './OutgoingPile';
+import { OutgoingPile } from './OutgoingPile';
+import { PostBoxMetrics } from './PostBoxMetrics';
 
 const DOMAIN = 0x0000;
 const TAG = 'PostBoxTabView';
@@ -63,6 +68,10 @@ export struct PostBoxTabView {
   @StorageProp(STORAGE_KEY_APP_LANGUAGE) appLanguage: string = 'zh-Hans';
   /** 底部避让：悬浮胶囊 Tab 栏离底安全距离（HomeView 同款约定） */
   @StorageProp(STORAGE_KEY_SAFE_AREA_BOTTOM_VP) safeAreaBottomVp: number = 0;
+  /** 顶部避让（沉浸式下内容要从状态栏下开始；顶距按它标定，跨机型不漂） */
+  @StorageProp(STORAGE_KEY_SAFE_AREA_TOP_VP) safeAreaTopVp: number = 0;
+  /** 窗口高（ImmersiveChrome 折叠/旋转/改窗时发布；版式度量按它分档） */
+  @StorageProp(STORAGE_KEY_WINDOW_HEIGHT_VP) windowHeightVp: number = 0;
   /** 登录 / 登出 / 注销后重查（登录状态影响节奏问询和状态行） */
   @StorageProp(STORAGE_KEY_SESSION_TICK) @Watch('reload') sessionTick: number = 0;
   /** 切到本 tab 时重查（别的 tab 里写了日记、寄了信，回来都要是最新的） */
@@ -108,6 +117,12 @@ export struct PostBoxTabView {
 
   private palette(): LetterPalette {
     return LetterPalette.of(this.theme.id);
+  }
+
+  /** 本机型/形态的版式度量（纯计算，单测覆盖；窗口高未发布时按主流直板兜底） */
+  private metrics(): PostBoxMetrics {
+    const windowHeight = this.windowHeightVp > 0 ? this.windowHeightVp : 782.65;
+    return PostBoxMetrics.compute(windowHeight, this.safeAreaTopVp, this.safeAreaBottomVp);
   }
 
   private isLoggedIn(): boolean {
@@ -256,16 +271,16 @@ export struct PostBoxTabView {
   build() {
     Navigation(this.navPathStack) {
       // 版式对齐 iOS PostBoxPage：VStack(spacing 14)，上邮筒插画、中状态行、
-      // 下固定高 188vp 叠纸。顶距 52vp（= iOS inline 导航栏 44 + VStack 顶距 8）
-      // 和底部避让都做在整列 padding 上——2026-10-27 真机实证：Image 的
-      // padding(top) 不参与 objectFit 绘制、width('100%') 节点的 margin 整组
-      // 被忽略（LetterboxView 的 wrap 节点 margin 正常），关键几何只走容器
-      // padding / 固定高 / layoutWeight
+      // 下固定高叠纸。所有尺寸走 PostBoxMetrics（跨机型/形态，单测覆盖）：
+      // 叠纸≈窗高 22%（iOS 188/852）、邮筒墨迹宽≈屏宽 37.9%（iOS 同比）、
+      // 顶距 = 安全区顶 + 70（dome 下移到信箱入口行之下，iOS 导航区观感）、
+      // 状态行 caption 字号 + 矮行高。真机实证（PROGRESS 5.2 排雷）：
+      // 关键几何只走容器 padding / 固定高 / layoutWeight / constraintSize，
+      // 不碰 overlay 带子闭包、width('100%') 节点的 margin、Image 的 padding
       Column({ space: 14 }) {
         // 上面：邮筒插画（本身就是按钮；点邮筒投信是 5.3，本卡不挂动作）。
-        // 信箱入口与插画同层 Stack、行内 @Builder 调用渲染——真机实证
-        // .overlay() 挂带子闭包的复杂 @Builder 时容器渲染但子节点全不渲染
-        // （OutgoingPile rule() 那种单节点 overlay 才稳），faqs-arkui-906 同族
+        // 插画已裁掉奶油边（dome ≈ 区顶），信箱入口与插画同层 Stack、
+        // 行内 @Builder 调用渲染（排雷 a：overlay 挂带子闭包的 @Builder 不渲染）
         Stack({ alignContent: Alignment.TopEnd }) {
           Image(this.theme.mailboxImage)
             .objectFit(ImageFit.Contain)
@@ -275,40 +290,42 @@ export struct PostBoxTabView {
         }
         .layoutWeight(1)
         .width('100%')
+        .constraintSize({ maxWidth: this.metrics().contentMaxWidthVp })
 
-        // 中间：状态行（R-POST-06；最小高 40，换文案不跳版）
+        // 中间：状态行（R-POST-06；用户定：caption 字号、矮行高，换文案不跳版）
         Text(this.statusLabel())
-          .fontSize(this.theme.bodyFont.size)
-          .fontWeight(this.theme.bodyFont.weight)
-          .fontFamily(this.theme.bodyFont.family)
+          .fontSize(this.theme.captionFont.size)
+          .fontWeight(this.theme.captionFont.weight)
+          .fontFamily(this.theme.captionFont.family)
           .fontColor(this.theme.textSecondary)
           .textAlign(TextAlign.Center)
           .maxLines(2)
-          .constraintSize({ minHeight: 40 })
+          .constraintSize({
+            minHeight: this.metrics().statusMinHeightVp,
+            maxWidth: this.metrics().contentMaxWidthVp
+          })
           .margin({ left: 32, right: 32 })
 
-        // 下面：固定高度（188vp）——5.3 投信动画要从这叠纸飞到投信口，高度不能变。
-        // 横向 28vp 内缩（iOS 同款）走 padding：width('100%') + margin 真机被忽略
+        // 下面：固定高度叠纸（度量恒定，5.3 投信动画要从这叠纸飞到投信口，
+        // 高度不能变）。横向 28vp 内缩（iOS 同款）走 padding（排雷 b）
         Column() {
           this.bottomArea()
         }
-        .height(OUTGOING_PILE_HEIGHT_VP)
+        .height(this.metrics().pileHeightVp)
         .padding({ left: 28, right: 28 })
         .alignItems(HorizontalAlign.Center)
         .width('100%')
+        .constraintSize({ maxWidth: this.metrics().contentMaxWidthVp })
       }
       .width('100%')
       .height('100%')
       .padding({
-        // 顶部：邮筒插画顶部距安全区顶 52vp（= iOS inline 导航栏 44 + VStack
-        // 顶距 8）。真机实证（2026-10-27）：这层 NavBar 内容列的 padding(top)
-        // 从窗口顶 y=0 量起而非安全区顶（top:52 落在 y=162 而不是 284），
-        // 所以 52+安全区顶/3.115 ≈ 91.3；细高邮筒图（678×1498）Contain 后
-        // 不再紧贴状态栏（用户反馈「邮筒太靠上」）
-        top: 91.3,
-        // 底部避开悬浮胶囊 Tab 栏（HomeView 同款口径 safeAreaBottomVp + 90），
-        // 叠纸整叠露出在胶囊之上（用户反馈「tab bar 遮住这次寄出的日记」）
-        bottom: this.safeAreaBottomVp + 90
+        // 顶/底全走度量：顶 = 安全区顶 + 70（dome 移到信箱入口行之下），
+        // 底 = 安全区底 + 102（叠纸底与悬浮胶囊 Tab 栏之间留出缝隙，
+        // 用户定）。真机实证（排雷 d）：这层 padding 从窗口顶 y=0 量起，
+        // 度量里的 topOffset 已含安全区顶，直接用、不再自己加
+        top: this.metrics().topOffsetVp,
+        bottom: this.metrics().bottomOffsetVp
       })
     }
     .mode(NavigationMode.Stack)
@@ -355,6 +372,10 @@ export struct PostBoxTabView {
         items: outgoingItemsOf(this.state().candidates),
         excludedIds: this.excludedIdsArray(),
         interactive: true,
+        totalHeightVp: this.metrics().pileHeightVp,
+        headerHeightVp: this.metrics().pileHeaderHeightVp,
+        rowHeightVp: this.metrics().pileRowHeightVp,
+        fadeHeightVp: this.metrics().pileFadeHeightVp,
         onToggle: (id: string): void => {
           const next = new Set<string>(this.excluded);
           if (next.has(id)) {
@@ -373,7 +394,11 @@ export struct PostBoxTabView {
         palette: this.palette(),
         items: outgoingItemsOf(this.state().candidates),
         excludedIds: this.excludedIdsArray(),
-        interactive: false
+        interactive: false,
+        totalHeightVp: this.metrics().pileHeightVp,
+        headerHeightVp: this.metrics().pileHeaderHeightVp,
+        rowHeightVp: this.metrics().pileRowHeightVp,
+        fadeHeightVp: this.metrics().pileFadeHeightVp
       })
       .width('100%')
       .opacity(0.5)
