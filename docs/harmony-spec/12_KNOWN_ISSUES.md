@@ -49,6 +49,7 @@
 | 25 | 🟡 | W1 | **应用接续：照片/录音文件不随接续迁移**（端到端已验收 ✅） | wantParam 只装草稿数据（官方 <100KB 约束）；文件迁移官方路径 = 分布式文件目录 + commonType.Asset 封装分布式对象（后续项）；块引用原样保留，对端缺文件按既有占位渲染，正文文字完整接续。**双设备端到端验收通过（2026-10-23，X6 ↔ Mate 80 Pro Max，A→B→A 双向；首轮 B 端白屏根因 = 接续冷启动只回调 onWindowStageRestore 不回调 onWindowStageCreate，官方 bpta-continue-cast 明示，EntryAbility 补齐 Restore 实现 + onContinue 禁系统 router 页面栈迁移后全链落编辑页）** | 后续版本接文件资产迁移（分布式文件目录 + commonType.Asset） | PROGRESS W1 · faqs-free-flow-1 |
 | 26 | ⚪ | 3.6 | **捏合换级无振动（X6）——非 bug 结案**：换级振动（preset soft）不触发 | 用户 X6「系统触感反馈」开关为关（用户确认）；官方 faqs-sensor-service-3：系统触感反馈关闭时管控 usage 列表内的振动静默，属预期行为；无需修码 | 无需修复；真机验振动时先确认开关开启 | PROGRESS 3.6 |
 | 27 | 🟡 | 3.6 | **`componentUtils.getRectangleById` 实测返回 px（X6 本 SDK），与捏合手势 vp 坐标不同单位**（2026-10-23 页首固定改造连带暴露并修复）：fingerList（FingerInfo）与 `ListScroller.currentOffset().yOffset` 均为 vp，rect 为 px（实测 rect=(0,435,1080,2005.5)=px，与 uitest dumpLayout 同单位）；混算致 Sixteen→Four 分开定位恒落 p0（idx 恒 0），Four→Sixteen 方向被 row 粒度掩盖碰巧对 | 已修：`HomeView.componentRect` 统一 `px ÷ display.getDefaultDisplaySync().densityPixels` 折 vp（真机终验：Sixteen 滚动后分开落 p3 ✓ 修复前恒 p0）；**B 端（Mate 80 Pro Max）未复验** | B 端装机时回归一次捏合定位（density 3.4，px 语义需复验）；若官方后续版本改回 vp 语义需重标定 | PROGRESS 3.6 |
+| 28 | 🟠 | 5.2 | **邮筒页跨机型/形态适配多轮未达产品关**（用户点名：一直优化不好，记入清单后续一起修复，2026-10-27）：用户四反馈（① 叠纸贴 Tab 栏 ② 邮筒下移放大 ③ 状态行字大 ④ 按机型/形态适配）经一轮深度适配（`PostBoxMetrics` 尺寸锚 iOS 比例单一来源 + 裁三张 PNG 奶油边 + `windowSizeChange` 窗口尺寸发布 + 状态行 caption 12fp + 430 限宽缩进），Mate X6 折叠态像素验收六项达标（dome 110.4vp/墨迹 37.0%W/缝隙 41.1vp/12fp/叠纸 173.3vp），**但用户观感仍不过关，不再逐轮调教** | 像素达标 ≠ 观感过关；展开态/其他机型（Mate 80 Pro Max）未实测；37.0%W 与 iOS 37.9% 有 1% 级偏差；整体与 iOS 并排观感未对照 | 后续一起修复：用户列出具体不达项后一次调——候选 = 展开态/其他机型真机走查、录屏与 iOS 并排对照标定参数、必要时回归固定绝对值方案 | PROGRESS 5.2 |
 
 ## 三、3.5 翻书手感专项档案（用户点名：一直优化不好，记录后修）
 
@@ -95,6 +96,9 @@
 
 ## 四、变更日志
 
+- 2026-10-27 邮筒页适配记档：+1 项 **#28**（用户拍板：邮筒页适配一直优化不好，
+  不再逐轮调教，记入清单后续一起修复——像素验收六项达标的同日用户观感不过关；
+  后续等用户列具体不达项 + 展开态/其他机型走查 + 录屏对照 iOS 一次调）。
 - 2026-10-23 阶段 1~3 体检（包名切换后）：542 单测全绿（清缓存全量真执行，
   Failure 0 / Error 0）/ build 零 ERROR / console.log 零残留 / TODO 仅计划内 2 钩子；
   check_localization 报 2 条硬编码中文（HomeView Seed15 造数文案）→ #3 追记
