@@ -237,17 +237,26 @@ export struct OutgoingPile {
         .border({ width: 1, color: this.palette.ink })
         .opacity(0.45)
       if (checked) {
-        // 手画的勾：短撇接长捺（iOS TickShape 的折线，比例一致）
-        Path()
-          .commands('M0 5.55 L4.68 11 Q7.15 5.5 13 0')
-          .width(13)
-          .height(11)
-          .fillOpacity(0)
-          .stroke(this.palette.liner)
-          .strokeWidth(1.8)
-          .strokeLineCap(LineCapStyle.Round)
-          .strokeLineJoin(LineJoinStyle.Round)
-          .offset({ x: 1.5, y: -1.5 })
+        // 手画的勾：短撇接长捺（iOS TickShape 的三端点，圆头相接）。
+        // 🔴 不用 Path.commands：真机上 commands 坐标按物理像素渲染（约缩小 3 倍
+        // 缩在框角，2026-10-27 真机像素扫描确认）；Line 的端点坐标是 vp，跨设备一致
+        Stack() {
+          Line({ width: 13, height: 11 })
+            .startPoint([0, 5.55])
+            .endPoint([4.68, 11])
+            .stroke(this.palette.liner)
+            .strokeWidth(1.8)
+            .strokeLineCap(LineCapStyle.Round)
+          Line({ width: 13, height: 11 })
+            .startPoint([4.68, 11])
+            .endPoint([13, 0])
+            .stroke(this.palette.liner)
+            .strokeWidth(1.8)
+            .strokeLineCap(LineCapStyle.Round)
+        }
+        .width(13)
+        .height(11)
+        .offset({ x: 1.5, y: -1.5 })
       }
     }
     .width(18)

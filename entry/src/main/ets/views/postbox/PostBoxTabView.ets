@@ -43,6 +43,7 @@ import {
 } from '../../models/PostBoxLogic';
 import { AppPrefs, PREF_KEY_PEN_PAL_NAME } from '../../services/AppPrefs';
 import { mailboxPageColor } from '../../services/MailboxPageColor';
+import { STORAGE_KEY_SAFE_AREA_BOTTOM_VP } from '../../services/ImmersiveChrome';
 import { LetterPalette } from './LetterPalette';
 import { OutgoingPile, OUTGOING_PILE_HEIGHT_VP } from './OutgoingPile';
 
@@ -60,6 +61,8 @@ export struct PostBoxTabView {
   @StorageProp(STORAGE_KEY_THEME) @Watch('onThemeChanged') theme: AppTheme = new BambooTheme();
   @Consume env: AppEnvironment;
   @StorageProp(STORAGE_KEY_APP_LANGUAGE) appLanguage: string = 'zh-Hans';
+  /** 底部避让：悬浮胶囊 Tab 栏离底安全距离（HomeView 同款约定） */
+  @StorageProp(STORAGE_KEY_SAFE_AREA_BOTTOM_VP) safeAreaBottomVp: number = 0;
   /** 登录 / 登出 / 注销后重查（登录状态影响节奏问询和状态行） */
   @StorageProp(STORAGE_KEY_SESSION_TICK) @Watch('reload') sessionTick: number = 0;
   /** 切到本 tab 时重查（别的 tab 里写了日记、寄了信，回来都要是最新的） */
@@ -252,16 +255,26 @@ export struct PostBoxTabView {
 
   build() {
     Navigation(this.navPathStack) {
-      Column() {
-        // 上面：邮筒插画（本身就是按钮；点邮筒投信是 5.3，本卡不挂动作）
-        Column() {
+      // 版式对齐 iOS PostBoxPage：VStack(spacing 14)，上邮筒插画、中状态行、
+      // 下固定高 188vp 叠纸。顶距 52vp（= iOS inline 导航栏 44 + VStack 顶距 8）
+      // 和底部避让都做在整列 padding 上——2026-10-27 真机实证：Image 的
+      // padding(top) 不参与 objectFit 绘制、width('100%') 节点的 margin 整组
+      // 被忽略（LetterboxView 的 wrap 节点 margin 正常），关键几何只走容器
+      // padding / 固定高 / layoutWeight
+      Column({ space: 14 }) {
+        // 上面：邮筒插画（本身就是按钮；点邮筒投信是 5.3，本卡不挂动作）。
+        // 信箱入口与插画同层 Stack、行内 @Builder 调用渲染——真机实证
+        // .overlay() 挂带子闭包的复杂 @Builder 时容器渲染但子节点全不渲染
+        // （OutgoingPile rule() 那种单节点 overlay 才稳），faqs-arkui-906 同族
+        Stack({ alignContent: Alignment.TopEnd }) {
           Image(this.theme.mailboxImage)
             .objectFit(ImageFit.Contain)
             .width('100%')
             .height('100%')
+          this.letterboxEntry()
         }
         .layoutWeight(1)
-        .padding({ left: 40, right: 40, top: 8 })
+        .width('100%')
 
         // 中间：状态行（R-POST-06；最小高 40，换文案不跳版）
         Text(this.statusLabel())
@@ -272,51 +285,65 @@ export struct PostBoxTabView {
           .textAlign(TextAlign.Center)
           .maxLines(2)
           .constraintSize({ minHeight: 40 })
-          .margin({ left: 32, right: 32, top: 14 })
+          .margin({ left: 32, right: 32 })
 
-        // 下面：固定高度（188vp）——5.3 投信动画要从这叠纸飞到投信口，高度不能变
+        // 下面：固定高度（188vp）——5.3 投信动画要从这叠纸飞到投信口，高度不能变。
+        // 横向 28vp 内缩（iOS 同款）走 padding：width('100%') + margin 真机被忽略
         Column() {
           this.bottomArea()
         }
         .height(OUTGOING_PILE_HEIGHT_VP)
-        .margin({ left: 28, right: 28, top: 14, bottom: 20 })
+        .padding({ left: 28, right: 28 })
         .alignItems(HorizontalAlign.Center)
         .width('100%')
       }
       .width('100%')
       .height('100%')
+      .padding({
+        // 顶部：邮筒插画顶部距安全区顶 52vp（= iOS inline 导航栏 44 + VStack
+        // 顶距 8）。真机实证（2026-10-27）：这层 NavBar 内容列的 padding(top)
+        // 从窗口顶 y=0 量起而非安全区顶（top:52 落在 y=162 而不是 284），
+        // 所以 52+安全区顶/3.115 ≈ 91.3；细高邮筒图（678×1498）Contain 后
+        // 不再紧贴状态栏（用户反馈「邮筒太靠上」）
+        top: 91.3,
+        // 底部避开悬浮胶囊 Tab 栏（HomeView 同款口径 safeAreaBottomVp + 90），
+        // 叠纸整叠露出在胶囊之上（用户反馈「tab bar 遮住这次寄出的日记」）
+        bottom: this.safeAreaBottomVp + 90
+      })
     }
-    .title(this.titleBar)
-    .hideBackButton(true)
     .mode(NavigationMode.Stack)
     .backgroundColor(this.pageColor !== undefined ? this.pageColor : this.theme.background)
   }
 
-  /** 标题栏：左端留空，右端「信箱」入口（带未读红点；红点用 destructive） */
+  /** 右上角信箱入口：官方 SymbolGlyph 图标（sys.symbol 无 tray，inbox 收件箱托盘
+   *   语义一致）+ 文字 + 未读红点（destructive）。有未读回信就亮（R-POST-09）。
+   *   iOS toolbar topBarTrailing 同款；wrap 节点的 margin 真机正常（右侧 16vp） */
   @Builder
-  titleBar() {
-    Row() {
-      Blank()
-      Stack({ alignContent: Alignment.TopEnd }) {
+  letterboxEntry() {
+    Stack({ alignContent: Alignment.TopEnd }) {
+      Row({ space: 6 }) {
+        SymbolGlyph($r('sys.symbol.inbox'))
+          .fontSize(this.theme.captionFont.size)
+          .fontColor([this.theme.textPrimary])
         Text($r('app.string.s_44fd049d7d'))
           .fontSize(this.theme.captionFont.size)
           .fontWeight(this.theme.captionFont.weight)
           .fontFamily(this.theme.captionFont.family)
           .fontColor(this.theme.textPrimary)
-          .padding({ left: 16, right: 16, top: 12, bottom: 12 })
-          .onClick((): void => {
-            this.navPathStack.pushPathByName('Letterbox', '');
-          })
-        if (hasUnreadLetter(this.letters, this.nowMs)) {
-          Circle()
-            .fill(this.theme.destructive)
-            .width(8)
-            .height(8)
-            .offset({ x: 6, y: 8 })
-        }
+      }
+      .padding({ left: 16, right: 16, top: 12, bottom: 12 })
+      .onClick((): void => {
+        this.navPathStack.pushPathByName('Letterbox', '');
+      })
+      if (hasUnreadLetter(this.letters, this.nowMs)) {
+        Circle()
+          .fill(this.theme.destructive)
+          .width(8)
+          .height(8)
+          .offset({ x: 6, y: 8 })
       }
     }
-    .width('100%')
+    .margin({ top: 8, right: 16 })
   }
 
   /** 下面那块（固定高度）：能寄出纸；服务端拦着且有新日记时半透明摆着（下次一起寄） */
