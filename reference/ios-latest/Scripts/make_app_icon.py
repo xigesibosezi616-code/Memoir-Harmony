@@ -15,12 +15,15 @@
 - `Memoir/Assets.xcassets/AppIconPreview_<主题>.imageset/`：设置页里的 192px 预览（`AppIconOption.previewAsset`）
 
 依赖 numpy 和 ImageMagick（`magick` 命令）。这台 Mac 上系统自带的 python3 没有 numpy，用 miniforge 的：
-    ~/miniforge3/bin/python3 Scripts/make_app_icon.py
+    ~/miniforge3/bin/python3 Scripts/make_app_icon.py                          重出四套图标和预览
+    ~/miniforge3/bin/python3 Scripts/make_app_icon.py --export 4096 <文件.png>   出一张素笺主图标的大图（方形、不带圆角，宣传 / 素材用）
+    ~/miniforge3/bin/python3 Scripts/make_app_icon.py --avatar 4096 <文件.png>   官方账号头像：字居中、四周留宽边（会被裁成圆）
 """
 import json
 import os
 import shutil
 import subprocess
+import sys
 
 import numpy as np
 
@@ -75,14 +78,22 @@ def centerline(per_seg=320):
     return np.concatenate(centers), np.concatenate(radii) * WEIGHT
 
 
-def coverage():
-    """字的覆盖率（0…1），SIZE×SIZE：先在 SUPERSAMPLE 倍上按到每个圆的距离算抗锯齿，再缩回来"""
-    n = SIZE * SUPERSAMPLE
-    k = n / GRID
-    field = np.full((n, n), -1e4, np.float32)
+def coverage(size=SIZE, supersample=SUPERSAMPLE, fit_width=None):
+    """字的覆盖率（0…1），size×size：先在 supersample 倍上按到每个圆的距离算抗锯齿，再缩回来。
+    fit_width 为 None 时照图标的构图（字在 GRID 格子里的原位）；给了比例就把整个字（含句点）挪到正中、宽度占画面这么多"""
+    n = size * supersample
     C, R = centerline()
     dx, dy, dr = STROKE["dot"]
-    circles = list(zip(C * k, R * k)) + [(np.array([dx, dy]) * k, dr * WEIGHT * k)]
+    circles = list(zip(C, R)) + [(np.array([dx, dy]), dr * WEIGHT)]
+    if fit_width is None:
+        k, shift = n / GRID, np.zeros(2)
+    else:
+        lo = np.min([c - r for c, r in circles], axis=0)
+        hi = np.max([c + r for c, r in circles], axis=0)
+        k = fit_width * n / (hi[0] - lo[0])
+        shift = n / 2 - (lo + hi) / 2 * k
+    circles = [(c * k + shift, r * k) for c, r in circles]
+    field = np.full((n, n), -1e4, np.float32)
     for (cx, cy), rr in circles:
         x0, x1 = int(max(0, cx - rr - 3)), int(min(n, cx + rr + 4))
         y0, y1 = int(max(0, cy - rr - 3)), int(min(n, cy + rr + 4))
@@ -90,7 +101,7 @@ def coverage():
         d = rr - np.sqrt((xx + 0.5 - cx) ** 2 + (yy + 0.5 - cy) ** 2)
         np.maximum(field[y0:y1, x0:x1], d, out=field[y0:y1, x0:x1])
     cov = np.clip(field + 0.5, 0, 1)
-    return cov.reshape(SIZE, SUPERSAMPLE, SIZE, SUPERSAMPLE).mean(axis=(1, 3))
+    return cov.reshape(size, supersample, size, supersample).mean(axis=(1, 3))
 
 
 def rgb(hex_color):
@@ -154,7 +165,29 @@ def write_preview(name, background, ink, alpha):
         f.write("\n")
 
 
+def export_flat(size, path):
+    """素笺主图标的大图：底色 + 字合成好的方图（不带圆角 —— 圆角由系统 / 用的地方自己加）"""
+    _, _, background, ink = THEMES[0]
+    a = coverage(size, supersample=1)[..., None]   # 大图上按距离算的抗锯齿已经够细，不用再超采样
+    write_png(path, rgb(background) * (1 - a) + rgb(ink) * a)
+    print(f"{path}  {size}×{size}  底 {background}  字 {ink}")
+
+
+def export_avatar(size, path, fit_width=0.6):
+    """官方账号头像：字挪到正中、宽度占六成 —— 各平台会把头像裁成圆，四周得留够边（2026-10-24 用户要）"""
+    _, _, background, ink = THEMES[0]
+    a = coverage(size, supersample=1, fit_width=fit_width)[..., None]
+    write_png(path, rgb(background) * (1 - a) + rgb(ink) * a)
+    print(f"{path}  {size}×{size}  字宽占 {fit_width:.0%}，居中")
+
+
 def main():
+    if len(sys.argv) == 4 and sys.argv[1] == "--export":
+        export_flat(int(sys.argv[2]), sys.argv[3])
+        return
+    if len(sys.argv) == 4 and sys.argv[1] == "--avatar":
+        export_avatar(int(sys.argv[2]), sys.argv[3])
+        return
     alpha = coverage()
     os.makedirs(ICON_DIR, exist_ok=True)
     for name, preview, background, ink in THEMES:

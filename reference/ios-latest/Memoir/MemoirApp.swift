@@ -16,9 +16,6 @@ struct MemoirApp: App {
     /// **在这里就判断掉**，而不是进了 `SplashView` 再决定：
     /// 当前主题没配封面图时，连一帧启动页背景都不该闪。
     /// 用 `@State` 的初值只在进程启动时求值一次 —— 正是我们要的时机。
-    ///
-    /// > 🔒 视频轮播那套已封存（见 `SplashVideoPool`）。解封时这行换回
-    /// > `SplashVideoPool.shouldPlayToday()`，并把 `SplashView.style` 改成 `.video`。
     @State private var showSplash = SplashCoverPool.coverForCurrentTheme != nil
     @AppStorage("showSplashAnimation") private var showSplashAnimation: Bool = true
 
@@ -122,7 +119,7 @@ struct MemoirApp: App {
         )
         do {
             return try ModelContainer(
-                for: Schema(versionedSchema: SchemaV10.self),
+                for: Schema(versionedSchema: SchemaV12.self),
                 migrationPlan: MemoirMigrationPlan.self,
                 configurations: [config]
             )
@@ -142,7 +139,7 @@ struct MemoirApp: App {
             }
             do {
                 let container = try ModelContainer(
-                    for: Schema(versionedSchema: SchemaV10.self),
+                    for: Schema(versionedSchema: SchemaV12.self),
                     migrationPlan: MemoirMigrationPlan.self,
                     configurations: [config]
                 )

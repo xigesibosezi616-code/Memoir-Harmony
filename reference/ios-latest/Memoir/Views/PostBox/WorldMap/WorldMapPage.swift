@@ -30,6 +30,8 @@ struct WorldMapPage: View {
     let inTransit: [InTransitLetter]
     /// 一打开先翻到哪一位（比如从信箱里点「他在哪」）；nil = 第一张（自己那位）
     let initialFocus: String?
+    /// 邮票夹里有几张，显示在右上角（一张小邮票 + 数字，不加字，用户定）。nil = 不知道（没登录 / 没问到），不显示
+    let stampBalance: Int?
 
     static let ownID = "own"
 
@@ -64,7 +66,8 @@ struct WorldMapPage: View {
         sendable: Set<String>,
         recipients: Binding<Set<String>>,
         inTransit: [InTransitLetter] = [],
-        initialFocus: String? = nil
+        initialFocus: String? = nil,
+        stampBalance: Int? = nil
     ) {
         self.roster = roster
         self.ownPenPalName = ownPenPalName
@@ -74,6 +77,7 @@ struct WorldMapPage: View {
         _recipients = recipients
         self.inTransit = inTransit
         self.initialFocus = initialFocus
+        self.stampBalance = stampBalance
         // 🔴 相机的起点必须在这里给，不能等 onAppear 再设：那时地图已经按默认（库比蒂诺、最近距离）摆好了，
         // 设进去的位置被吞掉，接着「翻到 McRae」把地图放大到了城市级（2026-10-15 模拟器日志）
         _position = State(initialValue: .region(MKCoordinateRegion(
@@ -105,6 +109,23 @@ struct WorldMapPage: View {
         .toolbarBackground(theme.background, for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .toolbarColorScheme(theme.preferredColorScheme == .dark ? .dark : .light, for: .navigationBar)
+        .toolbar {
+            // 右上角：邮票夹里有几张（2026-10-27 用户定：一张小邮票 + 数字，最简洁，不加字）
+            if let stampBalance {
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack(spacing: 7) {
+                        MarkStamp(ink: postInk, paper: palette.paper, width: 18)
+                        Text(verbatim: "\(stampBalance)")
+                            .font(.system(size: 16, weight: .semibold, design: .serif))
+                            .monospacedDigit()
+                            .foregroundStyle(theme.textPrimary)
+                    }
+                    .padding(.horizontal, 4)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(Text("邮票夹里有 \(stampBalance) 张邮票"))
+                }
+            }
+        }
         .paywallCover(isPresented: $showPaywall)
         .onAppear {
             if focusedID == nil { focusedID = initialFocus ?? cardIDs.first }
@@ -133,7 +154,8 @@ struct WorldMapPage: View {
 
     private func header(_ theme: any AppTheme) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("世界笔友")
+            // 界面上不叫「世界笔友」，叫「今雨与雅故」（2026-10-27 用户定：杜甫「旧雨今雨」，新友与故交）
+            Text("今雨与雅故")
                 .font(theme.titleFont)
                 .foregroundStyle(theme.textPrimary)
             Text("\(roster.count) 位笔友，住在世界各地")
@@ -151,7 +173,7 @@ struct WorldMapPage: View {
         HStack(spacing: 8) {
             Image(systemName: "location")
             if location.isDenied {
-                Text("定位没开，世界笔友的回信都按一两天算")
+                Text("定位没开，各地笔友的回信都按一两天算")
             } else {
                 Text("打开定位，就能算出信要走多远")
             }
@@ -379,7 +401,7 @@ struct WorldMapPage: View {
         WorldMapPage.names(of: recipients, ownPenPalName: ownPenPalName, roster: orderedRoster, locale: locale)
     }
 
-    /// 收件人的名字，按名片的顺序（自己那位在前），用这种语言的列举方式连起来（「青鸟、天野和 McRae」）
+    /// 收件人的名字，按名片的顺序（自己那位在前），用这种语言的列举方式连起来（「阿远、天野和 McRae」）
     static func names(of recipients: Set<String>, ownPenPalName: String, roster: [PenPal], locale: Locale) -> String {
         ([ownID] + roster.map(\.id)).filter { recipients.contains($0) }.map { id in
             id == ownID ? ownPenPalName : (roster.first { $0.id == id }?.surname.resolved(for: locale) ?? id)

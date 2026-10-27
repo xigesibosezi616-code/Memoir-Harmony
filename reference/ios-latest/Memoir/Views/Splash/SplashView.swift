@@ -1,17 +1,14 @@
 import SwiftUI
-import AVFoundation
 import UIKit
 
-/// 启动页。**当前用的是按主题的封面 + 现写一个「m.」**（2026-10-24 产品定）：
+/// 启动页：按主题的封面 + 现写一个「m.」（2026-10-24 产品定，设计见 `Memoir/MEMOIR_SPLASH.md`）。
 /// 封面（`SplashCoverPool`）只剩主题底色和底部的「from Sinara」，中间那个旧笔记本已经抹掉；
-/// 桌面图标上那一笔手写的 m. 在封面中间一笔写出来、落下句点，配笔尖的「刷刷刷」和落点的「咚」，
+/// 桌面图标上那一笔手写的 m. 在封面中间一笔写出来、落下句点，配笔尖的「刷刷刷」和落点的「砰」，
 /// 然后淡进主界面。字和颜色同桌面图标（`HandwrittenMark`、`ThemeSwatch`）。
 ///
-/// 视频轮播那套（`SplashVideoPool` + `SplashVideoPlayerView`）**已封存但没有删** ——
-/// 把 `style` 改回 `.video` 就能整套复活，详见 `Style` 的注释与
-/// `Memoir/MEMOIR_DEV_SPEC.md` 的「已封存的功能」一节。
+/// 更早的「视频轮播开场」封存了两个月、视频文件早就没了，2026-10-24 连代码一起删掉。
 ///
-/// ## 时间线（封面模式）
+/// ## 时间线
 ///
 /// ```
 ///  封面   ├淡入┤
@@ -33,24 +30,6 @@ struct SplashView: View {
 
     let onFinish: () -> Void
 
-    // MARK: - 开场样式（feature toggle）
-
-    /// 开场用哪种素材。
-    ///
-    /// 🔒 **`.video` 是已封存的实现，当前不启用。**
-    /// 代码整套保留且**参与编译**（不是注释掉的死代码）——
-    /// 这样重构、改 API、升 SDK 时它会跟着一起被修，解封时不会已经烂掉。
-    /// 解封只需把 `style` 改成 `.video` 并把视频放回 `Resources/SplashVideos/`。
-    enum Style {
-        /// 按主题的静态封面（当前启用）
-        case cover
-        /// 视频轮播池（🔒 已封存，见 `SplashVideoPool`）
-        case video
-    }
-
-    /// 🔴 改这一行即可切换开场形态。
-    static let style: Style = .cover
-
     // MARK: - 时长
 
     /// 封面淡入时长（封面底色和底下垫的主题背景同色，淡入的其实只有「from Sinara」）
@@ -66,12 +45,8 @@ struct SplashView: View {
     static let markWidth: CGFloat = 0.44
     static let markCenterY: CGFloat = 0.4496
 
-    /// 淡出时长。封面模式下接在 `coverDuration` 之后；
-    /// 视频模式下它同时是**提前量**（视频还剩这么久时就开始淡出，两者必须相等）。
+    /// 写完、停够之后整层淡出的时长
     static let fadeOutDuration: TimeInterval = 0.25
-
-    /// 读不到视频时长时的硬兜底。**仅视频模式用得到**。
-    private static let fallbackTimeout: TimeInterval = 20
 
     // MARK: - 状态
 
@@ -82,7 +57,6 @@ struct SplashView: View {
     /// 落第一笔的时刻；nil = 还没开始写
     @State private var writingStart: Date?
 
-    @State private var videoURL: URL?
     @State private var didFinish = false
 
     /// 整层的透明度。**淡出由这一层自己做**，做完才通知父视图把自己移除。
@@ -100,9 +74,7 @@ struct SplashView: View {
             themeManager.current.background
                 .ignoresSafeArea()
 
-            switch Self.style {
-            case .cover:
-                if let coverImage {
+            if let coverImage {
                     GeometryReader { geo in
                         let cover = Self.fittedRect(coverImage.size, in: geo.size)
                         ZStack {
@@ -123,29 +95,16 @@ struct SplashView: View {
                         }
                     }
                     .ignoresSafeArea()
-                }
-            case .video:
-                if let videoURL {
-                    // 播放结束通知在这里只当兜底：正常路径下计时器会先在
-                    // "还剩 fadeOutDuration"时就触发退场，轮不到它
-                    SplashVideoPlayerView(url: videoURL, onFinish: finish)
-                        .ignoresSafeArea()
-                }
             }
         }
         .opacity(opacity)
         // 点任意处跳过
         .contentShape(Rectangle())
         .onTapGesture { finish() }
-        .task {
-            switch Self.style {
-            case .cover: await runCover()
-            case .video: await runVideo()
-            }
-        }
+        .task { await runCover() }
     }
 
-    // MARK: - 封面模式（当前启用）
+    // MARK: - 封面 + 写字
 
     private func runCover() async {
         guard let url = SplashCoverPool.coverForCurrentTheme,
@@ -190,48 +149,10 @@ struct SplashView: View {
         }.value
     }
 
-    // MARK: - 视频模式（🔒 已封存，保留可编译）
-
-    private func runVideo() async {
-        guard let picked = SplashVideoPool.videoForToday() else {
-            finish()
-            return
-        }
-        videoURL = picked
-
-        guard let duration = await Self.duration(of: picked) else {
-            // 读不到时长：退回"等播放结束通知"，同时留一个硬超时防止永远卡住。
-            // 这条留着 —— 走到这里用户要对着开场干等 20 秒，属于必须能查到的失败。
-            NSLog("🔴[Boot] 读不到视频时长（%@），退回 %.0f 秒硬超时",
-                  picked.lastPathComponent, Self.fallbackTimeout)
-            try? await Task.sleep(for: .seconds(Self.fallbackTimeout))
-            finish()
-            return
-        }
-
-        // 提前 fadeOutDuration 开始退场，让淡出叠在视频的尾巴上。
-        // 视频本身不会被打断 —— 淡出期间播放器还在播，
-        // 直到过渡动画结束、这一层被真正移除时才停（见 SplashVideoPlayerView.dismantleUIView）。
-        let playBeforeFade = max(0, duration - Self.fadeOutDuration)
-        try? await Task.sleep(for: .seconds(playBeforeFade))
-        finish()
-    }
-
-    /// 视频实际时长；读不到（或不是有效数值）返回 nil。
-    private static func duration(of url: URL) async -> TimeInterval? {
-        let asset = AVURLAsset(url: url)
-        guard let duration = try? await asset.load(.duration) else { return nil }
-        let seconds = CMTimeGetSeconds(duration)
-        guard seconds.isFinite, seconds > 0 else { return nil }
-        return seconds
-    }
-
     // MARK: - 退场
 
-    /// 到点淡出 / 播放结束兜底 / 点击跳过都走这里，`didFinish` 保证只生效一次。
-    ///
-    /// **先把自己淡掉，淡完了再通知父视图移除**。视频模式下播放器要等这一层
-    /// 真正被移除时才停（见 `SplashVideoPlayerView.dismantleUIView`）。
+    /// 到点淡出 / 点击跳过都走这里，`didFinish` 保证只生效一次。
+    /// **先把自己淡掉，淡完了再通知父视图移除**；声音跟着一起淡掉
     private func finish() {
         guard !didFinish else { return }
         didFinish = true

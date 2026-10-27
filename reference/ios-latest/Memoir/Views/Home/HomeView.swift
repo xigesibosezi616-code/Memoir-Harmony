@@ -6,6 +6,11 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \JournalEntry.date, order: .reverse) private var entries: [JournalEntry]
     @State private var showCompose = false
+    /// 新手指引走到哪一步（`FirstStep`）；「写」的入口在哪（全局坐标），指引的细线指过去
+    @AppStorage(FirstStep.storageKey) private var firstStepRaw = 0
+    @State private var writeButtonFrame: CGRect = .zero
+    /// 双指捏合的小彩蛋（`PinchTip`）：捏过一次就不再提示
+    @AppStorage(PinchTip.doneKey) private var pinchTipDone = false
     /// 点「写」的那一刻有没有草稿：有就直接接着写，没有先选写在哪本里（`ComposeFlow`）
     @State private var composeHasDraft = false
     @State private var showFloatingTitle = false
@@ -40,6 +45,11 @@ struct HomeView: View {
         HomeDisplayMode(rawValue: displayModeRaw) ?? .defaultMode
     }
     private var isShowcase: Bool { displayMode == .showcase }
+    /// 双指捏合的小彩蛋这会儿出不出：大屏、一屏一篇、攒够 8 篇、没捏过、新手指引走完了、没在写也没在看某一篇
+    private var showsPinchTip: Bool {
+        isShowcase && zoom == .one && entries.count >= PinchTip.minEntries && !pinchTipDone
+            && FirstStep(rawValue: firstStepRaw) == .off && !showCompose && showcaseTarget == nil
+    }
     private var zoom: ShowcaseZoom { ShowcaseZoom(rawValue: zoomRaw) ?? .one }
 
     private struct PinchState {
@@ -202,6 +212,7 @@ struct HomeView: View {
                             .shadow(color: theme.accent.opacity(0.3), radius: 8, y: 4)
                     }
                     .matchedTransitionSource(id: Self.composeSourceID, in: composeTransition)
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { writeButtonFrame = $0 }
                     .padding(.bottom, 90)
                 }
             }
@@ -225,6 +236,7 @@ struct HomeView: View {
                             startWriting()
                         }
                         .matchedTransitionSource(id: Self.composeSourceID, in: composeTransition)
+                        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { writeButtonFrame = $0 }
                     }
                 }
             }
@@ -243,6 +255,23 @@ struct HomeView: View {
                     .navigationTransition(.zoom(sourceID: Self.composeSourceID, in: composeTransition))
             }
         }
+        // 小彩蛋：攒到 8 篇，一屏一篇时提示双指捏合
+        .overlay {
+            if showsPinchTip {
+                PinchTipView(theme: themeManager.current)
+            }
+        }
+        .animation(.easeOut(duration: 0.3), value: showsPinchTip)
+        // 已经不在一屏一篇了 = 以前捏过：当作触发过
+        .onAppear { if zoom != .one { pinchTipDone = true } }
+        // 新手指引 ①：指着「写」的入口
+        .overlay {
+            // 还没点过，或者点开了又退出来（`.createNotebook` / `.compose`），都指着「写」
+            if FirstStep.beforeSending.contains(FirstStep(rawValue: firstStepRaw) ?? .off), writeButtonFrame != .zero, !showCompose {
+                GuideHint(text: "试着写下你的第一篇日记吧", target: writeButtonFrame, below: isShowcase, theme: themeManager.current)
+            }
+        }
+        .animation(.easeOut(duration: 0.3), value: firstStepRaw)
     }
 
     // MARK: - 大屏：一屏 1 / 4 篇左右翻，16 / 64 篇上下滚，双指捏合换
@@ -307,6 +336,8 @@ struct HomeView: View {
                     return
                 }
                 pinch?.stepped = true
+                // 真的捏到换了一级：彩蛋提示永久收起
+                pinchTipDone = true
                 if let next { setZoom(next, focus: current.focus, anchor: current.anchor) }
             }
             .onEnded { _ in pinch = nil }
@@ -359,6 +390,8 @@ struct HomeView: View {
     /// 两个「写」的入口（列表模式的胶囊、大屏模式的加号）
     private func startWriting() {
         composeHasDraft = DraftEntry.current(in: modelContext) != nil
+        // 新手指引：有草稿直接进写日记页（跳过选本子）；没有就先到选本子，教他给自己做一本
+        FirstStep.advance(to: composeHasDraft ? .compose : .createNotebook, from: [.writeFirst])
         showCompose = true
     }
 

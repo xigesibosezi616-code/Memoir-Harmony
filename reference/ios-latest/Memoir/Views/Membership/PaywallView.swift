@@ -97,14 +97,18 @@ struct PaywallView: View {
 
     private func benefits(theme: any AppTheme) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            benefit(theme: theme, icon: "envelope.open", title: "写一篇，回一篇",
-                    detail: "免费是每周一封；会员的每篇日记，笔友都会回信")
+            // 直接讲邮票数（2026-10-27 用户定：不说「每周几封」，说每周几张邮票、一张寄一封）。数目跟 Backend stamps.ts 的 MEMBER_PACK / FREE_PACK 一致
+            benefit(theme: theme, icon: "envelope.open", title: "每周 20 张邮票",
+                    detail: "一张邮票寄一封信，每封都有回信；免费每周 3 张，没用完的一直攒着")
             benefit(theme: theme, icon: "seal", title: "火漆封口的信",
                     detail: "每封信装进火漆封口的信封，拆开是讲究的信纸")
-            benefit(theme: theme, icon: "person.2", title: "挑一位合你心意的笔友",
-                    detail: "温柔的、话少的、爱引诗的……笔友的性格由你选")
-            benefit(theme: theme, icon: "calendar", title: "月度与年度回望",
-                    detail: "每月一封「这个月的你」，年底一份「这一年」")
+            // 原来是「挑一位合你心意的笔友」（笔友性格任选），2026-10-23 删掉，换成世界笔友（会员 = 全部世界笔友）。
+            // 界面上世界笔友叫「今雨与雅故」（2026-10-27 用户定）
+            benefit(theme: theme, icon: "globe", title: "今雨与雅故",
+                    detail: "十五位住在世界各地的笔友，用母语给你回信，信纸背面附上译文")
+            // 原来是「月度与年度回望」（笔友写一封「这个月的你」），2026-10-27 改成写作统计里的情绪小结（每周、每月、每年）
+            benefit(theme: theme, icon: "chart.xyaxis.line", title: "情绪小结",
+                    detail: "每周、每月、每年，一段小结和几条建议，陪你看清这段时间的心情。")
             benefit(theme: theme, icon: "photo.on.rectangle", title: "全部相纸与封面版式",
                     detail: "六种相纸、三种日记本封面版式，全部可用")
             benefit(theme: theme, icon: "book.closed", title: "印成一本书",

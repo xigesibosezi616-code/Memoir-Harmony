@@ -130,9 +130,9 @@ class AudioRecorderManager: NSObject, AVAudioRecorderDelegate {
     static func playAudio(from relativePath: String) -> AVAudioPlayer? {
         // 播放前**自己声明**要的 category，不依赖"当前恰好是什么"。
         //
-        // 起因：开场视频为了不打断用户的音乐，会把 category 设成 `.ambient`（可混音）。
-        // 它刻意**不还原**（还原那一步会在进主页时把别人的音乐掐掉且不恢复，
-        // 见 `SplashVideoPlayerView.dismantleUIView` 的注释）。
+        // 起因：开场的笔声（`SplashSound`）和信件的音效（`LetterHaptics`）为了不打断用户的音乐，
+        // 会把 category 设成 `.ambient`（可混音），而且刻意**不还原** ——
+        // 还原那一步（setActive false）会把别人正在放的音乐掐掉且不恢复。
         // 所以这里必须自己设回独占语义 —— 用户点开一段录音就是想听它，
         // 而不是让它和背景音乐混在一起。
         //

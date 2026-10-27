@@ -31,7 +31,12 @@ struct PenPalCard: View {
         let theme = themeManager.current
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 12) {
-                StampPlaceholder(code: stampCode, ink: postInk, paper: palette.paper)
+                // 自己起名的那位没有地区码：贴尺素自己的 m. 邮票（和领邮票卡片上同一张，2026-10-27 用户定）
+                if case .own = subject {
+                    MarkStamp(ink: postInk, paper: palette.paper)
+                } else {
+                    StampPlaceholder(code: stampCode, ink: postInk, paper: palette.paper)
+                }
                 VStack(alignment: .leading, spacing: 4) {
                     Text(verbatim: title)
                         .font(theme.headingFont)
@@ -132,7 +137,7 @@ struct PenPalCard: View {
     private var stampCode: String {
         switch subject {
         case .world(let penPal): return penPal.region
-        case .own: return "✉︎"
+        case .own: return ""  // 不用：自己那位贴的是 MarkStamp
         }
     }
 

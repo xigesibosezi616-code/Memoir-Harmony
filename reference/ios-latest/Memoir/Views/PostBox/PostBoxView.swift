@@ -35,7 +35,7 @@ struct PostBoxView: View {
     @Query(sort: \JournalEntry.date, order: .reverse) private var entries: [JournalEntry]
 
     /// 当前笔友名（用户在 Onboarding/设置页改，AppStorage 共享 key）
-    @AppStorage("penPalName") private var penPalName: String = "青鸟"
+    @AppStorage(PenPalName.storageKey) private var penPalName: String = ""
 
     /// 为 true 时直接推出信箱 —— 点「回信到了」通知时由外面置位
     @Binding var openLetterbox: Bool
@@ -49,6 +49,15 @@ struct PostBoxView: View {
     /// 服务端说现在能不能寄。问不到（没登录、断网）就是 nil，当作能寄 —— 最终由服务端拦
     /// 邮票夹（服务端说了算）。问不到（没登录、断网、老服务端）就是 nil，当作能寄 —— 最终由服务端拦
     @State private var stamps: StampWallet?
+    /// 每周领邮票的小卡片（`StampPackCard`）。nil = 不显示
+    @State private var stampPack: StampPackCard.Phase?
+    /// 新手指引（`FirstStep`）：⑤ 指那叠信、⑧ 回信到了指「信箱」。两处在哪（全局坐标）
+    @AppStorage(FirstStep.storageKey) private var firstStepRaw = 0
+    @AppStorage(FirstStep.replyFromKey) private var firstReplyFrom = ""
+    @State private var letterboxFrame: CGRect = .zero
+    @State private var pileFrame: CGRect = .zero
+    @State private var slotFrame: CGRect = .zero
+    @State private var showLogin = false
     /// 服务端已经备好人设、现在能寄的世界笔友
     @State private var availablePenPals: Set<String> = []
     @State private var feel = LetterPostingFeel()
@@ -84,9 +93,11 @@ struct PostBoxView: View {
                     canPost: canPost,
                     pileScrolls: OutgoingPile.scrolls(outgoingItems.count),
                     onPoke: poke,
-                    onPost: postIfReady
+                    onPost: postIfReady,
+                    onSlotFrame: { slotFrame = $0 }
                 ) {
                     bottom
+                        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { pileFrame = $0 }
                 }
             }
             // 🔴 导航栏背景**设为可见、但填成和页面一模一样的颜色**，而不是 `.hidden`。
@@ -111,12 +122,30 @@ struct PostBoxView: View {
             .navigationDestination(isPresented: $showWorldMap) {
                 WorldMapPage(
                     roster: PenPalRoster.all,
-                    ownPenPalName: penPalName,
+                    ownPenPalName: PenPalName.display(penPalName),
                     location: location,
                     isMember: store.isMember,
                     sendable: sendablePenPals,
-                    recipients: recipientsBinding
+                    recipients: recipientsBinding,
+                    stampBalance: stamps?.balance
                 )
+            }
+        }
+        .overlay { guideOverlay(theme: theme) }
+        .animation(.easeOut(duration: 0.3), value: firstStepRaw)
+        .sheet(isPresented: $showLogin) { LoginView() }
+        // 这周的邮票到了：领取的小卡片。挂在导航外面，遮罩连顶栏一起压暗
+        .overlay {
+            if let phase = stampPack {
+                ZStack {
+                    Color.black.opacity(0.22)
+                        .ignoresSafeArea()
+                        .transition(.opacity)
+                    StampPackCard(phase: phase, theme: theme, ink: postmarkInk, paper: palette.paper,
+                                  onClaim: claimStampPack,
+                                  onLater: { withAnimation(.easeOut(duration: 0.25)) { stampPack = nil } })
+                        .transition(.opacity.combined(with: .offset(y: 14)))
+                }
             }
         }
         .task(id: theme.mailboxImageName) {
@@ -146,6 +175,8 @@ struct PostBoxView: View {
         .task(id: StampsKey(sent: sentLetterCount, loggedIn: env.session.isLoggedIn)) {
             await refreshStamps()
         }
+        // 新手指引：④ 来了邮筒 → ⑤ 指那叠信
+        .onAppear { FirstStep.advance(to: .pushPile, from: [.sendFirst]) }
         // 先把震动引擎热起来，点下去那一刻才不会慢半拍
         .onAppear { feel.prepare() }
         .onDisappear { feel.stop() }
@@ -188,7 +219,7 @@ struct PostBoxView: View {
         if posting != nil || practicing { return Text("把勾上的日记推进投信口，寄给\(recipientNames)") }
         switch situation {
         case .returned: return Text("有一封信没能寄出去")
-        case .notLoggedIn: return Text("登录之后，\(penPalName)才能给你回信")
+        case .notLoggedIn: return Text("登录之后，\(PenPalName.display(penPalName))才能给你回信")
         case .justPosted:
             return entriesToSend.isEmpty ? Text("信已经投进邮筒了") : Text("上一封信刚寄出，过一会儿再寄下一封")
         case .noStamps(let wallet):
@@ -272,12 +303,13 @@ struct PostBoxView: View {
 
     /// 已经寄出的信数（写好了的）。变了就重新问服务端能不能寄
     private var sentLetterCount: Int {
-        letters.filter { LetterDelivery.isRealLetter($0) }.count
+        letters.filter { LetterDelivery.isRealLetter($0) && !$0.isWelcome }.count
     }
 
     /// 上次寄信的时刻。写好的信、还在写的信都算；退回来的不算（那几篇还没寄出去）
     private var lastSentAt: Date? {
-        letters.filter { LetterDelivery.isRealLetter($0) || LetterOutbox.isQueued($0) }.map(\.generatedAt).max()
+        // Sinara 的欢迎信不是寄出去换来的回信，不算
+        letters.filter { (LetterDelivery.isRealLetter($0) || LetterOutbox.isQueued($0)) && !$0.isWelcome }.map(\.generatedAt).max()
     }
 
     /// 日记删了的话关系里会留下悬空的引用（见 `Letter.relatedEntries` 的注释），先滤掉
@@ -341,9 +373,9 @@ struct PostBoxView: View {
         )
     }
 
-    /// 「青鸟」「青鸟、天野和 McRae」
+    /// 「阿远」「阿远、天野和 McRae」
     private var recipientNames: String {
-        WorldMapPage.names(of: recipients, ownPenPalName: penPalName, roster: PenPalRoster.all, locale: locale)
+        WorldMapPage.names(of: recipients, ownPenPalName: PenPalName.display(penPalName), roster: PenPalRoster.all, locale: locale)
     }
 
     // MARK: - 世界笔友入口
@@ -359,7 +391,7 @@ struct PostBoxView: View {
             .font(theme.captionFont)
             .foregroundStyle(theme.textPrimary)
         }
-        .accessibilityLabel(Text("世界笔友地图"))
+        .accessibilityLabel(Text("笔友地图"))
     }
 
     /// 地球图标朝着你那一面：亚洲、欧非、美洲（不知道你在哪就是亚洲那一面）
@@ -398,6 +430,7 @@ struct PostBoxView: View {
             }
         }
         .accessibilityLabel(hasUnread ? Text("信箱，有新的回信") : Text("信箱"))
+        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { letterboxFrame = $0 }
     }
 
     // MARK: - 投信
@@ -462,7 +495,7 @@ struct PostBoxView: View {
         }
         if recipients.contains(ownID) {
             // 自己起名的那位没有住址，就在身边：几个小时就回（2026-10-15 定）
-            let letter = makeLetter(fromCharacter: penPalName)
+            let letter = makeLetter(fromCharacter: PenPalName.display(penPalName))
             letter.postage = 1
             letter.deliveredAt = PenPalTravel.arrivalDate(sentAt: sentAt, replyTime: .ownPenPal, timeScale: LetterDelivery.debugTimeScale)
             created.append(letter)
@@ -491,12 +524,16 @@ struct PostBoxView: View {
         }
         created.forEach { LetterOutbox.enqueue($0.id) }
         excluded = []
+        // 新手指引 ⑥：第一封寄出去了，投信动画放完再说一声「会有回信」
+        let guideFinale = { FirstStep.advance(to: .sent, from: [.sendFirst, .pushPile]) }
 
         if reduceMotion {
             feel.playQuiet()
+            guideFinale()
             Task { await LetterNotifications.requestAuthorizationIfNeeded() }
         } else {
             playPosting(items: items, excluded: skipped, sealed: sealed, from: start) {
+                guideFinale()
                 // 第一次寄信之后才问通知权限 —— 这时用户最明白「为什么要通知」。
                 // 放在动画之后：系统弹窗不该把投信打断
                 Task { await LetterNotifications.requestAuthorizationIfNeeded() }
@@ -509,11 +546,14 @@ struct PostBoxView: View {
     /// 练习投信（测试包，`LetterDelivery.practicePosting`）：只放动画、声音和震动，不建信、不调接口，那叠信也不收走
     private func practicePost(from start: Double) {
         let sealed = store.isMember
+        // 测试包练习投信也算寄出（测试的人不用真寄一封、没登录也能往下走；练习投信不会有回信，回信那几步要真寄才看得到）
+        let guideFinale = { FirstStep.advance(to: .sent, from: [.sendFirst, .pushPile]) }
         if reduceMotion {
             feel.playQuiet()
+            guideFinale()
             return
         }
-        playPosting(items: outgoingItems, excluded: excluded, sealed: sealed, from: start) {}
+        playPosting(items: outgoingItems, excluded: excluded, sealed: sealed, from: start) { guideFinale() }
     }
 
     /// 投信动画：信收进信封、推进投信口，配震动和声音（`LetterPostingFeel`）。正式寄信和练习投信共用。
@@ -545,18 +585,21 @@ struct PostBoxView: View {
                                    isMember: store.isMember, errors: env.errors)
     }
 
-    /// 问一下邮票夹；新的一包到了就领（快递封的撕拉动画做好之前，悄悄领）。顺便问现在能寄哪几位世界笔友
+    /// 问一下邮票夹；新的一包到了、邮票夹又没满，就浮出领取的小卡片（`StampPackCard`）。顺便问现在能寄哪几位世界笔友。
+    /// 不点「领取」也不耽误寄信：寄的时候服务端会把到期的那一包补上
     private func refreshStamps() async {
         guard env.session.isLoggedIn else {
             stamps = nil
             return
         }
         do {
-            var wallet = try await env.ai.fetchStamps()
-            if wallet.packReady {
-                wallet = try await env.ai.claimStamps()
-            }
+            let wallet = try await env.ai.fetchStamps()
             stamps = wallet
+            // 新手指引还在看信、写第一篇的那几步：先不弹，两张卡叠在一起会乱
+            let guideBusy = FirstStep.beforeSending.contains(FirstStep.current) || FirstStep.current == .sendFirst
+            if wallet.packReady, wallet.balance < wallet.cap, stampPack == nil, !guideBusy {
+                withAnimation(.easeOut(duration: 0.35)) { stampPack = .ready }
+            }
         } catch {
             // 只是提前问一声：问不到就照常让用户寄，最终由服务端拦（拦下了信会退回并说明原因）
             let ns = error as NSError
@@ -568,6 +611,63 @@ struct PostBoxView: View {
         } catch {
             let ns = error as NSError
             NSLog("⚠️ [PostBox] 查世界笔友失败 domain=%@ code=%ld %@", ns.domain, ns.code, "\(error)")
+        }
+    }
+
+    /// 新手指引在邮筒页的几步
+    @ViewBuilder
+    private func guideOverlay(theme: any AppTheme) -> some View {
+        switch FirstStep(rawValue: firstStepRaw) {
+        case .replyArrived where letterboxFrame != .zero && !openLetterbox:
+            GuideHint(text: "\(firstReplyFrom)的回信到了，\n点开「信箱」看看", target: letterboxFrame, below: true, theme: theme)
+        case .pushPile where posting == nil && !showWorldMap && !openLetterbox:
+            if !env.session.isLoggedIn && !practicing {
+                VStack {
+                    Spacer()
+                    GuideCard(text: "登录之后，就能把日记寄给笔友", button: "去登录", theme: theme) { showLogin = true }
+                        .padding(.bottom, 120)
+                }
+            } else if pileFrame != .zero {
+                // 只留呼吸的上滑箭头（用户 10-27：这一步不要提示框）：从那叠信一路往上走到邮筒的投信口、淡掉，再来一遍
+                GeometryReader { proxy in
+                    let origin = proxy.frame(in: .global).origin
+                    let path = slotFrame == .zero
+                        ? pileFrame
+                        : CGRect(x: pileFrame.midX - 20, y: slotFrame.maxY,
+                                 width: 40, height: max(pileFrame.midY - slotFrame.maxY, 1))
+                    // 邮筒页底是深色（皮革、极夜）时用浅色箭头，不然墨色压在深底上看不见
+                    GestureCue(kind: .swipeUp, envelope: path.offsetBy(dx: -origin.x, dy: -origin.y),
+                               color: pageIsDark ? Color(white: 0.96) : palette.ink,
+                               travel: slotFrame == .zero ? 0.75 : 0.85, arrowLength: 80)
+                }
+                .ignoresSafeArea()
+                .allowsHitTesting(false)
+            }
+        default:
+            EmptyView()
+        }
+    }
+
+    /// 点了「领取」：领这一包 →「+N」停一下再收起
+    private func claimStampPack() {
+        let before = stamps?.balance ?? 0
+        stampPack = .claiming
+        Task {
+            do {
+                let wallet = try await env.ai.claimStamps()
+                stamps = wallet
+                withAnimation(.easeInOut(duration: 0.3)) { stampPack = .claimed(max(0, wallet.balance - before)) }
+                try await Task.sleep(for: .seconds(1.4))
+                withAnimation(.easeOut(duration: 0.35)) { stampPack = nil }
+            } catch is CancellationError {
+                stampPack = nil
+            } catch {
+                let ns = error as NSError
+                NSLog("⚠️ [PostBox] 领邮票失败 domain=%@ code=%ld %@", ns.domain, ns.code, "\(error)")
+                stampPack = .ready
+                env.errors.present(error, fallback: NSLocalizedString(
+                    "邮票没领到，过一会儿再试", bundle: .appLanguage, comment: "每周领邮票：领取失败"))
+            }
         }
     }
 

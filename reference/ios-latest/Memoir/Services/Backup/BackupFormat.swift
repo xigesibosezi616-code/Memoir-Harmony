@@ -110,6 +110,24 @@ nonisolated struct BackupManifest: Codable {
 
 nonisolated struct BackupEntriesFile: Codable {
     var entries: [BackupEntry]
+    /// 情绪小结（会员，2026-10-27）。**可选，不升 `formatVersion`** —— 老包、鸿蒙包没有这个字段就是没有
+    var moodSummaries: [BackupMoodSummary]? = nil
+}
+
+/// 一期情绪小结（`MoodSummary`）。按 `id` 去重；本机已有同一期（`period` + `periodStart`）的也不导
+nonisolated struct BackupMoodSummary: Codable {
+    var id: UUID
+    /// `week` / `month` / `year`
+    var period: String
+    var periodStart: Date
+    var periodEnd: Date
+    var text: String
+    var suggestions: [String]
+    /// 写的时候用的 App 语言
+    var language: String
+    var entryCount: Int
+    var heavy: Bool
+    var createdAt: Date
 }
 
 nonisolated struct BackupEntry: Codable {
@@ -169,20 +187,24 @@ nonisolated struct BackupBlock: Codable {
 
 nonisolated struct BackupLettersFile: Codable {
     var letters: [BackupLetter]
-    /// 「他记得的关于你的事」（世界笔友，2026-10-16）。
+    /// 笔友手记（2026-10-16 世界笔友起；2026-10-27 起自己起名的那位也有，并分画像 / 大事）。
     /// **可选，不升 `formatVersion`** —— 老包、鸿蒙包没有这个字段就是没有
     var penPalNotes: [BackupPenPalNote]? = nil
 }
 
-/// 「他记得的关于你的事」里的一条（`PenPalNote`）。按 `id` 去重合并
+/// 笔友手记里的一条（`PenPalNote`）。按 `id` 去重合并
 nonisolated struct BackupPenPalNote: Codable {
     var id: UUID
-    /// 世界笔友的 id（`penpals.json`）
+    /// 世界笔友的 id（`penpals.json`）；自己起名的那位是 `"own"`
     var penPalID: String
     var text: String
     /// 记下它的那封回信的写信时刻
     var notedAt: Date
     var createdAt: Date
+    /// `"profile"` = 画像、`"recent"` = 大事（2026-10-27）。**可选** —— 老包没有就是大事；不认识的值原样保留
+    var kind: String? = nil
+    /// 笔友改写过这一条的时刻（2026-10-27）。**可选**
+    var updatedAt: Date? = nil
 }
 
 nonisolated struct BackupLetter: Codable {

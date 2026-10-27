@@ -8,7 +8,7 @@ import SwiftUI
 struct PracticeLetterView: View {
     @Environment(ThemeManager.self) private var themeManager
     @Environment(AppEnvironment.self) private var env
-    @AppStorage("penPalName") private var penPalName: String = "青鸟"
+    @AppStorage(PenPalName.storageKey) private var penPalName: String = ""
 
     @State private var sealed = true
     /// 每再封一封就加一：拆信那一页整个换新的，从火漆完好开始
@@ -21,8 +21,8 @@ struct PracticeLetterView: View {
             if sealed {
                 SealedLetterOpener(
                     palette: palette,
-                    sealMark: WaxSeal.initial(of: penPalName),
-                    sender: Text("来自\(penPalName)"),
+                    sealMark: WaxSeal.initial(of: PenPalName.display(penPalName)),
+                    sender: Text("来自\(PenPalName.display(penPalName))"),
                     onFinished: {
                         withAnimation(.easeInOut(duration: LetterOpeningFeel.unfoldDuration)) { sealed = false }
                     }

@@ -42,9 +42,18 @@ final class MockAIService: AIService {
         let draft = try await generateLetter(for: LetterContext(
             entries: context.entries, triggerKind: .perEntry, dominantMood: context.dominantMood, penPalName: name))
         return PenPalLetterDraft(letter: draft.body, translation: draft.body,
-                                 remember: context.entries.first.map { [String($0.title.prefix(20))] } ?? [],
+                                 notebook: NotebookEdits(add: context.entries.first.map { [String($0.title.prefix(20))] } ?? []),
                                  danger: false, postage: PenPalRoster.penPal(id: context.penPalID)?.postage ?? 1,
                                  generatedAt: .now, balance: 39)
+    }
+
+    /// 假的情绪小结：够让界面跑起来
+    func generateMoodSummary(_ request: MoodSummaryRequest) async throws -> MoodSummaryDraft {
+        try await Task.sleep(for: .seconds(Double.random(in: simulatedDelay)))
+        return MoodSummaryDraft(
+            summary: "这一段整体平稳，记了 \(request.entryCount) 篇心情。雨天的那几篇沉一些，周末的心情更亮。",
+            suggestions: ["下一个雨天，给自己安排一件小小的期待。", "周三晚上早点放下手机。"],
+            heavy: false)
     }
 
     func generateLetter(for context: LetterContext) async throws -> LetterDraft {

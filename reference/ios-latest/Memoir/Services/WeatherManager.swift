@@ -183,7 +183,18 @@ class WeatherManager: NSObject, CLLocationManagerDelegate {
 
     /// 取当前天气。**失败会重试一次** —— WeatherKit 首次调用要跟服务端换令牌，
     /// 弱网或冷启动时偶发失败，一次性放弃太可惜（用户看到的就是"天气又没了"）。
+    ///
+    /// 一小时内、同一处（3 公里内）再写，沿用上一次的天气，不再调用（`WeatherCache`，2026-10-27）
     private func fetchWeather(at location: CLLocation, isRetry: Bool = false) async {
+        if !isRetry, let cached = WeatherCache.load(), cached.isFresh(for: location, now: .now) {
+            currentWeatherCode = cached.code
+            currentTemperature = cached.temperature
+            weatherFailed = false
+            lastWeatherError = nil
+            NSLog("🟢[Weather] 沿用 %.0f 分钟前同一处的天气 %@ %@，不再调用",
+                  Date.now.timeIntervalSince(cached.fetchedAt) / 60, cached.code, cached.temperature)
+            return
+        }
         do {
             let weather = try await weatherWithTimeout(at: location)
             let current = weather.currentWeather
@@ -193,6 +204,8 @@ class WeatherManager: NSObject, CLLocationManagerDelegate {
             currentTemperature = "\(Int(celsius.rounded()))°"
             weatherFailed = false
             lastWeatherError = nil
+            WeatherCache(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude,
+                         fetchedAt: .now, code: current.symbolName, temperature: currentTemperature ?? "").save()
             NSLog("🟢[Weather] %@ %@ condition=%@",
                   current.symbolName, currentTemperature ?? "?", String(describing: current.condition))
         } catch {
@@ -282,4 +295,51 @@ class WeatherManager: NSObject, CLLocationManagerDelegate {
 /// 「超时」和 WeatherKit 自己抛的错（如 `WDSJWTAuthenticatorServiceListener.Errors 2` 是鉴权失败）
 struct WeatherTimeoutError: LocalizedError {
     var errorDescription: String? { "WeatherKit timeout" }
+}
+
+
+/// 上一次取到的天气（2026-10-27）：一小时内、3 公里内再写日记就沿用，不再调用天气服务。
+///
+/// 省的是调用次数（苹果每月 50 万次免费，鸿蒙那边的天气服务按次计费，规则相同、见鸿蒙 U14）。
+/// 存在本机的 UserDefaults，只有这一条、不上传、不进备份；坐标只留到小数点后两位（约 1 公里）
+struct WeatherCache: Codable {
+    let latitude: Double
+    let longitude: Double
+    let fetchedAt: Date
+    let code: String
+    let temperature: String
+
+    /// 沿用多久
+    static let maxAge: TimeInterval = 60 * 60
+    /// 离上一次多远以内算同一处（米）
+    static let maxDistance: CLLocationDistance = 3_000
+    private static let key = "weatherCache.v1"
+
+    init(latitude: Double, longitude: Double, fetchedAt: Date, code: String, temperature: String) {
+        self.latitude = (latitude * 100).rounded() / 100
+        self.longitude = (longitude * 100).rounded() / 100
+        self.fetchedAt = fetchedAt
+        self.code = code
+        self.temperature = temperature
+    }
+
+    func isFresh(for location: CLLocation, now: Date) -> Bool {
+        let age = now.timeIntervalSince(fetchedAt)
+        guard age >= 0, age < Self.maxAge else { return false }
+        return location.distance(from: CLLocation(latitude: latitude, longitude: longitude)) <= Self.maxDistance
+    }
+
+    static func load() -> WeatherCache? {
+        guard let data = UserDefaults.standard.data(forKey: key) else { return nil }
+        return try? JSONDecoder().decode(WeatherCache.self, from: data)
+    }
+
+    func save() {
+        do {
+            UserDefaults.standard.set(try JSONEncoder().encode(self), forKey: Self.key)
+        } catch {
+            let ns = error as NSError
+            NSLog("⚠️[Weather] 记不下这次的天气 domain=%@ code=%ld", ns.domain, ns.code)
+        }
+    }
 }

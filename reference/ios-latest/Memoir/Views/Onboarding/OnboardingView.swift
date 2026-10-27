@@ -1,9 +1,12 @@
+import SwiftData
 import SwiftUI
 
 struct OnboardingView: View {
     @Environment(ThemeManager.self) private var themeManager
+    @Environment(\.modelContext) private var modelContext
     @AppStorage("hasCompletedOnboarding") private var hasCompleted = false
-    @AppStorage("penPalName") private var penPalName: String = "青鸟"
+    /// 没有默认名：首启必须起名才能进（2026-10-24 产品定，见 `PenPalName`）
+    @AppStorage(PenPalName.storageKey) private var penPalName: String = ""
     @State private var selectedTheme = "bamboo"
     @FocusState private var penPalFieldFocused: Bool
 
@@ -43,14 +46,14 @@ struct OnboardingView: View {
 
             Spacer().frame(height: 40)
 
-            // 笔友起名（可跳过 → 默认"青鸟"）
+            // 笔友起名：必填，不能跳过
             VStack(spacing: 10) {
                 Text("给笔友起个名字")
                     .font(theme.captionFont)
                     .foregroundStyle(theme.textTertiary)
                     .tracking(theme.letterSpacingWide)
 
-                TextField("青鸟", text: $penPalName)
+                TextField("写一个名字", text: $penPalName)
                     .font(theme.bodyFont)
                     .foregroundStyle(theme.textPrimary)
                     .multilineTextAlignment(.center)
@@ -66,20 +69,23 @@ struct OnboardingView: View {
                     .focused($penPalFieldFocused)
                     .submitLabel(.done)
                     .onSubmit { penPalFieldFocused = false }
+                    .onChange(of: penPalName) { _, new in
+                        if new.count > PenPalName.maxLength { penPalName = String(new.prefix(PenPalName.maxLength)) }
+                    }
 
-                Text("可跳过，之后在设置里也能改")
+                Text("笔友会用这个名字给你写信，之后在设置里也能改")
                     .font(theme.labelFont)
                     .foregroundStyle(theme.textTertiary)
             }
 
             Spacer()
 
-            // CTA
+            // CTA：没起名点不了
             Button {
-                // 提交时 trim + 空了恢复默认"青鸟"
-                let trimmed = penPalName.trimmingCharacters(in: .whitespacesAndNewlines)
-                penPalName = trimmed.isEmpty ? "青鸟" : trimmed
+                penPalName = PenPalName.normalized(penPalName)
                 themeManager.currentThemeID = selectedTheme
+                // 新手指引从头开始，Sinara 的欢迎信放进信箱（见 `FirstStep`）
+                FirstStep.begin(in: modelContext, toName: nil)
                 hasCompleted = true
             } label: {
                 Text("开始书写")
@@ -89,7 +95,10 @@ struct OnboardingView: View {
                     .padding(.vertical, 16)
                     .background(theme.accent)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .opacity(PenPalName.needsNaming(penPalName) ? 0.4 : 1)
             }
+            .disabled(PenPalName.needsNaming(penPalName))
+            .animation(.easeInOut(duration: 0.2), value: PenPalName.needsNaming(penPalName))
             .padding(.horizontal, 40)
             .padding(.bottom, 48)
         }

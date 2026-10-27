@@ -84,8 +84,8 @@ enum LetterLanguage {
         return nlToCode[language]
     }
 
-    /// 尺素的应用语言（设置里选的那个，不是系统语言）
-    private static var appLanguage: String {
+    /// 尺素的应用语言（设置里选的那个，不是系统语言）。情绪小结也用它（`MoodSummaryWriter`）
+    static var appLanguage: String {
         let stored = UserDefaults.standard.string(forKey: LanguageManager.storageKey) ?? ""
         return supported.contains(stored) ? stored : "en"
     }

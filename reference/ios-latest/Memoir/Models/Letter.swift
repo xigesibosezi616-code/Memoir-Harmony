@@ -46,7 +46,7 @@ final class Letter {
     /// **写信当时的笔友名快照**。SwiftData @Model 持久化字段天然就是 snapshot ——
     /// 用户后续在设置里改 `@AppStorage("penPalName")` 不会反向修改老 letter 的此字段，
     /// 保证历史信件的署名与头像永远是"写下那一刻的笔友"。
-    var fromCharacter: String = "青鸟"
+    var fromCharacter: String = ""
 
     /// **写信当时的收信人昵称快照**（信件抬头「致 XXX」）。
     ///
@@ -92,7 +92,7 @@ final class Letter {
         relatedEntries: [JournalEntry] = [],
         status: LetterStatus = .pending,
         body: String = "",
-        fromCharacter: String = "青鸟",
+        fromCharacter: String = "",
         toName: String? = nil,
         triggerKind: LetterTriggerKind = .weekly,
         errorMessage: String? = nil

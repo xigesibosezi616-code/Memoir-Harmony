@@ -43,6 +43,10 @@ struct NotebookPicker: View {
     @State private var showCreate = false
     /// 刚建好的那本：等新建页收下去再转过去，不然转的那一下被盖着看不见
     @State private var created: String?
+    /// 新手指引 ②③：先给自己做一本（指「想做一本新的日记？」），做好了指「就写在这本里」
+    @AppStorage(FirstStep.storageKey) private var firstStepRaw = 0
+    @State private var chooseFrame: CGRect = .zero
+    @State private var createFrame: CGRect = .zero
 
     var body: some View {
         let theme = themeManager.current
@@ -93,6 +97,7 @@ struct NotebookPicker: View {
                     showCreate = true
                 } label: {
                     Text("想做一本新的日记？")
+                        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { createFrame = $0 }
                         .font(theme.captionFont)
                         .foregroundStyle(theme.textSecondary)
                         .padding(.vertical, 8)
@@ -102,6 +107,8 @@ struct NotebookPicker: View {
                 .buttonStyle(.plain)
 
                 Button {
+                    // 新手指引：没做新本子、直接写在这本里也往下走
+                    FirstStep.advance(to: .compose, from: [.createNotebook])
                     onChoose(book.tagName)
                 } label: {
                     Text("就写在这本里")
@@ -112,9 +119,20 @@ struct NotebookPicker: View {
                         .background(Capsule().fill(theme.accent))
                 }
                 .buttonStyle(.plain)
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { chooseFrame = $0 }
                 .padding(.horizontal, 48)
                 .padding(.top, 4)
                 .padding(.bottom, 20)
+            }
+            .overlay {
+                switch FirstStep(rawValue: firstStepRaw) {
+                case .createNotebook where createFrame != .zero && !showCreate:
+                    GuideHint(text: "先给自己做一本日记本", target: createFrame, below: false, theme: theme)
+                case .compose where chooseFrame != .zero && !showCreate:
+                    GuideHint(text: "就写在这一本里，\n点这里开始写", target: chooseFrame, below: false, theme: theme)
+                default:
+                    EmptyView()
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(theme.background.ignoresSafeArea())
@@ -144,6 +162,8 @@ struct NotebookPicker: View {
                 onCreate: { name, edit in
                     let tag = NotebookMaker.create(name: name, edit: edit, after: tags, in: modelContext, errors: env.errors)
                     created = tag.id.uuidString
+                    // 新手指引 ②→③：本子做好了，转盘转到它，接着指「就写在这本里」
+                    FirstStep.advance(to: .compose, from: [.createNotebook])
                     showCreate = false
                 },
                 onCancel: { showCreate = false }

@@ -22,7 +22,7 @@ struct LetterSummary: Sendable, Equatable {
 /// 客户端拿它提前告诉用户「邮票用完了、下一包几时到」，最终由服务端扣、由服务端拦
 struct StampWallet: Sendable, Equatable {
     let balance: Int
-    /// 邮票夹最多放几张（会员 40、免费 1）
+    /// 邮票夹最多放几张（2026-10-27 起不清空、一直攒，服务端固定给 999，只是防呆）
     let cap: Int
     /// 下一包什么时候到
     let nextPackAt: Date
@@ -38,13 +38,36 @@ struct PenPalLetterContext: Sendable {
     let penPalID: String
     let entries: [EntrySnapshot]
     let dominantMood: String?
-    /// 「他记得的关于你的事」：本机存的、这一位的，最近 20 条
-    let memory: [PenPalNoteSnapshot]
+    /// 他给你记的手记（画像 + 大事）：本机存的、只有这一位的（`PenPalNotebook.snapshot`）
+    let notebook: [PenPalNoteSnapshot]
 }
 
+/// 手记里的一条，寄信时带上（对齐后端 `NotebookItem`）
 struct PenPalNoteSnapshot: Sendable {
+    let id: UUID
+    let kind: PenPalNote.Kind
     let text: String
-    let notedAt: Date
+    /// 记下 / 最后改写这条的时刻
+    let date: Date
+}
+
+/// 这一封之后手记怎么改：服务端交回，`PenPalNotebook.apply` 照着改本机那一本（对齐后端 `NotebookEdits`）
+struct NotebookEdits: Sendable {
+    struct Rewrite: Sendable {
+        let id: UUID
+        let text: String
+    }
+
+    /// 整份重写的画像；nil = 画像不动
+    var profile: String?
+    /// 新记下的大事
+    var add: [String] = []
+    /// 改写的大事
+    var update: [Rewrite] = []
+    /// 不再需要的大事
+    var remove: [UUID] = []
+
+    var isEmpty: Bool { profile == nil && add.isEmpty && update.isEmpty && remove.isEmpty }
 }
 
 /// 世界笔友的回信
@@ -53,14 +76,59 @@ struct PenPalLetterDraft: Sendable {
     let letter: String
     /// 译文（读信人的语言）；同语言时为空串
     let translation: String
-    /// 这次新记下的事 → 存成 `PenPalNote`
-    let remember: [String]
+    /// 手记怎么改（危险的那封服务端一条都不给）
+    let notebook: NotebookEdits
     /// 危险的那封：正面放译文
     let danger: Bool
     let postage: Int
     let generatedAt: Date
     /// 寄完之后邮票夹里还剩几张
     let balance: Int
+}
+
+/// 一期情绪小结要发给服务端的东西（`POST /mood-summary`，对齐后端 `MoodSummaryBody`，2026-10-27）。
+/// 🔴 **只有统计数字和情绪词** —— 不带日记正文、不带地名（地点按篇数排第几处：`place1`…）
+struct MoodSummaryRequest: Sendable, Encodable {
+    struct Group: Sendable, Encodable {
+        let key: String
+        let valence: Double
+        let count: Int
+    }
+    struct LabelCount: Sendable, Encodable {
+        let label: String
+        let count: Int
+    }
+    struct TrendPoint: Sendable, Encodable {
+        let start: Date
+        let valence: Double
+        let count: Int
+    }
+
+    let period: String
+    let periodStart: Date
+    let periodEnd: Date
+    /// App 的语言（小结用它写）
+    let language: String
+    let entryCount: Int
+    let averageValence: Double
+    /// 九档各几篇，从「跌入谷底」到「心花怒放」
+    let levels: [Int]
+    let labels: [LabelCount]
+    let weather: [Group]
+    let places: [Group]
+    let weekdays: [Group]
+    let dayParts: [Group]
+    let trend: [TrendPoint]
+    /// 上一期的平均愉悦度；上一期没记心情就是 nil
+    let previousAverage: Double?
+}
+
+/// 服务端写好的一期小结
+struct MoodSummaryDraft: Sendable {
+    let summary: String
+    let suggestions: [String]
+    /// 心情很沉：小结下面附求助方式
+    let heavy: Bool
 }
 
 protocol AIService {
@@ -75,6 +143,9 @@ protocol AIService {
 
     /// 寄给一位世界笔友，拿回他的回信（原文 + 译文 + 记下的事 + 危险标记）
     func generatePenPalLetter(_ context: PenPalLetterContext) async throws -> PenPalLetterDraft
+
+    /// 写一期情绪小结（会员）：只发统计数字和情绪词
+    func generateMoodSummary(_ request: MoodSummaryRequest) async throws -> MoodSummaryDraft
 
     /// 拉取服务端已经写好的信。
     ///
@@ -103,11 +174,13 @@ struct LetterContext: Sendable {
     let triggerKind: LetterTriggerKind
     /// 用户最近主导情绪（由调用方预聚合），可为 nil
     let dominantMood: String?
-    /// 当前用户给笔友起的名字（来自 `@AppStorage("penPalName")`，默认 "青鸟"）。
+    /// 当前用户给笔友起的名字（来自 `@AppStorage(PenPalName.storageKey)`，用户自己起的，没有默认名）。
     /// 会被快照到 `Letter.fromCharacter`，让历史信件保留写信当时的名字。
     let penPalName: String
     /// = `Letter.id`（2026-10-16 起）。**同一个 id 服务端只写一封、只扣一张邮票**
     var clientLetterID: UUID? = nil
+    /// 他给你记的手记（2026-10-27 起，`PenPalNotebook.snapshot(for: PenPalNote.ownID)`）。nil = 不带，服务端也就不改手记
+    var notebook: [PenPalNoteSnapshot]? = nil
 }
 
 /// 日记快照 —— 脱离 SwiftData @Model 的不可变值类型。
@@ -128,6 +201,8 @@ struct LetterDraft: Sendable {
     let body: String
     /// 写信当时的笔友名（直接 = `context.penPalName`，调用方落库时写入 `Letter.fromCharacter`）
     let fromCharacter: String
+    /// 手记怎么改；请求里没带手记就是 nil
+    var notebook: NotebookEdits? = nil
 }
 
 // MARK: - 错误
@@ -142,7 +217,7 @@ enum AIServiceError: LocalizedError {
     case network(HTTPError)
     /// 被服务端拦下（429）。2026-10-16 起来信节奏换成邮票，`reason` 是 `no_stamps`（带下一包几时到）；
     /// 老的 `weekly_pending` 等只在旧服务端出现。
-    /// `penPalName` 用于文案 —— 笔友的名字是用户自己起的，不能写死「青鸟」
+    /// `penPalName` 用于文案 —— 笔友的名字是用户自己起的，不能写死任何名字
     case rateLimit(reason: String?, retryAfter: TimeInterval?, penPalName: String, nextPackAt: Date? = nil)
     /// 内容审核拒绝
     case contentFiltered
@@ -197,7 +272,7 @@ enum AIServiceError: LocalizedError {
         case .contentFiltered:
             return NSLocalizedString("日记内容未通过审核，这次没能寄出", bundle: .appLanguage, comment: "寄信被内容审核拦下")
         case .memberRequired:
-            return NSLocalizedString("世界笔友是尺素会员的，这封信没能寄出", bundle: .appLanguage, comment: "寄给世界笔友被拦：不是会员")
+            return NSLocalizedString("给各地的笔友写信是尺素会员的，这封信没能寄出", bundle: .appLanguage, comment: "寄给世界笔友被拦：不是会员")
         case .penPalUnavailable:
             return NSLocalizedString("这位笔友还没准备好，这封信没能寄出", bundle: .appLanguage, comment: "寄给世界笔友被拦：服务端还没这位")
         }
@@ -235,6 +310,9 @@ struct PlaceholderAIService: AIService {
     func claimStamps() async throws -> StampWallet { throw AIServiceError.notImplemented }
     func fetchAvailablePenPals() async throws -> Set<String> { [] }
     func generatePenPalLetter(_ context: PenPalLetterContext) async throws -> PenPalLetterDraft {
+        throw AIServiceError.notImplemented
+    }
+    func generateMoodSummary(_ request: MoodSummaryRequest) async throws -> MoodSummaryDraft {
         throw AIServiceError.notImplemented
     }
 }

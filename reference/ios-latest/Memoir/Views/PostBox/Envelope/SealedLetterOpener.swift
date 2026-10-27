@@ -22,6 +22,8 @@ struct SealedLetterOpener: View {
     var onBroken: () -> Void = {}
     /// 信纸抽出来了，该摊开成信纸了
     var onFinished: () -> Void
+    /// 教第一次拆火漆（Sinara 的欢迎信）：下面那几句小字换成显眼的卡片样子，信封上叠手势示意（`GestureCue`）
+    var guiding = false
 
     @Environment(ThemeManager.self) private var themeManager
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -64,14 +66,26 @@ struct SealedLetterOpener: View {
                     hint(Text("捏住封舌掀开，或者轻点一下"), visible: stage == 1 && !playing && !hurried && grab == nil)
                     hint(Text("上滑或轻点，抽出信纸"), visible: stage == 2 && !playing && !hurried)
                 }
-                .font(theme.captionFont)
-                .foregroundStyle(theme.textTertiary)
+                .font(guiding ? theme.bodyFont : theme.captionFont)
+                .foregroundStyle(guiding ? theme.textPrimary : theme.textTertiary)
             }
             // 抽出来的信纸会冒出信封上沿，整体放在中间偏下，给它留出地方
             .padding(.top, 80)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(Rectangle())
             .gesture(gesture)
+            // 新手指引：手势示意叠在信封上（第一下点火漆 → 水波；第二、三下上滑 → 往上走的箭头）
+            .overlay {
+                if guiding, envelopeFrame.width > 1 {
+                    // 颜色按信封的深浅挑（极夜的信封几乎是黑的，墨色压上去看不见）
+                    let cue = GestureCue.contrasting(on: palette.envelope, dark: palette.ink, light: palette.paper)
+                    if stage == 0 && !playing {
+                        GestureCue(kind: .tap, envelope: envelopeFrame, color: cue)
+                    } else if (stage == 1 || stage == 2) && !playing && !hurried && grab == nil {
+                        GestureCue(kind: .swipeUp, envelope: envelopeFrame, color: cue)
+                    }
+                }
+            }
         }
         .coordinateSpace(.named(Self.space))
         .accessibilityElement(children: .ignore)
@@ -94,7 +108,16 @@ struct SealedLetterOpener: View {
     }
 
     private func hint(_ text: Text, visible: Bool) -> some View {
-        text
+        let theme = themeManager.current
+        return text
+            .padding(.horizontal, guiding ? 16 : 0)
+            .padding(.vertical, guiding ? 10 : 0)
+            .background {
+                if guiding {
+                    Capsule().fill(.ultraThinMaterial)
+                        .overlay(Capsule().stroke(theme.accent.opacity(0.55), lineWidth: 1))
+                }
+            }
             .opacity(visible ? 1 : 0)
             .animation(.easeOut(duration: 0.3), value: visible)
     }
@@ -248,5 +271,96 @@ struct SealedLetterOpener: View {
                 advance()
             }
         }
+    }
+}
+
+/// 新手指引里的手势示意（2026-10-27 用户定），拆欢迎信和把那叠信推进邮筒都用：
+/// 第一下（打碎火漆）在火漆上一圈一圈地泛水波 —— 点这里；第二、三下（掀封舌、抽信纸）一个向上的箭头
+/// 从信封下沿往上走一遍、淡掉，停一下再来一遍。用户不动就一直这样。不接点按，手势照常落在信封上
+struct GestureCue: View {
+    enum Kind { case tap, swipeUp }
+
+    /// 压在 `background` 上看得清的那个：底深用浅的，底浅用深的（2026-10-27：皮革、极夜下深色箭头几乎看不见）
+    static func contrasting(on background: Color, dark: Color, light: Color) -> Color {
+        isDark(background) ? light : dark
+    }
+
+    static func isDark(_ color: Color) -> Bool {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        UIColor(color).getRed(&r, green: &g, blue: &b, alpha: &a)
+        return 0.299 * r + 0.587 * g + 0.114 * b < 0.5
+    }
+
+    let kind: Kind
+    /// 要示意的那块（信封、那叠信）在这一层里的位置
+    let envelope: CGRect
+    let color: Color
+    /// 箭头往上走多远（占这一块高度的比例）。信封上走 75%；从那叠信走到投信口要走满
+    var travel: CGFloat = 0.75
+    /// 箭头多长（2026-10-27 用户：太小了，做长一点）。信封上 46，那叠信到投信口那一路 80
+    var arrowLength: CGFloat = 46
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        TimelineView(.animation(paused: reduceMotion)) { context in
+            let t = context.date.timeIntervalSinceReferenceDate
+            switch kind {
+            case .tap:
+                // 火漆在信封正中偏下一点（封舌的尖上）
+                let seal = CGPoint(x: envelope.midX, y: envelope.minY + envelope.height * 0.54)
+                ZStack {
+                    ForEach(0..<2, id: \.self) { i in
+                        let p = (t / 1.8 + Double(i) * 0.5).truncatingRemainder(dividingBy: 1)
+                        Circle()
+                            .stroke(color.opacity(0.5 * (1 - p)), lineWidth: 1.5)
+                            .frame(width: 44 + 64 * p, height: 44 + 64 * p)
+                    }
+                }
+                .position(seal)
+            case .swipeUp:
+                // 一轮 1.8 秒：前 1.3 秒从下往上走（淡入再淡出），后面停着不出现
+                let p = (t / 1.8).truncatingRemainder(dividingBy: 1)
+                let move = min(p / 0.72, 1)
+                // 箭尾从这一块的下沿起，整支箭往上走
+                let y = envelope.maxY - arrowLength / 2 - envelope.height * travel * move
+                let ink = color.opacity(p < 0.72 ? 0.75 * sin(move * .pi) : 0)
+                // 圆润一点（用户：太生硬）：箭杆从尾巴淡到头、像一道划过的痕；箭头两边是微弯的弧，尖上圆角收口
+                ZStack {
+                    ArrowShaft()
+                        .stroke(LinearGradient(colors: [ink.opacity(0), ink], startPoint: .bottom, endPoint: .top),
+                                style: StrokeStyle(lineWidth: 3.5, lineCap: .round))
+                    ArrowHead()
+                        .stroke(ink, style: StrokeStyle(lineWidth: 3.5, lineCap: .round, lineJoin: .round))
+                }
+                .frame(width: 28, height: arrowLength)
+                .position(x: envelope.midX, y: y)
+            }
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/// 长箭头的杆：从下沿到箭头尖下面一点（尖那里交给 `ArrowHead`，两段不叠在一起显得更细）
+private struct ArrowShaft: Shape {
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: r.midX, y: r.maxY))
+        p.addLine(to: CGPoint(x: r.midX, y: r.minY + 2))
+        return p
+    }
+}
+
+/// 长箭头的头：两边各一道往里微弯的弧收到尖上（不是两根直棍）
+private struct ArrowHead: Shape {
+    func path(in r: CGRect) -> Path {
+        var p = Path()
+        let w = min(r.width / 2, 12)
+        let h = w * 1.05
+        let tip = CGPoint(x: r.midX, y: r.minY)
+        p.move(to: CGPoint(x: r.midX - w, y: r.minY + h))
+        p.addQuadCurve(to: tip, control: CGPoint(x: r.midX - w * 0.3, y: r.minY + h * 0.25))
+        p.addQuadCurve(to: CGPoint(x: r.midX + w, y: r.minY + h), control: CGPoint(x: r.midX + w * 0.3, y: r.minY + h * 0.25))
+        return p
     }
 }

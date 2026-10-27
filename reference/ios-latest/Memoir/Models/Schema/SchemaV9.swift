@@ -22,9 +22,10 @@ enum SchemaV9: VersionedSchema {
     ///
     /// V10 删了 `JournalEntry`、`DraftEntry` 上的旧心情字段，删了整个 `MoodTag`；冻结 `JournalEntry` 就得连 `Letter` 一起冻结
     /// （两者之间有 `@Relationship`）。`MoodTag` 和 `DraftEntry` 的快照 V1～V8 也在用（它们原来都直接用活类型，字段和这里一样）。
-    /// 其余三个 model（`Tag`、`MediaAsset`、`PenPalNote`）在 V9 和 V10 之间没变，仍用活类型。
+    /// 其余两个 model（`Tag`、`MediaAsset`）在 V9 和 V10 之间没变，仍用活类型；
+    /// `PenPalNote` 指向 `SchemaV10` 的快照（V9、V10 字段一样，V11 加了字段后活类型就不是这个样子了）。
     static var models: [any PersistentModel.Type] {
-        [Self.JournalEntry.self, Tag.self, Self.MoodTag.self, Self.Letter.self, MediaAsset.self, Self.DraftEntry.self, PenPalNote.self]
+        [Self.JournalEntry.self, Tag.self, Self.MoodTag.self, Self.Letter.self, MediaAsset.self, Self.DraftEntry.self, SchemaV10.PenPalNote.self]
     }
 
     // MARK: - V9 当时的字段快照（冻结，不要跟着活类型改）

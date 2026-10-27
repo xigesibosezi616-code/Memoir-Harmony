@@ -40,6 +40,15 @@ class LanguageManager {
         Locale(identifier: appLanguage.isEmpty ? "en" : appLanguage)
     }
 
+    /// 当前语言的 `.lproj`。和 `Bundle.appLanguage` 是同一份，区别是这里读的是**被观察的** `appLanguage` ——
+    /// 在 body 里拿它查表，切语言时 body 会重算、拿到新的字符串。
+    ///
+    /// 给 `.navigationTitle` / `.searchable(prompt:)` 用：这两个交给 UIKit 的文字只在第一次出现时按 key 查一次，
+    /// App 里切语言后 key 没变，标题就一直停在旧语言（2026-10-27 模拟器复现：切到简体中文，设置页大标题还是「Settings」）
+    var bundle: Bundle {
+        Bundle.main.path(forResource: appLanguage, ofType: "lproj").flatMap(Bundle.init(path:)) ?? .main
+    }
+
     var isChineseLocale: Bool {
         currentLocale.language.languageCode?.identifier == "zh"
     }

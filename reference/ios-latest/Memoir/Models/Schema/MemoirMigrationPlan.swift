@@ -35,7 +35,8 @@ enum MemoirMigrationPlan: SchemaMigrationPlan {
     /// **影响**：真正的 V1 / V2 老 store（2026-06 App Store 准备之前的开发版，从未上架）
     /// 不再能被迁移。要恢复支持的话，得在 `SchemaV1` / `SchemaV2` 里内嵌**当时的** @Model 定义快照。
     static var schemas: [any VersionedSchema.Type] {
-        [SchemaV3.self, SchemaV4.self, SchemaV5.self, SchemaV6.self, SchemaV7.self, SchemaV8.self, SchemaV9.self, SchemaV10.self]
+        [SchemaV3.self, SchemaV4.self, SchemaV5.self, SchemaV6.self, SchemaV7.self, SchemaV8.self, SchemaV9.self, SchemaV10.self,
+         SchemaV11.self, SchemaV12.self]
     }
 
     static var stages: [MigrationStage] {
@@ -61,7 +62,12 @@ enum MemoirMigrationPlan: SchemaMigrationPlan {
             // V9 → V10：`JournalEntry` 加两个可选字段（心情的愉悦度、情绪词），删旧心情和印章表情；`DraftEntry` 删旧心情；
             // 删掉 `MoodTag` entity。SchemaV9 已把 `JournalEntry`、`Letter`、`DraftEntry`、`MoodTag` 冻结成快照。
             // 只加可选字段、删字段、删 entity → lightweight 安全（旧心情按用户决定直接清空）
-            .lightweight(fromVersion: SchemaV9.self, toVersion: SchemaV10.self)
+            .lightweight(fromVersion: SchemaV9.self, toVersion: SchemaV10.self),
+            // V10 → V11：`PenPalNote` 加 `kind`（默认 "recent"）和可选的 `updatedAt`（笔友手记）。
+            // SchemaV10 已把 `PenPalNote` 冻结成快照（SchemaV9 也指向它）。老的每一条都是大事 → lightweight 安全
+            .lightweight(fromVersion: SchemaV10.self, toVersion: SchemaV11.self),
+            // V11 → V12：新增 `MoodSummary` entity（情绪小结，会员）。已有的六个 model 没动 → lightweight 安全
+            .lightweight(fromVersion: SchemaV11.self, toVersion: SchemaV12.self)
         ]
     }
 }

@@ -17,7 +17,7 @@ struct SealedEnvelope: View, Animatable {
     let palette: LetterPalette
     /// 火漆上压的字；nil = 「素」
     let sealMark: String?
-    /// 信封背面下方的一行小字（「来自 青鸟」）
+    /// 信封背面下方的一行小字（「来自 阿远」）
     var sender: Text? = nil
     var progress: Double = 0
     /// 有没有火漆。免费用户寄出去的信封只是普通封口（投信时用）

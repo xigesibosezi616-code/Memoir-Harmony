@@ -535,15 +535,34 @@ nonisolated enum BackupImporter {
             summary.lettersImported += 1
         }
 
-        // 4. 「他记得的关于你的事」：按 id 去重，本机已有的不动
+        // 4. 笔友手记：按 id 去重，本机已有的不动（同一位的画像导进来有两份也不要紧：寄信只带新的那份，下次重写时并掉）
         let existingNotes = (try? context.fetch(FetchDescriptor<PenPalNote>())) ?? []
         var noteIDs = Set(existingNotes.map(\.id))
         for bn in decodePenPalNotes(in: package) where !noteIDs.contains(bn.id) && !bn.penPalID.isEmpty {
             let note = PenPalNote(penPalID: bn.penPalID, text: bn.text, notedAt: bn.notedAt)
             note.id = bn.id
             note.createdAt = bn.createdAt
+            note.kind = bn.kind ?? PenPalNote.Kind.recent.rawValue
+            note.updatedAt = bn.updatedAt
             context.insert(note)
             noteIDs.insert(bn.id)
+        }
+
+        // 5. 情绪小结：按 id 去重；本机已经有同一期的也不导（各自写过一份，留本机的）
+        let existingSummaries = (try? context.fetch(FetchDescriptor<MoodSummary>())) ?? []
+        var summaryIDs = Set(existingSummaries.map(\.id))
+        var summaryPeriods = existingSummaries
+        for bs in decodeMoodSummaries(in: package) where !summaryIDs.contains(bs.id) {
+            guard let period = MoodSummary.Period(rawValue: bs.period),
+                  !summaryPeriods.contains(where: { $0.periodKind == period && abs($0.periodStart.timeIntervalSince(bs.periodStart)) < 12 * 3600 })
+            else { continue }
+            let item = MoodSummary(period: period, periodStart: bs.periodStart, periodEnd: bs.periodEnd, text: bs.text,
+                                   suggestions: bs.suggestions, language: bs.language, entryCount: bs.entryCount, heavy: bs.heavy)
+            item.id = bs.id
+            item.createdAt = bs.createdAt
+            context.insert(item)
+            summaryIDs.insert(bs.id)
+            summaryPeriods.append(item)
         }
 
         do {
@@ -620,6 +639,15 @@ nonisolated enum BackupImporter {
     }
 
     /// 「他记得的事」：这一项坏了不影响信和日记（单独解，解不动就当没有）
+    /// 情绪小结坏了不影响日记的导入：单独解析，解不动就当没有
+    private static func decodeMoodSummaries(in package: Package) -> [BackupMoodSummary] {
+        struct SummariesOnly: Decodable { var moodSummaries: [Lenient<BackupMoodSummary>]? }
+        guard let data = try? Data(contentsOf: package.root.appendingPathComponent(BackupFormat.entriesFile)),
+              let file = try? BackupFormat.jsonDecoder.decode(SummariesOnly.self, from: data)
+        else { return [] }
+        return (file.moodSummaries ?? []).compactMap(\.value)
+    }
+
     private static func decodePenPalNotes(in package: Package) -> [BackupPenPalNote] {
         struct NotesOnly: Decodable { var penPalNotes: [Lenient<BackupPenPalNote>]? }
         guard let data = try? Data(contentsOf: package.root.appendingPathComponent(BackupFormat.lettersFile)),

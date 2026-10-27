@@ -31,13 +31,13 @@ struct LanguagePickerView: View {
                             }
                         }
                     }
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(themeManager.settingsCard)
                 }
             }
         }
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
-        .background(theme.background)
+        .background(themeManager.settingsPage)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {

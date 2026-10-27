@@ -20,7 +20,7 @@ struct OutgoingPile: View {
     let items: [OutgoingItem]
     /// 取消勾选的那几篇
     @Binding var excluded: Set<UUID>
-    /// 信纸抬头写着寄给谁（「青鸟、McRae」）
+    /// 信纸抬头写着寄给谁（「阿远、McRae」）
     let recipients: String
     var interactive: Bool = true
     /// 点抬头的「寄给」：打开世界笔友地图挑收件人
@@ -86,7 +86,7 @@ struct OutgoingPile: View {
             .shadow(color: .black.opacity(0.12), radius: 2, x: 0, y: 1)
     }
 
-    /// 抬头：「寄给 青鸟 ⊕」—— 像信封上写地址，点它去地图上挑收件人（2026-10-15 产品定）
+    /// 抬头：「寄给 阿远 ⊕」—— 像信封上写地址，点它去地图上挑收件人（2026-10-15 产品定）
     private var header: some View {
         HStack(spacing: 8) {
             if let onTapRecipients, interactive {

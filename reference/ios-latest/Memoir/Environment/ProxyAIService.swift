@@ -30,7 +30,7 @@ struct ProxyAIService: AIService {
             guard !resp.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 throw AIServiceError.generationFailed("来信内容为空")
             }
-            return LetterDraft(body: resp.body, fromCharacter: resp.fromCharacter)
+            return LetterDraft(body: resp.body, fromCharacter: resp.fromCharacter, notebook: resp.notebook?.edits)
         } catch let e as AIServiceError {
             throw e
         } catch {
@@ -84,8 +84,21 @@ struct ProxyAIService: AIService {
         guard !resp.letter.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw AIServiceError.generationFailed("来信内容为空")
         }
-        return PenPalLetterDraft(letter: resp.letter, translation: resp.translation, remember: resp.remember,
+        // 服务端还没换上手记时只给 `remember`：都当新记下的大事
+        let notebook = resp.notebook?.edits ?? NotebookEdits(add: resp.remember ?? [])
+        return PenPalLetterDraft(letter: resp.letter, translation: resp.translation, notebook: notebook,
                                  danger: resp.danger, postage: resp.postage, generatedAt: resp.generatedAt, balance: resp.balance)
+    }
+
+    /// 写一期情绪小结：`POST /mood-summary`（会员；只发统计数字和情绪词）
+    func generateMoodSummary(_ request: MoodSummaryRequest) async throws -> MoodSummaryDraft {
+        var http = try HTTPRequest.postJSON(baseURL.appending(path: "mood-summary"), body: request)
+        http.timeout = 60
+        let resp = try await sendAuthorized(http, as: MoodSummaryResponseDTO.self)
+        guard !resp.summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw AIServiceError.generationFailed("小结内容为空")
+        }
+        return MoodSummaryDraft(summary: resp.summary, suggestions: resp.suggestions, heavy: resp.heavy)
     }
 
     /// 带上登录态发出去，错误统一翻成 `AIServiceError`
@@ -153,9 +166,12 @@ private struct LetterRequestDTO: Encodable {
     let language: String
     /// 同一个 id 服务端只写一封、只扣一张邮票（2026-10-16）
     let clientLetterId: String?
+    /// 笔友手记；nil 时这个字段不发（服务端就不改手记）
+    let notebook: [NotebookItemDTO]?
 
     init(context: LetterContext) {
         clientLetterId = context.clientLetterID?.uuidString
+        notebook = context.notebook?.map { NotebookItemDTO($0) }
         entries = context.entries.map {
             Entry(title: $0.title, textContent: $0.textContent, date: $0.date, mood: $0.mood)
         }
@@ -195,17 +211,12 @@ private struct PenPalLetterRequestDTO: Encodable {
         let date: Date
         let mood: String?
     }
-    struct Note: Encodable {
-        let text: String
-        let date: Date
-    }
-
     let clientLetterId: String
     let penPalId: String
     let entries: [Entry]
     let dominantMood: String?
     let readerLanguage: String
-    let memory: [Note]
+    let notebook: [NotebookItemDTO]
 
     init(context: PenPalLetterContext) {
         clientLetterId = context.clientLetterID.uuidString
@@ -214,7 +225,44 @@ private struct PenPalLetterRequestDTO: Encodable {
         dominantMood = context.dominantMood
         // 译文用日记写的语言（认不出来用尺素的应用语言），同 `LetterRequestDTO`
         readerLanguage = LetterLanguage.forLetter(texts: context.entries.map { "\($0.title)\n\($0.textContent)" })
-        memory = context.memory.map { Note(text: $0.text, date: $0.notedAt) }
+        notebook = context.notebook.map { NotebookItemDTO($0) }
+    }
+}
+
+/// 手记里的一条，对齐后端 `NotebookItemBody`
+private struct NotebookItemDTO: Encodable {
+    let id: String
+    let kind: String
+    let text: String
+    let date: Date
+
+    init(_ note: PenPalNoteSnapshot) {
+        id = note.id.uuidString
+        kind = note.kind.rawValue
+        text = note.text
+        date = note.date
+    }
+}
+
+/// 手记怎么改，对齐后端 `NotebookEdits`。字段都按可选解：缺了就是不改，id 不是 UUID 的丢掉
+private struct NotebookEditsDTO: Decodable {
+    struct Rewrite: Decodable {
+        let id: String
+        let text: String
+    }
+
+    let profile: String?
+    let add: [String]?
+    let update: [Rewrite]?
+    let remove: [String]?
+
+    var edits: NotebookEdits {
+        NotebookEdits(
+            profile: profile.flatMap { $0.isEmpty ? nil : $0 },
+            add: add ?? [],
+            update: (update ?? []).compactMap { r in UUID(uuidString: r.id).map { NotebookEdits.Rewrite(id: $0, text: r.text) } },
+            remove: (remove ?? []).compactMap(UUID.init(uuidString:))
+        )
     }
 }
 
@@ -222,16 +270,26 @@ private struct PenPalLetterRequestDTO: Encodable {
 private struct PenPalLetterResponseDTO: Decodable {
     let letter: String
     let translation: String
-    let remember: [String]
+    /// 只认它的老服务端给的「新记下的事」
+    let remember: [String]?
+    let notebook: NotebookEditsDTO?
     let danger: Bool
     let postage: Int
     let generatedAt: Date
     let balance: Int
 }
 
+/// 对齐 `MoodSummaryResponse`
+private struct MoodSummaryResponseDTO: Decodable {
+    let summary: String
+    let suggestions: [String]
+    let heavy: Bool
+}
+
 private struct LetterResponseDTO: Decodable {
     let body: String
     let fromCharacter: String
+    let notebook: NotebookEditsDTO?
 }
 
 private struct LetterListDTO: Decodable {

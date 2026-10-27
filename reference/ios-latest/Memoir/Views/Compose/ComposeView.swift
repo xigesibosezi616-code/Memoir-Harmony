@@ -43,6 +43,10 @@ struct ComposeView: View {
     @State private var showLocationPicker = false
     /// 存好了，问此刻的心情（每篇新日记都要过这一页，点「完成」才回去）
     @State private var showMoodCheckIn = false
+    /// 新手指引 ⑥（`FirstStep.compose`）：先指相机，写了东西再指 ✓。两个按钮在哪（全局坐标）
+    @AppStorage(FirstStep.storageKey) private var firstStepRaw = 0
+    @State private var cameraFrame: CGRect = .zero
+    @State private var saveFrame: CGRect = .zero
     /// 刚存好的这篇：心情页点「完成」后把心情记到它身上
     @State private var savedEntry: JournalEntry?
 
@@ -158,6 +162,7 @@ struct ComposeView: View {
                             insertSource = .camera
                         }
                         .accessibilityLabel(Text("拍照"))
+                        .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { cameraFrame = $0 }
                         toolbarIcon("photo", enabled: canInsertPaperPhoto, theme: theme) {
                             insertSource = .library
                         }
@@ -187,8 +192,11 @@ struct ComposeView: View {
                     // 这一页的主行动是「写」，不是「完成」。能不能点由 disabled 表达
                     CircleIconButton(systemName: "checkmark", prominence: .glass, theme: theme, size: 14) {
                         save()
+                        // 新手指引：写好第一篇（跳着做的也认）→ ⑦ 去邮筒寄给笔友
+                        FirstStep.advance(to: .sendFirst, from: FirstStep.beforeSending)
                         showMoodCheckIn = true
                     }
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { saveFrame = $0 }
                     .disabled(!hasContent)
                     .animation(.easeOut(duration: 0.2), value: hasContent)
                 }
@@ -236,6 +244,18 @@ struct ComposeView: View {
                 }
             }
         }
+        // 新手指引 ⑥：没写东西时指相机，写了（或拍了）就指 ✓
+        .overlay {
+            if FirstStep(rawValue: firstStepRaw) == .compose, !showMoodCheckIn {
+                if !hasContent, cameraFrame != .zero {
+                    GuideHint(text: "写几句今天的事，\n也可以点这里拍一张照片", target: cameraFrame, below: false,
+                              theme: themeManager.current)
+                } else if hasContent, saveFrame != .zero {
+                    GuideHint(text: "写好了，点这里保存", target: saveFrame, below: true, theme: themeManager.current)
+                }
+            }
+        }
+        .animation(.easeOut(duration: 0.3), value: hasContent)
         // 返回确认。挂在 NavigationStack 外层，让遮罩连导航栏一起盖住
         .overlay {
             if showExitDialog {

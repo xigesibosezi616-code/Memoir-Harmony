@@ -47,12 +47,12 @@ struct SettingsDataView: View {
                         .font(theme.captionFont)
                         .foregroundStyle(syncMonitor.isProtected ? theme.accent : theme.destructive)
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
 
                 Text(syncStatusDetail)
                     .font(theme.labelFont)
                     .foregroundStyle(syncMonitor.isProtected ? theme.textTertiary : theme.destructive)
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(themeManager.settingsCard)
 
                 HStack {
                     SettingsRow(icon: "livephoto", title: "同步 Live Photo 视频", theme: theme)
@@ -61,12 +61,12 @@ struct SettingsDataView: View {
                         .labelsHidden()
                         .tint(theme.accent)
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
                 if !syncLivePhotoVideos {
                     Text("关闭后，Live Photo 在其他设备只显示静态图。")
                         .font(theme.labelFont)
                         .foregroundStyle(theme.textTertiary)
-                        .listRowBackground(theme.cardBackground)
+                        .listRowBackground(themeManager.settingsCard)
                 }
 
                 Button {
@@ -80,7 +80,7 @@ struct SettingsDataView: View {
                             .foregroundStyle(theme.textTertiary)
                     }
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
 
                 Button {
                     showBackupPicker = true
@@ -93,7 +93,7 @@ struct SettingsDataView: View {
                             .foregroundStyle(theme.textTertiary)
                     }
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
 
                 // 存储占用：照片 / 录音是磁盘上的独立文件，不在数据库里，
                 // 没有这一行的话用户完全不知道尺素占了多少、更没有入口清理
@@ -104,7 +104,7 @@ struct SettingsDataView: View {
                         .font(theme.captionFont)
                         .foregroundStyle(theme.textTertiary)
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
 
                 if let usage = mediaUsage, usage.orphanCount > 0 {
                     Button {
@@ -122,7 +122,7 @@ struct SettingsDataView: View {
                                 .foregroundStyle(theme.accent)
                         }
                     }
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(themeManager.settingsCard)
                 }
             } footer: {
                 VStack(alignment: .leading, spacing: 6) {

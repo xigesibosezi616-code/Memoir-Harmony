@@ -249,14 +249,14 @@ struct MockAuthService: AuthService {
             throw AuthError.server(code: "verify_code_invalid", message: "验证码错误", retryAfter: nil)
         }
         let json = """
-        {"token":"mock-token","user":{"id":1,"phone":"\(phone)","email":null,"displayName":null,"penPalName":"青鸟","bindings":[{"provider":"phone"}]}}
+        {"token":"mock-token","user":{"id":1,"phone":"\(phone)","email":null,"displayName":null,"penPalName":"阿远","bindings":[{"provider":"phone"}]}}
         """
         return try JSONDecoder.iso8601.decode(AuthResponse.self, from: Data(json.utf8))
     }
 
     func fetchMe(token: String) async throws -> MeResponse {
         let json = """
-        {"user":{"id":1,"phone":"13800138000","email":null,"displayName":null,"penPalName":"青鸟","bindings":[{"provider":"phone"}]},"subscription":{"isActive":false,"productId":null,"platform":null,"expiresAt":null}}
+        {"user":{"id":1,"phone":"13800138000","email":null,"displayName":null,"penPalName":"阿远","bindings":[{"provider":"phone"}]},"subscription":{"isActive":false,"productId":null,"platform":null,"expiresAt":null}}
         """
         return try JSONDecoder.iso8601.decode(MeResponse.self, from: Data(json.utf8))
     }
@@ -264,7 +264,7 @@ struct MockAuthService: AuthService {
     func loginWithApple(identityToken: String, displayName: String?) async throws -> AuthResponse {
         try await Task.sleep(for: .milliseconds(400))
         let json = """
-        {"token":"mock-token","user":{"id":2,"phone":null,"email":null,"displayName":"Mock 用户","penPalName":"青鸟","bindings":[{"provider":"apple"}]}}
+        {"token":"mock-token","user":{"id":2,"phone":null,"email":null,"displayName":"Mock 用户","penPalName":"阿远","bindings":[{"provider":"apple"}]}}
         """
         return try JSONDecoder.iso8601.decode(AuthResponse.self, from: Data(json.utf8))
     }
@@ -281,7 +281,7 @@ struct MockAuthService: AuthService {
         // 用尾号 9 的手机号模拟「该号已属于另一个账号 → 触发账号转移」这条分支
         let switched = phone.hasSuffix("9")
         let json = """
-        {"ok":true,"switchedAccount":\(switched),"token":"mock-token-switched","user":{"id":\(switched ? 1 : 2),"phone":"\(phone)","email":null,"displayName":\(switched ? "\"原账号昵称\"" : "null"),"penPalName":"青鸟","bindings":[{"provider":"phone"},{"provider":"apple"}]}}
+        {"ok":true,"switchedAccount":\(switched),"token":"mock-token-switched","user":{"id":\(switched ? 1 : 2),"phone":"\(phone)","email":null,"displayName":\(switched ? "\"原账号昵称\"" : "null"),"penPalName":"阿远","bindings":[{"provider":"phone"},{"provider":"apple"}]}}
         """
         return try JSONDecoder.iso8601.decode(BindPhoneResponse.self, from: Data(json.utf8))
     }
@@ -292,7 +292,7 @@ struct MockAuthService: AuthService {
             throw AuthError.server(code: "verify_code_invalid", message: "验证码错误", retryAfter: nil)
         }
         let json = """
-        {"user":{"id":1,"phone":"\(newPhone)","email":null,"displayName":null,"penPalName":"青鸟","bindings":[{"provider":"phone"}]}}
+        {"user":{"id":1,"phone":"\(newPhone)","email":null,"displayName":null,"penPalName":"阿远","bindings":[{"provider":"phone"}]}}
         """
         return try JSONDecoder.iso8601.decode(MeUserResponse.self, from: Data(json.utf8)).user
     }

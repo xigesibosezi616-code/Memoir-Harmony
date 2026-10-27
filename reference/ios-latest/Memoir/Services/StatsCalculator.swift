@@ -25,7 +25,7 @@ enum StatsRange: String, CaseIterable, Identifiable {
     /// 这个范围的起点；`nil` 表示不限（全部）。
     ///
     /// `now` 做成参数是为了能在测试里喂假日期跑穿多个区间，
-    /// 不用真等一周过去（`SplashVideoPool` 也是这个路子）。
+    /// 不用真等一周过去。
     func startDate(now: Date = .now, calendar: Calendar = .current) -> Date? {
         let today = calendar.startOfDay(for: now)
         switch self {

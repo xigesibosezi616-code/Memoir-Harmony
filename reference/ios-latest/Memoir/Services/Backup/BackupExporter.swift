@@ -79,6 +79,16 @@ enum BackupExporter {
     ) throws -> Result {
         guard !entries.isEmpty else { throw ExportError.nothingToExport }
 
+        // 情绪小结（2026-10-27）：从日记所在的同一个库里取，导出页不用另外传
+        let moodSummaries: [MoodSummary]
+        do {
+            moodSummaries = try entries.first?.modelContext?.fetch(FetchDescriptor<MoodSummary>()) ?? []
+        } catch {
+            let ns = error as NSError
+            NSLog("⚠️ [Backup] 读情绪小结失败，这次不带 domain=%@ code=%ld", ns.domain, ns.code)
+            moodSummaries = []
+        }
+
         let fm = FileManager.default
         // 用带 App 名的目录名，因为 NSFileCoordinator 生成的 zip 会以目录名命名
         let stageName = "尺素备份_\(Self.dateStamp())"
@@ -105,7 +115,13 @@ enum BackupExporter {
         // 2. JSON
         do {
             let entriesFile = BackupEntriesFile(
-                entries: entries.map { makeBackupEntry($0, includesMedia: options.includesMedia) }
+                entries: entries.map { makeBackupEntry($0, includesMedia: options.includesMedia) },
+                // 没有就不写这个字段，老格式的包长得和以前一样
+                moodSummaries: moodSummaries.isEmpty ? nil : moodSummaries.map {
+                    BackupMoodSummary(id: $0.id, period: $0.period, periodStart: $0.periodStart, periodEnd: $0.periodEnd,
+                                      text: $0.text, suggestions: $0.suggestionList, language: $0.language,
+                                      entryCount: $0.entryCount, heavy: $0.heavy, createdAt: $0.createdAt)
+                }
             )
             try BackupFormat.jsonEncoder.encode(entriesFile)
                 .write(to: stage.appendingPathComponent(BackupFormat.entriesFile))
@@ -114,7 +130,8 @@ enum BackupExporter {
                 letters: letters.map(makeBackupLetter),
                 // 没有就不写这个字段（而不是写一个空数组），老格式的包长得和以前一样
                 penPalNotes: penPalNotes.isEmpty ? nil : penPalNotes.map {
-                    BackupPenPalNote(id: $0.id, penPalID: $0.penPalID, text: $0.text, notedAt: $0.notedAt, createdAt: $0.createdAt)
+                    BackupPenPalNote(id: $0.id, penPalID: $0.penPalID, text: $0.text, notedAt: $0.notedAt, createdAt: $0.createdAt,
+                                     kind: $0.kind, updatedAt: $0.updatedAt)
                 }
             )
             try BackupFormat.jsonEncoder.encode(lettersFile)

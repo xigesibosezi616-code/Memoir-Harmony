@@ -26,7 +26,7 @@ struct SettingsLocationView: View {
                         .labelsHidden()
                         .tint(theme.accent)
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
 
                 if locationRecordingEnabled {
                     HStack {
@@ -40,12 +40,12 @@ struct SettingsLocationView: View {
                         .labelsHidden()
                         .tint(theme.textTertiary)
                     }
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(themeManager.settingsCard)
 
                     Text(currentLocationPrecision.detail)
                         .font(theme.labelFont)
                         .foregroundStyle(theme.textTertiary)
-                        .listRowBackground(theme.cardBackground)
+                        .listRowBackground(themeManager.settingsCard)
                 }
             } footer: {
                 Text("位置只记在这台设备的日记里，不会上传。修改只影响之后写的日记。")

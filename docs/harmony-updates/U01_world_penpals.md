@@ -13,6 +13,55 @@
 
 ---
 
+## 界面上的名字：今雨与雅故（2026-10-27 用户定）
+
+「世界笔友」只是文档和代码里的叫法，**界面上一律不出现**。这 15 位笔友（连同自己起名的那位）所在的那一页、付费页的那一条，名字叫「**今雨与雅故**」——
+取自杜甫《秋述》「旧，雨来；今，雨不来」（后世以「旧雨」「今雨」称老朋友、新朋友），「雅故」是故交：新友与故交。
+单说这 15 位的提示句里用白话「各地的笔友」，不用这个名字（自己起名的那位是免费的，整个名字套进「是会员的」那种句子意思不对）。
+
+各语言**不硬译典故**，取本语言里同样雅的「新朋友与老朋友」：
+
+| 中文 | 繁中 | English | 日本語 | 한국어 | Français | Español |
+|---|---|---|---|---|---|---|
+| 今雨与雅故 | 今雨與雅故 | New Friends & Old | 新しき友、古き友 | 새 벗과 오랜 벗 | Amis d’hier et d’aujourd’hui | Amigos nuevos y de siempre |
+
+- English 出自英语老歌 *Make new friends, but keep the old*；日语用文语形「〜き」，像书名；韩语用「오랜 벗」（老朋友），不用「옛 벗」（会读成「过去的朋友」）
+
+用到的地方（原来的文案作废）：
+
+| 位置 | 中文 | 原来 |
+|---|---|---|
+| 笔友地图页标题 | 今雨与雅故 | 世界笔友 |
+| 邮筒页左上角入口（读屏） | 笔友地图 | 世界笔友地图 |
+| 付费页会员权益第三条标题 | 今雨与雅故 | （原「挑一位合你心意的笔友」，见 U11 第 7 项） |
+| 非会员寄给这 15 位被退回 | 给各地的笔友写信是尺素会员的，这封信没能寄出 | 世界笔友是尺素会员的，这封信没能寄出 |
+| 地图页没给定位 | 定位没开，各地笔友的回信都按一两天算 | 定位没开，世界笔友的回信都按一两天算 |
+
+后两句的七种语言：
+
+| 中文 | 繁中 | English | 日本語 | 한국어 | Français | Español |
+|---|---|---|---|---|---|---|
+| 笔友地图 | 筆友地圖 | Pen pal map | ペンフレンドの地図 | 펜팔 지도 | Carte des correspondants | Mapa de amigos por carta |
+| 给各地的笔友写信是尺素会员的，这封信没能寄出 | 給各地的筆友寫信是尺素會員的，這封信沒能寄出 | Writing to pen pals around the world is for members, so this letter couldn't be sent | 各地のペンフレンドへの手紙は会員向けです。この手紙は送れませんでした | 각지의 펜팔에게 쓰는 편지는 회원 전용이라 이 편지를 보내지 못했어요 | Écrire aux correspondants du monde entier est réservé aux membres : cette lettre n'est pas partie | Escribir a amigos por carta de todo el mundo es para miembros: esta carta no se pudo enviar |
+| 定位没开，各地笔友的回信都按一两天算 | 定位沒開，各地筆友的回信都按一兩天算 | Location is off, so every reply counts as a day or two | 位置情報がオフなので、返事はどれも1〜2日で届きます | 위치가 꺼져 있어 답장은 모두 하루이틀로 계산돼요 | Localisation désactivée : chaque réponse met un ou deux jours | La ubicación está desactivada: cada respuesta tarda uno o dos días |
+
+## 2026-10-27 邮票：免费每周 3 张、一直攒；界面上直接讲邮票数
+
+用户定（取代本包第 5 条里的数字，服务端 `Backend/shared/src/stamps.ts` 已改、待部署）：
+
+- **免费每周 3 张**（原来 1 张）。免费用户寄不了这 15 位，3 张都寄给自己起名的那位 = 每周最多三封回信；会员仍是 20 张
+- **不清空、一直攒**：这周没用完的留着，下一包接着叠上去，会员、免费都一样（原来会员攒到 40 为止、免费不能攒）。服务端只留一个用不到的 999 当防呆，`GET /me/stamps` 的 `cap` 固定是 999
+- **每周领邮票的小卡片**：见 U11 第 4 项
+- **笔友地图右上角显示邮票夹余额**：一张小号的 m. 邮票（18pt 宽，和领邮票卡片上同一张）+ 余额数字（衬线、半粗），**不加任何字**（用户定：最简洁最直白）；没登录 / 没问到余额就不显示。读屏念「邮票夹里有 N 张邮票」
+- **自己起名的那位，名片上的邮票贴尺素的 m. 邮票**（原来是空白框里一个信封符号）；15 位世界笔友仍是地区码邮票
+- **付费页第一条直接讲邮票数**（原来「写一篇，回一篇 / 免费是每周一封……」）：
+
+| 中文 | 繁中 | English | 日本語 | 한국어 | Français | Español |
+|---|---|---|---|---|---|---|
+| 每周 20 张邮票 | 每週 20 張郵票 | 20 stamps every week | 毎週 20 枚の切手 | 매주 우표 20장 | 20 timbres par semaine | 20 sellos cada semana |
+| 一张邮票寄一封信，每封都有回信；免费每周 3 张，没用完的一直攒着 | 一張郵票寄一封信，每封都有回信；免費每週 3 張，沒用完的一直攢著 | One stamp sends one letter, and every letter gets a reply. Free: 3 a week. Unused stamps keep adding up. | 切手1枚で手紙が1通送れて、どれにも返事が届きます。無料は毎週3枚。使わなかった分はずっと貯まります。 | 우표 한 장으로 편지 한 통, 모든 편지에 답장이 와요. 무료는 매주 3장, 안 쓴 우표는 계속 모여요. | Un timbre, une lettre, et chaque lettre reçoit une réponse. Gratuit : 3 par semaine. Les timbres non utilisés s’accumulent. | Un sello, una carta, y cada carta tiene respuesta. Gratis: 3 por semana. Los sellos que no uses se van guardando. |
+| 邮票夹里有 %lld 张邮票（读屏） | 郵票夾裡有 %lld 張郵票 | Stamps in your wallet: %lld | 切手入れに %lld 枚 | 우표첩에 우표 %lld장 | Timbres en réserve : %lld | Sellos guardados: %lld |
+
 ## 已定的产品决策（2026-10-15）
 
 | # | 决策 | 取代 v1 |
@@ -21,14 +70,14 @@
 | 2 | 删掉默认笔友名「青鸟」：首次打开**必须**给自己的笔友起名，不能跳过；这一位免费、无住址 | R-APP-06 |
 | 3 | 会员 = 全部世界笔友；免费只有自己起名的那一位 | R-MEMBER-02 |
 | 4 | 同一批日记可以分别寄给几位，每位各自回信、各自到达 | R-POST-04、R-POST-07 |
-| 5 | **计次改为邮票制**：寄一位贴一张邮资票（南极贴 2 张）；每 7 天一包（会员 20 张、免费 1 张，邮票夹上限 40）；余额只认服务端；重发不重复扣、退信退票 | 服务端节奏（`02_BACKEND_API.md`）、R-POST-05/12 |
+| 5 | **计次改为邮票制**：寄一位贴一张邮资票（南极贴 2 张）；每 7 天一包（会员 20 张、免费 3 张，**不清空、一直攒**；2026-10-27 改，见「2026-10-27 邮票」一节）；余额只认服务端；重发不重复扣、退信退票 | 服务端节奏（`02_BACKEND_API.md`）、R-POST-05/12 |
 | 6 | 路程随距离：本机按定位算，位置不上传；世界笔友 3 天内到，南极 3–5 天 | R-POST-07 |
 | 7 | 回信用笔友母语写，信纸翻过来是用户日记的语言；母语相同时只有一份 | R-LETTERLANG |
 | 8 | 日记有危险信号时，正面直接显示用户的语言 | — |
 | 9 | 邮票 + 集邮册（单独一个版面）；**寄信用的邮资票**（会用掉）和**收藏的来信邮票**（永不用掉）分开；每周那一包是撕拉条快递封 + 小本票 | — |
 | 10 | 邮戳下沿的五角星换成 Sinara 标志（随附 `sinara_mark.svg`） | R-POST-10 |
 | 11 | 明示「虚构的 AI 笔友」；隐私协议改版、老用户重新同意 | R-APP-02 |
-| 12 | 「他记得的关于你的事」：每位笔友各一份，**只存本机 + iCloud**，寄给这一位时随请求带上，服务端用完即弃。每条是 `{text, date}`（`date` = 记下它的那封回信的写信时刻，ISO8601）；列表里显示日期，用户能删；危险的那封回信不新增 | — |
+| 12 | ~~「他记得的关于你的事」：每条 `{text, date}`，列表里显示、用户能删~~ → **2026-10-27 换成「笔友手记」**（画像 + 大事，自己起名的那位也有；**用户看不到、删不了**），见「笔友手记」一节 | — |
 | 13 | 地图用**系统标准地图**（鸿蒙：华为 Map Kit 的标准样式），四周晕进页面底色；只显示地名标签、不显示兴趣点 | — |
 | 14 | 邮筒页**两个入口打开同一张地图**：左上角「笔友」（右上角仍是「信箱」）；那叠日记信纸的抬头由「这次寄出的日记」换成「寄给 {收件人} ⊕」，点它也打开地图。地图页「好了」返回邮筒 | R-POST-01、R-POST-04 |
 | 15 | **地图跟着用户那里的白天黑夜**：太阳低于地平线 6° 算夜里（深色地图），否则浅色；不知道位置时按手机时区 18:00–6:00 算夜里。**三套主题一样**，与主题、系统深色模式无关。墨点 / 名字 / 航线颜色跟着地图换 | — |
@@ -74,20 +123,20 @@
 
 | 接口 | 变化 |
 |---|---|
-| `GET /me/stamps` 🆕 | → `{ balance, cap, nextPackAt, packReady, isMember }`。会员上限 40、免费 1；`nextPackAt` 是 ISO8601（带毫秒） |
+| `GET /me/stamps` 🆕 | → `{ balance, cap, nextPackAt, packReady, isMember }`。`cap` 2026-10-27 起固定 999（不清空、一直攒，只是防呆）；`nextPackAt` 是 ISO8601（带毫秒） |
 | `POST /me/stamps/claim` 🆕 | 领这一包 → 同上再加 `added`（这次加了几张；没到时候 / 邮票夹满了为 0）。撕快递封的动画做好之前，**进邮筒页发现 `packReady` 就悄悄领** |
 | `GET /penpals` 🆕 | → `{ available: ["mcrae", "amano", …] }`：服务端已经备好人设、现在能寄的世界笔友 |
-| `POST /penpal-letter` 🆕 | 请求 `{ clientLetterId, penPalId, entries, dominantMood?, readerLanguage, memory: [{ text, date }] }` → `{ id, clientLetterId, penPalId, letter, translation, remember, danger, postage, generatedAt, balance }`。超时给 90 秒 |
-| `POST /letter` | 请求多一个可选的 `clientLetterId`（= 本机信件 id，UUID 大写）；响应多 `clientLetterId`、`balance`。**扣一张邮票** |
+| `POST /penpal-letter` 🆕 | 请求 `{ clientLetterId, penPalId, entries, dominantMood?, readerLanguage, notebook: [NotebookItem] }` → `{ id, clientLetterId, penPalId, letter, translation, notebook: NotebookEdits, remember, danger, postage, generatedAt, balance }`。超时给 90 秒。`notebook` 见「笔友手记」；`remember` 只给老客户端（= `notebook.add`），**鸿蒙不要读它** |
+| `POST /letter` | 请求多一个可选的 `clientLetterId`（= 本机信件 id，UUID 大写）和 `notebook: [NotebookItem]`（2026-10-27）；响应多 `clientLetterId`、`balance`，请求带了 `notebook` 时多 `notebook: NotebookEdits`。**扣一张邮票** |
 | `GET /letters` | 每封多 `penPalId`、`translation`、`danger`、`clientLetterId`（老信为 null / false） |
 | `GET /me/rhythm` | 🗄 只给老版本客户端用（按邮票折算），新客户端不再调 |
 
 **错误**
 - 429 `rate_limited`，`reason = "no_stamps"`，附 `nextPackAt`、`balance` → 「邮票用完了，新的一包{相对时间}送到」
-- 403 `forbidden`，`reason = "member_required"` → 「世界笔友是尺素会员的，这封信没能寄出」（退回）
+- 403 `forbidden`，`reason = "member_required"` → 「给各地的笔友写信是尺素会员的，这封信没能寄出」（退回；2026-10-27 改，见「界面上的名字」）
 - 404 `not_found`，`reason = "unknown_pen_pal"` → 「这位笔友还没准备好，这封信没能寄出」（退回）
 
-🔴 **`clientLetterId` 的语义（两端必须一致）**：同一个 id 再请求一次，服务端**原样返回已经写好的那封、不再写、不再扣票**（`remember` 为空）。
+🔴 **`clientLetterId` 的语义（两端必须一致）**：同一个 id 再请求一次，服务端**原样返回已经写好的那封、不再写、不再扣票**（`notebook` 三个数组都是空的、没有 `profile`）。
 所以重发、补寄都安全；**补领时也按它对上是哪一封**（`GET /letters` 里 `clientLetterId` 等于本机某封「写信中」的信的 id，就是它的回信），不再按时间猜 —— 时间猜只留给没有 id 的老信。
 
 ## 数据模型变化（对照 v1 `05_DATA_MODEL.md`）
@@ -101,15 +150,27 @@
 | `danger` | bool? | 危险的那封：**正面放译文**，原文在背面 |
 | `postage` | int? | 贴了几张邮票 |
 
-**新增 PenPalNote**（「他记得的关于你的事」，只在本机 + 用户自己的云）：`id`（UUID）、`penPalID`、`text`、`notedAt`（记下它的那封回信的写信时刻）、`createdAt`。
-寄给某位世界笔友时，带上这一位最近 20 条（按 `notedAt`，旧的在前）；回信里的 `remember` 每条存一行，`notedAt` = 回信的 `generatedAt`。
+**新增 PenPalNote**（笔友手记里的一条，只在本机 + 用户自己的云）：
+
+| 字段 | 类型 | 含义 |
+|---|---|---|
+| `id` | UUID | |
+| `penPalID` | string | 世界笔友的 id；**自己起名的那位是 `"own"`**（名册里的 id 都是小写英文名，不会撞） |
+| `text` | string | |
+| `notedAt` | date | 记下它的那封回信的写信时刻 |
+| `createdAt` | date | |
+| `kind` | string，默认 `"recent"` | `"profile"` = 画像、`"recent"` = 大事（2026-10-27 加；之前记下的都是大事） |
+| `updatedAt` | date? | 笔友改写过这一条的时刻（2026-10-27 加；没改过是空） |
+
+怎么读、怎么改见「笔友手记」一节。iOS 是 SwiftData 第 11 版（V10 → V11 轻量迁移，老的每一条 `kind` 都是 `"recent"`）。
 
 ## 备份包变化（对照 v1 `modules/08_backup_package.md`）
 
 **不升 `formatVersion`**，全是可选字段（读取方缺了就当没有）：
 - `letters.json` 每封信多 `penPalID`、`translatedBody`、`danger`、`postage`
-- `letters.json` 顶层多一个 `penPalNotes: [{ id, penPalID, text, notedAt, createdAt }]`，**按 `id` 去重合并**；没有笔记时不写这个字段
-- 「他记得的事」坏了不影响信和日记的导入（单独解析，解不动就当没有）
+- `letters.json` 顶层多一个 `penPalNotes: [{ id, penPalID, text, notedAt, createdAt, kind?, updatedAt? }]`，**按 `id` 去重合并**（本机已有同一个 id 的不动）；没有手记时不写这个字段。
+  `kind`、`updatedAt` 是 2026-10-27 加的：缺 `kind` 当 `"recent"`，不认识的值原样存着；同一位的画像导进来有两份也照收（寄信只带新的那份，下次重写时并掉）
+- 手记坏了不影响信和日记的导入（单独解析，解不动就当没有）
 
 ## 寄信规则（取代 R-POST-05、R-POST-07、R-POST-12）
 
@@ -118,8 +179,8 @@
 3. 点邮筒：**每位收件人落一封** `Letter`（`status=generating`、正文空、同一组日记、`generatedAt`=此刻、`stationery`=此刻会员身份、`toName`=此刻昵称）：
    - 自己起名的那位：`fromCharacter`=此刻笔友名，`deliveredAt`=此刻 + [2h, 6h] 均匀随机，`postage`=1
    - 世界笔友：`penPalID`=id，`fromCharacter`=此刻 App 语言下的姓，`deliveredAt`=此刻 + 距离分档内均匀随机，`postage`=邮资
-4. 寄信队列：有 `penPalID` 的走 `POST /penpal-letter`（带 `memory`），没有的走 `POST /letter`；**都带 `clientLetterId` = 这封信的 id**。
-   写好了：原文进 `body`、译文进 `translatedBody`、`danger`、`postage`；`remember` 存成 PenPalNote
+4. 寄信队列：有 `penPalID` 的走 `POST /penpal-letter`，没有的走 `POST /letter`；**都带 `clientLetterId` = 这封信的 id，都带这一位的 `notebook`**（R-NOTEBOOK-03）。
+   写好了：原文进 `body`、译文进 `translatedBody`、`danger`、`postage`；再照回执里的 `notebook` 改手记（R-NOTEBOOK-04），和信一起存
 5. 退回：`member_required`、`unknown_pen_pal`、`no_stamps`（补领一次仍没有）→ 退回邮筒页并写明原因；断网、超时不算失败，照常重试
 6. 测试期（服务端 `LETTER_RHYTHM_OFF=1`，v1 Q14）：不扣邮票，**人人按会员算** —— 世界笔友不查会员、邮票夹每周按会员 20 张（对应 iOS 的假开通会员）。
    鸿蒙测试时没买会员也能寄世界笔友是**预期**，不是 bug；上架前服务端关掉这个开关
@@ -156,6 +217,52 @@
      英语 →「拨打 988」（小字：美国 · 988 自杀与危机生命线）；
      **每种语言**都有「查找你所在地区的求助热线」（小字 findahelpline.com，打开 `https://findahelpline.com`）
    - 点一下直接拨号（`tel:`）或打开网页。不写许诺（「一定有人接」「会好起来」），不加别的号码；补各地热线前先问产品
+
+## 笔友手记（2026-10-27，iOS 已实现；后端已写好、尚未部署）
+
+**为什么**（用户原话）：「让用户觉得这个笔友是真的他的一个长期的笔友，而不是感觉像一个 AI，今天发生的事情或者前几周发生的事情过一段时间就忘了。当然我们也只记重要的事情和一些节点。」
+取代上面决策 12 原来的「他记得的关于你的事」（一串小纸条、只带最近 20 条、用户能看能删）；也取代 U11 第三节里那一行的「做完写进 U01」。
+
+**R-NOTEBOOK-01 每位笔友一本**：自己起名的那位（`penPalID = "own"`）和每位世界笔友各一本，**各记各的** —— 寄给谁就只带谁的那本，只寄给 3 位的事，另外 12 位永远不知道。
+一本手记两样东西：
+- **画像**（`kind = "profile"`）：这个人是谁 —— 身边的人、工作或学业、住在哪、在意什么、反复出现的心事。**一位笔友一份完整的文本**（一行 PenPalNote），最长约 600 字，需要时整份重写
+- **大事**（`kind = "recent"`）：生活里重要的事和节点（面试、搬家、考试、旅行、生日、分手、家人生病、换工作……），每件带日期；寄信时带最近的 30 件
+
+**R-NOTEBOOK-02 存哪、给谁看**：**只存在本机 + 用户自己的云**（鸿蒙：和日记同一个云同步），**从不存在我们的服务器上** —— 寄信时随请求带去，服务端用完即弃。
+🔴 **用户在 App 里看不到、也删不了**（2026-10-24 产品定，U11 第 3 条）：不做任何查看 / 编辑 / 删除手记的界面。跟着备份包导出、导入（见「备份包变化」）。
+
+**R-NOTEBOOK-03 寄信时带上哪些**（两个接口一样，字段名都是 `notebook`）：
+- 画像：这一位的 `kind = "profile"` 里**最后改过的那一份**（按 `updatedAt ?? notedAt` 取最新；两台设备同步前各起了一份时会有两份）
+- 大事：这一位的 `kind = "recent"`，按 `updatedAt ?? notedAt` 从旧到新排，取**最后 30 件**；更早的留在本机、不带、不删
+- 画像在前、大事在后；没有手记就带空数组 `[]`（**不要不带这个字段**：不带 = 老客户端，服务端就不改手记）
+- 每一条 `NotebookItem = { id, kind, text, date }`：`id` 是 UUID 字符串（大写），`date` = `updatedAt ?? notedAt`（ISO8601）
+
+**R-NOTEBOOK-04 回信到了怎么改**：回执里的 `notebook` 是这一本怎么改（`NotebookEdits`），服务端把改法换好了，鸿蒙照着做就行：
+
+```json
+{ "profile": "（整份新的画像；没有这个字段 = 画像不动）",
+  "add": ["新记下的大事"],
+  "update": [{ "id": "<大事的 id>", "text": "改写后的这件事" }],
+  "remove": ["<大事的 id>"] }
+```
+
+- `profile` 有：这一位已经有画像 → 改最新那份的 `text`、`updatedAt` = 改的时刻，**其余几份画像删掉**；还没有 → 新建一条 `kind = "profile"`，`notedAt` = 改的时刻
+- `remove`：只删**这一位的大事**里 id 对得上的；画像、别的笔友的，id 对上了也不动
+- `update`：同样只认这一位的大事；改 `text`、`updatedAt` = 改的时刻；同一件又在 `remove` 里的以删为准
+- `add`：每条新建一条大事，`notedAt` = 改的时刻
+- 「改的时刻」：世界笔友 = 回执的 `generatedAt`；自己起名的那位 = 收到回执的此刻（`/letter` 的回执不带 `generatedAt`）
+- 改完和这封信**一起存**（同一次写库）；改不动（读不出这一本等）不影响收信
+- id 不是 UUID 的、文字为空的，跳过
+
+**R-NOTEBOOK-05 服务端怎么定改法**（鸿蒙**不用做**，两端共用同一个后端；写在这里是为了知道会发生什么）：每封信写的同时，另外问一次模型「这一本怎么改」，和写信同时发、互不影响 ——
+只记重要的事；画像只在知道了长久的事时才整份重写；大事过去了改写成结果（「面试过了，拿到 offer」）、不再要紧的拿掉、超过 24 件时合并旧的；
+不写相对时间（「下周五」写成日期）；**危险的那封、筛出危机信号的，一条都不记**（回执里是空的改法）；改手记失败了这次就不改，信照样到。
+写信的提示词里两种笔友都读这本手记，像老朋友那样自然地提起一两件。实现：`Backend/shared/src/notebook.ts`。
+
+**R-NOTEBOOK-06 同一封重复请求**：`clientLetterId` 重复时服务端原样给回那封信，`notebook` 是空的改法（改法只在第一次给）—— 照常走 R-NOTEBOOK-04，等于不改。
+
+**鸿蒙要做的**：PenPalNote 加 `kind`、`updatedAt` 两个字段（老数据 `kind = "recent"`）；两个寄信接口都带 `notebook`、按回执改手记（R-NOTEBOOK-03、04）；备份包读写这两个字段。**不做任何界面**。
+没有新的用户可见文案。
 
 ## 以下各节待 iOS 实现后补全
 

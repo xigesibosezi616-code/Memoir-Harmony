@@ -42,7 +42,7 @@ struct SettingsAccountView: View {
                                 .foregroundStyle(theme.textTertiary)
                         }
                     }
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(themeManager.settingsCard)
 
                     // 手机号 —— **账号的主锚点，必需项**。
                     // Apple 只是可选的便捷登录方式：换设备时若只有 Apple 而没有手机号，
@@ -62,12 +62,12 @@ struct SettingsAccountView: View {
                                     .foregroundStyle(theme.textTertiary)
                             }
                         }
-                        .listRowBackground(theme.cardBackground)
+                        .listRowBackground(themeManager.settingsCard)
 
                         Text("手机号是账号的唯一凭据。不绑定的话，换手机或 Apple ID 不可用时将无法找回账号。")
                             .font(theme.labelFont)
                             .foregroundStyle(theme.destructive)
-                            .listRowBackground(theme.cardBackground)
+                            .listRowBackground(themeManager.settingsCard)
                     } else {
                         Button {
                             showChangePhone = true
@@ -83,7 +83,7 @@ struct SettingsAccountView: View {
                                     .foregroundStyle(theme.textTertiary)
                             }
                         }
-                        .listRowBackground(theme.cardBackground)
+                        .listRowBackground(themeManager.settingsCard)
                     }
 
                     // Apple ID 绑定状态
@@ -95,7 +95,7 @@ struct SettingsAccountView: View {
                                 .font(theme.captionFont)
                                 .foregroundStyle(theme.textTertiary)
                         }
-                        .listRowBackground(theme.cardBackground)
+                        .listRowBackground(themeManager.settingsCard)
                     } else {
                         Button {
                             showBindApple = true
@@ -108,7 +108,7 @@ struct SettingsAccountView: View {
                                     .foregroundStyle(theme.textTertiary)
                             }
                         }
-                        .listRowBackground(theme.cardBackground)
+                        .listRowBackground(themeManager.settingsCard)
                     }
                 }
 
@@ -118,7 +118,7 @@ struct SettingsAccountView: View {
                     } label: {
                         SettingsRow(icon: "rectangle.portrait.and.arrow.right", title: "退出登录", theme: theme)
                     }
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(themeManager.settingsCard)
                 }
 
                 // 注销账号（上架清单 A9：Apple 要求 App 内必须能注销）。单独一组、放在最下面，
@@ -137,7 +137,7 @@ struct SettingsAccountView: View {
                                 .foregroundStyle(theme.destructive)
                         }
                     }
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(themeManager.settingsCard)
                 } footer: {
                     Text("注销只删除我们服务器上的账号和来信记录，你的日记不受影响。")
                         .font(theme.labelFont)

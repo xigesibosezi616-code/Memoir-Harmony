@@ -30,7 +30,7 @@ struct ThemePickerView: View {
             .padding(.horizontal, 20)
             .padding(.top, 16)
         }
-        .background(theme.background)
+        .background(themeManager.settingsPage)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -105,7 +105,7 @@ struct ThemePickerView: View {
                 }
             }
             .padding(16)
-            .background(theme.cardBackground)
+            .background(themeManager.settingsCard)
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)

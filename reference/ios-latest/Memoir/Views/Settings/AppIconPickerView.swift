@@ -34,7 +34,7 @@ struct AppIconPickerView: View {
             .padding(.horizontal, 20)
             .padding(.top, 16)
         }
-        .background(theme.background)
+        .background(themeManager.settingsPage)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -77,7 +77,7 @@ struct AppIconPickerView: View {
                 }
             }
             .padding(12)
-            .background(theme.cardBackground, in: RoundedRectangle(cornerRadius: 14))
+            .background(themeManager.settingsCard, in: RoundedRectangle(cornerRadius: 14))
         }
         .buttonStyle(.plain)
     }
@@ -107,7 +107,7 @@ struct AppIconPickerView: View {
                 }
             }
             .padding(12)
-            .background(theme.cardBackground, in: RoundedRectangle(cornerRadius: 14))
+            .background(themeManager.settingsCard, in: RoundedRectangle(cornerRadius: 14))
         }
         .buttonStyle(.plain)
     }
@@ -122,6 +122,8 @@ struct AppIconPickerView: View {
                 .scaledToFill()
                 .frame(width: 56, height: 56)
                 .clipShape(RoundedRectangle(cornerRadius: 13))
+                // 素笺图标的底和卡片同色，不描一圈就看不出图标的边
+                .overlay(RoundedRectangle(cornerRadius: 13).strokeBorder(theme.border, lineWidth: 0.5))
         } else {
             RoundedRectangle(cornerRadius: 13)
                 .strokeBorder(theme.textTertiary.opacity(0.4), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))

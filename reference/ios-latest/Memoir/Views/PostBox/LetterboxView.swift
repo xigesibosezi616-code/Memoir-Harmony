@@ -26,8 +26,12 @@ struct LetterboxView: View {
     @State private var now = Date.now
     @AppStorage("letterboxGrouping") private var groupingRaw = LetterboxGrouping.all.rawValue
     /// 自己起名的那位笔友现在叫什么（这一组的组名）
-    @AppStorage("penPalName") private var penPalName: String = "青鸟"
+    @AppStorage(PenPalName.storageKey) private var penPalName: String = ""
     @State private var expansion = GroupExpansion()
+    /// 新手指引 ⑧：指着第一封回信那一行（全局坐标）
+    @AppStorage(FirstStep.storageKey) private var firstStepRaw = 0
+    @AppStorage(FirstStep.replyIDKey) private var firstReplyID = ""
+    @State private var replyRowFrame: CGRect = .zero
     @Namespace private var pickerNamespace
 
     private var grouping: LetterboxGrouping { LetterboxGrouping(rawValue: groupingRaw) ?? .all }
@@ -99,6 +103,11 @@ struct LetterboxView: View {
                 now = .now
             }
         }
+        .overlay {
+            if FirstStep(rawValue: firstStepRaw) == .replyArrived, replyRowFrame != .zero {
+                GuideHint(text: "点开这封回信", target: replyRowFrame, below: true, theme: theme)
+            }
+        }
     }
 
     // MARK: - 一列信
@@ -125,6 +134,9 @@ struct LetterboxView: View {
                     .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { frame in
+                if letter.id.uuidString == firstReplyID { replyRowFrame = frame }
+            }
         }
     }
 
@@ -174,7 +186,7 @@ struct LetterboxView: View {
             return Dictionary(grouping: arrived) { $0.penPalID ?? Self.ownPenPal }
                 .map { key, list in
                     let name = key == Self.ownPenPal
-                        ? penPalName
+                        ? PenPalName.display(penPalName)
                         : PenPalRoster.penPal(id: key)?.surname.resolved(for: appLocale) ?? list[0].fromCharacter
                     return LetterGroup(id: "penPal:\(key)", title: name, initial: String(name.first ?? "青"),
                                        letters: list, now: now)

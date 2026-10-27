@@ -34,7 +34,7 @@ struct SettingsJournalView: View {
                             .foregroundStyle(theme.textTertiary)
                     }
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
 
                 // 封条提醒天数（10 / 14 / 21 / 30 天，默认 14）
                 HStack {
@@ -50,7 +50,7 @@ struct SettingsJournalView: View {
                     .labelsHidden()
                     .tint(theme.textTertiary)
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
             }
         }
     }

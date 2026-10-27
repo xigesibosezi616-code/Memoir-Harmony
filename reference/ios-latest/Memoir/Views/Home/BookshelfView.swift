@@ -179,6 +179,11 @@ struct CreateTagSheet: View {
     @State private var edit = CoverEdit(color: .pineGreen)   // 默认墨绿
     @Environment(StoreKitManager.self) private var store
     @State private var showPaywall = false
+    /// 新手指引 ②（`FirstStep.createNotebook`）：没起名时指名字，起好了指「创建」
+    @Environment(ThemeManager.self) private var themeManager
+    @AppStorage(FirstStep.storageKey) private var firstStepRaw = 0
+    @State private var nameFrame: CGRect = .zero
+    @State private var createFrame: CGRect = .zero
 
     private var isNameTaken: Bool {
         Tag.isNameTaken(name, in: existingNames)
@@ -200,6 +205,7 @@ struct CreateTagSheet: View {
                         TextField("日记本名称", text: $name)
                             .textFieldStyle(.roundedBorder)
                             .autocorrectionDisabled()
+                            .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { nameFrame = $0 }
                         // 当场说明为什么「创建」是灰的
                         if isNameTaken {
                             Text("已有同名的日记本")
@@ -233,9 +239,20 @@ struct CreateTagSheet: View {
                         }
                     }
                     .disabled(!canCreate)
+                    .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { createFrame = $0 }
                 }
             }
         }
+        .overlay {
+            if FirstStep(rawValue: firstStepRaw) == .createNotebook {
+                if !canCreate, nameFrame != .zero {
+                    GuideHint(text: "给你的日记本起个名字", target: nameFrame, below: true, theme: themeManager.current)
+                } else if canCreate, createFrame != .zero {
+                    GuideHint(text: "挑一个喜欢的封面，\n好了点这里", target: createFrame, below: true, theme: themeManager.current)
+                }
+            }
+        }
+        .animation(.easeOut(duration: 0.25), value: canCreate)
         .paywallCover(isPresented: $showPaywall)
     }
 }

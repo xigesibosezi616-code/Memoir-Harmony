@@ -27,6 +27,7 @@ struct LetterDetailView: View {
     @State private var paperWidth: CGFloat = 0
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.locale) private var locale
+    @AppStorage(FirstStep.replyIDKey) private var firstReplyID = ""
 
     init(letter: Letter) {
         self.letter = letter
@@ -62,6 +63,12 @@ struct LetterDetailView: View {
         .onAppear {
             // 火漆信要等拆开才算读过
             if !sealed { markAsRead() }
+            // 新手指引 ⑨：打开了第一封回信
+            if isFirstReply { FirstStep.advance(to: .readReply, from: [.sent, .waitReply, .replyArrived]) }
+        }
+        // 新手指引 ⑩：读完第一封回信退出来 → 结束语
+        .onDisappear {
+            if isFirstReply { FirstStep.advance(to: .finale, from: [.readReply]) }
         }
         .paywallCover(isPresented: $showPaywall)
     }
@@ -119,7 +126,10 @@ struct LetterDetailView: View {
             onBroken: { markAsRead() },
             onFinished: {
                 withAnimation(.easeInOut(duration: LetterOpeningFeel.unfoldDuration)) { sealed = false }
-            }
+            },
+            // 欢迎信（没人引导，用户自己来拆）：拆信组件自己的三句小字（拆火漆 → 掀封舌 → 抽信纸）换成显眼的样子，
+            // 叠上手势示意，帮第一次拆火漆的人学会。只在还封着时出现（拆过的不会再进这里）
+            guiding: letter.isWelcome
         )
     }
 
@@ -132,7 +142,8 @@ struct LetterDetailView: View {
                     salutation: salutation,
                     content: letter.body
                 )
-                if !store.isMember {
+                // 欢迎信自己就讲了火漆是会员的，不再挂一行开通会员
+                if !store.isMember && !letter.isWelcome {
                     memberHint(theme: theme)
                         .padding(.top, 28)
                 }
@@ -145,8 +156,11 @@ struct LetterDetailView: View {
 
     // MARK: - 世界笔友的信
 
-    /// 世界笔友写来的（自己起名的那一位 `penPalID` 是 nil）
-    private var isWorldLetter: Bool { letter.penPalID != nil }
+    /// 新手指引在等的那封「第一封回信」
+    private var isFirstReply: Bool { !firstReplyID.isEmpty && letter.id.uuidString == firstReplyID }
+
+    /// 世界笔友写来的（自己起名的那一位 `penPalID` 是 nil；Sinara 的欢迎信是 "sinara"，也不算）
+    private var isWorldLetter: Bool { letter.penPalID != nil && !letter.isWelcome }
 
     /// 有没有译文。他的母语和你的语言相同（如西安的吴写给写中文的你）就只有原文一面
     private var hasTranslation: Bool { !(letter.translatedBody ?? "").isEmpty }

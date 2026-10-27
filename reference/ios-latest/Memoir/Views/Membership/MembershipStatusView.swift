@@ -40,7 +40,7 @@ struct MembershipStatusView: View {
                         .font(theme.captionFont)
                         .foregroundStyle(theme.textTertiary)
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
 
                 if let expiresAt = store.expiresAt {
                     HStack {
@@ -52,7 +52,7 @@ struct MembershipStatusView: View {
                             .font(theme.captionFont)
                             .foregroundStyle(theme.textTertiary)
                     }
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(themeManager.settingsCard)
                 }
             }
 
@@ -62,7 +62,7 @@ struct MembershipStatusView: View {
                         .font(theme.bodyFont)
                         .foregroundStyle(theme.textPrimary)
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
 
                 Button {
                     Task { await restore() }
@@ -76,7 +76,7 @@ struct MembershipStatusView: View {
                     }
                 }
                 .disabled(restoring)
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
             } footer: {
                 VStack(alignment: .leading, spacing: 6) {
                     if let restoreMessage {
@@ -102,7 +102,7 @@ struct MembershipStatusView: View {
                             .font(theme.bodyFont)
                             .foregroundStyle(theme.destructive)
                     }
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(themeManager.settingsCard)
                 } footer: {
                     Text("测试期间开通不收费，关掉后回到免费版。")
                         .font(theme.labelFont)

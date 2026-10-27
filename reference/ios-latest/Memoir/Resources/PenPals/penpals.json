@@ -229,13 +229,13 @@
         "es": "Xi'an"
       },
       "card": {
-        "zh-Hans": "大三学生，也在创业。白天上课，晚上写代码，周末骑城墙。",
-        "zh-Hant": "大三學生，也在創業。白天上課，晚上寫程式，週末騎城牆。",
-        "en": "A third-year student who is also building a startup. Classes by day, code by night, cycling the city wall at weekends.",
-        "ja": "大学三年生で、起業もしている。昼は授業、夜はコード、週末は城壁の上をサイクリング。",
-        "ko": "대학교 3학년이자 창업 중. 낮엔 수업, 밤엔 코딩, 주말엔 성벽 위를 자전거로 달린다.",
-        "fr": "Étudiant en troisième année qui lance aussi sa start-up. Cours le jour, code la nuit, vélo sur les remparts le week-end.",
-        "es": "Estudiante de tercer año que también monta su empresa. Clases de día, código de noche y bici por la muralla los fines de semana."
+        "zh-Hans": "在读的大学生，正在创业。白天上课，晚上写代码，周末骑城墙。",
+        "zh-Hant": "在讀的大學生，正在創業。白天上課，晚上寫程式，週末騎城牆。",
+        "en": "A university student building his own startup. Classes by day, code by night, cycling the city wall at weekends.",
+        "ja": "大学に通いながら起業している。昼は授業、夜はコード、週末は城壁の上をサイクリング。",
+        "ko": "대학에 다니며 창업 중. 낮엔 수업, 밤엔 코딩, 주말엔 성벽 위를 자전거로 달린다.",
+        "fr": "Étudiant à l'université, en train de lancer sa start-up. Cours le jour, code la nuit, vélo sur les remparts le week-end.",
+        "es": "Universitario que está montando su propia empresa. Clases de día, código de noche y bici por la muralla los fines de semana."
       }
     },
     {

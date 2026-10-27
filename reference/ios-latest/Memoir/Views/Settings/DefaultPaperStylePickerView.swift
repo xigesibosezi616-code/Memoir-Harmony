@@ -32,7 +32,7 @@ struct DefaultPaperStylePickerView: View {
                             }
                         }
                     }
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(themeManager.settingsCard)
                 }
             } header: {
                 Text("默认样式")
@@ -47,7 +47,7 @@ struct DefaultPaperStylePickerView: View {
         .paywallCover(isPresented: $showPaywall)
         .listStyle(.insetGrouped)
         .scrollContentBackground(.hidden)
-        .background(theme.background)
+        .background(themeManager.settingsPage)
         .tint(theme.accent)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {

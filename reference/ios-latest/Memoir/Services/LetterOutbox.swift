@@ -208,7 +208,7 @@ enum LetterOutbox {
         let levels = entries.compactMap(\.moodLevel)
         let dominantMood = Dictionary(grouping: levels, by: { $0 }).mapValues(\.count)
             .max(by: { $0.value < $1.value })?.key.englishName
-        // 世界笔友走另一个接口（原文 + 译文 + 记下的事），见 `sendToWorldPenPal`
+        // 世界笔友走另一个接口（原文 + 译文 + 手记），见 `sendToWorldPenPal`
         if let penPalID = letter.penPalID {
             await sendToWorldPenPal(letter, penPalID: penPalID, entries: entries, dominantMood: dominantMood,
                                     context: context, ai: ai, session: session, isMember: isMember, errors: errors)
@@ -222,7 +222,8 @@ enum LetterOutbox {
             // 投信那一刻的笔友名，落库时就写在 fromCharacter 里了
             penPalName: letter.fromCharacter,
             // 同一封信服务端只写一次、只扣一张邮票：重发、补寄都不会多扣
-            clientLetterID: letter.id
+            clientLetterID: letter.id,
+            notebook: PenPalNotebook.snapshot(for: PenPalNote.ownID, context: context)
         )
 
         update(id) { $0.attempts += 1 }
@@ -239,6 +240,9 @@ enum LetterOutbox {
             letter.status = LetterStatus.pending.rawValue
             letter.errorMessage = nil
             letter.updatedAt = .now
+            if let edits = draft.notebook {
+                PenPalNotebook.apply(edits, for: PenPalNote.ownID, at: .now, context: context)
+            }
             do {
                 try context.save()
             } catch {
@@ -256,8 +260,8 @@ enum LetterOutbox {
         }
     }
 
-    /// 寄给一位世界笔友：带上「他记得的关于你的事」，回信写好了把原文、译文、危险标记、邮资填进这封信，
-    /// 新记下的事存成 `PenPalNote`（危险的那封服务端一条都不给）
+    /// 寄给一位世界笔友：带上他给你记的手记，回信写好了把原文、译文、危险标记、邮资填进这封信，
+    /// 再照回执改手记（危险的那封服务端一条都不给）
     private static func sendToWorldPenPal(_ letter: Letter, penPalID: String, entries: [JournalEntry], dominantMood: String?,
                                           context: ModelContext, ai: AIService, session: UserSession,
                                           isMember: Bool, errors: ErrorPresenter) async {
@@ -267,7 +271,7 @@ enum LetterOutbox {
             penPalID: penPalID,
             entries: entries.map(\.snapshot),
             dominantMood: dominantMood,
-            memory: notes(for: penPalID, context: context)
+            notebook: PenPalNotebook.snapshot(for: penPalID, context: context)
         )
         update(id) { $0.attempts += 1 }
         let background = UIApplication.shared.beginBackgroundTask(withName: "penpal-letter-send")
@@ -283,9 +287,7 @@ enum LetterOutbox {
             letter.status = LetterStatus.pending.rawValue
             letter.errorMessage = nil
             letter.updatedAt = .now
-            for text in draft.remember {
-                context.insert(PenPalNote(penPalID: penPalID, text: text, notedAt: draft.generatedAt))
-            }
+            PenPalNotebook.apply(draft.notebook, for: penPalID, at: draft.generatedAt, context: context)
             do {
                 try context.save()
             } catch {
@@ -301,22 +303,6 @@ enum LetterOutbox {
             NSLog("⚠️ [LetterOutbox] 寄给世界笔友失败 %@ id=%@ domain=%@ code=%ld %@",
                   penPalID, id.uuidString, ns.domain, ns.code, "\(error)")
             await handle(error, letter: letter, context: context, ai: ai, session: session, isMember: isMember, errors: errors)
-        }
-    }
-
-    /// 本机存的「他记得的关于你的事」（这一位的），最近 20 条，旧的在前
-    private static func notes(for penPalID: String, context: ModelContext) -> [PenPalNoteSnapshot] {
-        var descriptor = FetchDescriptor<PenPalNote>(
-            predicate: #Predicate { $0.penPalID == penPalID },
-            sortBy: [SortDescriptor(\.notedAt, order: .reverse)]
-        )
-        descriptor.fetchLimit = PenPalNote.sendLimit
-        do {
-            return try context.fetch(descriptor).reversed().map { PenPalNoteSnapshot(text: $0.text, notedAt: $0.notedAt) }
-        } catch {
-            let ns = error as NSError
-            NSLog("⚠️ [LetterOutbox] 读「记得的事」失败 domain=%@ code=%ld %@", ns.domain, ns.code, "\(error)")
-            return []
         }
     }
 

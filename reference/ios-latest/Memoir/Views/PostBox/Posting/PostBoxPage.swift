@@ -46,6 +46,8 @@ struct PostBoxPage<Bottom: View>: View {
     let onPoke: () -> Void
     /// 寄：投信动画从时间轴的哪一刻接着放（推着寄的是推到的那一刻；读屏点邮筒是 0）
     let onPost: (Double) -> Void
+    /// 投信口在屏幕上的位置（全局坐标）：新手指引「往上推进邮筒」的箭头要一路指到这里
+    var onSlotFrame: (CGRect) -> Void = { _ in }
     @ViewBuilder let bottom: Bottom
 
     @Environment(ThemeManager.self) private var themeManager
@@ -123,6 +125,14 @@ struct PostBoxPage<Bottom: View>: View {
                 flight(liftPreview, t: Self.scrubTime(lift.progress), from: frame,
                        pivot: lift.flapPivot ?? flapSide(of: frame.midX))
             }
+        }
+        .overlay {
+            // 先量再摆：量在 `.position` 后面的话，量到的是整块区域而不是投信口
+            Color.clear
+                .frame(width: max(slotFrame.width, 1), height: max(slotFrame.height, 1))
+                .onGeometryChange(for: CGRect.self) { $0.frame(in: .global) } action: { onSlotFrame($0) }
+                .position(x: slotFrame.midX, y: slotFrame.midY)
+                .allowsHitTesting(false)
         }
         .onChange(of: posting == nil) { _, done in if done { flightStart = nil } }
         .onAppear { liftFeel.prepare() }

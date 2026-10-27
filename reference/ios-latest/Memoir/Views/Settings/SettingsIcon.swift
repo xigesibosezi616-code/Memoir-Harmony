@@ -16,7 +16,8 @@ enum SettingsIcon: String, CaseIterable, Identifiable {
     case language     // 语言：地球
     case data         // 数据与备份：云
     case stats        // 写作统计：三根柱
-    case rate         // 去 App Store 评分：五角星
+    case rate         // 去 App Store 评分：App Store 的「A」（2026-10-24 由五角星换成，用户定）
+    case feedback     // 反馈与建议：一支斜放的笔（2026-10-27）
     case about        // 关于：i
 
     var id: String { rawValue }
@@ -26,9 +27,12 @@ struct SettingsIconView: View {
     let icon: SettingsIcon
     var size: CGFloat = 22
     var color: Color = .primary
+    /// 线条再粗多少倍：一级页图标缩进小方框里（22 → 20），乘 1.1 保持原来的线粗
+    var weight: CGFloat = 1
 
-    /// 线宽跟着尺寸缩放，否则图标变小时线会显得越来越粗
-    private var lineWidth: CGFloat { size / 24 * 1.7 }
+    /// 线宽跟着尺寸缩放，否则图标变小时线会显得越来越粗。
+    /// App Store 的「A」只有三根直线、没有别的笔画撑着，同样粗细显得单薄 —— 单独加粗（用户定）
+    private var lineWidth: CGFloat { size / 24 * (icon == .rate ? 2.3 : 1.7) * weight }
 
     var body: some View {
         ZStack {
@@ -128,15 +132,22 @@ private struct SettingsIconStroke: Shape {
             p.move(to: g(r, 17, 19)); p.addLine(to: g(r, 17, 11))
 
         case .rate:
-            // 五角星：外圈 / 内圈各 5 个点交替连线。圆角由 lineJoin(.round) 负责
-            let c = g(r, 12, 12.8)
-            for i in 0..<10 {
-                let radius = gs(r, i.isMultiple(of: 2) ? 9.4 : 4.0)
-                let angle = (-90 + Double(i) * 36) * .pi / 180
-                let pt = CGPoint(x: c.x + radius * cos(angle), y: c.y + radius * sin(angle))
-                if i == 0 { p.move(to: pt) } else { p.addLine(to: pt) }
-            }
+            // App Store 的「A」：两根斜杆在顶上交叉，一根横杆横过下部、两头伸出腿外。
+            // 照 App Store 的图形画成和其他图标一样的线条（同线宽、圆头），不用它的实心标
+            p.move(to: g(r, 13.6, 3.4)); p.addLine(to: g(r, 4.4, 19.6))
+            p.move(to: g(r, 10.4, 3.4)); p.addLine(to: g(r, 19.6, 19.6))
+            p.move(to: g(r, 3.2, 15.4)); p.addLine(to: g(r, 20.8, 15.4))
+
+        case .feedback:
+            // 一支斜放的笔，笔尖朝左下：笔杆两条平行边 + 顶端，笔尖收成一点；靠笔尖一道削口，靠顶端一道笔箍
+            p.move(to: g(r, 4.5, 19.5))
+            p.addLine(to: g(r, 5.6, 15.4))
+            p.addLine(to: g(r, 15.6, 5.4))
+            p.addLine(to: g(r, 18.6, 8.4))
+            p.addLine(to: g(r, 8.6, 18.4))
             p.closeSubpath()
+            p.move(to: g(r, 5.6, 15.4)); p.addLine(to: g(r, 8.6, 18.4))
+            p.move(to: g(r, 13.6, 7.4)); p.addLine(to: g(r, 16.6, 10.4))
 
         case .about:
             p.addEllipse(in: gRect(r, 3, 3, 18, 18))

@@ -15,9 +15,25 @@ import SwiftData
 enum SchemaV10: VersionedSchema {
     static var versionIdentifier = Schema.Version(10, 0, 0)
 
-    /// V10 是当前最新版，用**活类型**。
-    /// 等将来出 V11 时，要回来把有变化的 model 冻结成快照（同 `SchemaV9` 的写法）。
+    /// ⚠️ **`PenPalNote` 用的是下面内嵌的快照，不是活类型**（2026-10-27 出 V11 时冻结：V11 给它加了 `kind`、`updatedAt`）。
+    /// 其余五个 model 在 V10 和 V11 之间没变，仍用活类型。
     static var models: [any PersistentModel.Type] {
-        [JournalEntry.self, Tag.self, Letter.self, MediaAsset.self, DraftEntry.self, PenPalNote.self]
+        [JournalEntry.self, Tag.self, Letter.self, MediaAsset.self, DraftEntry.self, Self.PenPalNote.self]
+    }
+
+    // MARK: - V10 当时的字段快照（冻结，不要跟着活类型改）
+    //
+    // 只用于迁移时描述"V10 长什么样"，运行时不会被实例化。字段必须和 V10 时的活类型**一个不差**。
+
+    /// 「他记得的关于你的事」的一条（V9 新增，V9、V10 字段一样，`SchemaV9` 也指向这份快照）
+    @Model
+    final class PenPalNote {
+        var id: UUID = UUID()
+        var penPalID: String = ""
+        var text: String = ""
+        var notedAt: Date = Date()
+        var createdAt: Date = Date()
+
+        init() {}
     }
 }

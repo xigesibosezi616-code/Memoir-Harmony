@@ -16,6 +16,10 @@ import SwiftUI
 /// 2. **「语言」不套二级页**，直接进选择页 —— 它本来就只有一件事可做，
 ///    多一层跳转纯属折磨（尤其对那些正因为语言不对而来找它的用户）。
 /// 3. **「写作统计」是内容页不是设置项**，所以单列一行、不塞进「日记」分组里。
+///
+/// 2026-10-26 照苹果「设置」的样子重排：大标题；账户卡（手写 m. 头像 + 名字 + 一行说明，没绑手机号时卡里多一行红点提醒）；
+/// 每行前面是原来的线条图标、套一个细线方框（不填色，用户定）；页面底比卡片深一点，分组看得出来（`SettingsPalette`）；
+/// 最后一组「关注我们」。二级、三级页同样用这组页面底 / 卡片色（`ThemeManager.settingsPage` / `settingsCard`），写作统计是内容页除外
 struct SettingsView: View {
     @Environment(ThemeManager.self) private var themeManager
     @Environment(LanguageManager.self) private var languageManager
@@ -62,7 +66,7 @@ struct SettingsView: View {
                                 .foregroundStyle(theme.textTertiary)
                         }
                     }
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(card)
                 }
 
                 Section {
@@ -72,12 +76,15 @@ struct SettingsView: View {
 
                 Section {
                     rateRow(theme: theme)
+                    actionRow(.feedback, "反馈与建议", theme: theme, action: writeToUs)
                     entry(.about, "关于", theme: theme) { SettingsAboutView() }
                 }
+
+                OfficialAccountsSection(theme: theme, themeID: themeID)
             }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
-            .background(theme.background)
+            .background(SettingsPalette.page(themeID))
             .tint(theme.accent)
             .sheet(isPresented: $showLogin) {
                 LoginView()
@@ -98,15 +105,9 @@ struct SettingsView: View {
                     // 其他失败（离线等）静默：本地快照继续可用
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("设置")
-                        .font(theme.labelFont)
-                        .tracking(theme.letterSpacingWide)
-                        .foregroundStyle(theme.textSecondary)
-                }
-            }
+            // 不写 `.navigationTitle("设置")`：那样 App 里切语言后大标题不跟着变（见 `LanguageManager.bundle`）
+            .navigationTitle(NSLocalizedString("设置", bundle: languageManager.bundle, comment: "设置页大标题"))
+            .navigationBarTitleDisplayMode(.large)
             // 快捷操作直达：跳过「外观」这一层，返回一次就回到设置首页
             .navigationDestination(isPresented: $openAppIconPicker) {
                 AppIconPickerView()
@@ -116,65 +117,84 @@ struct SettingsView: View {
 
     // MARK: - 账户卡
 
+    /// 苹果设置最上面那张卡的样子：头像 + 名字 + 一行说明；没绑手机号时卡里多一行带红点的提醒
     @ViewBuilder
     private func accountSection(theme: any AppTheme) -> some View {
-        Section {
-            if env.session.isLoggedIn, let user = env.session.user {
+        if env.session.isLoggedIn, let user = env.session.user {
+            Section {
                 NavigationLink {
                     SettingsAccountView()
                 } label: {
-                    HStack(spacing: 14) {
-                        Image(systemName: "person.crop.circle")
-                            .font(.system(size: 34, weight: .light))
-                            .foregroundStyle(theme.textSecondary)
-                        VStack(alignment: .leading, spacing: 3) {
-                            // 有昵称就以昵称为准 —— 一串脱敏手机号当账号名，用户看不出「这是我」
-                            Text(user.displayName?.isEmpty == false
-                                 ? user.displayName!
-                                 : (user.maskedPhone
-                                    ?? NSLocalizedString("已登录", bundle: .appLanguage, comment: "账号行兜底标题")))
-                                .font(theme.bodyFont)
-                                .foregroundStyle(theme.textPrimary)
-                            if user.displayName?.isEmpty == false, let phone = user.maskedPhone {
-                                Text(phone)
-                                    .font(theme.captionFont)
-                                    .foregroundStyle(theme.textTertiary)
-                            }
-                        }
-                        Spacer()
-                    }
-                    .padding(.vertical, 6)
+                    accountLabel(theme: theme,
+                                 // 有昵称就以昵称为准 —— 一串脱敏手机号当账号名，用户看不出「这是我」
+                                 title: Text(verbatim: user.displayName?.isEmpty == false
+                                             ? user.displayName!
+                                             : (user.maskedPhone
+                                                ?? NSLocalizedString("已登录", bundle: .appLanguage, comment: "账号行兜底标题"))),
+                                 subtitle: Text("账号、手机号与登录方式"))
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(card)
 
-                // 🔴 **未绑手机号的警告必须留在一级页**（见类型注释第 1 条）
+                // 🔴 **未绑手机号的警告必须留在一级页**（见类型注释第 1 条）：卡里一行红点提醒，下面的小字说清楚为什么
+                if user.phone == nil {
+                    NavigationLink {
+                        SettingsAccountView()
+                    } label: {
+                        HStack {
+                            Text("还没有绑定手机号")
+                                .font(.body)
+                                .foregroundStyle(theme.textPrimary)
+                            Spacer()
+                            Text(verbatim: "1")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 22, height: 22)
+                                .background(Circle().fill(theme.destructive))
+                        }
+                    }
+                    .listRowBackground(card)
+                }
+            } footer: {
                 if user.phone == nil {
                     Text("未绑定手机号。手机号是账号的唯一凭据，不绑定的话，换手机或 Apple ID 不可用时将无法找回账号。")
-                        .font(theme.labelFont)
                         .foregroundStyle(theme.destructive)
-                        .listRowBackground(theme.cardBackground)
                 }
-            } else {
+            }
+        } else {
+            Section {
                 Button {
                     showLogin = true
                 } label: {
-                    HStack(spacing: 14) {
-                        Image(systemName: "person.crop.circle")
-                            .font(.system(size: 34, weight: .light))
-                            .foregroundStyle(theme.textSecondary)
-                        Text("登录 / 注册")
-                            .font(theme.bodyFont)
-                            .foregroundStyle(theme.textPrimary)
+                    HStack {
+                        accountLabel(theme: theme, title: Text("登录 / 注册"), subtitle: Text("登录后才能收到笔友的回信"))
                         Spacer()
                         Image(systemName: "chevron.right")
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundStyle(theme.textTertiary)
                     }
-                    .padding(.vertical, 6)
+                    .contentShape(Rectangle())
                 }
-                .listRowBackground(theme.cardBackground)
+                .buttonStyle(.plain)
+                .listRowBackground(card)
             }
         }
+    }
+
+    private func accountLabel(theme: any AppTheme, title: Text, subtitle: Text) -> some View {
+        HStack(spacing: 14) {
+            MarkAvatar(size: 60, themeID: themeID)
+            VStack(alignment: .leading, spacing: 3) {
+                title
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(theme.textPrimary)
+                    .lineLimit(1)
+                subtitle
+                    .font(.subheadline)
+                    .foregroundStyle(theme.textSecondary)
+                    .lineLimit(1)
+            }
+        }
+        .padding(.vertical, 4)
     }
 
     // MARK: - 尺素会员
@@ -196,7 +216,7 @@ struct SettingsView: View {
                         }
                     }
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(card)
             } else {
                 Button { showPaywall = true } label: {
                     membershipLabel(theme: theme) {
@@ -212,22 +232,22 @@ struct SettingsView: View {
                     .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(card)
             }
         }
     }
 
     private func membershipLabel<Trailing: View>(theme: any AppTheme, @ViewBuilder trailing: () -> Trailing) -> some View {
-        HStack(spacing: 12) {
-            WaxSeal(size: 24, mark: WaxSeal.initial(of: env.session.user?.displayName))
-                .frame(width: 26)
+        HStack(spacing: 14) {
+            // 火漆印本身就是这一行的图标，不另放小方块；和下面各行的小方块一样宽，字才对得齐
+            WaxSeal(size: 26, mark: WaxSeal.initial(of: env.session.user?.displayName))
+                .frame(width: SettingsTile<EmptyView>.size)
             Text("尺素会员")
-                .font(theme.bodyFont)
+                .font(.body)
                 .foregroundStyle(theme.textPrimary)
             Spacer()
             trailing()
         }
-        .padding(.vertical, 2)
     }
 
     // MARK: - 分组入口
@@ -243,7 +263,7 @@ struct SettingsView: View {
         } label: {
             groupLabel(icon, title, theme: theme)
         }
-        .listRowBackground(theme.cardBackground)
+        .listRowBackground(card)
     }
 
     /// 去 App Store 评分。是个动作不是页面，所以右侧是「外跳」箭头而不是 `>`。
@@ -260,9 +280,29 @@ struct SettingsView: View {
     }
 
     private func rateButton(theme: any AppTheme, action: @escaping () -> Void) -> some View {
+        actionRow(.rate, "给我们评分", theme: theme, action: action)
+    }
+
+    /// 反馈与建议（2026-10-27）：打开手机自己的邮件 App 写到 connect@（`FeedbackMail`）。
+    /// 没有能接 mailto 的邮件 App 就把地址复制下来，提示一句 —— 不让用户点了没反应
+    private func writeToUs() {
+        guard let url = FeedbackMail.url else { return }
+        openURL(url) { accepted in
+            guard !accepted else { return }
+            UIPasteboard.general.string = FeedbackMail.address
+            env.errors.present(String(format: NSLocalizedString("邮箱地址已复制：%@", bundle: .appLanguage,
+                                                                comment: "反馈与建议：手机上没有邮件 App 时"),
+                                      FeedbackMail.address),
+                               kind: .success)
+        }
+    }
+
+    /// 点了是个动作、不是进页面的一行：右侧是「外跳」箭头而不是 `>`（评分、反馈与建议）
+    private func actionRow(_ icon: SettingsIcon, _ title: LocalizedStringKey, theme: any AppTheme,
+                           action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack {
-                groupLabel(.rate, "给我们评分", theme: theme)
+                groupLabel(icon, title, theme: theme)
                 Spacer()
                 Image(systemName: "arrow.up.right")
                     .font(.system(size: 13, weight: .semibold))
@@ -271,19 +311,23 @@ struct SettingsView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .listRowBackground(theme.cardBackground)
+        .listRowBackground(card)
     }
 
     private func groupLabel(_ icon: SettingsIcon, _ title: LocalizedStringKey, theme: any AppTheme) -> some View {
-        HStack(spacing: 12) {
-            SettingsIconView(icon: icon, size: 22, color: theme.textSecondary)
-                .frame(width: 26)
+        HStack(spacing: 14) {
+            SettingsTile(theme: theme) {
+                SettingsIconView(icon: icon, size: 20, color: theme.textSecondary, weight: 1.1)
+            }
             Text(title)
-                .font(theme.bodyFont)
+                .font(.body)
                 .foregroundStyle(theme.textPrimary)
         }
-        .padding(.vertical, 2)
     }
+
+    private var themeID: String { themeManager.currentThemeID }
+    /// 一级页的卡片底色（和页面底分得开，见 `SettingsPalette`）
+    private var card: Color { SettingsPalette.card(themeID) }
 
     private var currentLanguageDisplay: String {
         // 没有「跟随系统」这一档 —— 首启就已按系统语言定下一个具体语言

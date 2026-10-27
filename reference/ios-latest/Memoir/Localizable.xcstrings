@@ -522,6 +522,53 @@
         }
       }
     },
+    "%@的回信到了，\n点开「信箱」看看" : {
+      "comment" : "新手指引：第一封回信到了，邮筒页指「信箱」，%@ 是写信人",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@'s reply is here —\nopen your “Letterbox”"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya llegó la respuesta de %@:\nabre tu «Correo»"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La réponse de %@ est arrivée :\nouvrez votre « Courrier »"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@から返事が届きました。\n「郵便受け」を開いてみましょう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@의 답장이 왔어요.\n‘우편함’을 열어 보세요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@的回信到了，\n点开「信箱」看看"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@的回信到了，\n點開「信箱」看看"
+          }
+        }
+      }
+    },
     "%@的回信到了，去信箱看看吧" : {
       "comment" : "回信到达通知正文，%@ 是笔友名",
       "localizations" : {
@@ -847,6 +894,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld 篇"
+          }
+        }
+      }
+    },
+    "%lld 篇日记" : {
+      "comment" : "搜索结果列表的小标题：搜到几篇（避开单复数：外语写成「日记：N」）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entries: %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entradas: %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pages : %lld"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 件の日記"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일기 %lld편"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 篇日记"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 篇日記"
           }
         }
       }
@@ -2263,6 +2357,53 @@
         }
       }
     },
+    "一张邮票寄一封信，每封都有回信；免费每周 3 张，没用完的一直攒着" : {
+      "comment" : "付费页会员权益第一条说明（免费每周 3 张，见 FREE_PACK；邮票不清空）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One stamp sends one letter, and every letter gets a reply. Free: 3 a week. Unused stamps keep adding up."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un sello, una carta, y cada carta tiene respuesta. Gratis: 3 por semana. Los sellos que no uses se van guardando."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un timbre, une lettre, et chaque lettre reçoit une réponse. Gratuit : 3 par semaine. Les timbres non utilisés s’accumulent."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切手1枚で手紙が1通送れて、どれにも返事が届きます。無料は毎週3枚。使わなかった分はずっと貯まります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "우표 한 장으로 편지 한 통, 모든 편지에 답장이 와요. 무료는 매주 3장, 안 쓴 우표는 계속 모여요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一张邮票寄一封信，每封都有回信；免费每周 3 张，没用完的一直攒着"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一張郵票寄一封信，每封都有回信；免費每週 3 張，沒用完的一直攢著"
+          }
+        }
+      }
+    },
     "一支笔，一页纸，就是一个世界" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2819,6 +2960,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "下一步"
+          }
+        }
+      }
+    },
+    "下午" : {
+      "comment" : "一天里的时段：11–17 点",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afternoon"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tarde"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Après-midi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "午後"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오후"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下午"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下午"
           }
         }
       }
@@ -3472,147 +3660,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "「世界很大，但這一頁只屬於你」"
-          }
-        }
-      }
-    },
-    "世界笔友" : {
-      "comment" : "世界笔友地图：标题",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "World Pen Pals"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Amigos por carta del mundo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Correspondants du monde"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "世界のペンフレンド"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "세계의 펜팔"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "世界笔友"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "世界筆友"
-          }
-        }
-      }
-    },
-    "世界笔友地图" : {
-      "comment" : "邮筒页左上角入口（读屏）",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "World pen pals map"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mapa de amigos por carta"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Carte des correspondants"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "世界のペンフレンドの地図"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "세계 펜팔 지도"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "世界笔友地图"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "世界筆友地圖"
-          }
-        }
-      }
-    },
-    "世界笔友是尺素会员的，这封信没能寄出" : {
-      "comment" : "寄给世界笔友被拦：不是会员",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "World pen pals are for members, so this letter couldn't be sent"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Los amigos por carta del mundo son para miembros: esta carta no se pudo enviar"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les correspondants du monde sont réservés aux membres : cette lettre n'est pas partie"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "世界のペンフレンドは会員向けです。この手紙は送れませんでした"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "세계의 펜팔은 회원 전용이라 이 편지를 보내지 못했어요"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "世界笔友是尺素会员的，这封信没能寄出"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "世界筆友是尺素會員的，這封信沒能寄出"
           }
         }
       }
@@ -4363,6 +4410,53 @@
         }
       }
     },
+    "今雨与雅故" : {
+      "comment" : "世界笔友（15 位住在各地的笔友）在界面上的名字：笔友地图标题、付费页会员权益。2026-10-27 起取代「世界笔友」；取自杜甫「旧雨今雨」，新友与故交。各语言不硬译典故，取本语言里同样雅的「新朋友与老朋友」",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Friends & Old"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amigos nuevos y de siempre"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amis d’hier et d’aujourd’hui"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新しき友、古き友"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새 벗과 오랜 벗"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今雨与雅故"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今雨與雅故"
+          }
+        }
+      }
+    },
     "从相册选一张" : {
       "comment" : "编辑日记本封面：从相册选照片的按钮",
       "localizations" : {
@@ -4687,6 +4781,53 @@
         }
       }
     },
+    "低落" : {
+      "comment" : "心情走势纵轴底端",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unpleasant"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desagradable"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désagréable"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不快"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "불쾌"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "低落"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "低落"
+          }
+        }
+      }
+    },
     "作为新日记本导入" : {
       "comment" : "导入备份：同名日记本分开导入",
       "localizations" : {
@@ -4918,6 +5059,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "你在這裡"
+          }
+        }
+      }
+    },
+    "你已经写下一篇日记了，\n去「邮筒」试着把它寄给你的笔友" : {
+      "comment" : "新手指引：写好第一篇，底栏上方指「邮筒」",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You've written your first entry.\nGo to “Mailbox” and send it to your pen pal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya escribiste tu primera entrada.\nVe al «Buzón» y envíasela a tu amigo por carta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous avez écrit votre première page.\nAllez dans « Boîte aux lettres » pour l’envoyer à votre correspondant"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日記が一つ書けました。\n「ポスト」から文通相手に送ってみましょう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "첫 일기를 썼어요.\n‘우체통’에서 펜팔에게 보내 보세요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你已经写下一篇日记了，\n去「邮筒」试着把它寄给你的笔友"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你已經寫下一篇日記了，\n去「郵筒」試著把它寄給你的筆友"
           }
         }
       }
@@ -5482,6 +5670,53 @@
         }
       }
     },
+    "信寄出去了。\n%@读完会给你回信，几个小时后就到，会放进信箱。" : {
+      "comment" : "新手指引：第一封寄出后的卡片，%@ 是笔友名",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your letter is on its way.\n%@ will write back after reading it — in a few hours, in your Letterbox."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu carta ya va de camino.\n%@ te responderá después de leerla; llegará en unas horas a tu Correo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre lettre est partie.\n%@ vous répondra après l’avoir lue : dans quelques heures, dans votre Courrier."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手紙を送りました。\n%@が読んだら返事をくれます。数時間後に郵便受けに届きます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "편지를 보냈어요.\n%@이(가) 읽고 답장을 보낼 거예요. 몇 시간 뒤 우편함에 도착해요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "信寄出去了。\n%@读完会给你回信，几个小时后就到，会放进信箱。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "信寄出去了。\n%@讀完會給你回信，幾個小時後就到，會放進信箱。"
+          }
+        }
+      }
+    },
     "信已经投进邮筒了" : {
       "localizations" : {
         "en" : {
@@ -6040,6 +6275,53 @@
         }
       }
     },
+    "先给自己做一本日记本" : {
+      "comment" : "新手指引：选日记本页指「想做一本新的日记？」",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First, make a notebook of your own"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primero, crea tu propio cuaderno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commencez par créer votre propre carnet"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まずは自分のノートを作りましょう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "먼저 나만의 노트를 만들어 보세요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先给自己做一本日记本"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "先給自己做一本日記本"
+          }
+        }
+      }
+    },
     "先验证当前手机号" : {
       "localizations" : {
         "en" : {
@@ -6128,52 +6410,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "先驗證是你本人"
-          }
-        }
-      }
-    },
-    "免费是每周一封；会员的每篇日记，笔友都会回信" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Free: one letter a week. With Plus, your pen pal answers every entry."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gratis: una carta por semana. Con Plus, tu amigo por correspondencia responde a cada entrada."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gratuit : une lettre par semaine. Avec Plus, votre correspondant répond à chaque page."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無料は週に一通。会員なら、どの日記にもペンフレンドが返事をくれます。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "무료는 일주일에 한 통, 멤버는 모든 일기에 펜팔이 답장해요."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "免费是每周一封；会员的每篇日记，笔友都会回信"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "免費是每週一封；會員的每篇日記，筆友都會回信"
           }
         }
       }
@@ -6550,6 +6786,53 @@
         }
       }
     },
+    "关注我们" : {
+      "comment" : "设置页最底下，一排官方账号小 logo（App Store、小红书、抖音、微博）上面的小标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Follow us"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Síguenos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivez-nous"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "フォローする"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "팔로우하기"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关注我们"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關注我們"
+          }
+        }
+      }
+    },
     "关闭" : {
       "localizations" : {
         "en" : {
@@ -6877,6 +7160,53 @@
         }
       }
     },
+    "再写几篇，就能看出走势" : {
+      "comment" : "写作统计：心情走势点太少时",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Write a few more entries to see the trend"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribe unas entradas más para ver la tendencia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encore quelques entrées pour voir la tendance"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あと少し書くと、移り変わりが見えてきます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "몇 편 더 쓰면 흐름이 보여요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再写几篇，就能看出走势"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再寫幾篇，就能看出走勢"
+          }
+        }
+      }
+    },
     "再向右翻无更多内容" : {
       "localizations" : {
         "en" : {
@@ -7015,6 +7345,53 @@
         }
       }
     },
+    "最常出现的情绪" : {
+      "comment" : "写作统计：最常选的情绪词",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Most frequent feelings"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emociones más frecuentes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Émotions les plus fréquentes"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よく選んだ気持ち"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가장 자주 느낀 감정"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最常出现的情绪"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最常出現的情緒"
+          }
+        }
+      }
+    },
     "最长 3 分钟" : {
       "localizations" : {
         "en" : {
@@ -7057,6 +7434,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最長 3 分鐘"
+          }
+        }
+      }
+    },
+    "写一个名字" : {
+      "comment" : "给笔友起名的输入框里的提示（首启页、补起名页、设置里的笔友名）。笔友没有默认名，必须由用户自己起",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type a name"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribe un nombre"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écrivez un nom"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前を入力"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이름을 적어 주세요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "写一个名字"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "寫一個名字"
           }
         }
       }
@@ -7104,52 +7528,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "寫一篇"
-          }
-        }
-      }
-    },
-    "写一篇，回一篇" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A reply to every entry"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una respuesta para cada entrada"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une réponse à chaque page"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "書けば、必ず返事が届く"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "쓸 때마다 답장이 와요"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "写一篇，回一篇"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "寫一篇，回一篇"
           }
         }
       }
@@ -7573,6 +7951,53 @@
         }
       }
     },
+    "写几句今天的事，\n也可以点这里拍一张照片" : {
+      "comment" : "新手指引：写日记页没写东西时指相机",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Write a few lines about today,\nor tap here to take a photo"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribe unas líneas sobre hoy,\no toca aquí para hacer una foto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écrivez quelques lignes sur votre journée,\nou touchez ici pour prendre une photo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日のことを少し書いてみましょう。\nここから写真も撮れます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오늘 있었던 일을 몇 줄 적어 보세요.\n여기를 눌러 사진도 찍을 수 있어요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "写几句今天的事，\n也可以点这里拍一张照片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "寫幾句今天的事，\n也可以點這裡拍一張照片"
+          }
+        }
+      }
+    },
     "写在哪一本里？" : {
       "comment" : "写日记前选本子的那一页：标题",
       "localizations" : {
@@ -7663,6 +8088,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "寫在日記本主頁的書名下面；不寫就顯示這本日記跨越的年月"
+          }
+        }
+      }
+    },
+    "写好了，点这里保存" : {
+      "comment" : "新手指引：写了东西后指 ✓",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done? Tap here to save"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Listo? Toca aquí para guardar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminé ? Touchez ici pour enregistrer"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "書けたら、ここで保存"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다 썼으면 여기를 눌러 저장하세요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "写好了，点这里保存"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "寫好了，點這裡儲存"
           }
         }
       }
@@ -8921,6 +9393,53 @@
         }
       }
     },
+    "十五位住在世界各地的笔友，用母语给你回信，信纸背面附上译文" : {
+      "comment" : "付费页会员权益：世界笔友（说明）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fifteen pen pals across the globe write back in their own language, with a translation on the back"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quince amigos por carta de todo el mundo te responden en su idioma, con la traducción al dorso"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quinze correspondants à travers le monde vous répondent dans leur langue, avec une traduction au dos"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "世界各地に住む15人のペンフレンドが母語で返事をくれます。便箋の裏には翻訳つき"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세계 곳곳에 사는 펜팔 열다섯 명이 모국어로 답장해요. 편지지 뒷면엔 번역이 있어요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "十五位住在世界各地的笔友，用母语给你回信，信纸背面附上译文"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "十五位住在世界各地的筆友，用母語給你回信，信紙背面附上譯文"
+          }
+        }
+      }
+    },
     "十六世纪起，欧洲最好的书用摩洛哥山羊皮装帧，细密的粒面是烫金最衬的底子。十九世纪的英国书房里，小牛皮包住书脊，金箔压出书名——一本书先是器物，然后才是读物。" : {
       "localizations" : {
         "en" : {
@@ -9294,6 +9813,53 @@
         }
       }
     },
+    "去登录" : {
+      "comment" : "新手指引：没登录时卡片上的按钮",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign In"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Iniciar sesión"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se connecter"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログイン"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "去登录"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "去登入"
+          }
+        }
+      }
+    },
     "去设置" : {
       "localizations" : {
         "en" : {
@@ -9336,6 +9902,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "去設定"
+          }
+        }
+      }
+    },
+    "双指捏一捏，一屏看更多日记" : {
+      "comment" : "大屏模式的捏合小彩蛋提示",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pinch with two fingers to see more entries at once"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pellizca con dos dedos para ver más entradas a la vez"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pincez avec deux doigts pour voir plus de pages à la fois"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "2本指でつまむと、一度にたくさんの日記が見られます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "두 손가락으로 오므리면 한 화면에 더 많은 일기를 볼 수 있어요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "双指捏一捏，一屏看更多日记"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雙指捏一捏，一屏看更多日記"
+          }
+        }
+      }
+    },
+    "反馈与建议" : {
+      "comment" : "设置首页一行的名字，也是邮件主题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feedback & Suggestions"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comentarios y sugerencias"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avis et suggestions"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ご意見・ご要望"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "의견 및 제안"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "反馈与建议"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回饋與建議"
           }
         }
       }
@@ -9805,52 +10465,6 @@
         }
       }
     },
-    "可跳过，之后在设置里也能改" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "You can skip this and change it later in Settings"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Puedes omitirlo y cambiarlo luego en Ajustes"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vous pouvez passer et le changer plus tard dans les réglages"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "スキップできます。設定であとから変更も可能"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "건너뛰어도 되며, 나중에 설정에서 바꿀 수 있어요"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "可跳过，之后在设置里也能改"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "可跳過，之後在設定裡也能改"
-          }
-        }
-      }
-    },
     "合并到同名日记本" : {
       "comment" : "导入备份：同名日记本合并",
       "localizations" : {
@@ -10171,6 +10785,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "啟動動畫"
+          }
+        }
+      }
+    },
+    "周" : {
+      "comment" : "情绪小结：按周",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semaine"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "週"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "주간"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "週"
           }
         }
       }
@@ -10874,6 +11535,53 @@
         }
       }
     },
+    "地点与心情" : {
+      "comment" : "写作统计：常写日记的地方的平均心情",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Places & mood"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lugares y ánimo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lieux et humeur"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "場所と気分"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "장소와 기분"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地点与心情"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地點與心情"
+          }
+        }
+      }
+    },
     "坚持写下去，就是最大的勇气" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11247,6 +11955,53 @@
         }
       }
     },
+    "多云" : {
+      "comment" : "天气分类：多云 / 阴",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cloudy"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nublado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuageux"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "くもり"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "구름 많음"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "多云"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "多雲"
+          }
+        }
+      }
+    },
     "夜晚是属于诚实的时间" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11434,6 +12189,53 @@
         }
       }
     },
+    "大风" : {
+      "comment" : "天气分类：大风",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Windy"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viento"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vent fort"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "強風"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "강풍"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大风"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大風"
+          }
+        }
+      }
+    },
     "天" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -11477,6 +12279,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "天"
+          }
+        }
+      }
+    },
+    "天气、地点、星期和时段，每一组至少记 3 篇心情才显示。多写几篇，规律会慢慢浮出来。" : {
+      "comment" : "写作统计：为什么有的卡片没出来",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather, places, days and times appear once a group has at least 3 entries with a mood. Keep writing and the patterns will surface."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El clima, los lugares, los días y los momentos aparecen cuando un grupo tiene al menos 3 entradas con estado de ánimo. Sigue escribiendo y los patrones irán apareciendo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La météo, les lieux, les jours et les moments s’affichent dès qu’un groupe compte au moins 3 entrées avec une humeur. Continuez d’écrire : les tendances apparaîtront peu à peu."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "天気・場所・曜日・時間帯は、それぞれ気分を記録した日記が3件以上になると表示されます。書き続けるうちに、傾向が少しずつ見えてきます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "날씨·장소·요일·시간대는 기분을 기록한 일기가 각각 3편 이상이면 보여요. 계속 쓰다 보면 패턴이 조금씩 드러나요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "天气、地点、星期和时段，每一组至少记 3 篇心情才显示。多写几篇，规律会慢慢浮出来。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "天氣、地點、星期和時段，每一組至少記 3 篇心情才顯示。多寫幾篇，規律會慢慢浮現出來。"
+          }
+        }
+      }
+    },
+    "天气与心情" : {
+      "comment" : "写作统计：不同天气下的平均心情",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather & mood"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clima y ánimo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Météo et humeur"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "天気と気分"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "날씨와 기분"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "天气与心情"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "天氣與心情"
           }
         }
       }
@@ -11617,6 +12513,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "失望"
+          }
+        }
+      }
+    },
+    "好" : {
+      "comment" : "新手指引：卡片上收起的按钮（寄出去了 / 结束语）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entendido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "D’accord"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "좋아요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "好"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "好"
           }
         }
       }
@@ -12229,8 +13172,8 @@
         }
       }
     },
-    "定位没开，世界笔友的回信都按一两天算" : {
-      "comment" : "世界笔友地图",
+    "定位没开，各地笔友的回信都按一两天算" : {
+      "comment" : "笔友地图：没给定位时的提示",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -12265,13 +13208,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "定位没开，世界笔友的回信都按一两天算"
+            "value" : "定位没开，各地笔友的回信都按一两天算"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "定位沒開，世界筆友的回信都按一兩天算"
+            "value" : "定位沒開，各地筆友的回信都按一兩天算"
           }
         }
       }
@@ -12412,6 +13355,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "害怕"
+          }
+        }
+      }
+    },
+    "寄信时，一封贴一张" : {
+      "comment" : "每周领邮票的小卡片：说明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One stamp for each letter you send"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un sello por cada carta que envíes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un timbre pour chaque lettre envoyée"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "手紙1通につき1枚貼ります"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "편지 한 통에 한 장씩 붙여요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "寄信时，一封贴一张"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "寄信時，一封貼一張"
           }
         }
       }
@@ -13299,6 +14289,53 @@
         }
       }
     },
+    "小红书" : {
+      "comment" : "设置页底部官方账号：小红书的 logo（读屏念这个名字）。平台名",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xiaohongshu"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xiaohongshu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Xiaohongshu"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "小紅書（RED）"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "샤오홍슈"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "小红书"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "小紅書"
+          }
+        }
+      }
+    },
     "尚未备份" : {
       "localizations" : {
         "en" : {
@@ -13341,6 +14378,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "尚未備份"
+          }
+        }
+      }
+    },
+    "就写在这一本里，\n点这里开始写" : {
+      "comment" : "新手指引：做好日记本后指「就写在这本里」",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Write in this one —\ntap here to begin"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribe en este:\ntoca aquí para empezar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écrivez dans celui-ci :\ntouchez ici pour commencer"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このノートに書きましょう。\nここをタップして書き始めます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 노트에 써 볼까요.\n여기를 눌러 시작하세요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "就写在这一本里，\n点这里开始写"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "就寫在這一本裡，\n點這裡開始寫"
           }
         }
       }
@@ -14557,6 +15641,53 @@
         }
       }
     },
+    "年" : {
+      "comment" : "情绪小结：按年",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Year"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Año"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Année"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "연간"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年"
+          }
+        }
+      }
+    },
     "年付" : {
       "localizations" : {
         "en" : {
@@ -15346,6 +16477,53 @@
         }
       }
     },
+    "往期小结" : {
+      "comment" : "情绪小结：看以前的",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Past summaries"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resúmenes anteriores"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilans précédents"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去のまとめ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지난 요약"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "往期小结"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "往期小結"
+          }
+        }
+      }
+    },
     "很不愉快" : {
       "comment" : "心情弹窗：滑杆左端的刻度说明",
       "localizations" : {
@@ -15440,6 +16618,100 @@
         }
       }
     },
+    "微博" : {
+      "comment" : "设置页底部官方账号：微博的 logo（读屏念这个名字）。平台名",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weibo"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weibo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weibo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weibo"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "웨이보"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "微博"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "微博"
+          }
+        }
+      }
+    },
+    "心情" : {
+      "comment" : "心情走势图的纵轴（读屏用）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mood"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ánimo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Humeur"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気分"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기분"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "心情"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "心情"
+          }
+        }
+      }
+    },
     "心情分布" : {
       "localizations" : {
         "en" : {
@@ -15482,6 +16754,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "心情分佈"
+          }
+        }
+      }
+    },
+    "心情走势" : {
+      "comment" : "写作统计：心情折线图的标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mood over time"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evolución del ánimo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Évolution de l’humeur"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気分の移り変わり"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기분 흐름"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "心情走势"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "心情走勢"
           }
         }
       }
@@ -15769,7 +17088,6 @@
       }
     },
     "总字数" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -15910,7 +17228,6 @@
       }
     },
     "总篇数" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -16045,6 +17362,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "「悲傷也是值得被認真對待的」"
+          }
+        }
+      }
+    },
+    "情绪小结" : {
+      "comment" : "写作统计：会员的情绪小结卡片标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mood summary"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resumen del ánimo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilan d’humeur"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気分のまとめ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기분 요약"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "情绪小结"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "情緒小結"
+          }
+        }
+      }
+    },
+    "情绪捕捉" : {
+      "comment" : "写作统计：情绪那一段的标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mood Insights"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resumen de tu ánimo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aperçu de vos humeurs"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気分のインサイト"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기분 인사이트"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "情绪捕捉"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "情緒捕捉"
           }
         }
       }
@@ -16326,6 +17737,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "想讓筆友每篇都回？"
+          }
+        }
+      }
+    },
+    "愉快" : {
+      "comment" : "心情走势纵轴顶端",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pleasant"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agradable"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agréable"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快い"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "유쾌"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "愉快"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "愉快"
           }
         }
       }
@@ -17262,6 +18720,53 @@
         }
       }
     },
+    "打开后，底栏右边多一个搜索按钮，可以按关键字找写过的日记。" : {
+      "comment" : "设置 → 外观「搜索日记」开关下面的说明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adds a search button to the right of the tab bar, so you can find past entries by keyword."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añade un botón de búsqueda a la derecha de la barra de pestañas para encontrar entradas por palabra clave."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoute un bouton de recherche à droite de la barre d’onglets pour retrouver vos pages par mot-clé."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オンにすると、タブバーの右に検索ボタンが出て、キーワードで書いた日記を探せます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "켜면 탭 막대 오른쪽에 검색 버튼이 생겨 키워드로 지난 일기를 찾을 수 있어요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开后，底栏右边多一个搜索按钮，可以按关键字找写过的日记。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打開後，底欄右邊多一個搜尋按鈕，可以按關鍵字找寫過的日記。"
+          }
+        }
+      }
+    },
     "打开定位，就能算出信要走多远" : {
       "comment" : "世界笔友地图",
       "localizations" : {
@@ -17445,6 +18950,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "把此刻的想法留住，以後會感謝自己"
+          }
+        }
+      }
+    },
+    "抖音" : {
+      "comment" : "设置页底部官方账号：抖音的 logo（读屏念这个名字）。平台名",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Douyin"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Douyin"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Douyin"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Douyin"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "더우인"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抖音"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "抖音"
           }
         }
       }
@@ -17823,48 +19375,49 @@
         }
       }
     },
-    "挑一位合你心意的笔友" : {
+    "挑一个喜欢的封面，\n好了点这里" : {
+      "comment" : "新手指引：新建日记本页起好名后指「创建」",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choose a pen pal who suits you"
+            "value" : "Pick a cover you like,\nthen tap here"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elige un amigo por correspondencia a tu medida"
+            "value" : "Elige una portada que te guste\ny luego toca aquí"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Choisissez un correspondant à votre goût"
+            "value" : "Choisissez une couverture qui vous plaît,\npuis touchez ici"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "好みのペンフレンドを選ぶ"
+            "value" : "好きな表紙を選んで、\nできたらここをタップ"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "마음에 맞는 펜팔 고르기"
+            "value" : "마음에 드는 표지를 고르고\n다 됐으면 여기를 누르세요"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "挑一位合你心意的笔友"
+            "value" : "挑一个喜欢的封面，\n好了点这里"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "挑一位合你心意的筆友"
+            "value" : "挑一個喜歡的封面，\n好了點這裡"
           }
         }
       }
@@ -18614,6 +20167,100 @@
         }
       }
     },
+    "搜标题和正文里写过的字" : {
+      "comment" : "搜索页：还没输入关键字时的说明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find words you've written in titles and entries"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encuentra palabras que escribiste en títulos y entradas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retrouvez des mots écrits dans vos titres et vos pages"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイトルや本文に書いた言葉を探せます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "제목과 본문에 쓴 말을 찾아요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜标题和正文里写过的字"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜尋標題和內文裡寫過的字"
+          }
+        }
+      }
+    },
+    "搜索" : {
+      "comment" : "搜索页标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recherche"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "검색"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜尋"
+          }
+        }
+      }
+    },
     "搜索地点" : {
       "localizations" : {
         "en" : {
@@ -18656,6 +20303,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "搜尋地點"
+          }
+        }
+      }
+    },
+    "搜索日记" : {
+      "comment" : "搜索框占位",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search your journal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar en el diario"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher dans le journal"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日記を検索"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일기 검색"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索日记"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜尋日記"
           }
         }
       }
@@ -19169,6 +20863,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "放左邊"
+          }
+        }
+      }
+    },
+    "放进邮票夹了" : {
+      "comment" : "每周领邮票的小卡片：领到之后（上面一行是「+20」）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Added to your stamps"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardados con tus sellos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rangés avec vos timbres"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切手入れにしまいました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "우표첩에 넣었어요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放进邮票夹了"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "放進郵票夾了"
           }
         }
       }
@@ -20056,6 +21797,53 @@
         }
       }
     },
+    "日期" : {
+      "comment" : "心情走势图的横轴（读屏用）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fecha"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日付"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "날짜"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日期"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日期"
+          }
+        }
+      }
+    },
     "日本印刷产业连合会印刷用语集、武藏野美术大学造形档案；「肯特纸为日本所命名」一说见《特种制纸五十年史》。" : {
       "localizations" : {
         "en" : {
@@ -20380,6 +22168,53 @@
         }
       }
     },
+    "早上" : {
+      "comment" : "一天里的时段：5–11 点",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Morning"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mañana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Matin"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "朝"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아침"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "早上"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "早上"
+          }
+        }
+      }
+    },
     "早起的时光，是属于自己的" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -20517,6 +22352,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "時間在走，有些感受值得留下"
+          }
+        }
+      }
+    },
+    "星期与时段" : {
+      "comment" : "写作统计：星期几、一天里哪段时间的平均心情",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Days & times"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Días y momentos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours et moments"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "曜日と時間帯"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "요일과 시간대"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "星期与时段"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "星期與時段"
           }
         }
       }
@@ -20661,6 +22543,53 @@
         }
       }
     },
+    "晚上" : {
+      "comment" : "一天里的时段：17–23 点",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Evening"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noche"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soir"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "夜"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "저녁"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "晚上"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "晚上"
+          }
+        }
+      }
+    },
     "晚风轻拂，今天辛苦了" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -20797,6 +22726,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "普魯士藍"
+          }
+        }
+      }
+    },
+    "晴" : {
+      "comment" : "天气分类：晴",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Despejado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dégagé"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "晴れ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "맑음"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "晴"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "晴"
           }
         }
       }
@@ -21032,6 +23008,53 @@
         }
       }
     },
+    "月" : {
+      "comment" : "情绪小结：按月",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mois"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "월간"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月"
+          }
+        }
+      }
+    },
     "月亮也在等你写完今天的故事" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -21126,6 +23149,7 @@
       }
     },
     "月度与年度回望" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -21259,6 +23283,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "有一封信沒能寄出去"
+          }
+        }
+      }
+    },
+    "有一封来自%@的回信，\n去「邮筒」看看" : {
+      "comment" : "新手指引：第一封回信到了，不在邮筒页时指「邮筒」，%@ 是写信人",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A reply from %@ has arrived —\ncheck the “Mailbox”"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Te llegó una respuesta de %@:\nmira en el «Buzón»"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une réponse de %@ est arrivée :\nallez voir la « Boîte aux lettres »"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@から返事が届いています。\n「ポスト」を見てみましょう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@에게서 답장이 왔어요.\n‘우체통’에 가 보세요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有一封来自%@的回信，\n去「邮筒」看看"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有一封來自%@的回信，\n去「郵筒」看看"
           }
         }
       }
@@ -22846,6 +24917,53 @@
         }
       }
     },
+    "正在写这一期的小结…" : {
+      "comment" : "情绪小结生成中",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Writing this summary…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribiendo el resumen…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rédaction du bilan…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このまとめを書いています…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이번 요약을 쓰는 중…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在写这一期的小结…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在寫這一期的小結…"
+          }
+        }
+      }
+    },
     "正在寄出…" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -23591,6 +25709,100 @@
         }
       }
     },
+    "每周 20 张邮票" : {
+      "comment" : "付费页会员权益第一条标题（会员每周 20 张邮票，见 Backend stamps.ts MEMBER_PACK）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "20 stamps every week"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "20 sellos cada semana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "20 timbres par semaine"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "毎週 20 枚の切手"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "매주 우표 20장"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每周 20 张邮票"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每週 20 張郵票"
+          }
+        }
+      }
+    },
+    "每周、每月、每年，一段小结和几条建议，陪你看清这段时间的心情。" : {
+      "comment" : "情绪小结：非会员看到的说明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every week, month and year: a short summary and a few suggestions, to help you see how you’ve been feeling."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada semana, mes y año: un breve resumen y algunas sugerencias para ver mejor cómo ha sido tu ánimo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque semaine, chaque mois et chaque année : un court bilan et quelques suggestions pour mieux comprendre vos humeurs."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "毎週・毎月・毎年、短いまとめといくつかの提案で、この期間の気分を一緒に振り返ります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "매주, 매달, 매년 짧은 요약과 몇 가지 제안으로 그동안의 기분을 함께 돌아봐요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每周、每月、每年，一段小结和几条建议，陪你看清这段时间的心情。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每週、每月、每年，一段小結和幾條建議，陪你看清這段時間的心情。"
+          }
+        }
+      }
+    },
     "每封信装进火漆封口的信封，拆开是讲究的信纸" : {
       "localizations" : {
         "en" : {
@@ -23732,6 +25944,7 @@
       }
     },
     "每月一封「这个月的你」，年底一份「这一年」" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -23820,6 +26033,147 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "每篇另起一頁"
+          }
+        }
+      }
+    },
+    "每过完一个月，打开这里就会有一份那个月的小结（那个月要记满 3 篇心情）。" : {
+      "comment" : "情绪小结：还没有月小结",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When a month ends, open this page to find a summary of it (the month needs at least 3 entries with a mood)."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al terminar cada mes, abre esta página y tendrás su resumen (el mes necesita al menos 3 entradas con estado de ánimo)."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À la fin de chaque mois, ouvrez cette page pour y trouver son bilan (au moins 3 entrées avec une humeur dans le mois)."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1か月が終わると、ここを開いたときにその月のまとめが届きます（その月に気分を3件以上記録していること）。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "한 달이 끝나면 여기를 열 때 그 달의 요약이 생겨요(그 달에 기분을 3편 이상 기록해야 해요)."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每过完一个月，打开这里就会有一份那个月的小结（那个月要记满 3 篇心情）。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每過完一個月，打開這裡就會有一份那個月的小結（那個月要記滿 3 篇心情）。"
+          }
+        }
+      }
+    },
+    "每过完一周，打开这里就会有一份那一周的小结（那一周要记满 3 篇心情）。" : {
+      "comment" : "情绪小结：还没有周小结",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When a week ends, open this page to find a summary of it (the week needs at least 3 entries with a mood)."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al terminar cada semana, abre esta página y tendrás su resumen (la semana necesita al menos 3 entradas con estado de ánimo)."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À la fin de chaque semaine, ouvrez cette page pour y trouver son bilan (au moins 3 entrées avec une humeur dans la semaine)."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1週間が終わると、ここを開いたときにその週のまとめが届きます（その週に気分を3件以上記録していること）。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "한 주가 끝나면 여기를 열 때 그 주의 요약이 생겨요(그 주에 기분을 3편 이상 기록해야 해요)."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每过完一周，打开这里就会有一份那一周的小结（那一周要记满 3 篇心情）。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每過完一週，打開這裡就會有一份那一週的小結（那一週要記滿 3 篇心情）。"
+          }
+        }
+      }
+    },
+    "每过完一年，打开这里就会有一份那一年的小结（那一年要记满 3 篇心情）。" : {
+      "comment" : "情绪小结：还没有年小结",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When a year ends, open this page to find a summary of it (the year needs at least 3 entries with a mood)."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al terminar cada año, abre esta página y tendrás su resumen (el año necesita al menos 3 entradas con estado de ánimo)."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À la fin de chaque année, ouvrez cette page pour y trouver son bilan (au moins 3 entrées avec une humeur dans l’année)."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1年が終わると、ここを開いたときにその年のまとめが届きます（その年に気分を3件以上記録していること）。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "한 해가 끝나면 여기를 열 때 그 해의 요약이 생겨요(그 해에 기분을 3편 이상 기록해야 해요)."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每过完一年，打开这里就会有一份那一年的小结（那一年要记满 3 篇心情）。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每過完一年，打開這裡就會有一份那一年的小結（那一年要記滿 3 篇心情）。"
           }
         }
       }
@@ -23960,6 +26314,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "沒有匹配的地點"
+          }
+        }
+      }
+    },
+    "没有含「%@」的日记" : {
+      "comment" : "搜索页：没搜到时的说明，%@ 是用户输入的关键字（引号写在译文里，各语言用自己的引号）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No entries contain “%@”"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ninguna entrada contiene «%@»"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune page ne contient « %@ »"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%@」を含む日記はありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@”이(가) 들어간 일기가 없어요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有含「%@」的日记"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沒有含「%@」的日記"
+          }
+        }
+      }
+    },
+    "没有找到" : {
+      "comment" : "搜索页：没有搜到任何日记时的标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Results"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin resultados"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun résultat"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "見つかりません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "결과 없음"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有找到"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "沒有找到"
           }
         }
       }
@@ -24569,6 +27017,53 @@
         }
       }
     },
+    "深夜" : {
+      "comment" : "一天里的时段：23–5 点",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Late night"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Madrugada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuit"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "深夜"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "심야"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "深夜"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "深夜"
+          }
+        }
+      }
+    },
     "深夜的文字，往往最真实" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -24843,52 +27338,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "清理殘留檔案？"
-          }
-        }
-      }
-    },
-    "温柔的、话少的、爱引诗的……笔友的性格由你选" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gentle, quiet, fond of poetry… you pick your pen pal's personality."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Amable, callado, amante de la poesía… tú eliges su carácter."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Douce, discrète, amatrice de poésie… vous choisissez le caractère de votre correspondant."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "やさしい、口数の少ない、詩が好きな……ペンフレンドの性格はあなたが選べます。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다정한, 말수 적은, 시를 좋아하는… 펜팔의 성격을 직접 골라요."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "温柔的、话少的、爱引诗的……笔友的性格由你选"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "溫柔的、話少的、愛引詩的……筆友的性格由你選"
           }
         }
       }
@@ -25586,6 +28035,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "點右上角的信封圖示，%@會給你寫信"
+          }
+        }
+      }
+    },
+    "点开这封回信" : {
+      "comment" : "新手指引：信箱里框住第一封回信",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open this reply"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre esta respuesta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrez cette réponse"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この返事を開いてみましょう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 답장을 열어 보세요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点开这封回信"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "點開這封回信"
           }
         }
       }
@@ -26803,6 +29299,147 @@
         }
       }
     },
+    "登录之后，就能把日记寄给笔友" : {
+      "comment" : "新手指引：寄信那一步没登录时的卡片",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in to send your entries to your pen pal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia sesión para enviar tus entradas a tu amigo por carta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connectez-vous pour envoyer vos pages à votre correspondant"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログインすると、日記を文通相手に送れます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인하면 일기를 펜팔에게 보낼 수 있어요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录之后，就能把日记寄给笔友"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登入之後，就能把日記寄給筆友"
+          }
+        }
+      }
+    },
+    "登录后才能收到笔友的回信" : {
+      "comment" : "设置首页账户卡（没登录时）：「登录 / 注册」下面那行说明",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in to get letters from your pen pal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia sesión para recibir cartas de tu amigo por carta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connectez-vous pour recevoir les lettres de votre correspondant"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログインすると文通相手から返事が届きます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그인해야 펜팔의 답장을 받을 수 있어요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录后才能收到笔友的回信"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登入後才能收到筆友的回信"
+          }
+        }
+      }
+    },
+    "登录尺素账号后，每过完一期就会自动写一份小结。" : {
+      "comment" : "会员但没登录：情绪小结要账号",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign in to your Memoir account and a summary will be written after each period."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia sesión en tu cuenta de Añoranza y se escribirá un resumen al terminar cada periodo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connectez-vous à votre compte Déjà Vu : un bilan sera rédigé à la fin de chaque période."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尺素のアカウントにログインすると、期間が終わるたびにまとめが自動で届きます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "그리움 계정에 로그인하면 기간이 끝날 때마다 요약이 자동으로 작성돼요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录尺素账号后，每过完一期就会自动写一份小结。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登入尺素帳號後，每過完一期就會自動寫一份小結。"
+          }
+        }
+      }
+    },
     "登录已过期，请重新登录" : {
       "comment" : "登录态失效",
       "localizations" : {
@@ -27829,6 +30466,53 @@
         }
       }
     },
+    "稍后" : {
+      "comment" : "每周领邮票的小卡片：先关掉，下次进邮筒页再出",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Later"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más tarde"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus tard"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あとで"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "나중에"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "稍后"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "稍後"
+          }
+        }
+      }
+    },
     "窗外的天空每天都不一样，你注意到了吗" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -27877,6 +30561,7 @@
       }
     },
     "笔友" : {
+      "comment" : "还没给笔友起名时，对笔友的称呼",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -27918,6 +30603,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "筆友"
+          }
+        }
+      }
+    },
+    "笔友会用这个名字给你写信，之后在设置里也能改" : {
+      "comment" : "给笔友起名那一栏下面的小字（首启页、老用户补起名页）。起名不能跳过",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your pen pal will sign letters with this name. You can change it later in Settings."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu amigo por carta firmará con este nombre. Puedes cambiarlo más tarde en Ajustes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre correspondant signera ses lettres de ce nom. Vous pourrez le changer plus tard dans les Réglages."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文通相手はこの名前で手紙を書きます。あとから設定で変えられます"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "펜팔이 이 이름으로 편지를 써요. 나중에 설정에서 바꿀 수 있어요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "笔友会用这个名字给你写信，之后在设置里也能改"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "筆友會用這個名字給你寫信，之後在設定裡也能改"
           }
         }
       }
@@ -28010,6 +30742,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "筆友名字"
+          }
+        }
+      }
+    },
+    "笔友地图" : {
+      "comment" : "邮筒页左上角入口（读屏），打开「今雨与雅故」地图",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pen pal map"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mapa de amigos por carta"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carte des correspondants"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ペンフレンドの地図"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "펜팔 지도"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "笔友地图"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "筆友地圖"
           }
         }
       }
@@ -28612,6 +31391,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "綁定手機號碼"
+          }
+        }
+      }
+    },
+    "给你的日记本起个名字" : {
+      "comment" : "新手指引：新建日记本页指名字输入框",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Give your notebook a name"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ponle nombre a tu cuaderno"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Donnez un nom à votre carnet"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ノートに名前をつけましょう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "노트 이름을 지어 주세요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "给你的日记本起个名字"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "給你的日記本取個名字"
+          }
+        }
+      }
+    },
+    "给各地的笔友写信是尺素会员的，这封信没能寄出" : {
+      "comment" : "寄给世界笔友被拦：不是会员",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Writing to pen pals around the world is for members, so this letter couldn't be sent"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribir a amigos por carta de todo el mundo es para miembros: esta carta no se pudo enviar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écrire aux correspondants du monde entier est réservé aux membres : cette lettre n'est pas partie"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "各地のペンフレンドへの手紙は会員向けです。この手紙は送れませんでした"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "각지의 펜팔에게 쓰는 편지는 회원 전용이라 이 편지를 보내지 못했어요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "给各地的笔友写信是尺素会员的，这封信没能寄出"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "給各地的筆友寫信是尺素會員的，這封信沒能寄出"
           }
         }
       }
@@ -30476,6 +33349,7 @@
       }
     },
     "设置" : {
+      "comment" : "设置页大标题",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -30610,6 +33484,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "試了幾次都沒寄出去"
+          }
+        }
+      }
+    },
+    "试着写下你的第一篇日记吧" : {
+      "comment" : "新手指引：记录页指着「写」",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try writing your first entry"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribe tu primera entrada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écrivez votre première page"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最初の日記を書いてみましょう"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "첫 일기를 써 보세요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "试着写下你的第一篇日记吧"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "試著寫下你的第一篇日記吧"
+          }
+        }
+      }
+    },
+    "试着写下你的第一篇日记吧，\n回到「记录」" : {
+      "comment" : "新手指引：不在记录页时，底栏上方指「记录」",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try writing your first entry —\nhead back to “Records”"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribe tu primera entrada:\nvuelve a «Registros»"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écrivez votre première page :\nretournez dans « Journal »"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最初の日記を書いてみましょう。\n「記録」に戻って"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "첫 일기를 써 보세요.\n‘기록’으로 돌아가 볼까요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "试着写下你的第一篇日记吧，\n回到「记录」"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "試著寫下你的第一篇日記吧，\n回到「記錄」"
           }
         }
       }
@@ -30796,6 +33764,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "請和身邊信任的人說一說，或者聯絡專業的求助熱線。"
+          }
+        }
+      }
+    },
+    "请多记录你的生活。\n点点滴滴都可以留在这里，想分享了，就寄给你的笔友。" : {
+      "comment" : "新手指引：读完第一封回信后的结束语",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep writing about your life.\nEvery little moment can live here — and when you want to share, send it to your pen pal."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escribe a menudo sobre tu vida.\nCada pequeño momento puede quedarse aquí; y cuando quieras compartirlo, envíaselo a tu amigo por carta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Racontez votre vie, souvent.\nChaque petit moment peut rester ici ; et quand vous aurez envie de le partager, envoyez-le à votre correspondant."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "毎日のことを、たくさん書き留めてください。\n小さなことも全部ここに残せます。話したくなったら、文通相手に送りましょう。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일상을 자주 기록해 보세요.\n소소한 순간도 모두 여기에 남길 수 있어요. 나누고 싶어지면 펜팔에게 보내세요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请多记录你的生活。\n点点滴滴都可以留在这里，想分享了，就寄给你的笔友。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請多記錄你的生活。\n點點滴滴都可以留在這裡，想分享了，就寄給你的筆友。"
           }
         }
       }
@@ -31312,6 +34327,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "帳號"
+          }
+        }
+      }
+    },
+    "账号、手机号与登录方式" : {
+      "comment" : "设置首页账户卡：名字下面那行说明（点进去是账号页）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Account, phone number and sign-in"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuenta, teléfono e inicio de sesión"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compte, numéro et connexion"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アカウント・電話番号・ログイン方法"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계정, 휴대폰 번호, 로그인 방법"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "账号、手机号与登录方式"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "帳號、手機號碼與登入方式"
           }
         }
       }
@@ -32436,6 +35498,53 @@
         }
       }
     },
+    "还没有绑定手机号" : {
+      "comment" : "设置首页账户卡里的提醒行（后面一个红点），点进去去绑定",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No phone number linked"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin número de teléfono vinculado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun numéro associé"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "電話番号が未登録です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "휴대폰 번호가 연결되지 않았어요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "还没有绑定手机号"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "還沒有綁定手機號碼"
+          }
+        }
+      }
+    },
     "这一刻已经落在纸上" : {
       "localizations" : {
         "en" : {
@@ -33136,6 +36245,53 @@
         }
       }
     },
+    "这周的邮票到了" : {
+      "comment" : "每周领邮票的小卡片：标题",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This week's stamps are here"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya llegaron los sellos de esta semana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les timbres de la semaine sont arrivés"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今週の切手が届きました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이번 주 우표가 도착했어요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这周的邮票到了"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這週的郵票到了"
+          }
+        }
+      }
+    },
     "这套主题也有一张对应的桌面图标。" : {
       "localizations" : {
         "en" : {
@@ -33224,6 +36380,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "這是「僅文字」的備份，匯入後日記裡不會有照片和錄音。"
+          }
+        }
+      }
+    },
+    "这期小结没写成，下次打开会再试。" : {
+      "comment" : "情绪小结生成失败",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This summary couldn’t be written. It’ll try again next time you open this page."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo escribir este resumen. Se volverá a intentar la próxima vez que abras esta página."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce bilan n’a pas pu être rédigé. Nouvel essai à la prochaine ouverture."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このまとめは書けませんでした。次に開いたときにもう一度試します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이번 요약을 쓰지 못했어요. 다음에 열 때 다시 시도할게요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这期小结没写成，下次打开会再试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這期小結沒寫成，下次打開會再試。"
           }
         }
       }
@@ -33651,7 +36854,6 @@
       }
     },
     "连续写作" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -34161,6 +37363,100 @@
         }
       }
     },
+    "邮票夹里有 %lld 张邮票" : {
+      "comment" : "笔友地图右上角邮票数（读屏）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stamps in your wallet: %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sellos guardados: %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timbres en réserve : %lld"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切手入れに %lld 枚"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "우표첩에 우표 %lld장"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "邮票夹里有 %lld 张邮票"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "郵票夾裡有 %lld 張郵票"
+          }
+        }
+      }
+    },
+    "邮票没领到，过一会儿再试" : {
+      "comment" : "每周领邮票：领取失败",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't collect your stamps. Try again in a moment"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron recoger los sellos. Inténtalo de nuevo en un momento"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de récupérer les timbres. Réessayez dans un instant"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "切手を受け取れませんでした。少ししてからもう一度どうぞ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "우표를 받지 못했어요. 잠시 후 다시 해 주세요"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "邮票没领到，过一会儿再试"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "郵票沒領到，過一會兒再試"
+          }
+        }
+      }
+    },
     "邮票用完了，新的一包%@送到" : {
       "comment" : "寄信被拦：邮票用完了，%@ 是相对时间如「3 天后」",
       "localizations" : {
@@ -34344,6 +37640,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "郵筒裡還沒有信"
+          }
+        }
+      }
+    },
+    "邮箱地址已复制：%@" : {
+      "comment" : "反馈与建议：手机上没有邮件 App 时",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email address copied: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dirección de correo copiada: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Adresse e-mail copiée : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "メールアドレスをコピーしました：%@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이메일 주소를 복사했어요: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "邮箱地址已复制：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已複製信箱地址：%@"
           }
         }
       }
@@ -34810,6 +38153,53 @@
         }
       }
     },
+    "重试" : {
+      "comment" : "情绪小结没写成时重试",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再試行"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 시도"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重试"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重試"
+          }
+        }
+      }
+    },
     "闪光关" : {
       "localizations" : {
         "en" : {
@@ -35229,6 +38619,53 @@
         }
       }
     },
+    "雨" : {
+      "comment" : "天气分类：雨（含雷雨、毛毛雨）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rain"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lluvia"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pluie"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雨"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "비"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雨"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雨"
+          }
+        }
+      }
+    },
     "雨天的心情，总是特别丰富" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -35272,6 +38709,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "「雨天的心情，總是特別豐富」"
+          }
+        }
+      }
+    },
+    "雪" : {
+      "comment" : "天气分类：雪（含雨夹雪、冰雹）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Snow"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nieve"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neige"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雪"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "눈"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雪"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雪"
+          }
+        }
+      }
+    },
+    "雾霾" : {
+      "comment" : "天气分类：雾、霾、沙尘",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fog & haze"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niebla"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brouillard"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "霧・もや"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "안개"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "雾霾"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "霧霾"
           }
         }
       }
@@ -35368,52 +38899,6 @@
         }
       }
     },
-    "青鸟" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bluebird"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pájaro azul"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oiseau bleu"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "青い鳥"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "파랑새"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "青鸟"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "青鳥"
-          }
-        }
-      }
-    },
     "预览：" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -35457,6 +38942,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "預覽："
+          }
+        }
+      }
+    },
+    "领取" : {
+      "comment" : "每周领邮票的小卡片：领取按钮",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collect"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recoger"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupérer"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "受け取る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "받기"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "领取"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "領取"
           }
         }
       }

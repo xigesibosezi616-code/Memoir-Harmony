@@ -4,10 +4,18 @@ import Charts
 
 struct StatsView: View {
     @Environment(ThemeManager.self) private var themeManager
+    @Environment(StoreKitManager.self) private var store
+    @Environment(AppEnvironment.self) private var env
+    @Environment(\.modelContext) private var modelContext
     @Query private var entries: [JournalEntry]
+    /// 情绪小结（会员），新的在前
+    @Query(sort: \MoodSummary.periodStart, order: .reverse) private var summaries: [MoodSummary]
+    @State private var writingSummaries: Set<MoodSummary.Period> = []
+    @State private var failedSummaries: Set<MoodSummary.Period> = []
+    @State private var showPaywall = false
 
-    /// 心情分布的时间范围。**只影响饼图**，上方三个数字卡片仍是全期统计 ——
-    /// 「连续写作 / 总篇数 / 总字数」按区间算没有意义。
+    /// 情绪捕捉那一段的时间范围（走势、分布、情绪词、天气、地点、星期时段一起跟着变）。
+    /// 上方三个数字卡片和写作日历仍是全期 ——「连续写作 / 总篇数 / 总字数」按区间算没有意义。
     @State private var moodRange: StatsRange = .month
 
     private var stats: WritingStats {
@@ -55,19 +63,86 @@ struct StatsView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                // Mood distribution
-                ThemedCard {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("心情分布")
-                            .font(theme.captionFont)
-                            .foregroundStyle(theme.textTertiary)
-                            .tracking(theme.letterSpacingWide)
-
-                        RangePicker(selection: $moodRange, theme: theme)
-
-                        MoodDonutChart(data: moodData, theme: theme)
-                    }
+                // 情绪捕捉（2026-10-27）：免费的这几张图全在本机算，规则见 `MoodInsights`
+                sectionTitle("情绪捕捉", theme: theme)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 8)
+
+                // 情绪小结（会员）：自己有周 / 月 / 年，不跟下面的时间范围走
+                MoodSummaryCard(summaries: summaries, writing: writingSummaries, failed: failedSummaries,
+                                isMember: store.isMember, isLoggedIn: env.session.isLoggedIn,
+                                onRetry: { period in
+                                    failedSummaries.remove(period)
+                                    Task { await writeDueSummaries() }
+                                },
+                                onUnlock: { showPaywall = true })
+
+                RangePicker(selection: $moodRange, theme: theme)
+
+                let items = MoodInsights.moodEntries(entries, range: moodRange)
+                insightCard("心情走势", theme: theme) {
+                    MoodTrendChart(points: MoodInsights.trend(items, bucket: MoodInsights.bucket(for: moodRange)),
+                                   byMonth: MoodInsights.bucket(for: moodRange) == .month, theme: theme)
+                }
+
+                insightCard("心情分布", theme: theme) {
+                    MoodDonutChart(data: moodData, theme: theme)
+                }
+
+                let labels = MoodInsights.topLabels(items)
+                if !labels.isEmpty {
+                    insightCard("最常出现的情绪", theme: theme) {
+                        LabelCountList(items: labels, theme: theme)
+                    }
+                }
+
+                let weather = MoodInsights.byWeather(items)
+                if !weather.isEmpty {
+                    insightCard("天气与心情", theme: theme) {
+                        VStack(spacing: 12) {
+                            ForEach(weather, id: \.kind) { item in
+                                MoodScaleRow(title: Text(item.kind.title), group: item.group, theme: theme)
+                            }
+                        }
+                    }
+                }
+
+                let places = MoodInsights.byPlace(items)
+                if !places.isEmpty {
+                    insightCard("地点与心情", theme: theme) {
+                        VStack(spacing: 12) {
+                            ForEach(places) { group in
+                                MoodScaleRow(title: Text(verbatim: group.id), group: group, theme: theme)   // 地名是数据，不翻译
+                            }
+                        }
+                    }
+                }
+
+                let weekdays = MoodInsights.byWeekday(items, calendar: localeCalendar)
+                let dayParts = MoodInsights.byDayPart(items)
+                if !weekdays.isEmpty || !dayParts.isEmpty {
+                    insightCard("星期与时段", theme: theme) {
+                        VStack(spacing: 12) {
+                            ForEach(weekdays, id: \.weekday) { item in
+                                MoodScaleRow(title: Text(verbatim: weekdaySymbol(item.weekday)), group: item.group, theme: theme)
+                            }
+                            if !weekdays.isEmpty && !dayParts.isEmpty {
+                                Rectangle().fill(theme.border).frame(height: 0.5).padding(.vertical, 2)
+                            }
+                            ForEach(dayParts, id: \.part) { item in
+                                MoodScaleRow(title: Text(item.part.title), group: item.group, theme: theme)
+                            }
+                        }
+                    }
+                }
+
+                // 天气 / 地点 / 星期时段至少有一张没出来：说一句为什么，免得以为坏了
+                if weather.isEmpty || places.isEmpty || (weekdays.isEmpty && dayParts.isEmpty) {
+                    Text("天气、地点、星期和时段，每一组至少记 3 篇心情才显示。多写几篇，规律会慢慢浮出来。")
+                        .font(theme.captionFont)
+                        .foregroundStyle(theme.textTertiary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 4)
                 }
             }
             .padding(.horizontal, 20)
@@ -83,6 +158,9 @@ struct StatsView: View {
                     .foregroundStyle(theme.textSecondary)
             }
         }
+        .paywallCover(isPresented: $showPaywall)
+        // 会员打开写作统计时，把刚结束、还没写的那几期小结写了（规则见 `MoodSummaryWriter`）
+        .task(id: store.isMember) { await writeDueSummaries() }
         // 用 sheet 而不是 push：统计页是「看数据」的地方，点一天只是顺手翻一眼，
         // 看完该回到统计页而不是陷进日记的导航栈里。
         .sheet(item: $pickedDay) { picked in
@@ -93,7 +171,60 @@ struct StatsView: View {
         }
     }
 
-    private func statCard(_ title: String, value: String, unit: String, theme: any AppTheme) -> some View {
+    /// 刚结束、没写过、够 3 篇的那几期，一期一期写（不并发，免得一进来连问三次）
+    private func writeDueSummaries() async {
+        guard store.isMember, env.session.isLoggedIn else { return }
+        for item in MoodSummaryWriter.due(entries: entries, summaries: summaries) {
+            writingSummaries.insert(item.period)
+            do {
+                try await MoodSummaryWriter.write(item.period, interval: item.interval, request: item.request,
+                                                  ai: env.ai, context: modelContext)
+                failedSummaries.remove(item.period)
+            } catch {
+                // 写不成不弹窗（不是用户刚做的动作）：卡片上写一句「没写成」并给重试，日志打完整 error
+                let ns = error as NSError
+                NSLog("⚠️ [MoodSummary] 写 %@ 失败 domain=%@ code=%ld %@", item.period.rawValue, ns.domain, ns.code, "\(error)")
+                failedSummaries.insert(item.period)
+            }
+            writingSummaries.remove(item.period)
+        }
+    }
+
+    /// 星期按 App 语言排（一周从哪天开始、叫什么都跟着语言）
+    private var localeCalendar: Calendar {
+        var c = Calendar.current
+        c.locale = appLocale
+        return c
+    }
+
+    private func weekdaySymbol(_ weekday: Int) -> String {
+        localeCalendar.shortStandaloneWeekdaySymbols[(weekday - 1) % 7]
+    }
+
+    private func sectionTitle(_ title: LocalizedStringKey, theme: any AppTheme) -> some View {
+        Text(title)
+            .font(theme.labelFont)
+            .foregroundStyle(theme.textSecondary)
+            .tracking(theme.letterSpacingWide)
+    }
+
+    private func insightCard<Content: View>(_ title: LocalizedStringKey, theme: any AppTheme,
+                                            @ViewBuilder content: () -> Content) -> some View {
+        let body = content()
+        return ThemedCard {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(title)
+                    .font(theme.captionFont)
+                    .foregroundStyle(theme.textTertiary)
+                    .tracking(theme.letterSpacingWide)
+                body
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+    }
+
+    /// 标题必须是 `LocalizedStringKey`：以前是 `String`，`Text(String)` 不查表，外语下这三张卡一直显示中文
+    private func statCard(_ title: LocalizedStringKey, value: String, unit: String, theme: any AppTheme) -> some View {
         ThemedCard {
             VStack(spacing: 4) {
                 Text(value)
@@ -356,6 +487,180 @@ private struct MoodDonutChart: View {
                     }
                 }
             }
+        }
+    }
+}
+
+// MARK: - 情绪捕捉的几张图
+
+/// 心情走势：每一格的平均愉悦度连成线，点的颜色是那一档的颜色；中间虚线是「不悲不喜」。
+/// 没记心情的那一格不画（「没写」不等于「不悲不喜」）
+private struct MoodTrendChart: View {
+    let points: [MoodInsights.TrendPoint]
+    let byMonth: Bool
+    let theme: any AppTheme
+
+    var body: some View {
+        if points.count < 2 {
+            Text("再写几篇，就能看出走势")
+                .font(theme.labelFont)
+                .foregroundStyle(theme.textTertiary)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .padding(.vertical, 32)
+        } else {
+            Chart {
+                    RuleMark(y: .value("不悲不喜", 0))
+                        .lineStyle(StrokeStyle(lineWidth: 0.6, dash: [3, 3]))
+                        .foregroundStyle(theme.textTertiary.opacity(0.5))
+                    ForEach(points) { p in
+                        LineMark(x: .value("日期", p.start, unit: byMonth ? .month : .day),
+                                 y: .value("心情", p.valence))
+                            .interpolationMethod(.monotone)
+                            .lineStyle(StrokeStyle(lineWidth: 1.2))
+                            .foregroundStyle(theme.textTertiary.opacity(0.55))
+                        PointMark(x: .value("日期", p.start, unit: byMonth ? .month : .day),
+                                  y: .value("心情", p.valence))
+                            .symbolSize(48)
+                            .foregroundStyle(p.level.tint)
+                    }
+                }
+                .chartYScale(domain: -1...1)
+                .chartYAxis(.hidden)
+                .chartXScale(range: .plotDimension(startPadding: 8, endPadding: 20))
+                // 日期按 App 语言排（中文「10/4」）：FormatStyle 自带 locale，不跟视图环境，得单独给
+                .chartXAxis {
+                    AxisMarks(values: .automatic(desiredCount: 4)) { _ in
+                        AxisValueLabel(format: (byMonth ? Date.FormatStyle.dateTime.month(.abbreviated) : .dateTime.month(.defaultDigits).day()).locale(appLocale))
+                            .foregroundStyle(theme.textTertiary)
+                    }
+                }
+                // 纵轴不画，只在图里左上、左下各写一个字：上面是愉快、下面是低落
+                .chartOverlay { proxy in
+                    GeometryReader { geo in
+                        if let plot = proxy.plotFrame.map({ geo[$0] }) {
+                            ZStack(alignment: .topLeading) {
+                                Text("愉快").offset(x: plot.minX, y: plot.minY)
+                                Text("低落").offset(x: plot.minX, y: plot.maxY - 13)
+                            }
+                            .font(.system(size: 10))
+                            .foregroundStyle(theme.textTertiary.opacity(0.8))
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        }
+                    }
+                }
+                .frame(height: 150)
+        }
+    }
+}
+
+/// 一行「这一组的平均心情落在哪」：左边是组名，中间一条从低落到愉快的刻度（颜色顺着九档），点在平均值上，
+/// 右边是那一档的名字和篇数。天气、地点、星期、时段共用，几张卡片读法一样
+private struct MoodScaleRow: View {
+    let title: Text
+    let group: MoodInsights.Group
+    let theme: any AppTheme
+
+    var body: some View {
+        HStack(spacing: 10) {
+            title
+                .font(theme.labelFont)
+                .foregroundStyle(theme.textSecondary)
+                .lineLimit(1)
+                .frame(width: 64, alignment: .leading)
+
+            GeometryReader { geo in
+                let width = geo.size.width
+                let x = (min(max(group.valence, -1), 1) + 1) / 2 * width
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(LinearGradient(colors: MoodLevel.allCases.map { $0.tint.opacity(0.3) },
+                                             startPoint: .leading, endPoint: .trailing))
+                        .frame(height: 4)
+                    // 正中是「不悲不喜」
+                    Rectangle()
+                        .fill(theme.textTertiary.opacity(0.4))
+                        .frame(width: 1, height: 10)
+                        .offset(x: width / 2 - 0.5)
+                    Circle()
+                        .fill(group.level.tint)
+                        .frame(width: 12, height: 12)
+                        .overlay(Circle().stroke(theme.cardBackground, lineWidth: 2))
+                        .offset(x: x - 6)
+                }
+                .frame(width: width, height: geo.size.height)
+            }
+            .frame(height: 14)
+
+            Text(group.level.title)
+                .font(.system(size: 12))
+                .foregroundStyle(theme.textSecondary)
+                .lineLimit(2)
+                .multilineTextAlignment(.trailing)
+                .frame(width: 76, alignment: .trailing)
+            Text("\(group.count)")
+                .font(theme.labelFont)
+                .foregroundStyle(theme.textTertiary)
+                .frame(width: 24, alignment: .trailing)
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// 最常出现的情绪词：圆点是这个词所在那一档的颜色，条的长短按次数
+private struct LabelCountList: View {
+    let items: [MoodInsights.LabelCount]
+    let theme: any AppTheme
+
+    var body: some View {
+        let top = Double(items.map(\.count).max() ?? 1)
+        VStack(spacing: 10) {
+            ForEach(items) { item in
+                HStack(spacing: 10) {
+                    Circle()
+                        .fill(item.label.level.tint)
+                        .frame(width: 8, height: 8)
+                    Text(item.label.title)
+                        .font(theme.labelFont)
+                        .foregroundStyle(theme.textSecondary)
+                        .lineLimit(1)
+                        .frame(width: 64, alignment: .leading)
+                    GeometryReader { geo in
+                        Capsule()
+                            .fill(item.label.level.tint.opacity(0.55))
+                            .frame(width: max(6, geo.size.width * Double(item.count) / top), height: 6)
+                            .frame(maxHeight: .infinity, alignment: .center)
+                    }
+                    .frame(height: 14)
+                    Text("\(item.count)")
+                        .font(theme.labelFont)
+                        .foregroundStyle(theme.textTertiary)
+                        .frame(width: 24, alignment: .trailing)
+                }
+            }
+        }
+    }
+}
+
+extension MoodInsights.WeatherKind {
+    var title: LocalizedStringKey {
+        switch self {
+        case .clear: return "晴"
+        case .cloudy: return "多云"
+        case .rain: return "雨"
+        case .snow: return "雪"
+        case .fog: return "雾霾"
+        case .wind: return "大风"
+        }
+    }
+}
+
+extension MoodInsights.DayPart {
+    var title: LocalizedStringKey {
+        switch self {
+        case .morning: return "早上"
+        case .afternoon: return "下午"
+        case .evening: return "晚上"
+        case .night: return "深夜"
         }
     }
 }

@@ -209,7 +209,7 @@ func migrateEntriesToSingleNotebook(context: ModelContext) {
 /// 把**完全同名**的日记本记录合成一本。幂等，每次回到前台跑一次。
 ///
 /// **为什么会有同名记录**：新设备首启时 iCloud 往往还没同步下来，
-/// `ensureDefaultTagsExist` 看库是空的就先建一套「生活 / 读书笔记 / 旅行 / 工作」，
+/// 早先的 `ensureDefaultTagsExist` 看库是空的就先建一套「生活 / 读书笔记 / 旅行 / 工作」（2026-10-27 起不再建默认日记本），
 /// 之后同步下来的又是一套。CloudKit 不支持唯一约束，只能事后合。
 ///
 /// **为什么合并是安全的**：日记靠名字挂在日记本上，同名的两条记录挂着的是同一批日记，

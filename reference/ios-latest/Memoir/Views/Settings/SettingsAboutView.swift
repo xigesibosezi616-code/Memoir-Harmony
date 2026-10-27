@@ -1,3 +1,4 @@
+import SwiftData
 import SwiftUI
 
 /// 设置 →「关于」二级页。
@@ -10,6 +11,8 @@ struct SettingsAboutView: View {
     @AppStorage(LetterDelivery.practicePostingKey) private var practicePosting = false
     /// 是不是测试包。TestFlight 要运行时问 StoreKit，进页面再问（`LetterDelivery.detectTestBuild`）
     @State private var isTestBuild = LetterDelivery.isTestBuild
+    @Environment(\.modelContext) private var modelContext
+    @Environment(AppEnvironment.self) private var env
     @Environment(ThemeManager.self) private var themeManager
 
     var body: some View {
@@ -27,14 +30,14 @@ struct SettingsAboutView: View {
                 } label: {
                     SettingsRow(icon: "lock.shield", title: "隐私政策", theme: theme)
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
 
                 NavigationLink {
                     LegalDocumentView(document: .terms)
                 } label: {
                     SettingsRow(icon: "doc.text", title: "用户协议", theme: theme)
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
 
                 HStack {
                     SettingsRow(icon: "info.circle", title: "版本", theme: theme)
@@ -43,7 +46,7 @@ struct SettingsAboutView: View {
                         .font(theme.captionFont)
                         .foregroundStyle(theme.textTertiary)
                 }
-                .listRowBackground(theme.cardBackground)
+                .listRowBackground(themeManager.settingsCard)
             } footer: {
                 // 国内合规硬性要求：App 内必须可见 ICP 备案号与主办单位。
                 // 放在 footer 而不是单开一行 —— 这是给监管看的，不是给用户点的。
@@ -65,7 +68,7 @@ struct SettingsAboutView: View {
                             .foregroundStyle(theme.textPrimary)
                     }
                     .tint(theme.accent)
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(themeManager.settingsCard)
                 } header: {
                     Text(verbatim: "TEST BUILD")
                         .font(theme.captionFont)
@@ -83,7 +86,7 @@ struct SettingsAboutView: View {
                             .foregroundStyle(theme.textPrimary)
                     }
                     .tint(theme.accent)
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(themeManager.settingsCard)
 
                     NavigationLink {
                         PracticeLetterView()
@@ -92,7 +95,18 @@ struct SettingsAboutView: View {
                             .font(theme.bodyFont)
                             .foregroundStyle(theme.textPrimary)
                     }
-                    .listRowBackground(theme.cardBackground)
+                    .listRowBackground(themeManager.settingsCard)
+
+                    // 新手指引从头再走一遍（欢迎信恢复成没拆过），给测试的人反复看
+                    Button {
+                        FirstStep.begin(in: modelContext, toName: env.session.user?.displayName)
+                        env.errors.present("First-run guide restarted", kind: .success, duration: 2)
+                    } label: {
+                        Text(verbatim: "Replay first-run guide")
+                            .font(theme.bodyFont)
+                            .foregroundStyle(theme.textPrimary)
+                    }
+                    .listRowBackground(themeManager.settingsCard)
                 } footer: {
                     Text(verbatim: "Practice posting: push the stack into the slot as often as you like. Plays the animation, sound and haptics only; no letter is written, nothing is sent, the stack stays. Practice opening: a sealed letter to open again and again; nothing is read or sent. Debug and TestFlight builds only.")
                         .font(theme.labelFont)

@@ -17,6 +17,14 @@ struct ContentView: View {
     /// 用户同意过的政策版本。空串 = 从没同意过。
     /// 存版本号而不是布尔值，政策更新后才能重新征求同意（见 `LegalDocument.currentVersion`）
     @AppStorage("acceptedLegalVersion") private var acceptedLegalVersion = ""
+    /// 自己那位笔友的名字。老用户还没起名的，进了主界面先补起一次（`PenPalNamingSheet`）
+    @AppStorage(PenPalName.storageKey) private var penPalName = ""
+    /// 底栏出不出搜索那颗圆（设置 → 外观，默认关）
+    @AppStorage(DiarySearch.tabStorageKey) private var showSearchTab = false
+    /// 新手指引走到哪一步（`FirstStep`）：要换 tab 的那几步在底栏上方指一下
+    @AppStorage(FirstStep.storageKey) private var firstStepRaw = 0
+    /// 第一封回信是谁写的（`FirstReplyWatcher` 记下）
+    @AppStorage(FirstStep.replyFromKey) private var firstReplyFrom = ""
     @State private var selectedTab = 0
     /// 快捷操作「应用图标」→ 让设置页直接推出图标选择页
     @State private var openAppIconPicker = false
@@ -134,41 +142,36 @@ struct ContentView: View {
     private var content: some View {
         if hasCompletedOnboarding {
             TabView(selection: $selectedTab) {
-                HomeView()
-                    .tabItem {
-                        Image(systemName: "book.fill")
-                        Text("记录")
+                Tab("记录", systemImage: "book.fill", value: 0) {
+                    HomeView()
+                }
+                Tab("日记本", systemImage: "books.vertical.fill", value: 1) {
+                    BookshelfView()
+                }
+                Tab("邮筒", systemImage: "envelope.fill", value: 2) {
+                    PostBoxView(openLetterbox: $openLetterbox)
+                }
+                Tab("设置", systemImage: "gearshape", value: 3) {
+                    SettingsView(openAppIconPicker: $openAppIconPicker)
+                        .id(settingsResetID)
+                }
+                // 搜日记（2026-10-26）：系统原生的搜索标签 —— 单独一颗放大镜在右边，点开在底部展开搜索框（见文件末尾的 `SearchTabStandsApart`）。
+                // 设置 → 外观里打开才有，默认关（`DiarySearch.tabStorageKey`）
+                if showSearchTab {
+                    Tab("搜索", systemImage: "magnifyingglass", value: 4, role: .search) {
+                        DiarySearchView()
                     }
-                    .tag(0)
-
-                BookshelfView()
-                    .tabItem {
-                        Image(systemName: "books.vertical.fill")
-                        Text("日记本")
-                    }
-                    .tag(1)
-
-                PostBoxView(openLetterbox: $openLetterbox)
-                    .tabItem {
-                        Image(systemName: "envelope.fill")
-                        Text("邮筒")
-                    }
-                    .tag(2)
-
-                SettingsView(openAppIconPicker: $openAppIconPicker)
-                    .id(settingsResetID)
-                    .tabItem {
-                        Image(systemName: "gearshape")
-                        Text("设置")
-                    }
-                    .tag(3)
+                }
             }
+            .modifier(SearchTabStandsApart())
             .tint(themeManager.current.accent)
             .toolbarBackground(.thinMaterial, for: .tabBar)
             .toolbarBackgroundVisibility(.visible, for: .tabBar)
             // 🔴 在**离开**设置 tab 时重置，不在进入时 —— 否则桌面快捷操作
             //「应用图标」切进设置的同一刻要推出的图标页，会被这次重置冲掉
             .onChange(of: selectedTab) { old, new in
+                // 新手指引 ④⑤：去邮筒寄第一封时，邮筒那一页可能还停在上次打开的信箱里 —— 退回邮筒首页，那叠信才看得见
+                if new == 2, [.sendFirst, .pushPile].contains(FirstStep.current) { openLetterbox = false }
                 guard old == 3, new != 3 else { return }
                 openAppIconPicker = false
                 settingsResetID = UUID()
@@ -178,9 +181,7 @@ struct ContentView: View {
             .task {
                 MediaStorage.reconcileWithCloud(in: modelContext)
             }
-            .onAppear {
-                ensureDefaultTagsExist()
-            }
+            // 不再建默认日记本（2026-10-27 用户定）：新用户只有「全部日记」，第一次写的时候由新手指引带着自己做一本
             .overlay(alignment: .top) {
                 if let toast = env.errors.current {
                     ErrorToastView(toast: toast) { env.errors.dismiss() }
@@ -190,22 +191,22 @@ struct ContentView: View {
                 }
             }
             .animation(.spring(duration: 0.35), value: env.errors.current)
+            // 邮筒上「有没读的信」的小红点（没拆的欢迎信、第一封回信也靠它）
+            .overlay { PostBoxUnreadDot(showsSearch: showSearchTab, color: themeManager.current.destructive, visible: selectedTab != 4) }
+            .overlay { tabGuide }
+            // 回信读过了才被杀掉的：重进时直接到结束语
+            .onAppear { FirstStep.reconcile(in: modelContext) }
+            .animation(.easeOut(duration: 0.3), value: firstStepRaw)
+            // 老用户补起名（首启时起名还能跳过的那批）。挂在 TabView 上，不和外层的备份导入页抢同一个 sheet 槽位；
+            // 只读绑定：起好名字 `needsNaming` 变成 false 才收起，除此之外关不掉。等隐私同意之后再弹
+            .sheet(isPresented: Binding(get: { !needsLegalConsent && PenPalName.needsNaming(penPalName) },
+                                        set: { _ in })) {
+                PenPalNamingSheet()
+                    .environment(themeManager)
+            }
         } else {
             OnboardingView()
         }
-    }
-
-    private func ensureDefaultTagsExist() {
-        let descriptor = FetchDescriptor<Tag>()
-        let count = (try? modelContext.fetchCount(descriptor)) ?? 0
-        guard count == 0 else { return }
-        let defaultNames = ["生活", "读书笔记", "旅行", "工作"]
-        for (index, name) in defaultNames.enumerated() {
-            let tag = Tag(name: name)
-            tag.sortOrder = index
-            modelContext.insert(tag)
-        }
-        try? modelContext.save()
     }
 
     /// 把当前生效的会员交易交给服务器。没登录、没会员时什么也不做。
@@ -233,8 +234,69 @@ struct ContentView: View {
         .modelContainer(for: [JournalEntry.self, Tag.self], inMemory: true)
 }
 
+extension ContentView {
+    /// 新手指引里要换 tab 的那几步（回记录写第一篇、去邮筒寄出、回信到了去邮筒），和两张卡（寄出去了、结束语）
+    @ViewBuilder
+    fileprivate var tabGuide: some View {
+        let theme = themeManager.current
+        // 按阶段，不按刚走到哪一步：中途杀掉程序再进来停在别的 tab，也知道该往哪去
+        switch FirstStep(rawValue: firstStepRaw) ?? .off {
+        case .writeFirst, .createNotebook, .compose:
+            if selectedTab != 0 {
+                GuideTabHint(text: "试着写下你的第一篇日记吧，\n回到「记录」", tab: 0, showsSearch: showSearchTab, theme: theme)
+            }
+        case .sendFirst, .pushPile:
+            if selectedTab != 2 {
+                GuideTabHint(text: "你已经写下一篇日记了，\n去「邮筒」试着把它寄给你的笔友", tab: 2, showsSearch: showSearchTab, theme: theme)
+            }
+        case .sent:
+            // ⑥ 第一封寄出去了：说一声会有回信（点「好」以后静静等着）
+            ZStack {
+                Color.black.opacity(0.22).ignoresSafeArea()
+                GuideCard(text: "信寄出去了。\n\(PenPalName.display(penPalName))读完会给你回信，几个小时后就到，会放进信箱。",
+                          button: "好", theme: theme) {
+                    withAnimation(.easeOut(duration: 0.3)) { FirstStep.advance(to: .waitReply, from: [.sent]) }
+                }
+            }
+        case .replyArrived:
+            if selectedTab != 2 {
+                GuideTabHint(text: "有一封来自\(firstReplyFrom)的回信，\n去「邮筒」看看", tab: 2, showsSearch: showSearchTab, theme: theme)
+            }
+        case .finale:
+            // ⑩ 结束语：读完第一封回信
+            ZStack {
+                Color.black.opacity(0.22).ignoresSafeArea()
+                GuideCard(text: "请多记录你的生活。\n点点滴滴都可以留在这里，想分享了，就寄给你的笔友。",
+                          button: "好", theme: theme) {
+                    withAnimation(.easeOut(duration: 0.3)) { FirstStep.finish() }
+                }
+            }
+        case .waitReply, .readReply, .off:
+            EmptyView()
+        }
+        // ⑥⑦ 寄出去以后盯着第一封回信
+        if [.sent, .waitReply].contains(FirstStep(rawValue: firstStepRaw)) {
+            FirstReplyWatcher()
+        }
+    }
+}
+
 /// 会员同步的触发键：签名交易或登录态任一变化就重新同步一次
 private struct MembershipSyncKey: Equatable {
     let jws: String?
     let token: String?
+}
+
+/// 搜索 tab 单独一颗圆、不并进标签栏（用户定，2026-10-27）：点那颗放大镜就直接激活底部的搜索框。
+/// 🔴 **不加这句，iOS 27 会把搜索 tab 并进标签栏当第五格**（iOS 26 默认是单独一颗圆）——
+/// 在 27.0 模拟器上用 harness 实测：`.search` 不加 / `.searchable` 挂在 TabView 上都会并进去，只有这句和 27 新增的 `.prominent` 单独成圆；
+/// `.prominent` 的搜索框跑到页面顶上，和 26 不一样，所以选这句。点搜索框旁的 ✕ 回到原来那个 tab（系统行为）
+private struct SearchTabStandsApart: ViewModifier {
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content.tabViewSearchActivation(.searchTabSelection)
+        } else {
+            content
+        }
+    }
 }

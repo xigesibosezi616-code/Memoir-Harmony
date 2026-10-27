@@ -58,7 +58,7 @@ struct SettingsSubpage<Content: View>: View {
             content
         }
         .scrollContentBackground(.hidden)
-        .background(theme.background)
+        .background(themeManager.settingsPage)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
