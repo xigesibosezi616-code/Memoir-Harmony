@@ -22,7 +22,11 @@ import {
   judgePostBoxState,
   outgoingTitleOf,
   outgoingItemsOf,
-  hasUnreadLetter
+  hasUnreadLetter,
+  inTransitLettersOf,
+  postmarkPlace,
+  postmarkDateText,
+  postmarkInkHex
 } from '../../main/ets/models/PostBoxLogic';
 
 const NOW = 10_000_000_000; // 毫秒
@@ -266,6 +270,66 @@ export default function postBoxLogicTest() {
       const pending = makeLetter('L3', LetterStatus.Pending, '回信', 5000);
       pending.deliveredAt = NOW + 1000; // 还没到
       expect(hasUnreadLetter([pending], NOW)).assertFalse();
+    })
+
+    // ---- 邮戳 + 在路上（iOS inTransitLetters / Postmark.place 同款） ----
+
+    it('inTransitLettersTakeOwnedWritingAndUnarrived', 0, () => {
+      const owned = new Set<string>(['W1']);
+      const writingMine = makeLetter('W1', LetterStatus.Generating, '', 5000);
+      const writingOther = makeLetter('W2', LetterStatus.Generating, '', 6000); // 不归本机
+      const pending = makeLetter('P1', LetterStatus.Pending, '回信', 4000);
+      pending.deliveredAt = NOW + 3600_000; // 写好了还没到
+      const arrived = makeLetter('A1', LetterStatus.Pending, '回信', 3000);
+      arrived.deliveredAt = NOW - 1000; // 已到
+      const bounced = makeLetter('F1', LetterStatus.Failed, '', 7000);
+      const transit = inTransitLettersOf([bounced, writingOther, pending, writingMine, arrived],
+        owned, NOW);
+      // 本机写信中 + 未到的真信；另一台设备投的写信中 / 已到的 / 退回的都不算
+      expect(transit.length).assertEqual(2);
+      expect(transit[0].id).assertEqual('W1');
+      expect(transit[1].id).assertEqual('P1');
+    })
+
+    it('inTransitLettersSortLatestFirst', 0, () => {
+      const owned = new Set<string>(['L1', 'L2']);
+      const older = makeLetter('L1', LetterStatus.Generating, '', 5000);
+      const newer = makeLetter('L2', LetterStatus.Generating, '', 9000);
+      const transit = inTransitLettersOf([older, newer], owned, NOW);
+      expect(transit[0].id).assertEqual('L2');
+    })
+
+    it('postmarkPlaceTakesFirstNonEmptyFirstSegment', 0, () => {
+      // 空白 / 空串跳过，取第一个有字的；只写第一段（城市或地标）
+      expect(postmarkPlace([undefined, '  ', '上海 静安区', '北京'])).assertEqual('上海');
+      // 没有任何地点 → 空串（只盖日期）
+      expect(postmarkPlace([undefined, ''])).assertEqual('');
+      expect(postmarkPlace([])).assertEqual('');
+    })
+
+    it('postmarkPlaceTruncatesByScriptWidth', 0, () => {
+      // 中日韩方块字最多 8 个
+      const wide = '一二三四五六七八九';
+      expect(postmarkPlace([wide])).assertEqual('一二三四五六七八');
+      // 拉丁字母最多 16 个
+      const latin = 'abcdefghijklmnopq';
+      expect(postmarkPlace([latin])).assertEqual('abcdefghijklmnop');
+      // 短的不截
+      expect(postmarkPlace(['海淀'])).assertEqual('海淀');
+    })
+
+    it('postmarkDateTextPadsYearMonthDay', 0, () => {
+      // 2026.10.11 这种各国写法差不多的格式（本地时区）
+      const d = new Date(2026, 9, 28, 12, 0, 0);
+      expect(postmarkDateText(d.getTime())).assertEqual('2026.10.28');
+      const single = new Date(2026, 0, 5, 0, 0, 0);
+      expect(postmarkDateText(single.getTime())).assertEqual('2026.01.05');
+    })
+
+    it('postmarkInkFollowsTheme', 0, () => {
+      expect(postmarkInkHex('bamboo')).assertEqual('#B5473A');
+      expect(postmarkInkHex('leather')).assertEqual('#C8A87C');
+      expect(postmarkInkHex('kent')).assertEqual('#5F7896');
     })
 
     // ---- parseRhythmResponse（GET /me/rhythm 的形状） ----

@@ -187,3 +187,63 @@ export function outgoingItemsOf(entries: JournalEntry[]): OutgoingItem[] {
 export function hasUnreadLetter(letters: Letter[], nowMs: number): boolean {
   return letters.some((letter: Letter): boolean => LetterDelivery.isUnread(letter, nowMs));
 }
+
+/**
+ * 在路上的信（iOS PostBoxView.inTransitLetters 同款）：本机投了还在写的
+ * + 写好了还没到的，按寄出时刻从新到旧。底部「邮戳 + 在路上」拿最新那封渲染。
+ */
+export function inTransitLettersOf(letters: Letter[], ownedLetterIds: Set<string>,
+  nowMs: number): Letter[] {
+  const transit: Letter[] = letters.filter((letter: Letter): boolean =>
+    (LetterDelivery.isWriting(letter) && ownedLetterIds.has(letter.id)) ||
+    LetterDelivery.isInTransit(letter, nowMs));
+  transit.sort((a: Letter, b: Letter): number => b.generatedAt - a.generatedAt);
+  return transit;
+}
+
+/** 邮戳上的日期：各国写法差不多，统一「2026.10.11」（iOS Postmark.dateText 同款） */
+export function postmarkDateText(dateMs: number): string {
+  const d = new Date(dateMs);
+  const year = d.getFullYear();
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  const pad = (n: number): string => (n < 10 ? '0' + n : '' + n);
+  return `${year}.${pad(month)}.${pad(day)}`;
+}
+
+/**
+ * 邮戳上写哪个地方（iOS Postmark.place(from:) 同款）：这封信里最近一篇记了地点的
+ * 日记的地名，只写第一段（城市或地标），太长截短——中日韩方块字 8 个、拉丁 16 个。
+ */
+export function postmarkPlace(locations: Array<string | undefined>): string {
+  let raw: string | undefined = undefined;
+  for (const location of locations) {
+    if (location !== undefined) {
+      const trimmed = location.trim();
+      if (trimmed.length > 0) {
+        raw = trimmed;
+        break;
+      }
+    }
+  }
+  if (raw === undefined) {
+    return '';
+  }
+  const segments = raw.split(' ');
+  const first = segments.length > 0 ? segments[0] : raw;
+  const isWide = Array.from(first).some((ch: string): boolean => ch.charCodeAt(0) >= 0x2E80);
+  const limit = isWide ? 8 : 16;
+  return first.length > limit ? first.substring(0, limit) : first;
+}
+
+/** 邮戳的油墨色（iOS Postmark.ink 同款）：素笺朱红、肯特灰蓝、皮革浅棕 */
+export function postmarkInkHex(themeId: string): string {
+  switch (themeId) {
+    case 'leather':
+      return '#C8A87C';
+    case 'kent':
+      return '#5F7896';
+    default:
+      return '#B5473A';
+  }
+}

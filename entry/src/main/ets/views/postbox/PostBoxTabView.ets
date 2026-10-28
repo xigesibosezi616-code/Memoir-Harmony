@@ -42,7 +42,10 @@ import {
   PostBoxStateInput,
   judgePostBoxState,
   outgoingItemsOf,
-  hasUnreadLetter
+  hasUnreadLetter,
+  inTransitLettersOf,
+  postmarkPlace,
+  postmarkInkHex
 } from '../../models/PostBoxLogic';
 import { AppPrefs, PREF_KEY_PEN_PAL_NAME } from '../../services/AppPrefs';
 import { STORAGE_KEY_LETTER_OUTBOX_TICK } from '../../services/LetterOutboxService';
@@ -54,6 +57,7 @@ import {
 } from '../../services/ImmersiveChrome';
 import { LetterPalette } from './LetterPalette';
 import { OutgoingPile } from './OutgoingPile';
+import { Postmark } from './Postmark';
 import { PostBoxMetrics } from './PostBoxMetrics';
 
 const DOMAIN = 0x0000;
@@ -95,6 +99,14 @@ export struct PostBoxTabView {
   /** 邮筒插画左上 1 像素的颜色，当整页底色；取不到退回主题背景 */
   @State private pageColor: string | undefined = undefined;
   @State private penPalName: string = '青鸟';
+  /** 「邮戳 + 在路上」快照（reload 时备好；Postmark 地点要查关联日记，渲染时不能异步） */
+  @State private transitPlace: string = '';
+  @State private transitHasOthers: boolean = false;
+  /** 最新一封在途信快照（reload 时与上面几个一起备好）。
+   *  排雷（实机实证）：@Builder 按值传参（表达式实参）不随状态刷新——
+   *  首渲染 letters 未加载时以 undefined 落地，reload 后即使 if 分支
+   *  不切换也不会重刷，下半区就一直空着。快照进 @State、builder 无参读它 */
+  @State private transitLetter: Letter | undefined = undefined;
   private navPathStack: NavPathStack = new NavPathStack();
   private store: relationalStore.RdbStore | undefined = undefined;
   private nowTimerId: number = -1;
@@ -176,6 +188,26 @@ export struct PostBoxTabView {
           }
         }
         this.heldEntryIds = await LetterRepository.entryIdsForLetters(store, bouncedIds);
+        // 「邮戳 + 在路上」的快照（iOS PostBoxView.latestInTransit + Postmark.place）：
+        // 最新那封在途信的寄出地点取它关联日记记下的地方，是否还有别的信也在路上
+        const transit = inTransitLettersOf(this.letters, owned, this.nowMs);
+        const latestTransit = transit.length > 0 ? transit[0] : undefined;
+        if (latestTransit !== undefined) {
+          const linkedIds = await LetterRepository.entryIdsForLetters(store, [latestTransit.id]);
+          const locations: Array<string | undefined> = [];
+          for (const entry of this.entries) {
+            if (linkedIds.has(entry.id)) {
+              locations.push(entry.locationInfo);
+            }
+          }
+          this.transitLetter = latestTransit;
+          this.transitPlace = postmarkPlace(locations);
+          this.transitHasOthers = transit.length > 1;
+        } else {
+          this.transitLetter = undefined;
+          this.transitPlace = '';
+          this.transitHasOthers = false;
+        }
         // 新一轮候选出来，旧的勾选清掉（默认全勾；R-POST-04）
         this.excluded = new Set<string>();
       } catch (err) {
@@ -219,6 +251,9 @@ export struct PostBoxTabView {
       LetterDelivery.isInTransit(letter, this.nowMs) ||
       (LetterDelivery.isWriting(letter) && owned.has(letter.id)));
   }
+
+  /** 最新一封在路上的信（iOS latestInTransit）：见 this.transitLetter
+   *  （reload 时备好的快照，「邮戳 + 在路上」拿它渲染） */
 
   /** 勾上的那几篇（状态行「一篇都没勾」要区分） */
   private checkedCount(candidates: JournalEntry[]): number {
@@ -438,12 +473,15 @@ export struct PostBoxTabView {
           .margin({ left: 32, right: 32 })
 
         // 下面：固定高度叠纸（度量恒定，5.3 投信动画要从这叠纸飞到投信口，
-        // 高度不能变）。横向 28vp 内缩（iOS 同款）走 padding（排雷 b）
+        // 高度不能变）。横向 28vp 内缩（iOS 同款）走 padding（排雷 b）。
+        // 内容垂直居中（iOS ZStack{Color.clear; bottom} 同款：叠纸满高无感，
+        // 邮戳 / 退回卡不满高时居中不贴顶）
         Column() {
           this.bottomArea()
         }
         .height(this.metrics().pileHeightVp)
         .padding({ left: 28, right: 28 })
+        .justifyContent(FlexAlign.Center)
         .alignItems(HorizontalAlign.Center)
         .width('100%')
         .constraintSize({ maxWidth: this.metrics().contentMaxWidthVp })
@@ -535,6 +573,71 @@ export struct PostBoxTabView {
       })
       .width('100%')
       .opacity(0.5)
+    } else {
+      // 其余状况：最新一封在路上的信盖一枚邮戳 +「在路上」（iOS default 分支同款）；
+      // 没有在途信（没新日记 / 一篇都没有 / 没登录）下面就是空的
+      this.inTransitNote()
+    }
+  }
+
+  /**
+   * 邮戳 + 在路上（R-POST-07 寄出后的下半区；iOS PostBoxNotes.InTransitNote 权威）：
+   * 一枚日戳（寄出日期 + 地点弧排）+「X 寄出」+「在路上」胶囊 +
+   * 「回信会在三天内寄到你的信箱」。投信动画（那叠日记飞进投信口）是 5.6，
+   * 这里先静态摆上，别让下半区空着一块。
+   * 无参、只读 @State（transitLetter 一族 reload 时备好）：@Builder 表达式
+   * 传参不随状态刷新（见字段注释），按值传 letter 会永远停在首渲染的 undefined。
+   */
+  @Builder
+  private inTransitNote() {
+    if (this.transitLetter !== undefined) {
+      Row({ space: 20 }) {
+        Postmark({
+          dateMs: this.transitLetter.generatedAt,
+          place: this.transitPlace,
+          ink: postmarkInkHex(this.theme.id),
+          stampSizeVp: 86
+        })
+        Column({ space: 8 }) {
+          Text($r('app.string.s_87363c0bec',
+            shortDate(new Date(this.transitLetter.generatedAt), this.appLanguage)))
+            .fontSize(this.theme.bodyFont.size)
+            .fontWeight(this.theme.bodyFont.weight)
+            .fontFamily(this.theme.bodyFont.family)
+            .fontColor(this.theme.textPrimary)
+            .maxLines(1)
+          Row({ space: 6 }) {
+            Text($r('app.string.s_ff0e280d48'))
+              .fontSize(11)
+              .fontWeight(FontWeight.Medium)
+              .fontColor(postmarkInkHex(this.theme.id))
+              .padding({ left: 7, right: 7, top: 2.5, bottom: 2.5 })
+              .borderRadius(12)
+              .border({
+                width: 0.8,
+                color: postmarkInkHex(this.theme.id)
+              })
+            if (this.transitHasOthers) {
+              Text($r('app.string.s_a2917545f5'))
+                .fontSize(this.theme.labelFont.size)
+                .fontWeight(this.theme.labelFont.weight)
+                .fontFamily(this.theme.labelFont.family)
+                .fontColor(this.theme.textTertiary)
+                .maxLines(1)
+            }
+          }
+          Text($r('app.string.s_54e712fa52'))
+            .fontSize(this.theme.captionFont.size)
+            .fontWeight(this.theme.captionFont.weight)
+            .fontFamily(this.theme.captionFont.family)
+            .fontColor(this.theme.textSecondary)
+            .maxLines(2)
+        }
+        .alignItems(HorizontalAlign.Start)
+        .layoutWeight(1)
+      }
+      .alignItems(VerticalAlign.Center)
+      .width('100%')
     }
   }
 
