@@ -18,6 +18,7 @@ import { AssetSessionStore } from '../services/auth/AssetSessionStore';
 import { UserSession, STORAGE_KEY_SESSION_TICK } from '../services/auth/UserSession';
 import { AuthService } from '../services/auth/AuthService';
 import { HarmonyHttpClient } from '../services/http/HarmonyHttpClient';
+import { LetterOutboxService } from '../services/LetterOutboxService';
 import {
   WANT_PARAM_DRAFT,
   STORAGE_KEY_LIVE_DRAFT_JSON,
@@ -160,7 +161,10 @@ export default class EntryAbility extends UIAbility {
         (AppStorage.get<number>(STORAGE_KEY_SESSION_TICK) ?? 0) + 1);
     });
     const auth = new AuthService(client);
-    const env = new AppEnvironment(createDefaultErrorPresenter(), chrome, session, auth);
+    // 5.3 寄信队列：构造只存依赖不读偏好（AppPrefs.load 在 initThenLoad 才跑，
+    // 负责表首次访问才从偏好懒加载）；30s 轮询 / 回前台由 MainTabsView 挂
+    const outbox = new LetterOutboxService(this.context, session, auth);
+    const env = new AppEnvironment(createDefaultErrorPresenter(), chrome, session, auth, outbox);
     this.environment = env;
     AppStorage.setOrCreate(STORAGE_KEY_APP_ENVIRONMENT, env);
   }

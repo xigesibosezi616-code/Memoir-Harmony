@@ -21,6 +21,7 @@ import {
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP
 } from '../../services/ImmersiveChrome';
 import { AppDatabase } from '../../data/Database';
+import { STORAGE_KEY_LETTER_OUTBOX_TICK } from '../../services/LetterOutboxService';
 import { LetterRepository } from '../../data/LetterRepository';
 import { LetterDelivery } from '../../models/LetterDelivery';
 import { Letter } from '../../models/Letter';
@@ -48,6 +49,8 @@ export struct LetterboxView {
   @StorageProp(STORAGE_KEY_APP_LANGUAGE) appLanguage: string = 'zh-Hans';
   @StorageProp(STORAGE_KEY_SAFE_AREA_TOP_VP) safeAreaTopVp: number = 0;
   @StorageProp(STORAGE_KEY_SAFE_AREA_BOTTOM_VP) safeAreaBottomVp: number = 0;
+  /** 寄信队列改了库里的信（补领到信）时重查——人坐在信箱页也要是最新的 */
+  @StorageProp(STORAGE_KEY_LETTER_OUTBOX_TICK) @Watch('reloadLetters') outboxTick: number = 0;
   /** 信箱数据：onShown 全量重查（读信返回、调试插信后回来都刷新） */
   @State private letters: Letter[] = [];
   /** 「此刻」（毫秒）。定时推进，让到点的信自己冒出来（R-BOX-02） */

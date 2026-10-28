@@ -176,4 +176,36 @@ export class LetterRepository {
     }
     return ids;
   }
+
+  /** 投信那一刻写关联：这封信勾上的日记（R-POST-07；已存在的关联跳过不重插） */
+  static async linkLetterEntries(store: relationalStore.RdbStore,
+    letterId: string, entryIds: string[]): Promise<void> {
+    for (const entryId of entryIds) {
+      try {
+        const values: relationalStore.ValuesBucket = {
+          'letter_id': letterId,
+          'entry_id': entryId
+        };
+        await store.insert('letter_entry', values);
+      } catch (err) {
+        // 已有同对关联（PRIMARY KEY 冲突）不算错；真插不进去只损失关联，信照寄
+        hilog.warn(DOMAIN, TAG, 'link letter_entry failed letter=%{public}s entry=%{public}s: %{public}s',
+          letterId, entryId, JSON.stringify(err));
+      }
+    }
+  }
+
+  /** 不寄了：清掉这封信的日记关联（R-POST-11，日记回到「要寄的日记」候选里） */
+  static async clearLetterEntries(store: relationalStore.RdbStore,
+    letterId: string): Promise<void> {
+    try {
+      const predicates = new relationalStore.RdbPredicates('letter_entry');
+      predicates.equalTo('letter_id', letterId);
+      await store.delete(predicates);
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'clear letter_entry failed letter=%{public}s: %{public}s',
+        letterId, JSON.stringify(err));
+      throw new Error('LetterRepository.clearLetterEntries: 清空失败');
+    }
+  }
 }

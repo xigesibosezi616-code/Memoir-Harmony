@@ -38,18 +38,22 @@ export enum PostBoxSituationKind {
 export class PostBoxStateInput {
   readonly letters: Letter[];
   readonly entries: JournalEntry[];
-  /** 退回信里关联的日记 id（调用方查 letter_entry 关联表；5.3 之前恒空集） */
+  /** 退回信里关联的日记 id（调用方查 letter_entry 关联表，只算本机负责的退回信） */
   readonly heldEntryIds: Set<string>;
+  /** 本机寄信队列负责的信 id（5.3；另一台设备投的信不归本机管，不进 Returned/JustPosted） */
+  readonly ownedLetterIds: Set<string>;
   /** GET /me/rhythm 的结果；问不到（未登录、断网）传 undefined，当作能寄（R-POST-05） */
   readonly rhythm: RhythmResponse | undefined;
   readonly isLoggedIn: boolean;
   readonly nowMs: number;
 
   constructor(letters: Letter[], entries: JournalEntry[], heldEntryIds: Set<string>,
-    rhythm: RhythmResponse | undefined, isLoggedIn: boolean, nowMs: number) {
+    ownedLetterIds: Set<string>, rhythm: RhythmResponse | undefined,
+    isLoggedIn: boolean, nowMs: number) {
     this.letters = letters;
     this.entries = entries;
     this.heldEntryIds = heldEntryIds;
+    this.ownedLetterIds = ownedLetterIds;
     this.rhythm = rhythm;
     this.isLoggedIn = isLoggedIn;
     this.nowMs = nowMs;
@@ -61,10 +65,14 @@ export class PostBoxState {
   readonly kind: PostBoxSituationKind;
   /** 这次要寄的日记（R-POST-02/03 口径；Ready/Blocked 之外为空数组） */
   readonly candidates: JournalEntry[];
+  /** Returned 时那封退回的信（最近投的；视图拿它渲染退回卡片） */
+  readonly returnedLetter?: Letter;
 
-  constructor(kind: PostBoxSituationKind, candidates: JournalEntry[]) {
+  constructor(kind: PostBoxSituationKind, candidates: JournalEntry[],
+    returnedLetter?: Letter) {
     this.kind = kind;
     this.candidates = candidates;
+    this.returnedLetter = returnedLetter;
   }
 }
 
@@ -95,13 +103,16 @@ export function lastSentAtMs(letters: Letter[]): number | undefined {
 /**
  * 邮筒页此刻的状况，按 R-POST-06 的顺序判定（先命中先算）：
  * 有退回 → 未登录 → 本机有写信中的信 → 服务端拦 → 有可寄 → 在路上 → 没新日记 → 一篇都没有。
- * 「写信中」当前用 LetterDelivery.isWriting（generating 且正文空）近似 iOS 的
- * 队列成员判定（isQueued && owns）——5.3 寄信队列接上后换队列口径。
+ * 「本机负责」看 ownedLetterIds（寄信队列的本机负责表）：另一台设备投的信
+ * （写信中 / 退回）不劫持本机的邮筒页（iOS isQueued && owns / isReturned 同款）。
  */
 export function judgePostBoxState(input: PostBoxStateInput): PostBoxState {
-  // 1. 有一封退回来了，等用户决定（最优先——哪怕没登录，退回的信也该让用户看见）
-  if (input.letters.some((letter: Letter): boolean => LetterDelivery.isBounced(letter))) {
-    return new PostBoxState(PostBoxSituationKind.Returned, []);
+  // 1. 有一封退回来了，等用户决定（最优先——哪怕没登录，退回的信也该让用户看见）。
+  //    letters 由调用方按 generated_at 倒序备好，第一个命中的就是最近投的
+  const returned = input.letters.find((letter: Letter): boolean =>
+    LetterDelivery.isBounced(letter) && input.ownedLetterIds.has(letter.id));
+  if (returned !== undefined) {
+    return new PostBoxState(PostBoxSituationKind.Returned, [], returned);
   }
   // 2. 未登录
   if (!input.isLoggedIn) {
@@ -109,7 +120,8 @@ export function judgePostBoxState(input: PostBoxStateInput): PostBoxState {
   }
   // 3. 刚投了一封、还在写（本机负责的）。候选照算：状态行要区分
   //    「信已经投进邮筒了」和「上一封信刚寄出，过一会儿再寄下一封」
-  if (input.letters.some((letter: Letter): boolean => LetterDelivery.isWriting(letter))) {
+  if (input.letters.some((letter: Letter): boolean =>
+    LetterDelivery.isWriting(letter) && input.ownedLetterIds.has(letter.id))) {
     return new PostBoxState(PostBoxSituationKind.JustPosted,
       candidateEntries(input.letters, input.entries, input.heldEntryIds));
   }

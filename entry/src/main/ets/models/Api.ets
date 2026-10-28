@@ -10,6 +10,7 @@
  * - `id` 后端 number | string 两种都发过，统一归一为 string
  * - `bindings` 只留 provider 名单（'phone' / 'apple' / …），账号页显示绑定项够用
  */
+import { ApiDates } from '../services/http/ApiDates';
 
 /** 单个第三方绑定的原样形状 */
 interface BindingRaw {
@@ -321,6 +322,144 @@ export function parseRhythmResponse(raw: string): RhythmResponse {
   }
   return new RhythmResponse(optionalString(r.tier), r.canRequestNow,
     optionalString(r.reason), optionalString(r.nextLetterAt ?? undefined));
+}
+
+// ---- 5.3 寄信 / 补领（02_BACKEND_API.md POST /letter、GET /letters）----
+
+/** POST /letter 请求里的一篇日记（02 LetterRequest.entries 元素）。
+ *  只有用户勾上的那几篇进来（R-POST-04）；textContent = 已去掉划掉字的 content，
+ *  照片 / 录音 / 地点 / 天气一律不发；**不发 userName**（昵称服务端从库里取） */
+export class LetterRequestEntry {
+  readonly title: string;
+  readonly textContent: string;
+  /** 日记属于哪一天（毫秒），序列化成 ISO 串 */
+  readonly dateMs: number;
+  /** 心情 key；'' = 没记心情（序列化时省略） */
+  readonly mood: string;
+
+  constructor(title: string, textContent: string, dateMs: number, mood: string) {
+    this.title = title;
+    this.textContent = textContent;
+    this.dateMs = dateMs;
+    this.mood = mood;
+  }
+}
+
+/** POST /letter 请求（R-OUTBOX-10：entries 由调用方按 date 倒序排好；triggerKind 一律 weekly） */
+export class LetterRequest {
+  readonly entries: LetterRequestEntry[];
+  readonly triggerKind: string;
+  /** 这几篇里出现最多的 mood；'' = 都没记心情，不发（U03 版 R-OUTBOX-10） */
+  readonly dominantMood: string;
+  /** 投信那一刻的笔友名 */
+  readonly penPalName: string;
+  /** 回信语言跟日记写的语言走（R-LETTERLANG）；5.5 落地前恒 ''（不发，服务端按简体） */
+  readonly language: string;
+
+  constructor(entries: LetterRequestEntry[], triggerKind: string, dominantMood: string,
+    penPalName: string, language: string) {
+    this.entries = entries;
+    this.triggerKind = triggerKind;
+    this.dominantMood = dominantMood;
+    this.penPalName = penPalName;
+    this.language = language;
+  }
+}
+
+/** POST /letter 成功响应（回信草稿）。id / generatedAt 本端落库用不上，不收 */
+export class LetterResponse {
+  readonly body: string;
+  readonly fromCharacter: string;
+
+  constructor(body: string, fromCharacter: string) {
+    this.body = body;
+    this.fromCharacter = fromCharacter;
+  }
+}
+
+/** GET /letters 的一条（补领只认这三样；generatedAt 归一成毫秒，±5 分钟匹配用） */
+export class LetterSummaryDTO {
+  readonly body: string;
+  readonly fromCharacter: string;
+  readonly generatedAtMs: number;
+
+  constructor(body: string, fromCharacter: string, generatedAtMs: number) {
+    this.body = body;
+    this.fromCharacter = fromCharacter;
+    this.generatedAtMs = generatedAtMs;
+  }
+}
+
+interface LetterResponseRaw {
+  body?: string;
+  fromCharacter?: string;
+}
+
+interface LetterSummaryRaw {
+  body?: string;
+  fromCharacter?: string;
+  generatedAt?: string;
+}
+
+interface LetterListResponseRaw {
+  letters?: LetterSummaryRaw[];
+}
+
+export function parseLetterResponse(raw: string): LetterResponse {
+  const r = requireObject<LetterResponseRaw>(raw);
+  return new LetterResponse(requireString(r.body, 'letter.body'),
+    requireString(r.fromCharacter, 'letter.fromCharacter'));
+}
+
+export function parseLetterListResponse(raw: string): LetterSummaryDTO[] {
+  const r = requireObject<LetterListResponseRaw>(raw);
+  if (!Array.isArray(r.letters)) {
+    throw new Error('letters missing or not an array');
+  }
+  const out: LetterSummaryDTO[] = [];
+  for (const item of r.letters) {
+    if (item === null || typeof item !== 'object') {
+      throw new Error('letters item is not an object');
+    }
+    const generatedAt = ApiDates.parse(requireString(item.generatedAt, 'letters.generatedAt'));
+    if (generatedAt === null) {
+      throw new Error('letters.generatedAt is not ISO8601');
+    }
+    out.push(new LetterSummaryDTO(requireString(item.body, 'letters.body'),
+      requireString(item.fromCharacter, 'letters.fromCharacter'), generatedAt.getTime()));
+  }
+  return out;
+}
+
+/**
+ * LetterRequest → POST /letter 请求体（纯序列化，单测覆盖）：
+ * mood / dominantMood / language 为空串时省略不发；date 毫秒 → ISO8601（服务端 toISOString 同款）。
+ */
+export function letterRequestBody(request: LetterRequest): Record<string, Object> {
+  const entries: Record<string, Object>[] = [];
+  for (const e of request.entries) {
+    const item: Record<string, Object> = {
+      'title': e.title,
+      'textContent': e.textContent,
+      'date': new Date(e.dateMs).toISOString()
+    };
+    if (e.mood.length > 0) {
+      item['mood'] = e.mood;
+    }
+    entries.push(item);
+  }
+  const body: Record<string, Object> = {
+    'entries': entries,
+    'triggerKind': request.triggerKind,
+    'penPalName': request.penPalName
+  };
+  if (request.dominantMood.length > 0) {
+    body['dominantMood'] = request.dominantMood;
+  }
+  if (request.language.length > 0) {
+    body['language'] = request.language;
+  }
+  return body;
 }
 
 /** 校验 {ok:true} 轻响应（PATCH /me；非 ok 折 Decoding 档，防 200 空/坏体静默通过） */

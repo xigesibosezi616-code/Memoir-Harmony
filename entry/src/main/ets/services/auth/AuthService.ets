@@ -13,9 +13,11 @@ import { HttpRequest } from '../http/HttpRequest';
 import { HarmonyHttpClient } from '../http/HarmonyHttpClient';
 import { AuthResponse, MeResponse, SendCodeResponse, BindPhoneResponse,
   ChangePhoneResponse, DeleteAccountResponse, RhythmResponse,
+  LetterRequest, LetterResponse, LetterSummaryDTO,
   parseAuthResponse, parseMeResponse, parseSendCodeResponse,
   parseBindPhoneResponse, parseChangePhoneResponse, parseDeleteAccountResponse,
-  parseRhythmResponse, parseOkResponse } from '../../models/Api';
+  parseRhythmResponse, parseOkResponse, parseLetterResponse,
+  parseLetterListResponse, letterRequestBody } from '../../models/Api';
 
 export class AuthService {
   private readonly client: HarmonyHttpClient;
@@ -117,5 +119,23 @@ export class AuthService {
     const request = HttpRequest.get(`${ApiConfig.BASE_URL}/me/rhythm`,
       HttpRequest.bearer(token), ApiConfig.TIMEOUT_RHYTHM_S);
     return this.client.send<RhythmResponse>(request, parseRhythmResponse);
+  }
+
+  /** POST /letter（5.3 寄信）：服务端写一封回信。响应丢了信其实已写好（服务端
+   *  「写好 → 入库 → 返回」），重发前先 fetchLetters 补领（R-OUTBOX-07）。
+   *  429 reason 在顶层、message 只有中文——分类与本地渲染在寄信队列做 */
+  async sendLetter(request: LetterRequest, token: string): Promise<LetterResponse> {
+    const httpRequest = HttpRequest.postJSON(`${ApiConfig.BASE_URL}/letter`,
+      letterRequestBody(request), HttpRequest.bearer(token), ApiConfig.TIMEOUT_SEND_LETTER_S);
+    return this.client.send<LetterResponse>(httpRequest, parseLetterResponse);
+  }
+
+  /** GET /letters?limit=N（5.3 补领）：服务端已写好的信，按 generatedAt 倒序。
+   *  只拿它补领（按正文去重），不直接显示给用户（02「补领」⚠️ 注） */
+  async fetchLetters(limit: number, token: string): Promise<LetterSummaryDTO[]> {
+    const request = HttpRequest.get(
+      `${ApiConfig.BASE_URL}/letters?limit=${limit}`, HttpRequest.bearer(token),
+      ApiConfig.TIMEOUT_FETCH_S);
+    return this.client.send<LetterSummaryDTO[]>(request, parseLetterListResponse);
   }
 }

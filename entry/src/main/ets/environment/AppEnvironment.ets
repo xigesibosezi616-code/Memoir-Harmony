@@ -12,6 +12,7 @@ import { ErrorPresenter } from './ErrorPresenter';
 import { ImmersiveChrome } from '../services/ImmersiveChrome';
 import { UserSession } from '../services/auth/UserSession';
 import { AuthService } from '../services/auth/AuthService';
+import { LetterOutboxService } from '../services/LetterOutboxService';
 
 /** AppStorage key：AppEnvironment 实例（EntryAbility 创建，Index 取出 @Provide） */
 export const STORAGE_KEY_APP_ENVIRONMENT = 'appEnvironment';
@@ -28,14 +29,18 @@ export class AppEnvironment {
   /** 认证接口客户端（发码 / 验码 / /me；4.2） */
   readonly auth?: AuthService;
 
+  /** 寄信队列（5.3：投信 / 重试 / 补领 / 退回） */
+  readonly outbox?: LetterOutboxService;
+
   private readonly foregroundHooks: Array<() => void> = [];
 
   constructor(errors: ErrorPresenter, chrome?: ImmersiveChrome,
-    session?: UserSession, auth?: AuthService) {
+    session?: UserSession, auth?: AuthService, outbox?: LetterOutboxService) {
     this.errors = errors;
     this.chrome = chrome;
     this.session = session;
     this.auth = auth;
+    this.outbox = outbox;
   }
 
   /** 注册回到前台钩子（后续挂通知重排、寄信队列、同名合并等） */

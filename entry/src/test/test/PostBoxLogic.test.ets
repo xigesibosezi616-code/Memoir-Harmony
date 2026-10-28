@@ -6,6 +6,7 @@
  * - 上次寄信 = 真信 ∪ 写信中里最大 generatedAt；退回不算，退回信关联的日记不进候选
  * - 一次最多 14 篇（LetterDelivery.maximumEntriesPerLetter）
  * - 判定顺序：退回 → 未登录 → 写信中 → 服务端拦 → 有可寄 → 在路上 → 没新日记 → 一篇都没有
+ * - Returned/JustPosted 都要求本机负责（ownedLetterIds；另一台设备投的不算）
  * 外加标题口径（标题 → 正文第一行 ≤30 字 → 「无题」）与 parseRhythmResponse。
  */
 import { describe, it, expect } from '@ohos/hypium';
@@ -38,8 +39,17 @@ function makeEntry(id: string, date: number, createdAt: number): JournalEntry {
 }
 
 function input(letters: Letter[], entries: JournalEntry[], held: Set<string>,
-  rhythm: RhythmResponse | undefined, loggedIn: boolean): PostBoxStateInput {
-  return new PostBoxStateInput(letters, entries, held, rhythm, loggedIn, NOW);
+  rhythm: RhythmResponse | undefined, loggedIn: boolean,
+  owned?: Set<string>): PostBoxStateInput {
+  // 不传 owned 默认全部归本机：老用例只关心判定顺序；owns 门控单独出用例
+  let ownedIds = owned;
+  if (ownedIds === undefined) {
+    ownedIds = new Set<string>();
+    for (const letter of letters) {
+      ownedIds.add(letter.id);
+    }
+  }
+  return new PostBoxStateInput(letters, entries, held, ownedIds, rhythm, loggedIn, NOW);
 }
 
 export default function postBoxLogicTest() {
@@ -117,6 +127,27 @@ export default function postBoxLogicTest() {
       const rhythm = new RhythmResponse('free', true, 'ok', '');
       const state = judgePostBoxState(input([bounced], entries, new Set<string>(), rhythm, false));
       expect(state.kind).assertEqual(PostBoxSituationKind.Returned);
+      // 退回卡片要渲染那封信：最近投的带出来
+      expect(state.returnedLetter?.id).assertEqual('L1');
+    })
+
+    it('returnedRequiresOwnership', 0, () => {
+      // 另一台设备投的退信不劫持本机邮筒页（iOS isReturned 内含 owns）
+      const bounced = makeLetter('L1', LetterStatus.Failed, '', 9000);
+      const entries = [makeEntry('E1', 9500, 9500)];
+      const state = judgePostBoxState(input([bounced], entries, new Set<string>(),
+        undefined, true, new Set<string>()));
+      expect(state.kind).assertEqual(PostBoxSituationKind.Ready);
+      expect(state.returnedLetter).assertUndefined();
+    })
+
+    it('returnedLetterPicksMostRecent', 0, () => {
+      // letters 按 generated_at 倒序传入（listLetters 口径）：第一个命中的是最近投的
+      const older = makeLetter('L1', LetterStatus.Failed, '', 5000);
+      const newer = makeLetter('L2', LetterStatus.Failed, '', 9000);
+      const state = judgePostBoxState(input([newer, older], [], new Set<string>(), undefined, true));
+      expect(state.kind).assertEqual(PostBoxSituationKind.Returned);
+      expect(state.returnedLetter?.id).assertEqual('L2');
     })
 
     it('notLoggedInComesSecond', 0, () => {
@@ -137,6 +168,15 @@ export default function postBoxLogicTest() {
       const blocked = new RhythmResponse('free', false, 'weekly_pending', '2099-01-01T00:00:00Z');
       const state2 = judgePostBoxState(input([writing], entries, new Set<string>(), blocked, true));
       expect(state2.kind).assertEqual(PostBoxSituationKind.JustPosted);
+    })
+
+    it('justPostedRequiresOwnership', 0, () => {
+      // 另一台设备投的写信中不算本机「刚投了信」
+      const writing = makeLetter('L1', LetterStatus.Generating, '', 5000);
+      const entries = [makeEntry('E1', 6000, 6000)];
+      const state = judgePostBoxState(input([writing], entries, new Set<string>(),
+        undefined, true, new Set<string>()));
+      expect(state.kind).assertEqual(PostBoxSituationKind.Ready);
     })
 
     it('blockedShowsCandidatesForThePile', 0, () => {

@@ -71,6 +71,9 @@ export struct MainTabsView {
 
   private readonly tabsController: HdsTabsController = new HdsTabsController();
 
+  /** 寄信队列轮询间隔（iOS ContentView 每 30 秒 process 一次） */
+  private outboxTimerId: number = -1;
+
   aboutToAppear(): void {
     // 键盘高度监听（官方 window.on('keyboardHeightChange') 配方，
     // 与 RichFormatToolbar 同款）：键盘弹起 → keyboardUp，Tab 栏透明归位
@@ -85,6 +88,16 @@ export struct MainTabsView {
         // 取不到窗口（极端场景）：Tab 栏保持常显，不阻塞功能
       });
     }
+    // 寄信队列：进主界面就跑一轮，之后每 30 秒一轮（iOS ContentView 同款；
+    // process 单飞，信到点自动寄出 / 重试，队列没装配时是空操作）
+    this.processOutbox();
+    this.outboxTimerId = setInterval((): void => {
+      this.processOutbox();
+    }, 30_000);
+    // 回前台立刻跑一轮（EntryAbility.onForeground → env.onAppForeground）
+    this.env.registerForegroundHook((): void => {
+      this.processOutbox();
+    });
   }
 
   aboutToDisappear(): void {
@@ -92,6 +105,20 @@ export struct MainTabsView {
       this.mainWindow.off('keyboardHeightChange');
       this.mainWindow = undefined;
     }
+    if (this.outboxTimerId >= 0) {
+      clearInterval(this.outboxTimerId);
+      this.outboxTimerId = -1;
+    }
+  }
+
+  private processOutbox(): void {
+    const outbox = this.env.outbox;
+    if (outbox === undefined) {
+      return;
+    }
+    outbox.process().catch((): void => {
+      // process 内部已逐封兜底，这里不再重复提示
+    });
   }
 
   build() {

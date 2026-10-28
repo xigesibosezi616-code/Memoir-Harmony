@@ -30,9 +30,12 @@ import { AppDatabase } from '../../data/Database';
 import { LetterRepository } from '../../data/LetterRepository';
 import { EntryRepository } from '../../data/EntryRepository';
 import { LetterDelivery } from '../../models/LetterDelivery';
-import { Letter } from '../../models/Letter';
+import { Letter, LetterStatus, LetterTriggerKind, letterStationery } from '../../models/Letter';
+import { generateUuid } from '../../models/Uuid';
 import { JournalEntry } from '../../models/JournalEntry';
 import { RhythmResponse } from '../../models/Api';
+import { ErrorToastKind } from '../../environment/ErrorPresenter';
+import { shortDate } from '../../services/AppDateFormatters';
 import {
   PostBoxSituationKind,
   PostBoxState,
@@ -42,6 +45,7 @@ import {
   hasUnreadLetter
 } from '../../models/PostBoxLogic';
 import { AppPrefs, PREF_KEY_PEN_PAL_NAME } from '../../services/AppPrefs';
+import { STORAGE_KEY_LETTER_OUTBOX_TICK } from '../../services/LetterOutboxService';
 import { mailboxPageColor } from '../../services/MailboxPageColor';
 import {
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP,
@@ -76,6 +80,8 @@ export struct PostBoxTabView {
   @StorageProp(STORAGE_KEY_SESSION_TICK) @Watch('reload') sessionTick: number = 0;
   /** 切到本 tab 时重查（别的 tab 里写了日记、寄了信，回来都要是最新的） */
   @StorageProp(STORAGE_KEY_POSTBOX_VISIBLE_TICK) @Watch('reload') visibleTick: number = 0;
+  /** 寄信队列改了库里的信（寄出 / 退回 / 补领）时重查——人坐在本页也要是最新的 */
+  @StorageProp(STORAGE_KEY_LETTER_OUTBOX_TICK) @Watch('reload') outboxTick: number = 0;
   @State private letters: Letter[] = [];
   @State private entries: JournalEntry[] = [];
   /** 退回信里关联的日记 id（不出现在候选里，R-POST-03） */
@@ -125,6 +131,11 @@ export struct PostBoxTabView {
     return PostBoxMetrics.compute(windowHeight, this.safeAreaTopVp, this.safeAreaBottomVp);
   }
 
+  /** 本机寄信队列负责的信 id（Returned/JustPosted 的口径；队列没装配时空集） */
+  private ownedLetterIds(): Set<string> {
+    return this.env.outbox !== undefined ? this.env.outbox.ownedLetterIds() : new Set<string>();
+  }
+
   private isLoggedIn(): boolean {
     return this.env.session !== undefined && this.env.session.isLoggedIn();
   }
@@ -155,10 +166,12 @@ export struct PostBoxTabView {
         const store = this.store;
         this.letters = await LetterRepository.listLetters(store);
         this.entries = await EntryRepository.fetchAllEntries(store);
-        // 退回信里关联的日记不重新出现在候选里（R-POST-03）
+        // 本机负责的退回信里关联的日记不重新出现在候选里（R-POST-03；
+        // 另一台设备退回的不算——它的日记不该被这台机器扣住）
+        const owned = this.ownedLetterIds();
         const bouncedIds: string[] = [];
         for (const letter of this.letters) {
-          if (LetterDelivery.isBounced(letter)) {
+          if (LetterDelivery.isBounced(letter) && owned.has(letter.id)) {
             bouncedIds.push(letter.id);
           }
         }
@@ -196,13 +209,15 @@ export struct PostBoxTabView {
   /** 此刻的状况（R-POST-06 判定顺序，纯逻辑在 PostBoxLogic） */
   private state(): PostBoxState {
     return judgePostBoxState(new PostBoxStateInput(this.letters, this.entries,
-      this.heldEntryIds, this.rhythm, this.isLoggedIn(), this.nowMs));
+      this.heldEntryIds, this.ownedLetterIds(), this.rhythm, this.isLoggedIn(), this.nowMs));
   }
 
-  /** 有信在路上（含写信中——对用户都算「在路上」；服务端拦着时下面半透明摆纸用） */
+  /** 有信在路上（本机投的写信中 + 写好了还没到的；服务端拦着时下面半透明摆纸用） */
   private hasLettersInTransit(): boolean {
+    const owned = this.ownedLetterIds();
     return this.letters.some((letter: Letter): boolean =>
-      LetterDelivery.isInTransit(letter, this.nowMs) || LetterDelivery.isWriting(letter));
+      LetterDelivery.isInTransit(letter, this.nowMs) ||
+      (LetterDelivery.isWriting(letter) && owned.has(letter.id)));
   }
 
   /** 勾上的那几篇（状态行「一篇都没勾」要区分） */
@@ -268,6 +283,119 @@ export struct PostBoxTabView {
     return ids;
   }
 
+  // ---- 投信（R-POST-07；点邮筒触发）----
+
+  /** 点邮筒（iOS tapMailbox）：不是 Ready / 一篇都没勾就不收——状态行已写明原因 */
+  private tapMailbox(): void {
+    const state = this.state();
+    if (state.kind !== PostBoxSituationKind.Ready) {
+      return;
+    }
+    const checked: JournalEntry[] = [];
+    for (const entry of state.candidates) {
+      if (!this.excluded.has(entry.id)) {
+        checked.push(entry);
+      }
+    }
+    if (checked.length === 0) {
+      return;
+    }
+    this.post(checked);
+  }
+
+  /**
+   * 投信：先落一封「写信中」的信（R-POST-07 字段口径），交给寄信队列后台寄。
+   * 投信动画 / 邮戳是 5.6，本卡点完即落库。落库失败弹提示，别的不动。
+   */
+  private post(checked: JournalEntry[]): void {
+    const store = this.store;
+    const outbox = this.env.outbox;
+    if (store === undefined || outbox === undefined) {
+      return;
+    }
+    // 点下邮筒的这一刻 = 寄出时刻，到达时刻从这里起算
+    const sentAt = Date.now();
+    const letter = new Letter(generateUuid(), sentAt, Date.now());
+    letter.status = LetterStatus.Generating;
+    letter.body = '';
+    letter.fromCharacter = this.penPalName;
+    // 写信当刻的昵称快照；没登录 / 没设昵称时缺省，抬头退回只写「致」
+    const session = this.env.session;
+    if (session !== undefined) {
+      const user = session.user;
+      if (user !== null && user.displayName.length > 0) {
+        letter.toName = user.displayName;
+      }
+    }
+    letter.triggerKind = LetterTriggerKind.Weekly;
+    // 信纸在寄出这一刻定下（会员火漆信 6.x 接上即生效；当前恒普通信）
+    letter.stationery = letterStationery(false);
+    letter.deliveredAt = LetterDelivery.arrivalDate(sentAt, 1, Math.random);
+    const entryIds: string[] = [];
+    for (const entry of checked) {
+      entryIds.push(entry.id);
+    }
+    const save = async (): Promise<void> => {
+      try {
+        await LetterRepository.saveLetter(store, letter);
+        await LetterRepository.linkLetterEntries(store, letter.id, entryIds);
+      } catch (err) {
+        hilog.error(DOMAIN, TAG, 'post letter failed: %{public}s', JSON.stringify(err));
+        this.presentErrorText($r('app.string.s_7744960f42'));
+        return;
+      }
+      // 投进去就算寄出：交给本机队列，清掉勾选，立刻试寄一轮
+      outbox.enqueue(letter.id);
+      this.excluded = new Set<string>();
+      this.reload();
+      outbox.process().catch((err: BusinessError): void => {
+        hilog.warn(DOMAIN, TAG, 'process outbox failed: %{public}s', JSON.stringify(err));
+      });
+    };
+    save();
+  }
+
+  /** 重新寄出（R-POST-11）：失败计数清零，队列立刻接着跑 */
+  private resendReturned(letter: Letter): void {
+    const outbox = this.env.outbox;
+    if (outbox === undefined) {
+      return;
+    }
+    outbox.resend(letter.id)
+      .then((): void => {
+        this.reload();
+      })
+      .catch((err: BusinessError): void => {
+        hilog.error(DOMAIN, TAG, 'resend letter failed: %{public}s', JSON.stringify(err));
+        this.presentErrorText($r('app.string.s_7744960f42'));
+      });
+  }
+
+  /** 不寄了（R-POST-11）：带着的日记放回「要寄的日记」，记录留着不删 */
+  private discardReturned(letter: Letter): void {
+    const outbox = this.env.outbox;
+    if (outbox === undefined) {
+      return;
+    }
+    outbox.discard(letter.id)
+      .then((): void => {
+        this.reload();
+      })
+      .catch((err: BusinessError): void => {
+        hilog.error(DOMAIN, TAG, 'discard letter failed: %{public}s', JSON.stringify(err));
+        this.presentErrorText($r('app.string.s_b6c0279a8a'));
+      });
+  }
+
+  /** Resource → string（resourceManager 同步取），Toast 用 */
+  private presentErrorText(res: Resource): void {
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    this.env.errors.present(context.resourceManager.getStringSync(res.id), ErrorToastKind.Error);
+  }
+
   build() {
     Navigation(this.navPathStack) {
       // 版式对齐 iOS PostBoxPage：VStack(spacing 14)，上邮筒插画、中状态行、
@@ -286,6 +414,9 @@ export struct PostBoxTabView {
             .objectFit(ImageFit.Contain)
             .width('100%')
             .height('100%')
+            .onClick((): void => {
+              this.tapMailbox();
+            })
           this.letterboxEntry()
         }
         .layoutWeight(1)
@@ -363,10 +494,12 @@ export struct PostBoxTabView {
     .margin({ top: 8, right: 16 })
   }
 
-  /** 下面那块（固定高度）：能寄出纸；服务端拦着且有新日记时半透明摆着（下次一起寄） */
+  /** 下面那块（固定高度）：退回卡片 / 能寄出纸 / 服务端拦着半透明摆纸 */
   @Builder
   private bottomArea() {
-    if (this.state().kind === PostBoxSituationKind.Ready) {
+    if (this.state().kind === PostBoxSituationKind.Returned) {
+      this.returnedCard(this.state().returnedLetter)
+    } else if (this.state().kind === PostBoxSituationKind.Ready) {
       OutgoingPile({
         palette: this.palette(),
         items: outgoingItemsOf(this.state().candidates),
@@ -402,6 +535,74 @@ export struct PostBoxTabView {
       })
       .width('100%')
       .opacity(0.5)
+    }
+  }
+
+  /**
+   * 退回卡片（R-POST-11；iOS PostBoxNotes.ReturnedLetterCard 权威）：
+   * 「退回」长方戳盖歪一点 + 标题（寄出日期）+ 原因（退回那一刻的语言快照）
+   * + 重新寄出 / 不寄了。信纸底色按主题信纸（palette.paper）。
+   */
+  @Builder
+  private returnedCard(letter: Letter | undefined) {
+    if (letter !== undefined) {
+      Row({ space: 16 }) {
+      // 「退回」戳：盖歪 −8°（iOS rotationEffect 同款）
+      Text($r('app.string.s_607cd976d2'))
+        .fontSize(13)
+        .fontWeight(FontWeight.Bold)
+        .letterSpacing(2)
+        .fontColor(this.palette().ink)
+        .padding({ left: 8, right: 8, top: 5, bottom: 5 })
+        .borderRadius(3)
+        .border({
+          width: 1.6,
+          color: this.palette().ink
+        })
+        .rotate({ angle: -8 })
+        .opacity(0.85)
+        .margin({ top: 2 })
+      Column({ space: 6 }) {
+        Text($r('app.string.s_1c89ce16cb',
+          shortDate(new Date(letter.generatedAt), this.appLanguage)))
+          .fontSize(15)
+          .fontColor(this.palette().ink)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+        if (letter.errorMessage !== undefined && letter.errorMessage.length > 0) {
+          Text(letter.errorMessage)
+            .fontSize(12)
+            .fontColor(this.palette().ink)
+            .opacity(0.6)
+            .maxLines(3)
+            .textOverflow({ overflow: TextOverflow.Ellipsis })
+        }
+        Row({ space: 22 }) {
+          Text($r('app.string.s_6ec8fe27cd'))
+            .fontSize(14)
+            .fontWeight(FontWeight.Medium)
+            .fontColor(this.palette().liner)
+            .onClick((): void => {
+              this.resendReturned(letter);
+            })
+          Text($r('app.string.s_89345cda95'))
+            .fontSize(14)
+            .fontColor(this.palette().ink)
+            .opacity(0.5)
+            .onClick((): void => {
+              this.discardReturned(letter);
+            })
+        }
+        .margin({ top: 6 })
+      }
+      .alignItems(HorizontalAlign.Start)
+      .layoutWeight(1)
+      }
+      .alignItems(VerticalAlign.Top)
+      .width('100%')
+      .padding(18)
+      .backgroundColor(this.palette().paper)
+      .shadow({ radius: 2, color: 'rgba(0,0,0,0.12)', offsetX: 0, offsetY: 1 })
     }
   }
 }
