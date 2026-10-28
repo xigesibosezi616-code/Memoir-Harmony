@@ -17,6 +17,7 @@
 import { relationalStore } from '@kit.ArkData';
 import { common } from '@kit.AbilityKit';
 import { backgroundTaskManager } from '@kit.BackgroundTasksKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppDatabase } from '../data/Database';
 import { LetterRepository } from '../data/LetterRepository';
@@ -46,6 +47,7 @@ import {
   reconcilePlan
 } from '../models/LetterOutboxLogic';
 import { AppPrefs } from './AppPrefs';
+import { LetterNotifications } from './LetterNotifications';
 import { UserSession } from './auth/UserSession';
 import { AuthService } from './auth/AuthService';
 import { HttpError } from './http/HttpError';
@@ -64,16 +66,20 @@ export class LetterOutboxService {
   private readonly context: common.Context;
   private readonly session: UserSession;
   private readonly auth: AuthService;
+  /** 5.4 到达通知（寄成功 / 补领那一刻预约定时提醒；未装配时空操作） */
+  private readonly notifications?: LetterNotifications;
 
   /** 内存里的一份负责表；null = 还没从偏好读过（构造时偏好可能未 load） */
   private state: Map<string, OutboxItem> | null = null;
   /** 正在跑一轮（同一时间只跑一轮，免得同一封信被发两次；R-OUTBOX-02） */
   private isProcessing: boolean = false;
 
-  constructor(context: common.Context, session: UserSession, auth: AuthService) {
+  constructor(context: common.Context, session: UserSession, auth: AuthService,
+    notifications?: LetterNotifications) {
     this.context = context;
     this.session = session;
     this.auth = auth;
+    this.notifications = notifications;
   }
 
   /** 队列改了信 → 通知开着邮筒页的界面重查 */
@@ -296,7 +302,9 @@ export class LetterOutboxService {
       this.forget(letter.id);
       this.bumpTick();
       hilog.info(DOMAIN, TAG, 'sent letter id=%{public}s', letter.id);
-      // 5.4 到达通知预约位点（R-OUTBOX-03）：notifyArrival(fresh)，本卡不实现
+      // 5.4：寄成功那一刻预约定时到达提醒（哪怕已过到达时刻也排，
+      // 用户锁屏等到点弹——notifyArrival 内部先确认已授权再排）
+      this.notifyArrival(fresh, false);
     } catch (err) {
       hilog.warn(DOMAIN, TAG, 'send letter failed id=%{public}s: %{public}s',
         letter.id, JSON.stringify(err));
@@ -322,6 +330,17 @@ export class LetterOutboxService {
     } catch (err) {
       hilog.warn(DOMAIN, TAG, 'cancelSuspendDelay failed: %{public}s', JSON.stringify(err));
     }
+  }
+
+  /** 5.4：预约到达提醒（通知服务未装配 / 预约失败都不影响信流，内部全兜底） */
+  private notifyArrival(letter: Letter, onlyIfAhead: boolean): void {
+    if (this.notifications === undefined) {
+      return;
+    }
+    this.notifications.notifyArrival(letter, onlyIfAhead).catch((err: BusinessError): void => {
+      hilog.warn(DOMAIN, TAG, 'notifyArrival failed id=%{public}s: %{public}s',
+        letter.id, JSON.stringify(err));
+    });
   }
 
   /** 寄信失败分类（R-OUTBOX-04/05/06/08；iOS handle 同款分支） */
@@ -471,7 +490,8 @@ export class LetterOutboxService {
         await LetterRepository.saveLetter(store, letter);
         this.forget(letter.id);
         adoptedCount++;
-        // 5.4 通知位点：notifyArrival(letter, onlyIfAhead = false)，本卡不实现
+        // 5.4：补领认领也预约到达提醒（同信同 notificationId 覆盖不重复）
+        this.notifyArrival(letter, false);
       } else if (action.kind === ReconcileActionKind.Create) {
         // 对不上任何写信中的信 → 新落一封（R-OUTBOX-09）：
         // 到达时刻按服务端的写信时刻重算（早过了三天的即刻到达），
@@ -489,7 +509,8 @@ export class LetterOutboxService {
         letter.deliveredAt = LetterDelivery.arrivalDate(item.generatedAtMs, 1, Math.random);
         await LetterRepository.saveLetter(store, letter);
         adoptedCount++;
-        // 5.4 通知位点：notifyArrival(letter, onlyIfAhead = true)，本卡不实现
+        // 5.4：补领新建的到达提醒——到达时刻已过就不排（免得一打开弹过期通知）
+        this.notifyArrival(letter, true);
       }
       // Skip：正文本机已有（按正文去重），不动
     }

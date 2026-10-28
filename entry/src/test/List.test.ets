@@ -44,6 +44,7 @@ import letterRepositoryTest from './test/LetterRepository.test'
 import postBoxLogicTest from './test/PostBoxLogic.test'
 import postBoxMetricsTest from './test/PostBoxMetrics.test'
 import letterOutboxLogicTest from './test/LetterOutboxLogic.test'
+import notifyLogicTest from './test/NotifyLogic.test'
 import letterApiTest from './test/LetterApi.test'
 
 export default function testsuite() {
@@ -93,5 +94,6 @@ export default function testsuite() {
   postBoxLogicTest()
   postBoxMetricsTest()
   letterOutboxLogicTest()
+  notifyLogicTest()
   letterApiTest()
 }

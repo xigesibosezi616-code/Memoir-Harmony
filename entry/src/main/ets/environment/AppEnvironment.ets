@@ -13,6 +13,7 @@ import { ImmersiveChrome } from '../services/ImmersiveChrome';
 import { UserSession } from '../services/auth/UserSession';
 import { AuthService } from '../services/auth/AuthService';
 import { LetterOutboxService } from '../services/LetterOutboxService';
+import { LetterNotifications } from '../services/LetterNotifications';
 
 /** AppStorage key：AppEnvironment 实例（EntryAbility 创建，Index 取出 @Provide） */
 export const STORAGE_KEY_APP_ENVIRONMENT = 'appEnvironment';
@@ -32,15 +33,20 @@ export class AppEnvironment {
   /** 寄信队列（5.3：投信 / 重试 / 补领 / 退回） */
   readonly outbox?: LetterOutboxService;
 
+  /** 到达通知（5.4：定时提醒预约 / 授权申请 / 点通知路由信号） */
+  readonly notifications?: LetterNotifications;
+
   private readonly foregroundHooks: Array<() => void> = [];
 
   constructor(errors: ErrorPresenter, chrome?: ImmersiveChrome,
-    session?: UserSession, auth?: AuthService, outbox?: LetterOutboxService) {
+    session?: UserSession, auth?: AuthService, outbox?: LetterOutboxService,
+    notifications?: LetterNotifications) {
     this.errors = errors;
     this.chrome = chrome;
     this.session = session;
     this.auth = auth;
     this.outbox = outbox;
+    this.notifications = notifications;
   }
 
   /** 注册回到前台钩子（后续挂通知重排、寄信队列、同名合并等） */

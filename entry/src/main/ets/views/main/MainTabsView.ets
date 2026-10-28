@@ -11,6 +11,7 @@
  * - 记录 tab 本步仍是占位页（2.1/2.2 换真实记录页），其余三 tab 用现有资源名占位
  */
 import { curves, window } from '@kit.ArkUI';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 import { HdsTabs, HdsTabsController, hdsMaterial } from '@kit.UIDesignKit';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
@@ -19,6 +20,11 @@ import { tintMatrix } from '../../theme/IconTint';
 import { breakpointForWidth, STORAGE_KEY_APP_BREAKPOINT } from '../../theme/Breakpoint';
 import { ToastData, STORAGE_KEY_CURRENT_TOAST } from '../../environment/ErrorPresenter';
 import { AppEnvironment } from '../../environment/AppEnvironment';
+import { AppDatabase } from '../../data/Database';
+import { LetterRepository } from '../../data/LetterRepository';
+import { arrivalRemindersOf } from '../../models/NotifyLogic';
+import { LetterNotifications, STORAGE_KEY_OPEN_LETTERBOX_TICK,
+  STORAGE_KEY_POSTBOX_OPEN_LETTERBOX_TICK } from '../../services/LetterNotifications';
 import {
   STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP,
@@ -61,6 +67,10 @@ export struct MainTabsView {
   private mainWindow: window.Window | undefined = undefined;
   @State currentTab: number = 0;
   @State containerWidthVp: number = 0;
+  /** 5.4 点到达通知（R-NOTIFY-05）：EntryAbility 读到 want 后 +1 → 切邮筒 tab。
+   *  冷启动 bump 发生在挂载前，@Watch 首值不触发 → aboutToAppear 手动消费 */
+  @StorageProp(STORAGE_KEY_OPEN_LETTERBOX_TICK)
+  @Watch('onOpenLetterboxRequested') openLetterboxTick: number = 0;
 
   private readonly tabs: TabSpec[] = [
     new TabSpec(0, $r('app.string.s_9058a1c2c5'), $r('app.media.tab_notebook')),
@@ -98,6 +108,16 @@ export struct MainTabsView {
     this.env.registerForegroundHook((): void => {
       this.processOutbox();
     });
+    // 5.4（R-NOTIFY-04）：进主界面 / 回前台全量重排到达提醒
+    // （iOS ContentView scenePhase active 同款；同信同 notificationId 覆盖）
+    this.rescheduleArrivalReminders();
+    this.env.registerForegroundHook((): void => {
+      this.rescheduleArrivalReminders();
+    });
+    // 5.4 点通知冷启动路由（R-NOTIFY-05）：挂载前 EntryAbility 已 bump，手动消费
+    if (this.openLetterboxTick > 0) {
+      this.onOpenLetterboxRequested();
+    }
   }
 
   aboutToDisappear(): void {
@@ -119,6 +139,36 @@ export struct MainTabsView {
     outbox.process().catch((): void => {
       // process 内部已逐封兜底，这里不再重复提示
     });
+  }
+
+  /** 5.4（R-NOTIFY-04）：在途信全量重排到达提醒（失败降级，不阻塞主流程） */
+  private rescheduleArrivalReminders(): void {
+    const notifications = this.env.notifications;
+    if (notifications === undefined) {
+      return;
+    }
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const reschedule = async (): Promise<void> => {
+      const store = await AppDatabase.open(context);
+      const letters = await LetterRepository.listLetters(store);
+      const reminders = arrivalRemindersOf(letters, Date.now());
+      await notifications.rescheduleInTransit(reminders);
+    };
+    reschedule().catch((err: Object): void => {
+      hilog.warn(0x0000, 'MainTabsView', 'reschedule arrival reminders failed: %{public}s',
+        JSON.stringify(err));
+    });
+  }
+
+  /** 5.4 点到达通知路由（R-NOTIFY-05）：切邮筒 tab + 通知邮筒页推信箱；消费即清零 */
+  private onOpenLetterboxRequested(): void {
+    AppStorage.setOrCreate(STORAGE_KEY_OPEN_LETTERBOX_TICK, 0);
+    this.currentTab = 2;
+    AppStorage.setOrCreate(STORAGE_KEY_POSTBOX_OPEN_LETTERBOX_TICK,
+      (AppStorage.get<number>(STORAGE_KEY_POSTBOX_OPEN_LETTERBOX_TICK) ?? 0) + 1);
   }
 
   build() {

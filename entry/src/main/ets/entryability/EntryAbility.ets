@@ -19,6 +19,8 @@ import { UserSession, STORAGE_KEY_SESSION_TICK } from '../services/auth/UserSess
 import { AuthService } from '../services/auth/AuthService';
 import { HarmonyHttpClient } from '../services/http/HarmonyHttpClient';
 import { LetterOutboxService } from '../services/LetterOutboxService';
+import { LetterNotifications, WANT_PARAM_OPEN_LETTERBOX,
+  STORAGE_KEY_OPEN_LETTERBOX_TICK } from '../services/LetterNotifications';
 import {
   WANT_PARAM_DRAFT,
   STORAGE_KEY_LIVE_DRAFT_JSON,
@@ -40,6 +42,9 @@ export default class EntryAbility extends UIAbility {
   onCreate(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onCreate');
     this.stashContinuedDraftIfAny(want, launchParam);
+    // 5.4 点通知冷启动（R-NOTIFY-05）：want 带 openLetterbox → 发 tick，
+    // 主框架挂载后消费（MainTabsView aboutToAppear 手动读，@Watch 首值不触发）
+    this.bumpOpenLetterboxIfRequested(want);
   }
 
   /**
@@ -103,6 +108,22 @@ export default class EntryAbility extends UIAbility {
   onNewWant(want: Want, launchParam: AbilityConstant.LaunchParam): void {
     hilog.info(DOMAIN, TAG, '%{public}s', 'Ability onNewWant');
     this.stashContinuedDraftIfAny(want, launchParam);
+    // 5.4 点通知热启动（R-NOTIFY-05）：App 活着时点通知 → 主框架 @Watch 消费
+    this.bumpOpenLetterboxIfRequested(want);
+  }
+
+  /** 点到达通知打开（R-NOTIFY-05）：wantAgent parameters 带 openLetterbox → +1 信号 */
+  private bumpOpenLetterboxIfRequested(want: Want): void {
+    const params: Record<string, Object> | undefined = want.parameters;
+    if (params === undefined) {
+      return;
+    }
+    const flag: Object | undefined = params[WANT_PARAM_OPEN_LETTERBOX];
+    if (typeof flag === 'boolean' && flag) {
+      AppStorage.setOrCreate(STORAGE_KEY_OPEN_LETTERBOX_TICK,
+        (AppStorage.get<number>(STORAGE_KEY_OPEN_LETTERBOX_TICK) ?? 0) + 1);
+      hilog.info(DOMAIN, TAG, '%{public}s', 'open letterbox requested via notification');
+    }
   }
 
   onDestroy(): void {
@@ -161,10 +182,14 @@ export default class EntryAbility extends UIAbility {
         (AppStorage.get<number>(STORAGE_KEY_SESSION_TICK) ?? 0) + 1);
     });
     const auth = new AuthService(client);
+    // 5.4 到达通知：代理提醒（点通知跳回本 Ability 带 openLetterbox 参数）
+    const notifications = new LetterNotifications(this.context,
+      this.context.abilityInfo.bundleName, this.context.abilityInfo.name);
     // 5.3 寄信队列：构造只存依赖不读偏好（AppPrefs.load 在 initThenLoad 才跑，
     // 负责表首次访问才从偏好懒加载）；30s 轮询 / 回前台由 MainTabsView 挂
-    const outbox = new LetterOutboxService(this.context, session, auth);
-    const env = new AppEnvironment(createDefaultErrorPresenter(), chrome, session, auth, outbox);
+    const outbox = new LetterOutboxService(this.context, session, auth, notifications);
+    const env = new AppEnvironment(createDefaultErrorPresenter(), chrome, session, auth,
+      outbox, notifications);
     this.environment = env;
     AppStorage.setOrCreate(STORAGE_KEY_APP_ENVIRONMENT, env);
   }

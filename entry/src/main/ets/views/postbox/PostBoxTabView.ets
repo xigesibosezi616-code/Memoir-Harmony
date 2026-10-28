@@ -49,6 +49,7 @@ import {
 } from '../../models/PostBoxLogic';
 import { AppPrefs, PREF_KEY_PEN_PAL_NAME } from '../../services/AppPrefs';
 import { STORAGE_KEY_LETTER_OUTBOX_TICK } from '../../services/LetterOutboxService';
+import { STORAGE_KEY_POSTBOX_OPEN_LETTERBOX_TICK } from '../../services/LetterNotifications';
 import { mailboxPageColor } from '../../services/MailboxPageColor';
 import {
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP,
@@ -86,6 +87,10 @@ export struct PostBoxTabView {
   @StorageProp(STORAGE_KEY_POSTBOX_VISIBLE_TICK) @Watch('reload') visibleTick: number = 0;
   /** 寄信队列改了库里的信（寄出 / 退回 / 补领）时重查——人坐在本页也要是最新的 */
   @StorageProp(STORAGE_KEY_LETTER_OUTBOX_TICK) @Watch('reload') outboxTick: number = 0;
+  /** 5.4 点到达通知（R-NOTIFY-05）：主框架切到邮筒 tab 后 +1，本页 push 信箱。
+   *  冷启动主框架先切 tab 再挂本页，@Watch 首值不触发 → aboutToAppear 手动消费 */
+  @StorageProp(STORAGE_KEY_POSTBOX_OPEN_LETTERBOX_TICK)
+  @Watch('onOpenLetterboxRequested') openLetterboxTick: number = 0;
   @State private letters: Letter[] = [];
   @State private entries: JournalEntry[] = [];
   /** 退回信里关联的日记 id（不出现在候选里，R-POST-03） */
@@ -118,6 +123,11 @@ export struct PostBoxTabView {
     }, NOW_TICK_INTERVAL_MS);
     this.loadPageColor();
     this.reload();
+    // 5.4 点通知冷启动路由（R-NOTIFY-05）：主框架已先 bump（EntryAbility →
+    // MainTabsView 切 tab）→ 本页首次挂载时读残留信号手动消费一次
+    if (this.openLetterboxTick > 0) {
+      this.onOpenLetterboxRequested();
+    }
   }
 
   aboutToDisappear(): void {
@@ -125,6 +135,12 @@ export struct PostBoxTabView {
       clearInterval(this.nowTimerId);
       this.nowTimerId = -1;
     }
+  }
+
+  /** 5.4 点到达通知路由（R-NOTIFY-05）：进本页即推信箱；消费即清零防重复触发 */
+  private onOpenLetterboxRequested(): void {
+    AppStorage.setOrCreate(STORAGE_KEY_POSTBOX_OPEN_LETTERBOX_TICK, 0);
+    this.navPathStack.pushPathByName('Letterbox', '');
   }
 
   /** 换主题 = 换邮筒插画 = 底色重取；笔友名也顺手刷新（设置页改完回来生效） */
@@ -383,6 +399,14 @@ export struct PostBoxTabView {
       outbox.enqueue(letter.id);
       this.excluded = new Set<string>();
       this.reload();
+      // 5.4（R-NOTIFY-02）：第一次投信成功后申请通知授权——回信到了才通知得到；
+      // 已授权直接过，拒过不反复弹，失败不拦投信流程
+      const notifications = this.env.notifications;
+      if (notifications !== undefined) {
+        notifications.requestAuthorizationIfNeeded().catch((): void => {
+          // 申请失败（未登录弹窗异常等）：下次投信再试，不打扰用户
+        });
+      }
       outbox.process().catch((err: BusinessError): void => {
         hilog.warn(DOMAIN, TAG, 'process outbox failed: %{public}s', JSON.stringify(err));
       });
