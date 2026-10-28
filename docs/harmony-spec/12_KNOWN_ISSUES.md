@@ -96,6 +96,15 @@
 
 ## 四、变更日志
 
+- 2026-10-28 InTransitNote 实机空白攻坚记档：5.3 补做「邮戳+在路上」（iOS
+  PostBoxNotes.InTransitNote 权威，恢复 5.2 版式下半区空洞）实机不渲染；
+  根因 = **@Builder 按值传参（表达式实参）不随状态刷新**——首渲染 letters
+  未加载时 `inTransitNote(undefined)` 落地，reload 后 if 分支不切换、表达式
+  实参变了也不重刷（dump 实锤底部容器 Column 空）；修法 = 快照进 @State
+  （transitLetter/transitPlace/transitHasOthers reload 备好）+ builder 无参
+  只读状态（后续卡片通用排雷：@Builder 传业务对象一律走 @State 无参模式，
+  勿按值传参）；真机验收过（邮戳双圈/横带/-9°/胶囊全渲染，五页走查无崩溃）；
+  655 单测绿 / build 零 ERROR。
 - 2026-10-27 邮筒页适配记档：+1 项 **#28**（用户拍板：邮筒页适配一直优化不好，
   不再逐轮调教，记入清单后续一起修复——像素验收六项达标的同日用户观感不过关；
   后续等用户列具体不达项 + 展开态/其他机型走查 + 录屏对照 iOS 一次调）。
