@@ -3507,6 +3507,18 @@
     {
       "name": "s_e15f73bdc6",
       "value": "Déjà Vu utilise l’appareil photo pour ajouter des photos à vos entrées."
+    },
+    {
+      "name": "s_ea5026fc0f",
+      "value": "VERSION DE TEST"
+    },
+    {
+      "name": "s_f93c4db3ab",
+      "value": "Livraison rapide des lettres"
+    },
+    {
+      "name": "s_bdfe921dd3",
+      "value": "1 min ≈ 1 jour : les réponses arrivent en 15 s à 3 min. Activé par défaut. Ne concerne que les lettres envoyées lorsqu’il est activé."
     }
   ]
 }

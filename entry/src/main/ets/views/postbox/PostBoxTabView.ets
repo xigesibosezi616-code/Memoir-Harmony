@@ -10,16 +10,21 @@
  * - 候选口径 R-POST-02/03 在 PostBoxLogic（纯逻辑，带单测）
  * - 进页面就问 GET /me/rhythm：这周寄不了提前说明，不等点了再拒
  *   （R-POST-05；问不到当作能寄，最终由服务端拦）
- * - 点邮筒投信是 5.3；退回卡片 / 在路上的邮戳卡是 5.6 —— 本卡不碰
+ * - 点邮筒投信（5.3 落库 + 5.6 动画）：落库成功才起投信动画（displaySync
+ *   逐帧推进 postingT，手感数值集中在 LetterPostingTimeline /
+ *   LetterPostingFlightGeometry，单测钉死）；动画放完才申请通知授权
+ *   （R-POST-09）；投信口拒收轻轻一顿（LetterPostingFeel）
  * - 「此刻」每 5 秒推进（R-BOX-02）：在路上的信到点，右上角红点自己亮
  * - 切到本 tab / 登录态变化才重查（MainTabsView onChange 写
  *   STORAGE_KEY_POSTBOX_VISIBLE_TICK 驱动；tab 内容常驻不重建）
  * - 标题栏：左上不出「邮筒」二字（用户拍板，iOS 同款无标题），
- *   右上角「信箱」入口带未读红点（红色用 destructive——accent 在部分
- *   主题是墨色会看成黑点）
+ *   右上角「信箱」入口 = 官方 Button（缩小版：高 32、图标 16、字 12），
+ *   位置对齐首页页首「+」（安全区顶+28、右 20），带未读红点（红色用
+ *   destructive——accent 在部分主题是墨色会看成黑点）
  */
 import { relationalStore } from '@kit.ArkData';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { displaySync } from '@kit.ArkGraphics2D';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
@@ -47,7 +52,21 @@ import {
   postmarkPlace,
   postmarkInkHex
 } from '../../models/PostBoxLogic';
-import { AppPrefs, PREF_KEY_PEN_PAL_NAME } from '../../services/AppPrefs';
+import { OutgoingItem } from '../../models/PostBoxLogic';
+import { LetterPostingTimeline } from '../../models/LetterPostingTimeline';
+import {
+  PostingRun,
+  RectF,
+  fitRectInRect,
+  slotRectOf,
+  MAILBOX_IMAGE_ASPECT
+} from '../../models/LetterPostingFlightGeometry';
+import { LetterPostingFeel } from '../../services/LetterPostingFeel';
+import { LetterPalette } from './LetterPalette';
+import { OutgoingPile } from './OutgoingPile';
+import { LetterPostingFlight } from './LetterPostingFlight';
+import { Postmark } from './Postmark';
+import { PostBoxMetrics } from './PostBoxMetrics';
 import { STORAGE_KEY_LETTER_OUTBOX_TICK } from '../../services/LetterOutboxService';
 import { STORAGE_KEY_POSTBOX_OPEN_LETTERBOX_TICK } from '../../services/LetterNotifications';
 import { mailboxPageColor } from '../../services/MailboxPageColor';
@@ -56,10 +75,7 @@ import {
   STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_WINDOW_HEIGHT_VP
 } from '../../services/ImmersiveChrome';
-import { LetterPalette } from './LetterPalette';
-import { OutgoingPile } from './OutgoingPile';
-import { Postmark } from './Postmark';
-import { PostBoxMetrics } from './PostBoxMetrics';
+import { AppPrefs, PREF_KEY_PEN_PAL_NAME } from '../../services/AppPrefs';
 
 const DOMAIN = 0x0000;
 const TAG = 'PostBoxTabView';
@@ -116,6 +132,24 @@ export struct PostBoxTabView {
   private store: relationalStore.RdbStore | undefined = undefined;
   private nowTimerId: number = -1;
 
+  // ---- 5.6 投信动画（displaySync 逐帧推进 postingT；手感集中在几何层单测） ----
+  /** 正在投的那一封（undefined = 没在投信）。投进去就算寄出：落库成功才起动画 */
+  @State private posting: PostingRun | undefined = undefined;
+  /** 动画推进到的时刻（秒，0 ~ TOTAL），displaySync 每帧推一下 */
+  @State private postingT: number = 0;
+  /** 投信的手感：跟动画节点的小震动 + 封口声（预载失败只是没声没震，静默） */
+  private postingFeel: LetterPostingFeel = new LetterPostingFeel();
+  /** 逐帧驱动（动画起了才 start，放完 / 离开页面 stop） */
+  private postingSync: displaySync.DisplaySync | undefined = undefined;
+  private postingFrameCallback: ((info: displaySync.IntervalInfo) => void) | undefined = undefined;
+  /** 动画起点（displaySync 回调的 ns 时间戳；首帧定下） */
+  private postingStartNs: number = -1;
+  /** 起飞那一刻量好的几何（动画期间版式恒定，量一次用到底） */
+  private postingSlotRect: RectF = { x: 0, y: 0, width: 0, height: 0 };
+  private postingPileRect: RectF = { x: 0, y: 0, width: 0, height: 0 };
+  /** 落库进行中（防连点双寄：posting 要落库成功才立起来，这中间也得拦） */
+  private postingUnderway: boolean = false;
+
   aboutToAppear(): void {
     this.penPalName = AppPrefs.getString(PREF_KEY_PEN_PAL_NAME, '青鸟');
     this.nowTimerId = setInterval((): void => {
@@ -128,6 +162,12 @@ export struct PostBoxTabView {
     if (this.openLetterboxTick > 0) {
       this.onOpenLetterboxRequested();
     }
+    // 5.6 投信手感预载：声音两条 wav 走 rawfile（生成脚本和 iOS 共用），
+    // 页面一出现就备好，点邮筒那一刻不用等
+    const context = this.getUIContext().getHostContext();
+    if (context !== undefined) {
+      this.postingFeel.prepare(context.resourceManager);
+    }
   }
 
   aboutToDisappear(): void {
@@ -135,9 +175,15 @@ export struct PostBoxTabView {
       clearInterval(this.nowTimerId);
       this.nowTimerId = -1;
     }
+    // 5.6：动画没放完就离开页面——停驱动、停震、放掉解码器
+    this.stopPostingSync();
+    this.postingFeel.cancel();
+    this.postingFeel.release();
   }
 
-  /** 5.4 点到达通知路由（R-NOTIFY-05）：进本页即推信箱；消费即清零防重复触发 */
+  /** 5.4 点到达通知路由（R-NOTIFY-05）：进本页即推信箱；消费即清零防重复触发。
+   *  返回时的重查不靠 onPop（侧滑返回不触发），靠信箱页 onDisappear bump
+   *  STORAGE_KEY_POSTBOX_VISIBLE_TICK（见 LetterboxView） */
   private onOpenLetterboxRequested(): void {
     AppStorage.setOrCreate(STORAGE_KEY_POSTBOX_OPEN_LETTERBOX_TICK, 0);
     this.navPathStack.pushPathByName('Letterbox', '');
@@ -284,6 +330,10 @@ export struct PostBoxTabView {
 
   /** 状态行文案（R-POST-06 八种情况；带笔友名的走资源参数 %s） */
   private statusLabel(): ResourceStr {
+    // 5.6 投信动画中钉住「点邮筒…」：信还没进邮筒不说「在路上」，版式不跳
+    if (this.posting !== undefined) {
+      return $r('app.string.s_ae7b18f8be', this.penPalName);
+    }
     const state = this.state();
     switch (state.kind) {
       case PostBoxSituationKind.Returned:
@@ -338,6 +388,13 @@ export struct PostBoxTabView {
 
   /** 点邮筒（iOS tapMailbox）：不是 Ready / 一篇都没勾就不收——状态行已写明原因 */
   private tapMailbox(): void {
+    // 正在投 / 正在落库：忽略连点（投进去就算寄出，不会寄出第二封）
+    if (this.posting !== undefined || this.postingUnderway) {
+      return;
+    }
+    // 点下立刻给一记扎实的（真机反馈「点击震感弱」：投信编排要等异步落库后才起，
+    // 这一下让手指马上有回音；拒收也同款，原因在状态行里写着）
+    this.postingFeel.playMailboxTap();
     const state = this.state();
     if (state.kind !== PostBoxSituationKind.Ready) {
       return;
@@ -351,19 +408,21 @@ export struct PostBoxTabView {
     if (checked.length === 0) {
       return;
     }
-    this.post(checked);
+    this.post(checked, outgoingItemsOf(state.candidates), this.excludedIdsArray());
   }
 
   /**
-   * 投信：先落一封「写信中」的信（R-POST-07 字段口径），交给寄信队列后台寄。
-   * 投信动画 / 邮戳是 5.6，本卡点完即落库。落库失败弹提示，别的不动。
+   * 投信：先落一封「写信中」的信（R-POST-07 字段口径），交给寄信队列后台寄；
+   * 落库成功才起 5.6 投信动画（约 3 秒，那叠日记飞进投信口）。落库失败弹提示，
+   * 别的不动。通知授权挪到动画放完（R-POST-09：弹窗不压在动画上）。
    */
-  private post(checked: JournalEntry[]): void {
+  private post(checked: JournalEntry[], items: OutgoingItem[], excludedIds: string[]): void {
     const store = this.store;
     const outbox = this.env.outbox;
     if (store === undefined || outbox === undefined) {
       return;
     }
+    this.postingUnderway = true;
     // 点下邮筒的这一刻 = 寄出时刻，到达时刻从这里起算
     const sentAt = Date.now();
     const letter = new Letter(generateUuid(), sentAt, Date.now());
@@ -381,7 +440,7 @@ export struct PostBoxTabView {
     letter.triggerKind = LetterTriggerKind.Weekly;
     // 信纸在寄出这一刻定下（会员火漆信 6.x 接上即生效；当前恒普通信）
     letter.stationery = letterStationery(false);
-    letter.deliveredAt = LetterDelivery.arrivalDate(sentAt, 1, Math.random);
+    letter.deliveredAt = LetterDelivery.arrivalDate(sentAt, LetterDelivery.debugTimeScale(), Math.random);
     const entryIds: string[] = [];
     for (const entry of checked) {
       entryIds.push(entry.id);
@@ -392,6 +451,7 @@ export struct PostBoxTabView {
         await LetterRepository.linkLetterEntries(store, letter.id, entryIds);
       } catch (err) {
         hilog.error(DOMAIN, TAG, 'post letter failed: %{public}s', JSON.stringify(err));
+        this.postingUnderway = false;
         this.presentErrorText($r('app.string.s_7744960f42'));
         return;
       }
@@ -399,19 +459,141 @@ export struct PostBoxTabView {
       outbox.enqueue(letter.id);
       this.excluded = new Set<string>();
       this.reload();
-      // 5.4（R-NOTIFY-02）：第一次投信成功后申请通知授权——回信到了才通知得到；
-      // 已授权直接过，拒过不反复弹，失败不拦投信流程
-      const notifications = this.env.notifications;
-      if (notifications !== undefined) {
-        notifications.requestAuthorizationIfNeeded().catch((): void => {
-          // 申请失败（未登录弹窗异常等）：下次投信再试，不打扰用户
-        });
-      }
+      // 5.6 投信动画（items/excludedIds 是点邮筒那一刻的快照，动画里要画）。
+      // 几何量不出来（初次布局未完成等）信照寄，动画跳过直接收尾
+      this.beginPosting(items, excludedIds);
       outbox.process().catch((err: BusinessError): void => {
         hilog.warn(DOMAIN, TAG, 'process outbox failed: %{public}s', JSON.stringify(err));
       });
     };
     save();
+  }
+
+  /**
+   * 5.6 投信动画起飞：量邮筒 / 叠纸的几何 → 快照进 PostingRun →
+   * 起逐帧驱动（iOS beginPostingFlight；页面坐标 = 窗口坐标，沉浸满窗）。
+   */
+  private beginPosting(items: OutgoingItem[], excludedIds: string[]): void {
+    const ui = this.getUIContext();
+    const mailboxRect = ui.getComponentUtils().getRectangleById('postboxMailboxImage');
+    const pileRectInfo = ui.getComponentUtils().getRectangleById('postboxPile');
+    if (mailboxRect.size.width <= 0 || mailboxRect.size.height <= 0 ||
+      pileRectInfo.size.width <= 0 || pileRectInfo.size.height <= 0) {
+      // 邮筒 / 叠纸还没量出来（初次布局未完成等）：信照寄，动画跳过直接收尾
+      hilog.warn(DOMAIN, TAG,
+        'posting geometry missing, skip animation: mailbox=%{public}f pile=%{public}f',
+        mailboxRect.size.width, pileRectInfo.size.width);
+      this.finishPosting();
+      return;
+    }
+    // 排雷（官方 API 参考实证）：getRectangleById 的 size / windowOffset 单位是 px，
+    // 飞行层的 position/width/height 全按 vp 算——不转的话整个动画画到 3 倍屏外，
+    // 真机表现是「displaySync 在跑、画面纹丝不动」。在这里一次转清，纯逻辑层照旧全 vp。
+    const mailboxDrawn = fitRectInRect({
+      x: ui.px2vp(mailboxRect.windowOffset.x),
+      y: ui.px2vp(mailboxRect.windowOffset.y),
+      width: ui.px2vp(mailboxRect.size.width),
+      height: ui.px2vp(mailboxRect.size.height)
+    }, MAILBOX_IMAGE_ASPECT);
+    this.postingSlotRect = slotRectOf(mailboxDrawn);
+    this.postingPileRect = {
+      x: ui.px2vp(pileRectInfo.windowOffset.x),
+      y: ui.px2vp(pileRectInfo.windowOffset.y),
+      width: ui.px2vp(pileRectInfo.size.width),
+      height: ui.px2vp(pileRectInfo.size.height)
+    };
+    // 真机排障：float 参数会被 hilog 隐私打码（}f），先拼进字符串再打
+    const slot = this.postingSlotRect;
+    const pile = this.postingPileRect;
+    hilog.info(DOMAIN, TAG,
+      'posting flight begin, slot=(%{public}s,%{public}s,%{public}s,%{public}s) pile=(%{public}s,%{public}s,%{public}s,%{public}s)',
+      slot.x.toFixed(1), slot.y.toFixed(1), slot.width.toFixed(1), slot.height.toFixed(1),
+      pile.x.toFixed(1), pile.y.toFixed(1), pile.width.toFixed(1), pile.height.toFixed(1));
+    const session = this.env.session;
+    const displayName = session !== undefined && session.user !== null
+      ? session.user.displayName : undefined;
+    // 会员火漆信是 6.x，现在投的都是普通封口；火漆管道先铺好
+    const hasSeal = false;
+    this.posting = new PostingRun(items, excludedIds, hasSeal, PostingRun.sealMarkOf(displayName));
+    this.postingT = 0;
+    this.postingStartNs = -1;
+    this.postingFeel.play(hasSeal);
+    // 排雷（displaySync 文档实证）：start 在异步回调里调用会拿错 UI 上下文，
+    // 回调一帧都不来（真机「点了没动画」的根因）——必须 runScopedTask
+    // 把 start 绑回当前 UI 上下文
+    ui.runScopedTask((): void => {
+      const sync = displaySync.create();
+      const callback = (info: displaySync.IntervalInfo): void => {
+        this.advancePosting(info.timestamp);
+      };
+      sync.on('frame', callback);
+      sync.start();
+      this.postingSync = sync;
+      this.postingFrameCallback = callback;
+    });
+  }
+
+  /** 逐帧推进（displaySync 回调，UI 主线程；timestamp 是开机起单调 ns） */
+  private advancePosting(timestampNs: number): void {
+    if (this.posting === undefined) {
+      return;
+    }
+    if (this.postingStartNs < 0) {
+      this.postingStartNs = timestampNs;
+    }
+    const t = (timestampNs - this.postingStartNs) / 1000000000;
+    if (t >= LetterPostingTimeline.TOTAL) {
+      this.postingT = LetterPostingTimeline.TOTAL;
+      this.finishPosting();
+      return;
+    }
+    this.postingT = t;
+  }
+
+  /** 动画放完（或跳过）：停驱动、清状态、这时候才申请通知授权（R-POST-09） */
+  private finishPosting(): void {
+    this.stopPostingSync();
+    // 正常放完（翻板已落）：2.91s 起的「余震」让它自己响完再自然停（iOS 也
+    // 从不中途 stop 编排）；只有提前跳过（几何量不到）才把震动掐掉
+    if (this.postingT < LetterPostingTimeline.FLAP_FALL_END) {
+      this.postingFeel.cancel();
+    }
+    hilog.info(DOMAIN, TAG, 'posting flight finished, t=%{public}f', this.postingT);
+    this.posting = undefined;
+    this.postingT = 0;
+    this.postingUnderway = false;
+    // 5.4（R-NOTIFY-02）：第一次投信动画放完才申请——回信到了才通知得到；
+    // 已授权直接过，拒过不反复弹，失败不拦投信
+    const notifications = this.env.notifications;
+    if (notifications !== undefined) {
+      notifications.requestAuthorizationIfNeeded().catch((): void => {
+        // 申请失败（未登录弹窗异常等）：下次投信再试，不打扰用户
+      });
+    }
+  }
+
+  private stopPostingSync(): void {
+    const sync = this.postingSync;
+    if (sync !== undefined) {
+      sync.stop();
+      if (this.postingFrameCallback !== undefined) {
+        sync.off('frame', this.postingFrameCallback);
+      }
+    }
+    this.postingSync = undefined;
+    this.postingFrameCallback = undefined;
+    this.postingStartNs = -1;
+  }
+
+  /** 邮戳「在路上」的淡出进度：信进了邮筒（翻板落回）才亮（和几何层 revealOpacity 同一条曲线） */
+  private postingReveal(): number {
+    return LetterPostingTimeline.smooth(this.postingT,
+      LetterPostingTimeline.FLAP_FALL_START, LetterPostingTimeline.TOTAL);
+  }
+
+  /** 略大一点落定（和几何层 revealScale 同一条曲线） */
+  private postingRevealScale(): number {
+    return 1 + 0.05 * (1 - this.postingReveal());
   }
 
   /** 重新寄出（R-POST-11）：失败计数清零，队列立刻接着跑 */
@@ -457,6 +639,7 @@ export struct PostBoxTabView {
 
   build() {
     Navigation(this.navPathStack) {
+      Stack() {
       // 版式对齐 iOS PostBoxPage：VStack(spacing 14)，上邮筒插画、中状态行、
       // 下固定高叠纸。所有尺寸走 PostBoxMetrics（跨机型/形态，单测覆盖）：
       // 叠纸≈窗高 22%（iOS 188/852）、邮筒墨迹宽≈屏宽 37.9%（iOS 同比）、
@@ -465,18 +648,42 @@ export struct PostBoxTabView {
       // 关键几何只走容器 padding / 固定高 / layoutWeight / constraintSize，
       // 不碰 overlay 带子闭包、width('100%') 节点的 margin、Image 的 padding
       Column({ space: 14 }) {
-        // 上面：邮筒插画（本身就是按钮；点邮筒投信是 5.3，本卡不挂动作）。
-        // 插画已裁掉奶油边（dome ≈ 区顶），信箱入口与插画同层 Stack、
-        // 行内 @Builder 调用渲染（排雷 a：overlay 挂带子闭包的 @Builder 不渲染）
-        Stack({ alignContent: Alignment.TopEnd }) {
-          Image(this.theme.mailboxImage)
-            .objectFit(ImageFit.Contain)
-            .width('100%')
-            .height('100%')
-            .onClick((): void => {
-              this.tapMailbox();
-            })
-          this.letterboxEntry()
+        // 第一节 = 页首行 + 邮筒插画（内层不再加间距，几何自管）：
+        // 页首行只有右上「信箱」入口（官方 Button），位置对齐首页大屏页首的
+        // 「+」——顶 = 安全区顶 + 28、右 20（HomeView showcaseHeaderRow
+        // 同款几何）；入口高 32 + 底距 10 = 行高 70，插画顶 = 安全区顶
+        // + 70，与原版式逐像素一致（dome 位置不动）
+        Column() {
+          Row() {
+            this.letterboxEntry()
+          }
+          .justifyContent(FlexAlign.End)
+          .width('100%')
+          .padding({ top: 28, right: 20, bottom: 10 })
+
+          // 邮筒插画（本身就是按钮；点邮筒投信是 5.3，本卡不挂动作）。
+          // 插画已裁掉奶油边（dome ≈ 区顶）；行内 @Builder 调用渲染
+          // （排雷 a：overlay 挂带子闭包的 @Builder 不渲染）。
+          // 2026-11-04 用户反馈整体下移一点：offset 14vp 往下坐（不放大
+          // ——图是实底，放大必裁切或盖住状态行，用户拍板不裁）；14vp
+          // 恰好被插画与状态行的 space 14 吃掉，图底贴状态行框顶不遮字；
+          // 投信动画量的是本 Image 的窗口矩形（getRectangleById 含
+          // offset），dome 下移后投信口换算自动跟随
+          Stack({ alignContent: Alignment.TopEnd }) {
+            Image(this.theme.mailboxImage)
+              .objectFit(ImageFit.Contain)
+              .width('100%')
+              .height('100%')
+              .offset({ y: 14 })
+              // 5.6：点邮筒那一刻量这块的窗口矩形（contain 后按 588:1410
+              // 算投信口在图上的位置），量不到动画跳过
+              .id('postboxMailboxImage')
+              .onClick((): void => {
+                this.tapMailbox();
+              })
+          }
+          .layoutWeight(1)
+          .width('100%')
         }
         .layoutWeight(1)
         .width('100%')
@@ -513,53 +720,104 @@ export struct PostBoxTabView {
       .width('100%')
       .height('100%')
       .padding({
-        // 顶/底全走度量：顶 = 安全区顶 + 70（dome 移到信箱入口行之下），
+        // 顶 = 安全区顶（页首行从这里起排，「信箱」入口再 +28 对齐首页「+」）；
         // 底 = 安全区底 + 102（叠纸底与悬浮胶囊 Tab 栏之间留出缝隙，
         // 用户定）。真机实证（排雷 d）：这层 padding 从窗口顶 y=0 量起，
-        // 度量里的 topOffset 已含安全区顶，直接用、不再自己加
-        top: this.metrics().topOffsetVp,
+        // 度量里的值已含安全区，直接用、不再自己加
+        top: this.metrics().safeTopVp,
         bottom: this.metrics().bottomOffsetVp
       })
+
+      // 5.6 投信动画：全页覆盖层（自己不响应点击），盖在正文上。
+      // 几何是窗口坐标（沉浸满窗页面坐标 = 窗口坐标），这里原样落位
+      if (this.posting !== undefined) {
+        LetterPostingFlight({
+          t: this.postingT,
+          run: this.posting,
+          palette: this.palette(),
+          pileRect: this.postingPileRect,
+          slotRect: this.postingSlotRect,
+          totalHeightVp: this.metrics().pileHeightVp,
+          headerHeightVp: this.metrics().pileHeaderHeightVp,
+          rowHeightVp: this.metrics().pileRowHeightVp,
+          fadeHeightVp: this.metrics().pileFadeHeightVp
+        })
+      }
+      }
     }
     .mode(NavigationMode.Stack)
     .backgroundColor(this.pageColor !== undefined ? this.pageColor : this.theme.background)
   }
 
-  /** 右上角信箱入口：官方 SymbolGlyph 图标（sys.symbol 无 tray，inbox 收件箱托盘
-   *   语义一致）+ 文字 + 未读红点（destructive）。有未读回信就亮（R-POST-09）。
-   *   iOS toolbar topBarTrailing 同款；wrap 节点的 margin 真机正常（右侧 16vp） */
+  /** 右上角信箱入口：官方 Button（Capsule 胶囊，缩小版）+ inbox 图标
+   *  （sys.symbol 无 tray，inbox 收件箱托盘语义一致）+ 文字 + 未读红点
+   *  （destructive）。轮廓成型走主题玻璃 token（glassBackground +
+   *  0.5vp glassBorder，信箱页返回圆钮同款；token 每主题单独调过「与
+   *  页面背景拉开一档明度差」——2026-11-04 真机反馈透明按钮看不清轮廓
+   *  后定稿）。有未读回信红点就亮（R-POST-09）。定位由外层页首行管
+   *  （顶 = 安全区 + 28、右 20） */
   @Builder
   letterboxEntry() {
-    Stack({ alignContent: Alignment.TopEnd }) {
-      Row({ space: 6 }) {
+    Button({ type: ButtonType.Capsule, stateEffect: true }) {
+      Row({ space: 5 }) {
         SymbolGlyph($r('sys.symbol.inbox'))
-          .fontSize(this.theme.captionFont.size)
+          .fontSize(16)
           .fontColor([this.theme.textPrimary])
         Text($r('app.string.s_44fd049d7d'))
-          .fontSize(this.theme.captionFont.size)
+          .fontSize(12)
           .fontWeight(this.theme.captionFont.weight)
           .fontFamily(this.theme.captionFont.family)
           .fontColor(this.theme.textPrimary)
       }
-      .padding({ left: 16, right: 16, top: 12, bottom: 12 })
-      .onClick((): void => {
-        this.navPathStack.pushPathByName('Letterbox', '');
-      })
-      if (hasUnreadLetter(this.letters, this.nowMs)) {
-        Circle()
-          .fill(this.theme.destructive)
-          .width(8)
-          .height(8)
-          .offset({ x: 6, y: 8 })
-      }
+      // 红点跟 iOS 同款挂法（PostBoxView letterboxButton）：overlay 在
+      // 内容框（图标 + 文字的 Row）右上角，向右上探出——iOS 8pt 点 offset
+      // (6, -4)，本处 6vp 点等比 (4.5, -3)。探出量吃进按钮右 padding 14 /
+      // 上下留白里，点始终收在按钮框内（2026-11-04 真机反馈：收进按钮后
+      // 悬在空白处「位置怪」——根因是挂在按钮外框而不是内容框上）
+      .overlay(this.unreadDot(), { align: Alignment.TopEnd })
     }
-    .margin({ top: 8, right: 16 })
+    .height(32)
+    .padding({ left: 12, right: 14 })
+    .backgroundColor(this.theme.glassBackground)
+    .border({ width: 0.5, color: this.theme.glassBorder })
+    .onClick((): void => {
+      // 返回后的重查不靠 onPop（侧滑返回不触发 onPop，真机复现：读完信
+      // 侧滑回来红点不灭），靠信箱页 NavDestination onDisappear bump
+      // STORAGE_KEY_POSTBOX_VISIBLE_TICK（见 LetterboxView）
+      this.navPathStack.pushPathByName('Letterbox', '');
+    })
   }
 
-  /** 下面那块（固定高度）：退回卡片 / 能寄出纸 / 服务端拦着半透明摆纸 */
+  /** 信箱入口的未读红点：有已到未读才亮（destructive——accent 在部分主题
+   *  是墨色会看成黑点），6vp（2026-11-04 真机反馈缩小后定稿） */
+  @Builder
+  unreadDot() {
+    if (hasUnreadLetter(this.letters, this.nowMs)) {
+      Circle()
+        .fill(this.theme.destructive)
+        .width(6)
+        .height(6)
+        .offset({ x: 4.5, y: -3 })
+    }
+  }
+
+  /** 下面那块（固定高度）：投信动画中 / 退回卡片 / 能寄出纸 / 服务端拦着半透明摆纸 */
   @Builder
   private bottomArea() {
-    if (this.state().kind === PostBoxSituationKind.Returned) {
+    if (this.posting !== undefined) {
+      // 5.6 投信动画中：那叠日记的活身在覆盖层里演快照，下面这块只剩
+      // 邮戳「在路上」，等信进了邮筒（翻板落回）才淡出来、略大一点落定
+      // （R-POST-08；reload 一落地 transitLetter 就是刚寄的这封）
+      Column() {
+        this.inTransitNote()
+      }
+      .width('100%')
+      .height('100%')
+      .justifyContent(FlexAlign.Center)
+      .alignItems(HorizontalAlign.Center)
+      .opacity(this.postingReveal())
+      .scale({ x: this.postingRevealScale(), y: this.postingRevealScale() })
+    } else if (this.state().kind === PostBoxSituationKind.Returned) {
       this.returnedCard(this.state().returnedLetter)
     } else if (this.state().kind === PostBoxSituationKind.Ready) {
       OutgoingPile({
@@ -582,6 +840,8 @@ export struct PostBoxTabView {
         }
       })
       .width('100%')
+      // 5.6：投信动画起飞那一刻量这叠纸的窗口矩形（动画里画它的快照）
+      .id('postboxPile')
     } else if (this.state().kind === PostBoxSituationKind.Blocked &&
       !this.hasLettersInTransit() && this.state().candidates.length > 0) {
       // 这周寄不了，新写的先摆着，下次一起寄（只是画，不能勾）

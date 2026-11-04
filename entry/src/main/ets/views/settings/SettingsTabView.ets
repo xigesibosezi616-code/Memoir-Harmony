@@ -72,6 +72,9 @@ export struct SettingsTabView {
             } else {
               this.loginEntryCard()
             }
+            // 通用设置组（华为系统设置模板：分组卡 + 图标行 + 右侧箭头；
+            // 6.1 在此结构上继续长，关于页里藏着测试包的回信加速开关（5.8））
+            this.aboutGroupCard()
             // 底部：悬浮 Tab 栏 + 手势条让位
             Column().width('100%').height(this.safeAreaBottomVp + 88)
           }
@@ -187,6 +190,39 @@ export struct SettingsTabView {
     .margin({ top: 20 })
     .onClick((): void => {
       this.navPathStack.pushPathByName('Login', '');
+    })
+  }
+
+  /** 关于（华为设置模板分组行：info 图标 + 标题 + chevron；点进关于页，
+   *  测试包里多一段「测试构建」分组，含回信加速开关（5.8）） */
+  @Builder
+  private aboutGroupCard() {
+    Row({ space: 10 }) {
+      SymbolGlyph($r('sys.symbol.info_circle'))
+        .fontSize(14)
+        .fontWeight(FontWeight.Medium)
+        .fontColor([this.theme.textSecondary])
+        .width(20)
+      Text($r('app.string.s_bed172efc9'))
+        .fontSize(this.theme.bodyFont.size)
+        .fontWeight(this.theme.bodyFont.weight)
+        .fontFamily(this.theme.bodyFont.family)
+        .fontColor(this.theme.textPrimary)
+        .layoutWeight(1)
+      SymbolGlyph($r('sys.symbol.chevron_right'))
+        .fontSize(13)
+        .fontWeight(FontWeight.Medium)
+        .fontColor([this.theme.textTertiary])
+    }
+    .width('100%')
+    .padding({ top: 15, bottom: 15, left: 20, right: 20 })
+    .alignItems(VerticalAlign.Center)
+    .borderRadius(16)
+    .backgroundColor(this.theme.cardBackground)
+    .width('100%')
+    .margin({ top: 20 })
+    .onClick((): void => {
+      this.navPathStack.pushPathByName('About', '');
     })
   }
 

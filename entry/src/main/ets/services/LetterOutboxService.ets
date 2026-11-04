@@ -46,7 +46,9 @@ import {
   dominantMoodOf,
   reconcilePlan
 } from '../models/LetterOutboxLogic';
+import { LetterLanguage } from '../models/LetterLanguage';
 import { AppPrefs } from './AppPrefs';
+import { LanguageManager } from './LanguageManager';
 import { LetterNotifications } from './LetterNotifications';
 import { UserSession } from './auth/UserSession';
 import { AuthService } from './auth/AuthService';
@@ -260,9 +262,20 @@ export class LetterOutboxService {
       requestEntries.push(new LetterRequestEntry(entry.title, entry.content,
         entry.date, entry.mood));
     }
+    // 回信语言跟这次寄出的日记走（R-LETTERLANG-01）：标题 + 正文本机识别，
+    // 认不出退 App 语言（偏好里的 appLanguage，iOS 读 UserDefaults 同款）
+    const texts: string[] = [];
+    for (const requestEntry of requestEntries) {
+      texts.push(requestEntry.title);
+      texts.push(requestEntry.textContent);
+    }
+    const appLanguage = AppPrefs.getString(LanguageManager.PREF_KEY, '');
+    const letterLanguage = LetterLanguage.forLetter(texts, appLanguage);
+    hilog.info(DOMAIN, TAG, 'letter language=%{public}s (app=%{public}s) id=%{public}s',
+      letterLanguage, appLanguage, letter.id);
     const request = new LetterRequest(requestEntries, LetterTriggerKind.Weekly,
       dominantMoodOf(entries.map((entry: JournalEntry): string => entry.mood)),
-      letter.fromCharacter, '');
+      letter.fromCharacter, letterLanguage);
 
     this.mutateItem(letter.id, (current: OutboxItem): OutboxItem =>
       new OutboxItem(current.attempts + 1, current.failures, current.nextAttemptAt));
@@ -506,7 +519,7 @@ export class LetterOutboxService {
         }
         letter.triggerKind = LetterTriggerKind.Weekly;
         letter.stationery = letterStationery(false);
-        letter.deliveredAt = LetterDelivery.arrivalDate(item.generatedAtMs, 1, Math.random);
+        letter.deliveredAt = LetterDelivery.arrivalDate(item.generatedAtMs, LetterDelivery.debugTimeScale(), Math.random);
         await LetterRepository.saveLetter(store, letter);
         adoptedCount++;
         // 5.4：补领新建的到达提醒——到达时刻已过就不排（免得一打开弹过期通知）

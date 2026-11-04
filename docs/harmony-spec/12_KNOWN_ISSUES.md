@@ -48,9 +48,9 @@
 | 24 | ✅ | 3.6 | **大屏模式真机走查六项（2026-10-23 全部收官）**：①溶解接缝 ②主色 R/B ③scrollToItemInGroup 定位 ④pinch focus 坐标系 ⑤换级方向/误触守卫 ⑥懒加载 | **①② 像素实测过（接缝逐行均差 ≤8.3；夜景染蓝 (r84,g88,b115) b>r）；③ 根因实锤+修复+四路径回归过（见下）；④ focus 定位在 ③ 回归中隐式验证（落点行与手指下篇一致）；⑤ 换级四级双向 + 误触守卫 400ms 冷却 + zoom 持久化冷启恢复实测过（`hdc shell uinput -T -m` 双指注入可替代真人捏合：每指 4 坐标 x1 y1 x2 y2 + 尾参 smoothTimeMs）；⑥ 9月组各位置滚入渲染完整（多 dump 序列）、尾部留白正常、SixtyFour 16 篇不满屏全渲染**。**③ 修复档案**：根因 = `scrollToItemInGroup` 默认 START 置顶，焦点在尾部月份组时目标 offset 超出 maxOffset 被钳到列表底（顶部显示其他月份、焦点行不可见；尾部留白 120→500vp 同路径落点即正确，实锤几何钳制非时序——600ms 延时版与 300ms 快速捏合均复现同样落点，证伪「组未建」「手势未结束」两假说）；iOS 基准 = `scrollTo(id:focus, anchor:)` 锚点对齐 + 尾部仅 96pt；修法 = 第 4 参 `ScrollAlign.CENTER`（组下标 +1 语义不变）+ setTimeout 回 66ms + 留白回 120vp，标定脚手架（S20/S14/SI2 按钮、calibLog、临时日志）全部移除。四路径回归（X6 16 篇 seed 数据）：Four 末页捏近主路径 offset 700px 焦点行屏显 59% 可见（bug 时钳底 924px 焦点行不可见）、(2,1) 深路径 CENTER 超限钳底但 9月组完整可见、SixtyFour 逆向内容不满屏全可见、(1,0) 对照路径无回归（offset 0 页首完整）。已知余量：66ms 转场中调用时布局为中间态，CENTER 落点与稳定几何有 ±170px 级偏差（焦点行始终在视口内，转场盖住，不追） | **③⑥ 收官；3.6 走查全过，待用户捏合手感终验后结案** | PROGRESS 3.6 |
 | 25 | 🟡 | W1 | **应用接续：照片/录音文件不随接续迁移**（端到端已验收 ✅） | wantParam 只装草稿数据（官方 <100KB 约束）；文件迁移官方路径 = 分布式文件目录 + commonType.Asset 封装分布式对象（后续项）；块引用原样保留，对端缺文件按既有占位渲染，正文文字完整接续。**双设备端到端验收通过（2026-10-23，X6 ↔ Mate 80 Pro Max，A→B→A 双向；首轮 B 端白屏根因 = 接续冷启动只回调 onWindowStageRestore 不回调 onWindowStageCreate，官方 bpta-continue-cast 明示，EntryAbility 补齐 Restore 实现 + onContinue 禁系统 router 页面栈迁移后全链落编辑页）** | 后续版本接文件资产迁移（分布式文件目录 + commonType.Asset） | PROGRESS W1 · faqs-free-flow-1 |
 | 26 | ⚪ | 3.6 | **捏合换级无振动（X6）——非 bug 结案**：换级振动（preset soft）不触发 | 用户 X6「系统触感反馈」开关为关（用户确认）；官方 faqs-sensor-service-3：系统触感反馈关闭时管控 usage 列表内的振动静默，属预期行为；无需修码 | 无需修复；真机验振动时先确认开关开启 | PROGRESS 3.6 |
-| 27 | 🟡 | 3.6 | **`componentUtils.getRectangleById` 实测返回 px（X6 本 SDK），与捏合手势 vp 坐标不同单位**（2026-10-23 页首固定改造连带暴露并修复）：fingerList（FingerInfo）与 `ListScroller.currentOffset().yOffset` 均为 vp，rect 为 px（实测 rect=(0,435,1080,2005.5)=px，与 uitest dumpLayout 同单位）；混算致 Sixteen→Four 分开定位恒落 p0（idx 恒 0），Four→Sixteen 方向被 row 粒度掩盖碰巧对 | 已修：`HomeView.componentRect` 统一 `px ÷ display.getDefaultDisplaySync().densityPixels` 折 vp（真机终验：Sixteen 滚动后分开落 p3 ✓ 修复前恒 p0）；**B 端（Mate 80 Pro Max）未复验** | B 端装机时回归一次捏合定位（density 3.4，px 语义需复验）；若官方后续版本改回 vp 语义需重标定 | PROGRESS 3.6 |
+| 27 | 🟡 | 3.6 | **`componentUtils.getRectangleById` 实测返回 px（X6 本 SDK），与捏合手势 vp 坐标不同单位**（2026-10-23 页首固定改造连带暴露并修复）：fingerList（FingerInfo）与 `ListScroller.currentOffset().yOffset` 均为 vp，rect 为 px（实测 rect=(0,435,1080,2005.5)=px，与 uitest dumpLayout 同单位）；混算致 Sixteen→Four 分开定位恒落 p0（idx 恒 0），Four→Sixteen 方向被 row 粒度掩盖碰巧对。**⚠️ 5.6 重犯（2026-11-04）**：投信动画 beginPosting 拿 getRectangleById 几何直接当 vp 传飞行层——真机表现「displaySync 在跑（begin→finished 2.95s 日志全对）但画面纹丝不动」，slot/pile 全部 3.4× 屏外坐标渲染（信封画在 y≈1783vp≈5710px 处）；教训=**本清单已知坑写新功能前必须回查** | 已修：`HomeView.componentRect` 统一 `px ÷ display.getDefaultDisplaySync().densityPixels` 折 vp（真机终验：Sixteen 滚动后分开落 p3 ✓ 修复前恒 p0）；**B 端（Mate 80 Pro Max）未复验**。5.6 修法统一为官方 `ui.px2vp()`（UIContext API，比手动 ÷density 少一个取密度来源）；修后 hilog 几何标准值 `slot=(167.8,177.9,55.7,8.7) pile=(27.9,528.3,335.4,185.6)`、连拍帧差分轨迹全对（s3 半空/s4 入口） | B 端装机时回归一次捏合定位（density 3.4，px 语义需复验）；若官方后续版本改回 vp 语义需重标定；**写新功能用 getRectangleById 时直接 px2vp，勿再当 vp** | PROGRESS 3.6 · 5.6 |
 | 28 | 🟠 | 5.2 | **邮筒页跨机型/形态适配多轮未达产品关**（用户点名：一直优化不好，记入清单后续一起修复，2026-10-27）：用户四反馈（① 叠纸贴 Tab 栏 ② 邮筒下移放大 ③ 状态行字大 ④ 按机型/形态适配）经一轮深度适配（`PostBoxMetrics` 尺寸锚 iOS 比例单一来源 + 裁三张 PNG 奶油边 + `windowSizeChange` 窗口尺寸发布 + 状态行 caption 12fp + 430 限宽缩进），Mate X6 折叠态像素验收六项达标（dome 110.4vp/墨迹 37.0%W/缝隙 41.1vp/12fp/叠纸 173.3vp），**但用户观感仍不过关，不再逐轮调教** | 像素达标 ≠ 观感过关；展开态/其他机型（Mate 80 Pro Max）未实测；37.0%W 与 iOS 37.9% 有 1% 级偏差；整体与 iOS 并排观感未对照 | 后续一起修复：用户列出具体不达项后一次调——候选 = 展开态/其他机型真机走查、录屏与 iOS 并排对照标定参数、必要时回归固定绝对值方案 | PROGRESS 5.2 |
-| 29 | 🔴 | 5.4 | **真机代理提醒被 AGC「代理提醒」开放能力权益管控拦截**（2026-10-29 实锤）：`reminderAgentManager.publishReminder` 真机报 **1700002「The number of reminders exceeds the limit」**（Mate X6，仅排 2 个、远低于 API26 单应用 64 上限——无权益时配额按 0 处理），授权、重排计划、降级路径全正常（`skip reminder`/`rescheduling N`/`publishReminder failed` 日志链实证；模拟器侧管控策略未验，Mate 90 Pro 模拟器启动后 hdc 始终不上线）；**到达通知在真机上弹不出来，须 AGC 申请后才能 E2E** | 华为对三方应用的代理提醒（reminderAgentManager）要求 AGC 申请「代理提醒」开放能力（应用类型限工具/效率类、场景限生活类提醒——尺素「回信到达」符合），审批约 8 个工作日，通过后重新生成 Profile | AGC 后台提权（提权材料：应用类型/使用场景说明）→ 审批过后重新生成调试+发布 Profile → 真机装机复跑 `publishReminder`（应见 `arrival reminder published`）→ 走 R-NOTIFY-05 验收（真通知点击直达信箱）；在此之前代码侧已全就绪：失败降级不炸信流（log-only），点通知路由链路已用 `aa start --pb openLetterbox true` 等价验证冷/热启动直达信箱 | PROGRESS 5.4 · R-NOTIFY-01/05 |
+| 29 | 🔴 | 5.4 | **真机代理提醒被 AGC「代理提醒」开放能力权益管控拦截**（2026-10-29 实锤）：`reminderAgentManager.publishReminder` 真机报 **1700002「The number of reminders exceeds the limit」**（Mate X6，仅排 2 个、远低于 API26 单应用 64 上限——无权益时配额按 0 处理），授权、重排计划、降级路径全正常（`skip reminder`/`rescheduling N`/`publishReminder failed` 日志链实证；模拟器侧管控策略未验，Mate 90 Pro 模拟器启动后 hdc 始终不上线）；**到达通知在真机上弹不出来，须 AGC 申请后才能 E2E** | 华为对三方应用的代理提醒（reminderAgentManager）要求 AGC 申请「代理提醒」开放能力（应用类型限工具/效率类、场景限生活类提醒——尺素「回信到达」符合），审批约 8 个工作日，通过后重新生成 Profile。**官方申请路径（文档《代理提醒(ArkTS)》agent-powered-reminder，2026-11-04 核对）**：AGC「开发与服务」→ 项目下选应用 → **项目设置 → 开放能力管理** → 「代理提醒」卡片「申请」→ 填申请原因 + 传**代理提醒功能场景截图** + **应用分类信息截图**（截图来源：AGC「APP」页签 → 应用上架 → 应用信息）→ 提交 → 8 个工作日出结果（按钮变「申请中」）；**审批通过后还要回「开放能力接入」页勾选代理提醒能力开关并点右上角「保存」**，只批不勾不生效。**进展：2026-11-04 用户已在 AGC 提交申请（附邮筒页/信箱页功能场景截图），等审批（约 8 个工作日）** | AGC 后台提权（提权材料：应用类型/使用场景说明）→ 审批过后重新生成调试+发布 Profile → 真机装机复跑 `publishReminder`（应见 `arrival reminder published`）→ 走 R-NOTIFY-05 验收（真通知点击直达信箱）；在此之前代码侧已全就绪：失败降级不炸信流（log-only），点通知路由链路已用 `aa start --pb openLetterbox true` 等价验证冷/热启动直达信箱 | PROGRESS 5.4 · R-NOTIFY-01/05 |
 
 ## 三、3.5 翻书手感专项档案（用户点名：一直优化不好，记录后修）
 
@@ -97,6 +97,57 @@
 
 ## 四、变更日志
 
+- 2026-11-05 测试包门控定版记档（PROGRESS 5.8）：**debug/release 判定用 hvigor
+  自动生成的 BuildProfile**（构建时生成于 `entry/build/<product>/generated/
+  profile/<target>/BuildProfile.ets`，官方引入 `import BuildProfile from
+  'entry/BuildProfile'`——模块 oh-package 名路径，任意深度可用；`DEBUG`/
+  `BUILD_MODE_NAME` 随 buildMode 翻转，编译期定死，等价 iOS `#if DEBUG`）。
+  **运行时无 debuggable 字段可查**：本 SDK（API 26）`ApplicationInfo`/
+  `BundleInfo` d.ts 均无 debuggable/appProvisionType，bundleManager 路线走不通。
+  **排雷**：① 本 SDK Toggle 开态轨道色是 `.selectedColor()`，无 `.toggleColor()`
+  （编译报 Property does not exist）；② 字符串词条键 = `s_`+SHA1(中文值)[:10]，
+  「关于」「版本」已有词条（s_bed172efc9/s_989d1affa0），新增前先查重；③ 新
+  字符串须同步全部 8 个 locale 文件（base/en/es/fr/ja/ko/zh_Hans/zh_Hant 全量
+  镜像，键同值异）；④ release 构建可与 debug 共用同一签名配置（本工程只有
+  尺素Debug.p12），`-p buildMode=release` 可直接出包装机验门控，验完记得回
+  debug 重建。
+- 2026-11-04 投信动画「点了没动画」两根因攻坚记档（PROGRESS 5.6）：**①
+  displaySync.start() 在异步回调里调用 = frame 回调一帧不来**——displaySync 官
+  方文档明示 start 须在正确 UI 上下文（save 落库的异步续体里上下文已错），
+  真机表现=点击无任何反应（信照寄、动画无声无息）；修法 =
+  `ui.runScopedTask(()=>{displaySync.create(); on('frame'); start()})` 绑回当
+  前 UI 上下文。**排雷沉淀：displaySync 一律 runScopedTask 包 create/on/start
+  三连，异步链路里裸 start 必死。** **② getRectangleById 返回 px 当 vp（#27
+  3.6 坑重犯）**——displaySync 修好后 begin/finished 日志全对（2.95s 精确）但
+  连拍帧差分证画面静止；hilog 几何值被隐私打码（float 参数显示 `}f`，
+  `%{public}f` 也不放行——**诊断日志 float 一律 `.toFixed(1)` 拼字符串再
+  `%{public}s`**），改字符串后实锤坐标 3.4× 屏外；修法 = `ui.px2vp()`（#27 已
+  追记）。**取证方法论**：`snapshot_display`（设备原生，无 uitest 启动开销）
+  0.22s 间隔连拍 + 帧差分 bbox 追踪，比 uitest screenCap（单帧 1s+）密一个数
+  量级，动画轨迹排查首选；多模态识别大图会漏小运动物体，裁变化区放大再识别。
+- 2026-11-04 大屏卡徽标「零渲染」+ 信箱入口按钮改造记档：**① 卡片天气/位置看
+  不清**——根因 = WeatherLocationBadge 的 fontSize/fontColor/iconSize 为未装饰
+  普通成员，冷启动大屏卡首建用心情色 tint（深字 #666666），照片异步解出后父级
+  tintHex 变深、其余文字重算为浅字，但徽标纯成员不触发子重建、深字留深底
+  （(102,102,102) on (108,109,93) Δsum=-4）——「零渲染」实为色撞不可见（dump
+  节点/bounds/opacity 全正常但像素测不到，即此）；排查弯路：先疑 loadFirstPhoto
+  animateTo 淡入退化，移除证伪已还原；修法 = 三成员改 @Prop（ResourceColor 联合
+  可编译），四处调用零改动；真机验收大屏/列表/详情 × 三主题亮像素全部恢复
+  （321/1109 等，修复前 0）无回归。**排雷沉淀：未装饰普通成员跨子组件传值不
+  触发子重渲染——后续子组件接收父级后变值的样式参数一律 @Prop**（与 10-28
+  @Builder 按值传参同族）。**② 信箱入口按钮**（PROGRESS 5.2 追记）——build()
+  重构页首行+插画合并内层 Column（插画顶逐像素不动）、官方 Capsule Button+玻璃
+  成型、红点 TopEnd offset({x:-8,y:6}) 入内、PostBoxMetrics.safeTopVp+单测；
+  三主题真机像素验收全过；**操作坑：列表模式调试行位置与大屏不同，沿用大屏
+  坐标误点 Seed15 污染 15 篇（Clear15 清回，真实数据无恙）——自动化点击前必须
+  按当前模式重新 dump 定位**。
+- 2026-11-04 应用图标提前接线记档（用户插入任务③，PROGRESS 6.2 追记）：Q5 调研
+  实锤——鸿蒙 5.0.3(15)+ 有 AGC 图标管理服务（appInfoManager 三接口）但须上架+
+  运营开通，开发期不可用 → 退单图标（素笺）；iOS 素笺图标拆层：背景纯纵向线性
+  渐变按拟合模型重建、前景 BFS 泛洪抠书本（合成校验 maxdiff=4 零超 10）；启动窗
+  底色 base/dark 统一 #F8F7F2 消白/黑闪；**排雷：AppScope 同名资源编译时覆盖
+  entry——background/foreground 两处必须同步改**；真机验收：桌面图标模板匹配
+  4.8 + 启动窗帧连拍抓到纸底+书本图标，全链路无闪。
 - 2026-10-28 InTransitNote 实机空白攻坚记档：5.3 补做「邮戳+在路上」（iOS
   PostBoxNotes.InTransitNote 权威，恢复 5.2 版式下半区空洞）实机不渲染；
   根因 = **@Builder 按值传参（表达式实参）不随状态刷新**——首渲染 letters

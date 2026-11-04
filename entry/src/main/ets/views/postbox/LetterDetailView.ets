@@ -1,14 +1,15 @@
 /**
- * 来信详情（普通信，10_BUILD_MANUAL.md 5.1）。对应 iOS `LetterDetailView.swift`。
+ * 来信详情（10_BUILD_MANUAL.md 5.1 / 5.7）。对应 iOS `Views/PostBox/LetterDetailView.swift`。
  *
  * - 普通信**打开即已读**（R-BOX-04）：首次装载时 status → read 落库（只第一次有效）
+ * - 火漆信（尺素会员寄出的，见 `Letter.isSealed`）：没拆过的先是一枚封着的信封，
+ *   一下一下拆开（`SealedLetterOpener`），**打碎火漆那一刻才算已读**；
+ *   拆过的再打开直接是信纸（专属信纸 `LetterStationery`）。
+ *   只看了一眼信封就退出去，信还封着 —— 和实物一样
  * - 信头「致{昵称快照}」（R-BOX-07）：整句交给译文排（致%s，R-LANG-07）；
  *   昵称是**寄出那一刻的快照**，不实时读当前昵称——改名字不连历史信一起变
- * - 正文一整段（开头、中段、结尾、签名都由服务端写好）
  * - 信末会员小字（R-BOX-08）：行先渲染占位；会员状态接入后只对非会员显示，
  *   点击开付费页等付费体系卡片接通
- * - 火漆信（5.7 拆信流程）：本卡先按普通信展示正文，但**不标已读**——
- *   拆信要打碎火漆那一刻才算（R-BOX-04），只看一眼就退出信还封着
  * - 路由：邮筒 tab 内 Navigation（router_map `LetterDetail`），参数 = 信 id
  */
 import { relationalStore } from '@kit.ArkData';
@@ -26,7 +27,12 @@ import { AppDatabase } from '../../data/Database';
 import { LetterRepository } from '../../data/LetterRepository';
 import { Letter, LetterStatus } from '../../models/Letter';
 import { LetterDelivery } from '../../models/LetterDelivery';
+import { LetterOpeningTimeline } from '../../models/LetterOpeningTimeline';
+import { PostingRun } from '../../models/LetterPostingFlightGeometry';
 import { dayAndWeekday } from '../../services/AppDateFormatters';
+import { LetterPalette } from './LetterPalette';
+import { SealedLetterOpener } from './SealedLetterOpener';
+import { LetterStationery } from './LetterStationery';
 
 const DOMAIN = 0x0000;
 const TAG = 'LetterDetailView';
@@ -49,6 +55,8 @@ export struct LetterDetailView {
   /** 路由参数：信 id（onReady 从 NavDestinationContext.pathInfo 取） */
   private letterId: string = '';
   @State private letter: Letter | undefined = undefined;
+  /** 火漆信这次进来时还封着、还没拆完。进来那一刻定下，拆完变 false（iOS sealed） */
+  @State private sealed: boolean = false;
   private navPathStack: NavPathStack = new NavPathStack();
   private store: relationalStore.RdbStore | undefined = undefined;
 
@@ -58,56 +66,16 @@ export struct LetterDetailView {
         this.topBar()
 
         if (this.letter !== undefined) {
-          Scroll() {
-            Column({ space: 24 }) {
-              // 信头：寄出日子 + 抬头「致{昵称快照}」
-              Column({ space: 6 }) {
-                Text(dayAndWeekday(new Date(this.letter.generatedAt), this.appLanguage))
-                  .fontSize(this.theme.captionFont.size)
-                  .fontWeight(this.theme.captionFont.weight)
-                  .fontFamily(this.theme.captionFont.family)
-                  .fontColor(this.theme.textTertiary)
-                  .letterSpacing(this.theme.letterSpacingWide)
-                Text(this.salutation())
-                  .fontSize(this.theme.headingFont.size)
-                  .fontWeight(this.theme.headingFont.weight)
-                  .fontFamily(this.theme.headingFont.family)
-                  .fontColor(this.theme.textPrimary)
-              }
-              .width('100%')
-              .alignItems(HorizontalAlign.Start)
-              .padding({ top: 8 })
-
-              Divider()
-                .strokeWidth(0.5)
-                .color(this.theme.borderAccent)
-                .width('100%')
-
-              // 正文（已含开头 + 中段 + 结尾 + 签名——服务端写好）
-              Text(this.letter.body)
-                .fontSize(this.theme.bodyFont.size)
-                .fontWeight(this.theme.bodyFont.weight)
-                .fontFamily(this.theme.bodyFont.family)
-                .fontColor(this.theme.textPrimary)
-                .lineSpacing(LengthMetrics.vp(10))
-                .width('100%')
-
-              this.memberHint()
+          if (this.letter.isSealed) {
+            // 火漆信：没拆过的是一枚封着的信封；拆完（或上次已拆过）摊开成信纸
+            if (this.sealed) {
+              this.sealedEnvelopeView(this.letter)
+            } else {
+              this.stationeryView(this.letter)
             }
-            .width('100%')
-            .alignItems(HorizontalAlign.Start)
-            .padding({
-              left: 28,
-              right: 28,
-              bottom: this.safeAreaBottomVp + 60
-            })
+          } else {
+            this.plainLetterView(this.letter)
           }
-          // Scroll 高度受限后内容小于视口默认居中（官方 FAQ faqs-arkui-725）——显式顶对齐
-          .align(Alignment.Top)
-          .scrollBar(BarState.Off)
-          .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
-          .width('100%')
-          .layoutWeight(1)
         }
       }
       .width('100%')
@@ -133,6 +101,127 @@ export struct LetterDetailView {
     })
   }
 
+  // ---- 普通信（打开即已读，R-BOX-04） ----
+
+  @Builder
+  private plainLetterView(letter: Letter) {
+    Scroll() {
+      Column({ space: 24 }) {
+        // 信头：寄出日子 + 抬头「致{昵称快照}」
+        Column({ space: 6 }) {
+          Text(dayAndWeekday(new Date(letter.generatedAt), this.appLanguage))
+            .fontSize(this.theme.captionFont.size)
+            .fontWeight(this.theme.captionFont.weight)
+            .fontFamily(this.theme.captionFont.family)
+            .fontColor(this.theme.textTertiary)
+            .letterSpacing(this.theme.letterSpacingWide)
+          Text(this.salutation())
+            .fontSize(this.theme.headingFont.size)
+            .fontWeight(this.theme.headingFont.weight)
+            .fontFamily(this.theme.headingFont.family)
+            .fontColor(this.theme.textPrimary)
+        }
+        .width('100%')
+        .alignItems(HorizontalAlign.Start)
+        .padding({ top: 8 })
+
+        Divider()
+          .strokeWidth(0.5)
+          .color(this.theme.borderAccent)
+          .width('100%')
+
+        // 正文（已含开头 + 中段 + 结尾 + 签名——服务端写好）
+        Text(letter.body)
+          .fontSize(this.theme.bodyFont.size)
+          .fontWeight(this.theme.bodyFont.weight)
+          .fontFamily(this.theme.bodyFont.family)
+          .fontColor(this.theme.textPrimary)
+          .lineSpacing(LengthMetrics.vp(10))
+          .width('100%')
+
+        this.memberHint()
+      }
+      .width('100%')
+      .alignItems(HorizontalAlign.Start)
+      .padding({
+        left: 28,
+        right: 28,
+        bottom: this.safeAreaBottomVp + 60
+      })
+    }
+    // Scroll 高度受限后内容小于视口默认居中（官方 FAQ faqs-arkui-725）——显式顶对齐
+    .align(Alignment.Top)
+    .scrollBar(BarState.Off)
+    .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
+    .width('100%')
+    .layoutWeight(1)
+  }
+
+  // ---- 火漆信：封着的信封，一下一下拆开（R-BOX-05，5.7） ----
+
+  @Builder
+  private sealedEnvelopeView(letter: Letter) {
+    SealedLetterOpener({
+      palette: LetterPalette.of(this.theme.id),
+      mark: PostingRun.sealMarkOf(letter.fromCharacter),
+      sender: $r('app.string.s_d190c58094', letter.fromCharacter),
+      onBroken: (): void => {
+        // 第一下打碎火漆那一刻才算已读（R-BOX-04）
+        this.markLetterRead();
+      },
+      onFinished: (): void => {
+        // 信纸抽出来了，摊开成信纸（iOS unfold：easeInOut 0.55s）
+        this.getUIContext().animateTo({
+          duration: Math.round(LetterOpeningTimeline.UNFOLD_DURATION * 1000),
+          curve: Curve.EaseInOut
+        }, (): void => {
+          this.sealed = false;
+        });
+      }
+    })
+    .width('100%')
+    .layoutWeight(1)
+    .transition(TransitionEffect.OPACITY.combine(TransitionEffect.translate({ y: 30 })))
+  }
+
+  // ---- 火漆信：摊开的专属信纸（字一行一格落在格线上，5.7） ----
+
+  @Builder
+  private stationeryView(letter: Letter) {
+    Scroll() {
+      Column() {
+        LetterStationery({
+          palette: LetterPalette.of(this.theme.id),
+          date: dayAndWeekday(new Date(letter.generatedAt), this.appLanguage),
+          salutation: this.salutation(),
+          content: letter.body
+        })
+        // 会员小字居中一行（iOS stationery 的 VStack 默认居中；
+        // 20 是 memberHint 自带的顶距，8 补齐 iOS 的 28）
+        Row() {
+          this.memberHint()
+        }
+        .width('100%')
+        .justifyContent(FlexAlign.Center)
+        .margin({ top: 8 })
+      }
+      .width('100%')
+      .padding({
+        left: 16,
+        right: 16,
+        top: 12,
+        bottom: this.safeAreaBottomVp + 60
+      })
+    }
+    // Scroll 高度受限后内容小于视口默认居中（官方 FAQ faqs-arkui-725）——显式顶对齐
+    .align(Alignment.Top)
+    .scrollBar(BarState.Off)
+    .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
+    .width('100%')
+    .layoutWeight(1)
+    .transition(TransitionEffect.OPACITY.combine(TransitionEffect.translate({ y: 16 })))
+  }
+
   /** 抬头：有昵称快照「致%s」整句交给译文，没有退回光秃秃的「致」（R-BOX-07） */
   private salutation(): ResourceStr {
     const letter = this.letter;
@@ -144,7 +233,8 @@ export struct LetterDetailView {
 
   /**
    * 装载 + 标已读。
-   * 普通信打开即已读（R-BOX-04）；火漆信要打碎火漆那一刻才算（5.7 接），这里不标。
+   * 普通信打开即已读（R-BOX-04）；火漆信要打碎火漆那一刻才算（onBroken 里调
+   * `markLetterRead`），这里只定「这次进来还封不封着」。
    * 已读只记本地（R-BOX-10），不调服务端。
    */
   private async loadLetter(): Promise<void> {
@@ -162,16 +252,39 @@ export struct LetterDetailView {
         return;
       }
       const now = Date.now();
-      if (!letter.isSealed && LetterDelivery.isUnread(letter, now)) {
-        letter.status = LetterStatus.Read;
-        letter.readAt = now;
-        letter.updatedAt = now;
-        await LetterRepository.saveLetter(this.store, letter);
+      if (letter.isSealed) {
+        // 拆过的再打开直接是信纸（R-BOX-04）；只看信封退出的仍封着
+        this.sealed = LetterDelivery.isUnread(letter, now);
+      } else if (LetterDelivery.isUnread(letter, now)) {
+        this.markLetterRead(letter, now);
       }
       this.letter = letter;
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'load letter failed id=%{public}s: %{public}s',
         this.letterId, JSON.stringify(err));
+    }
+  }
+
+  /** 标记已读（只第一次有效；写库失败不阻断阅读，下次进来再标） */
+  private async markLetterRead(letter?: Letter, now?: number): Promise<void> {
+    const target = letter !== undefined ? letter : this.letter;
+    if (target === undefined) {
+      return;
+    }
+    const at = now !== undefined ? now : Date.now();
+    if (!LetterDelivery.isUnread(target, at)) {
+      return;
+    }
+    target.status = LetterStatus.Read;
+    target.readAt = at;
+    target.updatedAt = at;
+    if (this.store !== undefined) {
+      try {
+        await LetterRepository.saveLetter(this.store, target);
+      } catch (err) {
+        hilog.error(DOMAIN, TAG, 'mark letter read failed id=%{public}s: %{public}s',
+          target.id, JSON.stringify(err));
+      }
     }
   }
 
@@ -240,7 +353,6 @@ export struct LetterDetailView {
         .fontFamily(this.theme.captionFont.family)
         .fontColor(this.theme.accent)
     }
-    .width('100%')
     .padding({ top: 20 })
   }
 }

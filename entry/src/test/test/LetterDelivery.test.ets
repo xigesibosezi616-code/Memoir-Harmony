@@ -45,6 +45,25 @@ export default function letterDeliveryTest() {
       expect(LetterDelivery.maximumEntriesPerLetter).assertEqual(14);
     })
 
+    // ---- 开发加速（5.8）：timeScaleFor 四象限 + 1 分钟 ≈ 1 天换算 ----
+
+    it('timeScaleForOnlyAcceleratesInTestBuildWithToggleOn', 0, () => {
+      // 测试包 + 开关开 → 加速；其余三个组合恒 1
+      expect(LetterDelivery.timeScaleFor(true, true)).assertEqual(1440);
+      expect(LetterDelivery.timeScaleFor(true, false)).assertEqual(1);
+      // 🔴 正式包：开关留着开着也不生效（5.8 验收核心）
+      expect(LetterDelivery.timeScaleFor(false, true)).assertEqual(1);
+      expect(LetterDelivery.timeScaleFor(false, false)).assertEqual(1);
+    })
+
+    it('fastDeliveryScaleMatchesOneMinutePerDay', 0, () => {
+      expect(LetterDelivery.debugFastDeliveryScale).assertEqual(1440);
+      const minSec = LetterDelivery.minimumDelaySec / 1440; // 6 小时 → 15 秒
+      const maxSec = LetterDelivery.maximumDelaySec / 1440; // 3 天 → 3 分钟
+      expect(minSec).assertEqual(15);
+      expect(maxSec).assertEqual(180);
+    })
+
     // ---- 真正的信：有正文且 status ∈ {pending, delivered, read} ----
 
     it('isRealLetterRequiresBodyAndKnownStatus', 0, () => {

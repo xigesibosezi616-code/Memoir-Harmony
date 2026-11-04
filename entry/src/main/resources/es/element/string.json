@@ -3507,6 +3507,18 @@
     {
       "name": "s_e15f73bdc6",
       "value": "Añoranza usa la cámara para añadir fotos a tus entradas."
+    },
+    {
+      "name": "s_ea5026fc0f",
+      "value": "VERSIÓN DE PRUEBA"
+    },
+    {
+      "name": "s_f93c4db3ab",
+      "value": "Entrega rápida de cartas"
+    },
+    {
+      "name": "s_bdfe921dd3",
+      "value": "1 min ≈ 1 día: las respuestas llegan en 15 s a 3 min. Activado por defecto. Solo afecta a las cartas enviadas mientras esté activado."
     }
   ]
 }

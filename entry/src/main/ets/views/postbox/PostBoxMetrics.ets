@@ -23,6 +23,8 @@ export const POSTBOX_SPACING_VP: number = 14;
 
 /** 邮筒页版式（全部 vp；由窗口高 + 上下安全区算出） */
 export class PostBoxMetrics {
+  /** 顶部安全区（窗口顶→状态栏底）：页首行（信箱入口）从这里起排 */
+  readonly safeTopVp: number;
   /** 内容顶（≈ 邮筒 dome 顶，裁边 PNG 的墨迹顶）距窗口顶 */
   readonly topOffsetVp: number;
   /** 内容底（叠纸整叠底）距窗口底 */
@@ -42,9 +44,11 @@ export class PostBoxMetrics {
   /** 内容列最大宽：宽屏（折叠展开/平板/2in1）缩进布局居中；窄屏自然满宽 */
   readonly contentMaxWidthVp: number;
 
-  private constructor(topOffsetVp: number, bottomOffsetVp: number, statusMinHeightVp: number,
-    pileHeightVp: number, pileHeaderHeightVp: number, pileRowHeightVp: number,
-    pileFadeHeightVp: number, stageHeightVp: number, contentMaxWidthVp: number) {
+  private constructor(safeTopVp: number, topOffsetVp: number, bottomOffsetVp: number,
+    statusMinHeightVp: number, pileHeightVp: number, pileHeaderHeightVp: number,
+    pileRowHeightVp: number, pileFadeHeightVp: number, stageHeightVp: number,
+    contentMaxWidthVp: number) {
+    this.safeTopVp = safeTopVp;
     this.topOffsetVp = topOffsetVp;
     this.bottomOffsetVp = bottomOffsetVp;
     this.statusMinHeightVp = statusMinHeightVp;
@@ -77,7 +81,7 @@ export class PostBoxMetrics {
     const bottomOffset = safeBottomVp + bottomGap;
     const stage = Math.max(0, windowHeightVp - topOffset - bottomOffset
       - POSTBOX_SPACING_VP * 2 - statusMin - pile);
-    return new PostBoxMetrics(topOffset, bottomOffset, statusMin, pile, header, row,
-      fade, stage, 430);
+    return new PostBoxMetrics(safeTopVp, topOffset, bottomOffset, statusMin, pile, header,
+      row, fade, stage, 430);
   }
 }

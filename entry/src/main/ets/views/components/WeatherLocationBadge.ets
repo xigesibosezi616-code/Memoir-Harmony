@@ -76,11 +76,11 @@ export struct WeatherLocationBadge {
   /** 地名，如 "西安市" */
   @Prop locationInfo: string = '';
   /** 文字字号（fp） */
-  fontSize: number = 12;
+  @Prop fontSize: number = 12;
   /** 文字与图标颜色 */
-  fontColor: ResourceColor = 0xFF8B7E6A;
+  @Prop fontColor: ResourceColor = 0xFF8B7E6A;
   /** 天气图标字号（fp）；定位图标比它小 1（iOS 同款） */
-  iconSize: number = 11;
+  @Prop iconSize: number = 11;
 
   build() {
     if (weatherBadgeHasContent(this.weatherCode, this.weatherInfo, this.locationInfo)) {

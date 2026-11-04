@@ -353,7 +353,7 @@ export class LetterRequest {
   readonly dominantMood: string;
   /** 投信那一刻的笔友名 */
   readonly penPalName: string;
-  /** 回信语言跟日记写的语言走（R-LETTERLANG）；5.5 落地前恒 ''（不发，服务端按简体） */
+  /** 回信语言跟日记写的语言走（R-LETTERLANG）：LetterOutboxService 用 LetterLanguage 识别填入，认不出退 App 语言 */
   readonly language: string;
 
   constructor(entries: LetterRequestEntry[], triggerKind: string, dominantMood: string,

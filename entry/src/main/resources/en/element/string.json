@@ -3507,6 +3507,18 @@
     {
       "name": "s_e15f73bdc6",
       "value": "memoir uses the camera to add photos to your entries."
+    },
+    {
+      "name": "s_ea5026fc0f",
+      "value": "TEST BUILD"
+    },
+    {
+      "name": "s_f93c4db3ab",
+      "value": "Fast letter delivery"
+    },
+    {
+      "name": "s_bdfe921dd3",
+      "value": "1 min ≈ 1 day: replies arrive in 15 s to 3 min. On by default. Only affects letters sent while on."
     }
   ]
 }

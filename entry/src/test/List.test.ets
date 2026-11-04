@@ -46,6 +46,12 @@ import postBoxMetricsTest from './test/PostBoxMetrics.test'
 import letterOutboxLogicTest from './test/LetterOutboxLogic.test'
 import notifyLogicTest from './test/NotifyLogic.test'
 import letterApiTest from './test/LetterApi.test'
+import letterLanguageTest from './test/LetterLanguage.test'
+import letterPostingTimelineTest from './test/LetterPostingTimeline.test'
+import letterPostingFlightGeometryTest from './test/LetterPostingFlightGeometry.test'
+import postingHapticPatternTest from './test/PostingHapticPattern.test'
+import letterOpeningTimelineTest from './test/LetterOpeningTimeline.test'
+import letterOpeningHapticPatternTest from './test/LetterOpeningHapticPattern.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -96,4 +102,10 @@ export default function testsuite() {
   letterOutboxLogicTest()
   notifyLogicTest()
   letterApiTest()
+  letterLanguageTest()
+  letterPostingTimelineTest()
+  letterPostingFlightGeometryTest()
+  postingHapticPatternTest()
+  letterOpeningTimelineTest()
+  letterOpeningHapticPatternTest()
 }

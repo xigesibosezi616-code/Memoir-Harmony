@@ -9,6 +9,8 @@
  * - Letter 的时间字段（generatedAt / deliveredAt）是毫秒；`now` 由调用方注入
  */
 import { Letter, LetterStatus } from './Letter';
+import { AppPrefs } from '../services/AppPrefs';
+import BuildProfile from 'entry/BuildProfile';
 
 export class LetterDelivery {
   /** 最快多久到（6 小时），秒 */
@@ -17,6 +19,28 @@ export class LetterDelivery {
   static readonly maximumDelaySec: number = 72 * 3600;
   /** 一次最多寄出多少篇日记。只是保护上限 —— 太多篇塞进一封信，提示词会超长 */
   static readonly maximumEntriesPerLetter: number = 14;
+
+  // ---- 开发加速（仅测试包；10_BUILD_MANUAL.md 5.8，对应 iOS LetterDelivery.swift） ----
+
+  /** 是不是测试包：debug 构建恒 true，正式（release）构建编译期即为 false，开关代码不生效 */
+  static readonly isTestBuild: boolean = BuildProfile.DEBUG;
+  /** 加速倍率：1 分钟 ≈ 1 天（6 小时 ≈ 15 秒、3 天 ≈ 3 分钟） */
+  static readonly debugFastDeliveryScale: number = 1440;
+
+  /**
+   * 测试包的时间压缩倍率：测试包且开关开着 → 1440，其余恒 1。
+   * **正式包永远是 1**（isTestBuild 编译期定死 false），偏好里留着开关也不生效。
+   * 纯函数，单测直接喂参（timeScaleFor 测试）
+   */
+  static timeScaleFor(isTestBuild: boolean, fastDeliveryOn: boolean): number {
+    return isTestBuild && fastDeliveryOn ? LetterDelivery.debugFastDeliveryScale : 1;
+  }
+
+  /** 寄信时取当前倍率（iOS `LetterDelivery.debugTimeScale` 同款；只影响开启后寄出的信） */
+  static debugTimeScale(): number {
+    return LetterDelivery.timeScaleFor(LetterDelivery.isTestBuild,
+      AppPrefs.isDebugFastLetterDeliveryOn());
+  }
 
   /**
    * 回信的到达时刻：寄出后 [6 小时, 3 天] 内均匀随机。

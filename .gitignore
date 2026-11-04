@@ -46,3 +46,8 @@ agconnect-services*.json
 
 # hvigor 构建材料缓存（自动生成，不入库）
 material/
+
+# DevEco Code 本地工具配置（MCP/会话），不入库
+.deveco/
+.dsh/
+.mcp.json

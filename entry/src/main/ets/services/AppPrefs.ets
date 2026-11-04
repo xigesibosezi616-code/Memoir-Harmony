@@ -37,6 +37,8 @@ export const PREF_KEY_EYE_INTRO_SHOWN = 'eyeIntroShown';
 export const PREF_KEY_HOME_DISPLAY_MODE = 'homeDisplayMode';
 /** 大屏一屏放几篇（对应 iOS `showcaseZoom`，0–3；U06 R-HOME-09 只存本机） */
 export const PREF_KEY_SHOWCASE_ZOOM = 'showcaseZoom';
+/** 回信加速（对应 iOS `debugFastLetterDelivery`，默认开；5.8 仅测试包生效/可见） */
+export const PREF_KEY_DEBUG_FAST_LETTER_DELIVERY = 'debugFastLetterDelivery';
 
 /** 目录版式取值（iOS `BookContentsView.Layout`） */
 export const BOOK_CONTENTS_LAYOUT_LIST = 'list';
@@ -207,5 +209,16 @@ export class AppPrefs {
   static setShowcaseZoom(zoom: number): void {
     const clamped = Math.min(3, Math.max(0, Math.round(zoom)));
     AppPrefs.putString(PREF_KEY_SHOWCASE_ZOOM, `${clamped}`);
+  }
+
+  // ---- 5.8 回信加速（仅测试包；正式包读出来也不生效，见 LetterDelivery.debugTimeScale） ----
+
+  /** 回信加速开关。没碰过就算开着（iOS 2026-10-17 产品要求：测试的人不会去「关于」里找开关） */
+  static isDebugFastLetterDeliveryOn(): boolean {
+    return AppPrefs.getBool(PREF_KEY_DEBUG_FAST_LETTER_DELIVERY, true);
+  }
+
+  static setDebugFastLetterDelivery(on: boolean): void {
+    AppPrefs.putBool(PREF_KEY_DEBUG_FAST_LETTER_DELIVERY, on);
   }
 }

@@ -31,6 +31,11 @@
       "buildFunction": "SettingsAccountBuilder"
     },
     {
+      "name": "About",
+      "pageSourceFile": "src/main/ets/views/settings/SettingsAboutView.ets",
+      "buildFunction": "SettingsAboutBuilder"
+    },
+    {
       "name": "ChangePhone",
       "pageSourceFile": "src/main/ets/views/auth/ChangePhoneView.ets",
       "buildFunction": "ChangePhoneBuilder"

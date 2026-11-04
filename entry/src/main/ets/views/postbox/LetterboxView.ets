@@ -5,10 +5,10 @@
  *   在路上的看不见，只要有一封在走就在卡片下补一行「有回信正在路上」
  * - 「此刻」每 5 秒推进一次（R-BOX-02）：页面开着时到点的信自己冒出来、红点自己亮
  * - 行 =「来自{笔友}」+ 到达日子 + 预览（R-BOX-03：火漆信没拆不露预览）+ 未读红点；
+ *   火漆信行首是一枚小信封（没拆的封着，拆过的封舌翻开，5.7）
  *   信箱里显示的是**收到的日子**（到达时刻），不是寄出日子（iOS 同款）
  * - 空态「信箱还是空的」；到点的信由 onShown 全量重查 + nowMs 推进双驱动
  * - 路由：邮筒 tab 内 Navigation（router_map `Letterbox`），邮筒页右上角推入
- * - 火漆信行首暂用首字圆徽占位（SealedEnvelope 小信封是 5.7 火漆卡）
  */
 import { relationalStore } from '@kit.ArkData';
 import { hilog } from '@kit.PerformanceAnalysisKit';
@@ -25,7 +25,11 @@ import { STORAGE_KEY_LETTER_OUTBOX_TICK } from '../../services/LetterOutboxServi
 import { LetterRepository } from '../../data/LetterRepository';
 import { LetterDelivery } from '../../models/LetterDelivery';
 import { Letter } from '../../models/Letter';
+import { PostingRun } from '../../models/LetterPostingFlightGeometry';
 import { shortDate } from '../../services/AppDateFormatters';
+import { LetterPalette } from './LetterPalette';
+import { SealedEnvelope } from './SealedEnvelope';
+import { STORAGE_KEY_POSTBOX_VISIBLE_TICK } from './PostBoxTabView';
 
 const DOMAIN = 0x0000;
 const TAG = 'LetterboxView';
@@ -167,6 +171,13 @@ export struct LetterboxView {
     .onShown((): void => {
       this.reloadLetters();
     })
+    .onDisAppear((): void => {
+      // 出栈那一刻（侧滑返回/返回键/显式 pop 都走这里）bump 邮筒页的重查
+      // tick——pushPathByName 的 onPop 只在显式 pop 时触发，侧滑返回不触发，
+      // 会导致读完信回邮筒红点不灭（真机复现过），故以 onDisAppear 为准
+      const tick = AppStorage.get<number>(STORAGE_KEY_POSTBOX_VISIBLE_TICK) ?? 0;
+      AppStorage.setOrCreate(STORAGE_KEY_POSTBOX_VISIBLE_TICK, tick + 1);
+    })
   }
 
   // ---- 顶栏：返回圆钮 + 居中标题「信箱」 ----
@@ -243,16 +254,28 @@ export struct LetterboxView {
   @Builder
   private letterRow(letter: Letter) {
     Row({ space: 12 }) {
-      // 行首：笔友首字圆徽（火漆信 5.7 换 SealedEnvelope 小信封，先占位）
-      Stack() {
-        Circle()
-          .fill(this.theme.accentBackground)
-        Text(letter.fromCharacter.length > 0 ? letter.fromCharacter.charAt(0) : '青')
-          .fontSize(16)
-          .fontColor(this.theme.accent)
+      // 行首：火漆信是一枚小信封（没拆的封着，拆过的封舌翻开，iOS 同款）；
+      // 普通信是笔友首字圆徽
+      if (letter.isSealed) {
+        SealedEnvelope({
+          palette: LetterPalette.of(this.theme.id),
+          mark: PostingRun.sealMarkOf(letter.fromCharacter),
+          progress: LetterDelivery.isUnread(letter, this.nowMs) ? 0 : 0.55,
+          widthVp: 40
+        })
+        // 翻开的封舌会冒出信封上沿，往下挪一点，让整体落在头像那一格里
+        .offset({ y: LetterDelivery.isUnread(letter, this.nowMs) ? 0 : 7 })
+      } else {
+        Stack() {
+          Circle()
+            .fill(this.theme.accentBackground)
+          Text(letter.fromCharacter.length > 0 ? letter.fromCharacter.charAt(0) : '青')
+            .fontSize(16)
+            .fontColor(this.theme.accent)
+        }
+        .width(40)
+        .height(40)
       }
-      .width(40)
-      .height(40)
 
       Column({ space: 4 }) {
         Row() {

@@ -21,6 +21,7 @@ export default function postBoxMetricsTest() {
     it('mateX6FoldedAnchor', 0, () => {
       // Mate X6 折叠态：叠纸 172.18（=782.65×22%），顶 39.2+70、底 28+102
       const m = PostBoxMetrics.compute(782.65, 39.2, 28);
+      expect(m.safeTopVp).assertEqual(39.2);
       expect(m.topOffsetVp).assertEqual(109.2);
       expect(m.bottomOffsetVp).assertEqual(130);
       expect(Math.abs(m.pileHeightVp - 172.183) < 0.001).assertTrue();
@@ -41,6 +42,14 @@ export default function postBoxMetricsTest() {
       // 超高窗不放大（iOS 绝对值封顶），矮窗不小于 132
       expect(PostBoxMetrics.compute(2000, 40, 30).pileHeightVp).assertEqual(188);
       expect(PostBoxMetrics.compute(347, 0, 0).pileHeightVp).assertEqual(132);
+    })
+
+    it('safeTopPassthroughForHeaderRow', 0, () => {
+      // 页首行（信箱入口）从安全区顶起排：safeTop 原样透传，任意窗高/档位成立
+      for (const args of [[782.65, 39.2, 28], [347, 0, 0], [900, 40, 30], [200, 0, 0]]) {
+        const m = PostBoxMetrics.compute(args[0], args[1], args[2]);
+        expect(m.safeTopVp).assertEqual(args[1]);
+      }
     })
 
     it('compactTierForShortWindows', 0, () => {
