@@ -673,22 +673,6 @@ export struct HomeView {
           .onClick((): void => {
             this.getUIContext().getRouter().pushUrl({ url: 'pages/ThemeDebug' });
           })
-        Button('LanguageDebug')
-          .fontSize(this.theme.bodyFont.size)
-          .fontColor(this.theme.accent)
-          .backgroundColor(this.theme.accentBackground)
-          .borderRadius(10)
-          .onClick((): void => {
-            this.getUIContext().getRouter().pushUrl({ url: 'pages/LanguageDebug' });
-          })
-        Button('LocationDebug')
-          .fontSize(this.theme.bodyFont.size)
-          .fontColor(this.theme.accent)
-          .backgroundColor(this.theme.accentBackground)
-          .borderRadius(10)
-          .onClick((): void => {
-            this.getUIContext().getRouter().pushUrl({ url: 'pages/LocationDebug' });
-          })
       }
       .justifyContent(FlexAlign.Center)
 
