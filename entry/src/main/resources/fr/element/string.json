@@ -3519,6 +3519,26 @@
     {
       "name": "s_bdfe921dd3",
       "value": "1 min ≈ 1 jour : les réponses arrivent en 15 s à 3 min. Activé par défaut. Ne concerne que les lettres envoyées lorsqu’il est activé."
+    },
+    {
+      "name": "s_6ed1b2bd01",
+      "value": "Synchronisation cloud"
+    },
+    {
+      "name": "s_b9004e6f7b",
+      "value": "Désactivé"
+    },
+    {
+      "name": "s_f71802e114",
+      "value": "Vos journaux ne sont que sur cet appareil et seront perdus si vous supprimez l'app. Pensez à exporter régulièrement une sauvegarde."
+    },
+    {
+      "name": "s_0f449019e8",
+      "value": "Calcul…"
+    },
+    {
+      "name": "s_f6f7c46fd6",
+      "value": "Impossible d'ouvrir AppGallery"
     }
   ]
 }

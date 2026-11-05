@@ -54,6 +54,41 @@
       "name": "LetterDetail",
       "pageSourceFile": "src/main/ets/views/postbox/LetterDetailView.ets",
       "buildFunction": "LetterDetailBuilder"
+    },
+    {
+      "name": "Appearance",
+      "pageSourceFile": "src/main/ets/views/settings/SettingsAppearanceView.ets",
+      "buildFunction": "SettingsAppearanceBuilder"
+    },
+    {
+      "name": "JournalSettings",
+      "pageSourceFile": "src/main/ets/views/settings/SettingsJournalView.ets",
+      "buildFunction": "SettingsJournalBuilder"
+    },
+    {
+      "name": "DefaultPaperStyle",
+      "pageSourceFile": "src/main/ets/views/settings/DefaultPaperStylePickerView.ets",
+      "buildFunction": "DefaultPaperStylePickerBuilder"
+    },
+    {
+      "name": "PenPalSettings",
+      "pageSourceFile": "src/main/ets/views/settings/SettingsPenPalView.ets",
+      "buildFunction": "SettingsPenPalBuilder"
+    },
+    {
+      "name": "LocationSettings",
+      "pageSourceFile": "src/main/ets/views/settings/SettingsLocationView.ets",
+      "buildFunction": "SettingsLocationBuilder"
+    },
+    {
+      "name": "Language",
+      "pageSourceFile": "src/main/ets/views/settings/LanguagePickerView.ets",
+      "buildFunction": "LanguagePickerBuilder"
+    },
+    {
+      "name": "Data",
+      "pageSourceFile": "src/main/ets/views/settings/SettingsDataView.ets",
+      "buildFunction": "SettingsDataBuilder"
     }
   ]
 }

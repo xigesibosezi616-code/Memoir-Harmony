@@ -33,7 +33,7 @@ import {
 import { HomeView } from '../home/HomeView';
 import { BookshelfView } from '../shelf/BookshelfView';
 import { PostBoxTabView, STORAGE_KEY_POSTBOX_VISIBLE_TICK } from '../postbox/PostBoxTabView';
-import { SettingsTabView } from '../settings/SettingsTabView';
+import { SettingsTabView, STORAGE_KEY_SETTINGS_RESET_TICK } from '../settings/SettingsTabView';
 import { ErrorToastView } from './ErrorToastView';
 
 /** tab 定义（0 记录 / 1 日记本 / 2 邮筒 / 3 设置，顺序与 iOS ContentView 一致） */
@@ -202,6 +202,12 @@ export struct MainTabsView {
       .vertical(false)
       .scrollable(false)
       .onChange((index: number): void => {
+        // 🔴 R-SETTINGS-03：离开设置 tab 时把设置导航栈重置回首页
+        // （不是进入时清——快捷方式直达不受影响；SettingsTabView @Watch 后 clear）
+        if (this.currentTab === 3 && index !== 3) {
+          AppStorage.setOrCreate(STORAGE_KEY_SETTINGS_RESET_TICK,
+            (AppStorage.get<number>(STORAGE_KEY_SETTINGS_RESET_TICK) ?? 0) + 1);
+        }
         this.currentTab = index;
         // 邮筒 tab 内容常驻不重建：切过去时写 tick 驱动它重查
         // （别的 tab 里写了日记 / 寄了信 / 登录态变，回来都是最新的）
