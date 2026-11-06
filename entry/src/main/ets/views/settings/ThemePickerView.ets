@@ -99,7 +99,7 @@ export struct ThemePickerView {
       })
     }
     .hideTitleBar(true)
-    .backgroundColor(this.theme.background)
+    .backgroundColor(this.theme.settingsPageBackground)
     .onReady((ctx: NavDestinationContext): void => {
       this.navPathStack = ctx.pathStack;
       this.manager = AppStorage.get<ThemeManager>(STORAGE_KEY_THEME_MANAGER);
@@ -184,7 +184,7 @@ export struct ThemePickerView {
     .width('100%')
     .padding(16)
     .borderRadius(12)
-    .backgroundColor(this.theme.cardBackground)
+    .backgroundColor(this.theme.settingsCardBackground)
     .border({
       width: this.themeId === paper.id ? 1.5 : 0.5,
       color: this.themeId === paper.id ? this.theme.accent : this.theme.border

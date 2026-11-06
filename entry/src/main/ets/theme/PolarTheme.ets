@@ -14,8 +14,12 @@ export class PolarTheme implements AppTheme {
   readonly cardBackground: ResourceColor = 0xFF0E0E10;
   readonly surfaceBackground: ResourceColor = 0xFF1C1C1E;
   readonly sidebarBackground: ResourceColor = 0xFF000000;
-  /** 设置页底：纯黑（卡 0E0E10 浮其上，华为深色同款） */
+  /** 设置页底（U10 R-SETTINGS-08：纯黑） */
   readonly settingsPageBackground: ResourceColor = 0xFF000000;
+  /** 设置分组卡（U10 R-SETTINGS-08：1C1C1E，与全局 cardBackground 0E0E10 不同） */
+  readonly settingsCardBackground: ResourceColor = 0xFF1C1C1E;
+  /** 设置大标题（U10 R-SETTINGS-08：FFFFFF） */
+  readonly settingsTitleColor: ResourceColor = 0xFFFFFFFF;
 
   readonly textPrimary: ResourceColor = 0xFFE5E5EA;
   readonly textSecondary: ResourceColor = 0xFF8E8E93;

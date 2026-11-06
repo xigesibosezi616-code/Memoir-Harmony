@@ -56,7 +56,7 @@ export struct LanguagePickerView {
                 })
             }
             .borderRadius(16)
-            .backgroundColor(this.theme.cardBackground)
+            .backgroundColor(this.theme.settingsCardBackground)
             .width('100%')
 
             // 底部：手势条让位
@@ -78,7 +78,7 @@ export struct LanguagePickerView {
       .padding({ top: this.safeAreaTopVp })
     }
     .hideTitleBar(true)
-    .backgroundColor(this.theme.background)
+    .backgroundColor(this.theme.settingsPageBackground)
     .onReady((ctx: NavDestinationContext): void => {
       this.navPathStack = ctx.pathStack;
       const mgr = AppStorage.get<LanguageManager>(STORAGE_KEY_LANGUAGE_MANAGER);

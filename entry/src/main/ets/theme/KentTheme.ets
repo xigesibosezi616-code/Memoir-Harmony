@@ -13,8 +13,12 @@ export class KentTheme implements AppTheme {
   readonly cardBackground: ResourceColor = 0xFFFFFFFF;
   readonly surfaceBackground: ResourceColor = 0xFFF8F8F8;
   readonly sidebarBackground: ResourceColor = 0xFF1A1A1A;
-  /** 设置页底：华为浅色同款灰页（白卡浮其上） */
-  readonly settingsPageBackground: ResourceColor = 0xFFF1F1F1;
+  /** 设置页底（U10 R-SETTINGS-08：F2F2F5，白卡浮其上） */
+  readonly settingsPageBackground: ResourceColor = 0xFFF2F2F5;
+  /** 设置分组卡（U10 R-SETTINGS-08：FFFFFF） */
+  readonly settingsCardBackground: ResourceColor = 0xFFFFFFFF;
+  /** 设置大标题（U10 R-SETTINGS-08：主文字色 1A1A1A，不跟系统深浅） */
+  readonly settingsTitleColor: ResourceColor = 0xFF1A1A1A;
 
   readonly textPrimary: ResourceColor = 0xFF1A1A1A;
   readonly textSecondary: ResourceColor = 0xFF666666;

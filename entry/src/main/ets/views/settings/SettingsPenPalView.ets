@@ -45,7 +45,7 @@ export struct SettingsPenPalView {
               this.penPalNameRow()
             }
             .borderRadius(16)
-            .backgroundColor(this.theme.cardBackground)
+            .backgroundColor(this.theme.settingsCardBackground)
             .width('100%')
 
             // footer：改名影响范围（R-SETTINGS-05；iOS 同款）
@@ -75,7 +75,7 @@ export struct SettingsPenPalView {
       .padding({ top: this.safeAreaTopVp })
     }
     .hideTitleBar(true)
-    .backgroundColor(this.theme.background)
+    .backgroundColor(this.theme.settingsPageBackground)
     .onReady((ctx: NavDestinationContext): void => {
       this.navPathStack = ctx.pathStack;
       this.penPalName = AppPrefs.getString(PREF_KEY_PEN_PAL_NAME, '青鸟');

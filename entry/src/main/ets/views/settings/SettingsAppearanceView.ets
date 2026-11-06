@@ -87,7 +87,7 @@ export struct SettingsAppearanceView {
               this.splashRow()
             }
             .borderRadius(16)
-            .backgroundColor(this.theme.cardBackground)
+            .backgroundColor(this.theme.settingsCardBackground)
             .width('100%')
 
             // 手记页展示方式（当前模式的说明文案跟在行下）
@@ -102,7 +102,7 @@ export struct SettingsAppearanceView {
                 .width('100%')
             }
             .borderRadius(16)
-            .backgroundColor(this.theme.cardBackground)
+            .backgroundColor(this.theme.settingsCardBackground)
             .width('100%')
 
             // 大屏模式的长按指定封面提示（iOS footer 同款）
@@ -132,7 +132,7 @@ export struct SettingsAppearanceView {
       .padding({ top: this.safeAreaTopVp })
     }
     .hideTitleBar(true)
-    .backgroundColor(this.theme.background)
+    .backgroundColor(this.theme.settingsPageBackground)
     .onReady((ctx: NavDestinationContext): void => {
       this.navPathStack = ctx.pathStack;
       this.splashOn = AppPrefs.getBool(PREF_KEY_SHOW_SPLASH_ANIMATION, true);

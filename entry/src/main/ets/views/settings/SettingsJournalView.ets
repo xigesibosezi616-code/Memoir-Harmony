@@ -46,7 +46,7 @@ export struct SettingsJournalView {
               this.paperStyleRow()
             }
             .borderRadius(16)
-            .backgroundColor(this.theme.cardBackground)
+            .backgroundColor(this.theme.settingsCardBackground)
             .width('100%')
 
             // 底部：手势条让位
@@ -68,7 +68,7 @@ export struct SettingsJournalView {
       .padding({ top: this.safeAreaTopVp })
     }
     .hideTitleBar(true)
-    .backgroundColor(this.theme.background)
+    .backgroundColor(this.theme.settingsPageBackground)
     .onReady((ctx: NavDestinationContext): void => {
       this.navPathStack = ctx.pathStack;
     })

@@ -15,6 +15,10 @@ export class BambooTheme implements AppTheme {
   readonly sidebarBackground: ResourceColor = 0xFFF0EBE1;
   /** 设置页底：纸面降一档（卡 FAF7F2 浮其上，华为浅色结构同款） */
   readonly settingsPageBackground: ResourceColor = 0xFFF0EBE1;
+  /** 设置分组卡（U10 R-SETTINGS-08：素笺 FAF7F2） */
+  readonly settingsCardBackground: ResourceColor = 0xFFFAF7F2;
+  /** 设置大标题（U10 R-SETTINGS-08：主文字色 3D3428，不跟系统深浅） */
+  readonly settingsTitleColor: ResourceColor = 0xFF3D3428;
 
   readonly textPrimary: ResourceColor = 0xFF3D3428;
   readonly textSecondary: ResourceColor = 0xFF8B7E6A;

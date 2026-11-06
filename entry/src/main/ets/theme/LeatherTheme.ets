@@ -12,8 +12,12 @@ export class LeatherTheme implements AppTheme {
   readonly cardBackground: ResourceColor = 0xFF241C16;
   readonly surfaceBackground: ResourceColor = 0xFF2A2019;
   readonly sidebarBackground: ResourceColor = 0xFF140E0A;
-  /** 设置页底：压更黑（卡 241C16 浮其上，华为深色结构同款） */
-  readonly settingsPageBackground: ResourceColor = 0xFF140E0A;
+  /** 设置页底（U10 R-SETTINGS-08：1C1410） */
+  readonly settingsPageBackground: ResourceColor = 0xFF1C1410;
+  /** 设置分组卡（U10 R-SETTINGS-08：2A2019，与全局 cardBackground 241C16 不同） */
+  readonly settingsCardBackground: ResourceColor = 0xFF2A2019;
+  /** 设置大标题（U10 R-SETTINGS-08：FFFFFF） */
+  readonly settingsTitleColor: ResourceColor = 0xFFFFFFFF;
 
   readonly textPrimary: ResourceColor = 0xFFD4C4A8;
   readonly textSecondary: ResourceColor = 0xFF8A7B6A;

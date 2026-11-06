@@ -29,6 +29,18 @@ export interface AppTheme {
    * 深色主题压更黑。卡仍用 cardBackground 不动）
    */
   settingsPageBackground: ResourceColor;
+  /**
+   * 设置分组卡底色（U10 R-SETTINGS-08 配色表：素笺 FAF7F2 / 皮革 2A2019 /
+   * 肯特 FFFFFF / 极夜 1C1C1E）。皮革、极夜与全局 cardBackground 不同
+   * （设置页专用），素笺、肯特与 cardBackground 同值但显式配齐。
+   */
+  settingsCardBackground: ResourceColor;
+  /**
+   * 设置大标题「设置」的字色（U10 R-SETTINGS-08：按主题定死不跟系统深浅色
+   * 走——浅色主题手机开深色模式时系统默认标题色是白的，压在浅色页底上
+   * 几乎看不见，iOS 2026-11-07 修过这个）。
+   */
+  settingsTitleColor: ResourceColor;
 
   // ---- 文字（3）----
   /** 主文字 */

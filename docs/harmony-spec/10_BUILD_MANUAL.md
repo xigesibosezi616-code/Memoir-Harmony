@@ -522,6 +522,12 @@ agent 的通用开场提示词见 **附录 A**；鸿蒙仓库的 `CLAUDE.md` 模
   - 字号硬编码本页（不用主题衬线，HarmonyOS Sans 天然 1:1）：大标题 fp26 / 行标题 fp16 / 行值 fp14 / 昵称 fp22 / chevron fp18
   - `settingsPageBackground` 新 token：页底比卡深一档（四主题各自值），接口全成员必填漏配编译报错
   - 二级页仍定格居中小标题（4.3 模式），本轮未动
+- **用户拍板（2026-11-07 二，U10 已交付——设置首页照苹果重排 + 关注我们 + 账户卡 + 会员页骨架，规格 docs/harmony-updates/U10_official_accounts.md）**：
+  - **行首图标终局：线框图片是唯一方案**（用户否决彩底 tile，「不要彩底图标」；`SettingIconTile.ets` 已删除）。DevEco 复刻不出 iOS 自绘线条，一律直接用图片：`HarmonyAssets/settings_icons/`（四套主题 × 10 设置图标 + 3 关注 logo + 1 头像，圆框照鸿蒙系统设置，「给我们评分」= 华为应用市场购物袋线框；`SettingsIcons.ets` 主题 id × 图标名 → `$r` 查表）；尺素会员行火漆印 26pt 不套框占同宽
+  - **R-SETTINGS-08 分层配色 token**：settingsCardBackground / settingsTitleColor（素笺 F0EBE1/FAF7F2/3D3428；皮革 1C1410/2A2019/FFFFFF；肯特 F2F2F5/FFFFFF/1A1A1A；极夜 000000/1C1C1E/FFFFFF）；设置下面所有页面都用这一组（13 个二级页 + 选择页全换）；**大标题按主题定死，不跟系统深浅色**（浅色主题下手机开深色模式的坑，iOS 2026-11-07 修过）
+  - 一级页结构（R-SETTINGS-01 取代）：账户卡（R-SETTINGS-10：手写 m. 头像不放账号头像，🔴 华为账号能拿到也不用，两端统一）→ 尺素会员行（→ 会员页骨架，Stage 7 点亮）→ 五连组 → 数据/统计组 → 评分/反馈/关于组 → 关注我们组（R-SETTINGS-07，一行一平台，名单为空整组不出现；大陆版 = 小红书/抖音/微博）
+  - 反馈与建议（R-SETTINGS-11）：mailto `connect@sinaratech.com.cn`、主题「反馈与建议」、正文版本行不翻译；无邮件 App → 复制邮箱 + toast
+  - 关注我们拉起：小红书 scheme `xhsdiscover://user/5a0af5e94eacab4314599675`→短链 fallback；抖音直开短链；微博 `sinaweibo://userinfo?uid=7934302970`；openLink 全 catch → toast
 - **用户拍板（2026-10-24，6.1 一并做）**：
   - 设置页 UI 按华为系统设置风格做，排版精美（分组卡结构）
   - 图标优先用官方 `sys.symbol`，有官方可用的不用自绘

@@ -70,7 +70,7 @@ export struct SettingsAboutView {
             .padding({ top: 15, bottom: 15, left: 20, right: 20 })
             .alignItems(VerticalAlign.Center)
             .borderRadius(16)
-            .backgroundColor(this.theme.cardBackground)
+            .backgroundColor(this.theme.settingsCardBackground)
             .width('100%')
 
             // 「测试构建」分组：只在测试包里存在（5.8 验收：正式构建里搜不到这个开关）
@@ -101,7 +101,7 @@ export struct SettingsAboutView {
               .padding({ top: 15, bottom: 15, left: 20, right: 20 })
               .alignItems(VerticalAlign.Center)
               .borderRadius(16)
-              .backgroundColor(this.theme.cardBackground)
+              .backgroundColor(this.theme.settingsCardBackground)
               .width('100%')
 
               Text($r('app.string.s_bdfe921dd3'))
@@ -131,7 +131,7 @@ export struct SettingsAboutView {
       .padding({ top: this.safeAreaTopVp })
     }
     .hideTitleBar(true)
-    .backgroundColor(this.theme.background)
+    .backgroundColor(this.theme.settingsPageBackground)
     .onReady((ctx: NavDestinationContext): void => {
       this.navPathStack = ctx.pathStack;
       this.fastDeliveryOn = AppPrefs.isDebugFastLetterDeliveryOn();

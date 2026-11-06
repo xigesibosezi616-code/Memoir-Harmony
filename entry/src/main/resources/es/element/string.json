@@ -3539,6 +3539,42 @@
     {
       "name": "s_f6f7c46fd6",
       "value": "No se pudo abrir AppGallery"
+    },
+    {
+      "name": "s_d89283676b",
+      "value": "Síguenos"
+    },
+    {
+      "name": "s_2895d69933",
+      "value": "Comentarios y sugerencias"
+    },
+    {
+      "name": "s_5cc6e4a916",
+      "value": "Sin número de teléfono vinculado"
+    },
+    {
+      "name": "s_486e6b598c",
+      "value": "Inicia sesión para recibir cartas de tu amigo por carta"
+    },
+    {
+      "name": "s_dce5f6e4df",
+      "value": "Cuenta, teléfono e inicio de sesión"
+    },
+    {
+      "name": "s_c446cab9ee",
+      "value": "Dirección de correo copiada: %s"
+    },
+    {
+      "name": "s_e2866d0815",
+      "value": "Xiaohongshu"
+    },
+    {
+      "name": "s_21a8e41cf6",
+      "value": "Douyin"
+    },
+    {
+      "name": "s_9d972e7230",
+      "value": "Weibo"
     }
   ]
 }

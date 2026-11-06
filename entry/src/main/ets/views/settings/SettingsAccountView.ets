@@ -95,7 +95,7 @@ export struct SettingsAccountView {
                 this.huaweiRow()
               }
               .borderRadius(16)
-              .backgroundColor(this.theme.cardBackground)
+              .backgroundColor(this.theme.settingsCardBackground)
               .width('100%')
 
               // 退出登录（单独一组；确认走官方 AlertDialog）
@@ -114,7 +114,7 @@ export struct SettingsAccountView {
               .width('100%')
               .padding({ top: 15, bottom: 15, left: 20, right: 20 })
               .borderRadius(16)
-              .backgroundColor(this.theme.cardBackground)
+              .backgroundColor(this.theme.settingsCardBackground)
               .onClick((): void => {
                 this.confirmLogout();
               })
@@ -136,7 +136,7 @@ export struct SettingsAccountView {
                 .width('100%')
                 .padding({ top: 15, bottom: 15, left: 20, right: 20 })
                 .borderRadius(16)
-                .backgroundColor(this.theme.cardBackground)
+                .backgroundColor(this.theme.settingsCardBackground)
                 .onClick((): void => {
                   this.navPathStack.pushPathByName('DeleteAccount', '');
                 })
@@ -177,10 +177,10 @@ export struct SettingsAccountView {
       }
       .width('100%')
       .height('100%')
-      .backgroundColor(this.theme.background)
+      .backgroundColor(this.theme.settingsPageBackground)
     }
     .hideTitleBar(true)
-    .backgroundColor(this.theme.background)
+    .backgroundColor(this.theme.settingsPageBackground)
     .onReady((ctx: NavDestinationContext): void => {
       this.navPathStack = ctx.pathStack;
       this.refreshFromSession();
@@ -491,7 +491,7 @@ export struct SettingsAccountView {
       }
       .padding({ left: 22, right: 22, top: 24, bottom: 24 })
       .constraintSize({ maxWidth: 320 })
-      .backgroundColor(this.theme.cardBackground)
+      .backgroundColor(this.theme.settingsCardBackground)
       .borderRadius(20)
     }
     .width('100%')

@@ -88,7 +88,7 @@ export struct SettingsLocationView {
               }
             }
             .borderRadius(16)
-            .backgroundColor(this.theme.cardBackground)
+            .backgroundColor(this.theme.settingsCardBackground)
             .width('100%')
 
             // footer：位置只在本机、改动只影响之后的日记（iOS 同款）
@@ -118,7 +118,7 @@ export struct SettingsLocationView {
       .padding({ top: this.safeAreaTopVp })
     }
     .hideTitleBar(true)
-    .backgroundColor(this.theme.background)
+    .backgroundColor(this.theme.settingsPageBackground)
     .onReady((ctx: NavDestinationContext): void => {
       this.navPathStack = ctx.pathStack;
       this.recordingOn = AppPrefs.isLocationRecordingEnabled();

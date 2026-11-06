@@ -122,10 +122,10 @@ export struct DeleteAccountView {
       .width('100%')
       .height('100%')
       .padding({ top: this.safeAreaTopVp })
-      .backgroundColor(this.theme.background)
+      .backgroundColor(this.theme.settingsPageBackground)
     }
     .hideTitleBar(true)
-    .backgroundColor(this.theme.background)
+    .backgroundColor(this.theme.settingsPageBackground)
     .onReady((ctx: NavDestinationContext): void => {
       this.navPathStack = ctx.pathStack;
       const session = this.env.session;
@@ -363,7 +363,7 @@ export struct DeleteAccountView {
           .fontFamily(this.theme.bodyFont.family)
           .fontColor(this.theme.textPrimary)
           .placeholderColor(this.theme.textSecondary)
-          .backgroundColor(this.theme.cardBackground)
+          .backgroundColor(this.theme.settingsCardBackground)
           .borderRadius(12)
           .height(44)
           .layoutWeight(1)

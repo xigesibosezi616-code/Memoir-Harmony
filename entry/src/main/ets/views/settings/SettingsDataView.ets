@@ -85,7 +85,7 @@ export struct SettingsDataView {
               }
             }
             .borderRadius(16)
-            .backgroundColor(this.theme.cardBackground)
+            .backgroundColor(this.theme.settingsCardBackground)
             .width('100%')
 
             // footer：导入语义 + 残留文件说明（iOS footer 同款两条）
@@ -126,7 +126,7 @@ export struct SettingsDataView {
       .padding({ top: this.safeAreaTopVp })
     }
     .hideTitleBar(true)
-    .backgroundColor(this.theme.background)
+    .backgroundColor(this.theme.settingsPageBackground)
     .onReady((ctx: NavDestinationContext): void => {
       this.navPathStack = ctx.pathStack;
       this.scanMediaUsage();

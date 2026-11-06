@@ -86,7 +86,7 @@ export struct AppIconPickerView {
       .padding({ top: this.safeAreaTopVp })
     }
     .hideTitleBar(true)
-    .backgroundColor(this.theme.background)
+    .backgroundColor(this.theme.settingsPageBackground)
     .onReady((ctx: NavDestinationContext): void => {
       this.navPathStack = ctx.pathStack;
       this.manager = AppStorage.get<ThemeManager>(STORAGE_KEY_THEME_MANAGER);
@@ -180,7 +180,7 @@ export struct AppIconPickerView {
     .width('100%')
     .padding(12)
     .borderRadius(14)
-    .backgroundColor(this.theme.cardBackground)
+    .backgroundColor(this.theme.settingsCardBackground)
     .alignItems(VerticalAlign.Center)
     .onClick(() => {
       this.select('');
@@ -216,7 +216,7 @@ export struct AppIconPickerView {
     .width('100%')
     .padding(12)
     .borderRadius(14)
-    .backgroundColor(this.theme.cardBackground)
+    .backgroundColor(this.theme.settingsCardBackground)
     .alignItems(VerticalAlign.Center)
     .onClick(() => {
       this.select(paper.id);

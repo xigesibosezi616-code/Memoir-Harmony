@@ -86,7 +86,7 @@ export struct DefaultPaperStylePickerView {
               })
             }
             .borderRadius(16)
-            .backgroundColor(this.theme.cardBackground)
+            .backgroundColor(this.theme.settingsCardBackground)
             .width('100%')
 
             // footer：预选说明（iOS 同款）
@@ -116,7 +116,7 @@ export struct DefaultPaperStylePickerView {
       .padding({ top: this.safeAreaTopVp })
     }
     .hideTitleBar(true)
-    .backgroundColor(this.theme.background)
+    .backgroundColor(this.theme.settingsPageBackground)
     .onReady((ctx: NavDestinationContext): void => {
       this.navPathStack = ctx.pathStack;
       const stored = paperStyleFromRaw(
