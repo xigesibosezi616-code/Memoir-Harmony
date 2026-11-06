@@ -665,18 +665,6 @@ export struct HomeView {
       .justifyContent(FlexAlign.Center)
 
       Row({ space: 12 }) {
-        Button('ThemeDebug')
-          .fontSize(this.theme.bodyFont.size)
-          .fontColor(this.theme.accent)
-          .backgroundColor(this.theme.accentBackground)
-          .borderRadius(10)
-          .onClick((): void => {
-            this.getUIContext().getRouter().pushUrl({ url: 'pages/ThemeDebug' });
-          })
-      }
-      .justifyContent(FlexAlign.Center)
-
-      Row({ space: 12 }) {
         Button('LetterDebug')
           .fontSize(this.theme.bodyFont.size)
           .fontColor(this.theme.accent)

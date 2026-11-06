@@ -66,6 +66,14 @@ export interface AppTheme {
   /** 主色背景 */
   accentBackground: ResourceColor;
 
+  // ---- 手写 m. 的墨色（1）----
+  /**
+   * 开场一笔写出来的「m.」和桌面图标上的字色（U09 R-THEME-13 的表：
+   * 素笺 #8B7E6A / 皮革 #C8A87C / 肯特 #1A1A1A / 极夜 #8FA8BF）。
+   * 与 accent 语义分开：accent 变了，图标和开场那一笔的字色不该跟着变。
+   */
+  markInk: ResourceColor;
+
   // ---- 心情标签（3）----
   /** 心情标签底色 */
   moodBackground: ResourceColor;

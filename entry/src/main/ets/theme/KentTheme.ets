@@ -35,6 +35,7 @@ export class KentTheme implements AppTheme {
 
   readonly accent: ResourceColor = 0xFF1A1A1A;
   readonly accentBackground: ResourceColor = 0xFFF0F0F0;
+  readonly markInk: ResourceColor = 0xFF1A1A1A;
 
   readonly moodBackground: ResourceColor = 0xFFF0F0F0;
   readonly moodBorder: ResourceColor = 0xFFE5E5E5;

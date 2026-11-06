@@ -10,14 +10,16 @@
  * 这里的做法是**停在这一屏**——不同意就过不去（R-APP-03），
  * 只提示一句原因（不用全局错误条：这不是失败，是合规告知）。
  *
- * 配色**有意不跟主题**（iOS 同款）：白卡片、深字是合规页的固定样子，
- * 页面出现时主题尚未经用户选择，走默认主题反而突兀。
- *
- * 🔴 **卡片必须待在下半屏**：背景画里骑士递信给信鸽这个主体位于画面纵向
- * 0.30~0.50 处，卡片一旦居中就正好把它整个盖住。留出上半屏，画面才有意义。
+ * 背景**就是当前主题的底色**（刚装好时是素笺 #FAF7F2；老用户因协议改版
+ * 重新同意时是他自己的主题色），卡片**居中**（U04：骑士递信给信鸽的
+ * 背景画已删，不再需要给画面让位）。卡片样式不变，影子减淡（黑 10%、
+ * 半径 20、下移 6），加一圈 0.5 的细边（黑 6%）。
  */
 import { LengthMetrics } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { AppTheme } from '../../theme/AppTheme';
+import { BambooTheme } from '../../theme/BambooTheme';
+import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
 import { LegalDocument } from './LegalDocument';
 import { LegalInlineSpan, parseInlineBold } from './LegalMarkdown';
 import { STORAGE_KEY_APP_LANGUAGE } from '../../services/LanguageManager';
@@ -28,6 +30,7 @@ export struct LegalConsentView {
   /** 用户点了同意：调用方写版本号（R-APP-02） */
   onAccept: () => void = () => {};
 
+  @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
   @StorageProp(STORAGE_KEY_APP_LANGUAGE) appLanguage: string = 'en';
   /** 当前打开的协议全文（privacy / terms），undefined = 没开 */
   @State presentedDocument: LegalDocument | undefined = undefined;
@@ -74,8 +77,13 @@ export struct LegalConsentView {
   }
 
   build() {
-    Stack({ alignContent: Alignment.Bottom }) {
-      this.backgroundBuilder()
+    Stack({ alignContent: Alignment.Center }) {
+      // 背景只是当前主题的底色（U04：背景画已删）
+      Column()
+        .width('100%')
+        .height('100%')
+        .backgroundColor(this.theme.background)
+
       this.cardBuilder()
 
       // 协议全文必须在同意**之前**就能读到 ——「先同意才能看」不合规。
@@ -88,38 +96,6 @@ export struct LegalConsentView {
           }
         })
       }
-    }
-    .width('100%')
-    .height('100%')
-  }
-
-  // MARK: - 背景
-
-  @Builder
-  private backgroundBuilder() {
-    Stack({ alignContent: Alignment.Top }) {
-      // 底衬：同一张图铺满后重度模糊。先试过取画面平均色填纯色，
-      // 但卡片两侧的窄边仍能看出一条横向接缝；换成模糊版之后颜色
-      // 与纹理都是连续的，接缝彻底消失。这一屏一辈子只出现一次，模糊开销无所谓
-      Image($r('app.media.consent_background'))
-        .objectFit(ImageFit.Cover)
-        .width('100%')
-        .height('100%')
-        .blur(40)
-
-      // 🔴 **按宽度铺满 + 顶部对齐，不要用 Cover 铺满**：
-      // 原图（比例 0.562）比屏幕（约 0.460）「胖」，Cover 会左右各裁掉 9% ——
-      // 而**骑士正好贴着左边缘**，一裁就只剩他的手臂，画面就失去意义了。
-      // 按宽度铺满：左右一个像素都不裁，代价是底部留白，被同意卡片盖住
-      Image($r('app.media.consent_background'))
-        .objectFit(ImageFit.Contain)
-        .width('100%')
-
-      // 画面本身偏暗，再压一层让白卡片的对比度稳定
-      Column()
-        .width('100%')
-        .height('100%')
-        .backgroundColor(0x33000000)
     }
     .width('100%')
     .height('100%')
@@ -224,9 +200,10 @@ export struct LegalConsentView {
     }
     .backgroundColor(0xFFFCFCFC)
     .borderRadius(4)
-    .shadow({ radius: 24, color: 0x59000000, offsetX: 0, offsetY: 8 })
-    // 卡片贴下半屏（iOS bottom padding 44）+ 左右离屏 30。
-    // margin 在白底之外，只挪位置不撑卡片（iOS 同款：外层 padding）
-    .margin({ left: 30, right: 30, bottom: 44 })
+    .border({ width: 0.5, color: 0x0F000000 })
+    // 影子减淡（U04：黑 10%、半径 20、下移 6）；
+    // margin 在底色之外，只挪位置不撑卡片（iOS 同款：外层 padding 30）
+    .shadow({ radius: 20, color: 0x1A000000, offsetX: 0, offsetY: 6 })
+    .margin({ left: 30, right: 30 })
   }
 }

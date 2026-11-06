@@ -47,7 +47,8 @@ export struct OnboardingView {
     this.optionThemes = [
       ThemeManager.themeFor('bamboo'),
       ThemeManager.themeFor('leather'),
-      ThemeManager.themeFor('kent')
+      ThemeManager.themeFor('kent'),
+      ThemeManager.themeFor('polar')
     ];
     const mgr = AppStorage.get<ThemeManager>(STORAGE_KEY_THEME_MANAGER);
     if (mgr !== undefined) {

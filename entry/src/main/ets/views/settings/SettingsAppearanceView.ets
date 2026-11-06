@@ -1,19 +1,21 @@
 /**
  * 设置 →「外观」二级页（10_BUILD_MANUAL.md 6.1）。对应 iOS `SettingsAppearanceView.swift`。
  *
- * - 主题选择：推 6.2 的主题选择页（本卡先立行，6.2 接路由）
+ * - 主题选择：推 6.2 的主题选择页（6.2 已接路由）
+ * - 应用图标：推 6.2 的图标选择页（行值显示「跟随主题」/ 当前固定的图标名）
  * - 启动动画：开关（`showSplashAnimation`，与 iOS 键同名；EntryAbility 启动时
  *   合并算 `showSplash`，这里只写偏好，下次启动生效）
  * - 手记页：大屏 / 列表（`homeDisplayMode`，U07 R-HOME-11 默认大屏）；
  *   行值 + 官方 showActionSheet 二选一，当前模式的说明文案跟在行下
  * - 「语言」不在这页——一级页单列一行直通选择页（R-SETTINGS-02）
- * - 应用图标不做（Q5 单图标拍板）；封条提醒天数 / Live Photo 同步不做（Q10 死设置）
+ * - 封条提醒天数 / Live Photo 同步不做（Q10 死设置）
  *
  * 路由：系统路由表（router_map.json → name `Appearance`）。
  */
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
-import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
+import { STORAGE_KEY_THEME, STORAGE_KEY_THEME_MANAGER, ThemeManager } from '../../theme/ThemeManager';
+import { ThemePaper } from '../../theme/ThemePaper';
 import { STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP } from '../../services/ImmersiveChrome';
 import { AppPrefs, PREF_KEY_SHOW_SPLASH_ANIMATION,
@@ -50,6 +52,8 @@ export struct SettingsAppearanceView {
   @State private splashOn: boolean = true;
   /** 手记页展示方式（showcase / list；非法值按大屏兜底，与 AppPrefs 同一约定） */
   @State private homeMode: string = HOME_DISPLAY_MODE_SHOWCASE;
+  /** 应用图标选择（'' = 跟随主题；行值显示用） */
+  @State private iconSelection: string = '';
 
   private navPathStack: NavPathStack = new NavPathStack();
 
@@ -68,9 +72,14 @@ export struct SettingsAppearanceView {
 
         Scroll() {
           Column({ space: 20 }) {
-            // 主题 + 启动动画
+            // 主题 + 应用图标 + 启动动画
             Column() {
               this.themeRow()
+              Divider()
+                .color(this.theme.border)
+                .strokeWidth(0.5)
+                .margin({ left: 20 })
+              this.appIconRow()
               Divider()
                 .color(this.theme.border)
                 .strokeWidth(0.5)
@@ -128,6 +137,11 @@ export struct SettingsAppearanceView {
       this.navPathStack = ctx.pathStack;
       this.splashOn = AppPrefs.getBool(PREF_KEY_SHOW_SPLASH_ANIMATION, true);
       this.homeMode = AppPrefs.currentHomeDisplayMode();
+      this.refreshIconSelection();
+    })
+    .onShown((): void => {
+      // 从图标选择页返回时刷新行值（onReady 只在首次挂载时跑）
+      this.refreshIconSelection();
     })
   }
 
@@ -201,8 +215,59 @@ export struct SettingsAppearanceView {
     .padding({ top: 15, bottom: 15, left: 20, right: 20 })
     .alignItems(VerticalAlign.Center)
     .onClick((): void => {
-      // 6.2：this.navPathStack.pushPathByName('ThemePicker', '');
+      this.navPathStack.pushPathByName('ThemePicker', '');
     })
+  }
+
+  // ---- 应用图标（行值：跟随主题 / 当前固定的图标名；6.2 图标选择页） ----
+
+  @Builder
+  private appIconRow() {
+    Row({ space: 10 }) {
+      // 鸿蒙官方 symbol 无 app.badge（resource-name-check 实证），四宫格是最接近「应用图标」的官方图标
+      SymbolGlyph($r('sys.symbol.square_grid_2x2'))
+        .fontSize(14)
+        .fontWeight(FontWeight.Medium)
+        .fontColor([this.theme.textSecondary])
+        .width(20)
+      Text($r('app.string.s_f93d423da3'))
+        .fontSize(this.theme.bodyFont.size)
+        .fontWeight(this.theme.bodyFont.weight)
+        .fontFamily(this.theme.bodyFont.family)
+        .fontColor(this.theme.textPrimary)
+        .layoutWeight(1)
+      Text(this.iconSelectionValueRes())
+        .fontSize(this.theme.captionFont.size)
+        .fontWeight(this.theme.captionFont.weight)
+        .fontFamily(this.theme.captionFont.family)
+        .fontColor(this.theme.textTertiary)
+      SymbolGlyph($r('sys.symbol.chevron_right'))
+        .fontSize(13)
+        .fontWeight(FontWeight.Medium)
+        .fontColor([this.theme.textTertiary])
+    }
+    .width('100%')
+    .padding({ top: 15, bottom: 15, left: 20, right: 20 })
+    .alignItems(VerticalAlign.Center)
+    .onClick((): void => {
+      this.navPathStack.pushPathByName('AppIconPicker', '');
+    })
+  }
+
+  /** 行值词条：跟随主题显示「跟随主题」，固定了显示那个图标（=主题）的名字 */
+  private iconSelectionValueRes(): Resource {
+    for (const paper of ThemePaper.all) {
+      if (this.iconSelection === paper.id) {
+        return paper.nameRes;
+      }
+    }
+    return $r('app.string.s_cb7f4c5817');
+  }
+
+  /** 从 ThemeManager 读当前图标选择（'' = 跟随主题） */
+  private refreshIconSelection(): void {
+    const manager = AppStorage.get<ThemeManager>(STORAGE_KEY_THEME_MANAGER);
+    this.iconSelection = manager !== undefined ? manager.appIconSelection : '';
   }
 
   // ---- 启动动画开关 ----

@@ -35,6 +35,7 @@ export class BambooTheme implements AppTheme {
 
   readonly accent: ResourceColor = 0xFF8B7E6A;
   readonly accentBackground: ResourceColor = 0xFFF0EBE1;
+  readonly markInk: ResourceColor = 0xFF8B7E6A;
 
   readonly moodBackground: ResourceColor = 0xFFF0EBE1;
   readonly moodBorder: ResourceColor = 0xFFD4C9B8;

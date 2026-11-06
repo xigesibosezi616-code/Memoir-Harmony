@@ -6,11 +6,11 @@
         "type": "HarmonyOS",
         "material": {
           "storeFile": "/Users/gavin/Desktop/Memoir-Harmony/Memoir.p12",
-          "storePassword": "000000223B2CD51048487B5BAE21E7A90E2CC20F95565A4314C92EF80E1BCC8A7F96E84F2AA6C1D1ECCC9195E94BC08DCC66",
+          "storePassword": "00000022093ACB1265D1F21283E24E8C0CC05BD941D9F34537B3477C96DD12353E999E5C8FE44485BE2D98B0FA82822CE7CF",
           "keyAlias": "Memoir",
-          "keyPassword": "00000022C7B7992CACEB52F8C31C0EEBC66E7C5578CDEB67FC5EB934BA2784D38AF6BE9E3AD6CE18B29377015EA030E6143B",
+          "keyPassword": "000000227D51492A807627480E5212CA28A8B90163922C04D910B49BCC13AD738144C39E816567A85D842D54DA4E679F59D0",
           "signAlg": "SHA256withECDSA",
-          "profile": "/Users/gavin/Desktop/Memoir-Harmony/尺素Debug.p7b",
+          "profile": "/Users/gavin/Desktop/Memoir-Harmony/尺素1Debug.p7b",
           "certpath": "/Users/gavin/Desktop/Memoir-Harmony/Memoir.cer"
         }
       }

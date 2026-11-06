@@ -101,6 +101,10 @@ export class RichTextAppearance {
       case 'kent':
         appearance = new RichTextAppearance(14, 8, '#B3FFE15A', theme.textPrimary, theme.bodyFont.family);
         break;
+      case 'polar':
+        // 黑底上浅色字：荧光笔换成压得住浅色字的深蓝（#3D5A80 60%）
+        appearance = new RichTextAppearance(14, 8, '#993D5A80', theme.textPrimary, theme.bodyFont.family);
+        break;
       default:
         // 未配排版参数的主题：按正文字号推导，荧光笔暂用强调色打底
         appearance = new RichTextAppearance(theme.bodyFont.size, theme.bodyLineSpacing,
@@ -111,7 +115,8 @@ export class RichTextAppearance {
     // 痕迹小字色 = theme.textTertiary（iOS labelColor）
     if (theme.id === 'bamboo') {
       appearance.laterInkColor = '#3E5470';
-    } else if (theme.id === 'leather') {
+    } else if (theme.id === 'leather' || theme.id === 'polar') {
+      // 皮革 / 极夜：补记墨色浅灰蓝（黑底浅字，同 iOS polar 分支）
       appearance.laterInkColor = '#A9B9CC';
     } else {
       appearance.laterInkColor = '#34507A';

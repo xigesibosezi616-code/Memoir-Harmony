@@ -40,6 +40,8 @@ export class LetterPalette {
         return LetterPalette.leather;
       case 'kent':
         return LetterPalette.kent;
+      case 'polar':
+        return LetterPalette.polar;
       default:
         return LetterPalette.bamboo;
     }
@@ -56,4 +58,8 @@ export class LetterPalette {
   /** 肯特：白信封，藏青内衬，白纸灰蓝格线 */
   static readonly kent: LetterPalette = new LetterPalette(
     '#FDFDFB', '#1A1A1A', '#597C8FA6', '#F6F6F3', '#CFCFC8', '#2F4A6B', false);
+
+  /** 极夜：深灰信封，浅蓝内衬（肯特书签的浅蓝），白纸浅蓝格线不加框 */
+  static readonly polar: LetterPalette = new LetterPalette(
+    '#FAFAFA', '#1A1A1A', '#668FA8BF', '#1C1C1E', '#3A3A3C', '#B4C7D8', false);
 }

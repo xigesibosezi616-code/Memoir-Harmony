@@ -20,6 +20,8 @@ export function splashImageFor(themeId: string): Resource | undefined {
       return $r('app.media.splash_leather');
     case 'kent':
       return $r('app.media.splash_kent');
+    case 'polar':
+      return $r('app.media.splash_polar');
     default:
       return undefined;
   }

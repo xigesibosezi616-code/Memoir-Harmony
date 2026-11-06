@@ -33,6 +33,7 @@ export class LeatherTheme implements AppTheme {
 
   readonly accent: ResourceColor = 0xFFC8A87C;
   readonly accentBackground: ResourceColor = 0xFF241C16;
+  readonly markInk: ResourceColor = 0xFFC8A87C;
 
   readonly moodBackground: ResourceColor = 0xFF2D2219;
   readonly moodBorder: ResourceColor = 0xFF3A2E25;

@@ -497,8 +497,7 @@ export struct ComposeView {
    * （2026-10-22 用户反馈：皮革正常、素笺/肯特不行）；皮革 card ≠ bg 自带
    * 可见深色底，不加边框保持原样。对 iOS 偏差（iOS 三主题同样融底），
    * 用户拍板单独优化，记录于 PROGRESS.md 2.10。
-   * 主题色值均为 0xAARRGGBB 数字字面量，typeof 收窄后直接比较
-   * （ThemeDebug colorToHex 同款前提）。
+   * 主题色值均为 0xAARRGGBB 数字字面量，typeof 收窄后直接比较。
    */
   private weatherCapsuleNeedsOutline(): boolean {
     const card: ResourceColor = this.theme.cardBackground;

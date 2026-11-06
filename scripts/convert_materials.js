@@ -340,23 +340,19 @@ function assertNoCollisions(entries) {
 
 /** 图片映射：[iOS 相对 Memoir 的源路径, base/media 下的目标名] */
 const IMAGE_MAP = [
-  // 三套 App 图标（0.1 物料清单；6.2 主题与图标会接线）
-  ['Assets.xcassets/AppIcon.appiconset/memoir-icon-any-1024.png', 'app_icon_any_1024.png'],
-  ['Assets.xcassets/AppIcon.appiconset/memoir-icon-dark-1024.png', 'app_icon_dark_1024.png'],
-  ['Assets.xcassets/AppIcon.appiconset/memoir-icon-tinted-1024.png', 'app_icon_tinted_1024.png'],
-  ['Assets.xcassets/KentIcon.appiconset/kent-icon-1024.png', 'kent_icon_1024.png'],
-  ['Assets.xcassets/LeatherIcon.appiconset/leather-icon-1024.png', 'leather_icon_1024.png'],
-  // App 图标预览（主题选择）
+  // App 图标预览（主题选择；U09 R-THEME-13 换手写 m.，192×192 方图不带圆角）
   ['Assets.xcassets/AppIconPreview_Bamboo.imageset/AppIconPreview_Bamboo.png', 'app_icon_preview_bamboo.png'],
   ['Assets.xcassets/AppIconPreview_Leather.imageset/AppIconPreview_Leather.png', 'app_icon_preview_leather.png'],
   ['Assets.xcassets/AppIconPreview_Kent.imageset/AppIconPreview_Kent.png', 'app_icon_preview_kent.png'],
+  ['Assets.xcassets/AppIconPreview_Polar.imageset/AppIconPreview_Polar.png', 'app_icon_preview_polar.png'],
+  // 桌面主图标前景（分层图标 layered_image 的 foreground；U09：透明底 m. 字形 #8B7E6A）
+  ['AppIcons/AppIcon.icon/Assets/m.png', 'foreground.png'],
   // 书打开的插画
   ['Assets.xcassets/BookOpen_Leather.imageset/BookOpen_Leather.png', 'book_open_leather.png'],
   ['Assets.xcassets/BookOpen_Nordic.imageset/BookOpen_Nordic.png', 'book_open_nordic.png'],
   ['Assets.xcassets/BookOpen_Washi.imageset/BookOpen_Washi.png', 'book_open_washi.png'],
-  // 品牌 Logo、协议同意页背景
+  // 品牌 Logo（协议同意页背景画已删：U04，iOS 侧 ConsentBackground 已移除）
   ['Assets.xcassets/BrandLogo.imageset/Sinara玄纳司-LOGO-06.jpg', 'brand_logo.jpg'],
-  ['Assets.xcassets/ConsentBackground.imageset/consent_bg.jpg', 'consent_background.jpg'],
   // 日记本布面（11 色）
   ['Assets.xcassets/Cover_AmberBrown_Linen.imageset/Cover_AmberBrown_Linen.png', 'cover_amber_brown_linen.png'],
   ['Assets.xcassets/Cover_BronzeBrown_Linen.imageset/Cover_BronzeBrown_Linen.png', 'cover_bronze_brown_linen.png'],
@@ -379,10 +375,11 @@ const IMAGE_MAP = [
   ['Assets.xcassets/Texture_Leather.imageset/Texture_Leather.png', 'texture_leather.png'],
   ['Assets.xcassets/Texture_Linen.imageset/Texture_Linen.png', 'texture_linen.png'],
   ['Assets.xcassets/Texture_Paper.imageset/Texture_Paper.png', 'texture_paper.png'],
-  // 启动封面（1290×2796）
+  // 启动封面（1290×2796，U09 R-APP-10：中间留空，写字由 HandwrittenMark 运行时画）
   ['Resources/SplashCovers/splash_bamboo.png', 'splash_bamboo.png'],
   ['Resources/SplashCovers/splash_leather.png', 'splash_leather.png'],
   ['Resources/SplashCovers/splash_kent.png', 'splash_kent.png'],
+  ['Resources/SplashCovers/splash_polar.png', 'splash_polar.png'],
 ];
 
 /** 声音：[iOS 相对 Memoir 的源路径, rawfile/sounds 下的目标名]（原样拷贝） */
@@ -392,6 +389,8 @@ const SOUND_FILES = [
   ['Resources/Sounds/letter_open_3.wav', 'letter_open_3.wav'],
   ['Resources/Sounds/letter_post_plain.wav', 'letter_post_plain.wav'],
   ['Resources/Sounds/letter_post_sealed.wav', 'letter_post_sealed.wav'],
+  // U09 R-APP-10 开场笔声（按 HandwrittenMark 时间表合成）
+  ['Resources/Sounds/splash_write.wav', 'splash_write.wav'],
 ];
 
 /** 读 element/string.json；不存在或解析失败返回 null */
@@ -545,9 +544,19 @@ function main() {
     sounds++;
   }
 
+  // ---------- 4. 启动图标（系统启动页去 logo，U09 走查）----------
+  // startWindowIcon 用全透明 144×144：点击图标后系统启动页只剩纯色底
+  // （start_window_background = 素笺封面底 #FAF7F2），与开场封面无缝衔接。
+  fs.writeFileSync(
+    path.join(ENTRY_RES, 'base', 'media', 'startIcon.png'),
+    Buffer.from(TRANSPARENT_STARTICON_PNG_B64, 'base64'));
+
   console.log(`字符串 ${entries.length} 条 × 7 语言；图片 ${images} 张 → base/media；`
     + `声音 ${sounds} 个 → rawfile/sounds；索引 → ${path.relative(ROOT, INDEX_FILE)}`);
 }
+
+/** 144×144 全透明 PNG（系统启动页 startWindowIcon：不显示任何 logo） */
+const TRANSPARENT_STARTICON_PNG_B64 = 'iVBORw0KGgoAAAANSUhEUgAAAJAAAACQCAYAAADnRuK4AAAAZ0lEQVR4nO3BMQEAAADCoPVP7WcKoAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAoBtEnwABuFMcLQAAAABJRU5ErkJggg==';
 
 if (require.main === module) {
   main();

@@ -330,6 +330,7 @@ export default function postBoxLogicTest() {
       expect(postmarkInkHex('bamboo')).assertEqual('#B5473A');
       expect(postmarkInkHex('leather')).assertEqual('#C8A87C');
       expect(postmarkInkHex('kent')).assertEqual('#5F7896');
+      expect(postmarkInkHex('polar')).assertEqual('#8FA8BF');
     })
 
     // ---- parseRhythmResponse（GET /me/rhythm 的形状） ----

@@ -4,7 +4,7 @@
  * 一键插不同 deliveredAt 的测试信：已到达 / 在路上 / 已读 / 火漆，配清空。
  * 5.1 验收：插几封不同到达时刻的信 → 到点自动出现在信箱、红点亮起（R-BOX-02）。
  * 仅 HomeView 调试按钮行进入；真「回信加速」开关是 5.8（仅测试包），本页届时收编或删。
- * 调试文案英文硬编码，不进本地化体系（同 ThemeDebug 约定）。
+ * 调试文案英文硬编码，不进本地化体系（历史约定：调试脚手架不进产品文案体系）。
  */
 import { relationalStore } from '@kit.ArkData';
 import { hilog } from '@kit.PerformanceAnalysisKit';

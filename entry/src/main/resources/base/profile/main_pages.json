@@ -1,7 +1,6 @@
 {
   "src": [
     "pages/Index",
-    "pages/ThemeDebug",
     "pages/LetterDebug",
     "pages/Compose",
     "pages/EditEntry"

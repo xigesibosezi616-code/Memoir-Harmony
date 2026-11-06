@@ -236,13 +236,15 @@ export function postmarkPlace(locations: Array<string | undefined>): string {
   return first.length > limit ? first.substring(0, limit) : first;
 }
 
-/** 邮戳的油墨色（iOS Postmark.ink 同款）：素笺朱红、肯特灰蓝、皮革浅棕 */
+/** 邮戳的油墨色（iOS Postmark.ink 同款）：素笺朱红、肯特灰蓝、皮革浅棕、极夜浅蓝 */
 export function postmarkInkHex(themeId: string): string {
   switch (themeId) {
     case 'leather':
       return '#C8A87C';
     case 'kent':
       return '#5F7896';
+    case 'polar':
+      return '#8FA8BF';
     default:
       return '#B5473A';
   }

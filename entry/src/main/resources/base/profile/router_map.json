@@ -89,6 +89,16 @@
       "name": "Data",
       "pageSourceFile": "src/main/ets/views/settings/SettingsDataView.ets",
       "buildFunction": "SettingsDataBuilder"
+    },
+    {
+      "name": "ThemePicker",
+      "pageSourceFile": "src/main/ets/views/settings/ThemePickerView.ets",
+      "buildFunction": "ThemePickerBuilder"
+    },
+    {
+      "name": "AppIconPicker",
+      "pageSourceFile": "src/main/ets/views/settings/AppIconPickerView.ets",
+      "buildFunction": "AppIconPickerBuilder"
     }
   ]
 }

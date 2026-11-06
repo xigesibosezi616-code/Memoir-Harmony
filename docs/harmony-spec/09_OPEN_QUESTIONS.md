@@ -102,12 +102,19 @@ iOS：每个主题一张桌面图标，可「跟随主题」或手动固定；�
   `@kit.AppGalleryKit` 的 `appInfoManager.queryDynamicIcons/selectDynamicIcon/disableDynamicIcon`
   三接口，但图标须在 **AGC「分发>服务>图标管理」页面创建/管理**，且需**向运营发邮件申请
   开通**、应用已上架（开发期/未上架不可用；不支持模拟器）。
-- **拍板**：开发期按 04_DESIGN_LANGUAGE 预案退回**单图标**（素笺书本图标已接线，见
-  PROGRESS 6.2 追记）；上架后如要三主题图标，走 AGC 图标管理 + appInfoManager 接入，
-  届时设置页再出「应用图标」段（R-THEME-06/09 相应解锁）。
-- **长按快捷方式**：鸿蒙 shortcuts 为 module.json5 静态配置（label 可走字符串资源随系统
-  语言本地化），无 iOS 式代码动态登记——能否满足「标题跟 App 语言」待 6.2 做 6.2 时细调；
-  动态登记结论以届时调研为准。
+- **拍板（2026-11-06 修正，用户指示「淘宝都能换图标，去查官方文档」驱动）**：
+  ~~开发期退回单图标~~ → **代码侧全量接入** AGC 图标管理服务：
+  `ThemeManager` 接 appInfoManager 三接口——素笺（默认图标）→ `disableDynamicIcon`
+  恢复系统图标，皮革/肯特/极夜 → `selectDynamicIcon`；**AGC 创建动态图标时
+  iconId 必须与主题 id 同名**（leather/kent/polar）。开发期未上架服务不可用 →
+  按 R-THEME-06 降级：**主题不回滚** + toast「主题已更换，图标没能跟着换」；
+  上架后 AGC「分发>服务>图标管理」配好图标 + 运营邮件开通即生效，**零改码**。
+  设置页「应用图标」行与图标选择页照 iOS 全量交付（应用侧状态管理：
+  `appIconSelection` 空=跟随主题；iconAlreadyMatches 用应用侧 resolvedAppIconId
+  判断——**鸿蒙无「查询当前生效图标」接口**，记偏差）。
+- **长按快捷方式（R-THEME-08）**：鸿蒙 shortcuts 为 module.json5 静态配置
+  （label 可走字符串资源随系统语言本地化），无 iOS 式代码动态登记；
+  与「直达换图标页」的动态路由结合需细调，**6.2 暂缓，记偏差**。
 
 ### Q6 🟡 Georgia 字体
 
