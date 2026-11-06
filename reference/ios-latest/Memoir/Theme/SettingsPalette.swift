@@ -26,6 +26,19 @@ enum SettingsPalette {
         default: Color(hex: "#FAF7F2")
         }
     }
+
+    /// 左上角大标题「设置」的颜色。
+    ///
+    /// 大标题是系统导航栏画的，用的是系统的主文字色。浅色主题（素笺、肯特）不指定明暗、跟着手机走，
+    /// 手机开了深色模式时它就成了白字压在浅色页面底上，几乎看不见（2026-11-07 用户报）——
+    /// 浅色主题写死成主题的主文字色。深色主题整个 App 本来就走系统深色，白字没问题，`nil` 不动
+    static func title(_ themeID: String) -> Color? {
+        switch themeID {
+        case "leather", "polar": nil
+        case "kent": Color(hex: "#1A1A1A")
+        default: Color(hex: "#3D3428")
+        }
+    }
 }
 
 /// 设置一级页每行前面的小方框：细线圆角框，里面是原色的图标。**不填底色**

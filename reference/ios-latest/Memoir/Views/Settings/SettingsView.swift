@@ -85,6 +85,8 @@ struct SettingsView: View {
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(SettingsPalette.page(themeID))
+            // 大标题的颜色：浅色主题下手机开深色模式，系统会把它画成白字（见 `SettingsPalette.title`）
+            .background(NavigationBarTitleColor(color: SettingsPalette.title(themeID)))
             .tint(theme.accent)
             .sheet(isPresented: $showLogin) {
                 LoginView()
