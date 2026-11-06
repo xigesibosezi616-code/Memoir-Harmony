@@ -11,6 +11,7 @@
  *
  * 路由：系统路由表（router_map.json → name `ThemePicker`）。
  */
+import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../../theme/AppTheme';
@@ -21,9 +22,6 @@ import { ThemePaper } from '../../theme/ThemePaper';
 import { STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP } from '../../services/ImmersiveChrome';
 import { ThemeIntroSheet } from './ThemeIntroSheet';
-
-/** 顶栏一行的高（返回圆钮 + 居中标题） */
-const TOP_BAR_ROW_HEIGHT_VP: number = 44;
 
 @Builder
 export function ThemePickerBuilder() {
@@ -149,6 +147,7 @@ export struct ThemePickerView {
     }
     .width('100%')
     .height(TOP_BAR_ROW_HEIGHT_VP)
+    .margin({ bottom: TOP_BAR_CONTENT_GAP_VP })
   }
 
   // ---- 单行：色块 + 名 + 副标题 + 选中打勾（iOS themeRow 同款） ----

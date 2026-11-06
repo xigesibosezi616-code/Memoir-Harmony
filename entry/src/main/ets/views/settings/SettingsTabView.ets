@@ -29,7 +29,8 @@
  * 无邮件处理方 → 复制邮箱 + toast「邮箱地址已复制：%s」。
  *
  * 华为量测规格沿用（存档 .tmp-ui/hw_settings/）：页边距 16 / 卡圆角 20 /
- * 卡距 26 / 卡内边距 12 / 行上下边距 8 / 行标题 fp16 / 行值 fp14 / 昵称 fp22 /
+ * 卡距 26 / 卡内边距 12 / 行上下边距 8 / 行标题 fp16 / 行值 fp14 / 昵称 fp20 加粗 /
+ * 账户卡副标题 fp12（昵称 / 副标题 2026-11-07 用户要求缩小，大标题同日加粗）/
  * 本页字号硬编码系统无衬线（用户拍板，主题字体在其它 tab 保留）；
  * 🔴 大标题 fp26 左上固定不滚动（滚动态实锤，无折叠态）。
  * 离开设置 tab 重置导航栈（R-SETTINGS-03）；登录态用
@@ -87,8 +88,10 @@ const SEAL_SIZE_VP: number = 26;
 const ROW_TITLE_FONT_SIZE_FP: number = 16;
 /** 行值 / 副标题字号（华为实测 55px ≈ fp14） */
 const ROW_VALUE_FONT_SIZE_FP: number = 14;
-/** 账户昵称字号（华为实测 91px ≈ fp22） */
-const ACCOUNT_NAME_FONT_SIZE_FP: number = 22;
+/** 账户昵称字号（华为实测 91px ≈ fp22；2026-11-07 用户要求缩小一档改 fp20，同时加粗） */
+const ACCOUNT_NAME_FONT_SIZE_FP: number = 20;
+/** 账户卡副标题字号（原与行值同 fp14；2026-11-07 用户要求缩小一档改 fp12） */
+const ACCOUNT_SUBTITLE_FONT_SIZE_FP: number = 12;
 
 /** 反馈邮箱（R-SETTINGS-11） */
 const FEEDBACK_EMAIL: string = 'connect@sinaratech.com.cn';
@@ -185,9 +188,11 @@ export struct SettingsTabView {
         .edgeEffect(EdgeEffect.Spring)
 
         // 华为大标题「设置」：fp26 左上**固定**，不随内容滚动、无折叠态（滚动态实锤）；
-        // 颜色按主题定死（R-SETTINGS-08：浅色主题手机开深色模式时也是深色字）
+        // 加粗（2026-11-07 用户要求）；颜色按主题定死（R-SETTINGS-08：浅色主题手机
+        // 开深色模式时也是深色字）
         Text($r('app.string.s_7debf9cb03'))
           .fontSize(BIG_TITLE_FONT_SIZE_FP)
+          .fontWeight(FontWeight.Bold)
           .fontColor(this.theme.settingsTitleColor)
           .margin({
             top: this.safeAreaTopVp + TITLE_TOP_GAP_VP,
@@ -220,12 +225,14 @@ export struct SettingsTabView {
           .objectFit(ImageFit.Contain)
           .interpolation(ImageInterpolation.High)
         Column({ space: 2 }) {
-          // 有昵称就以昵称为准——一串脱敏手机号当账号名，用户看不出「这是我」（iOS 同款）
+          // 有昵称就以昵称为准——一串脱敏手机号当账号名，用户看不出「这是我」（iOS 同款）；
+          // 加粗 + fp20（2026-11-07 用户要求）
           Text(this.accountTitle)
             .fontSize(ACCOUNT_NAME_FONT_SIZE_FP)
+            .fontWeight(FontWeight.Bold)
             .fontColor(this.theme.textPrimary)
           Text($r('app.string.s_dce5f6e4df'))
-            .fontSize(ROW_VALUE_FONT_SIZE_FP)
+            .fontSize(ACCOUNT_SUBTITLE_FONT_SIZE_FP)
             .fontColor(this.theme.textSecondary)
         }
         .alignItems(HorizontalAlign.Start)
@@ -304,9 +311,10 @@ export struct SettingsTabView {
         Column({ space: 2 }) {
           Text($r('app.string.s_5d2df2c92d'))
             .fontSize(ACCOUNT_NAME_FONT_SIZE_FP)
+            .fontWeight(FontWeight.Bold)
             .fontColor(this.theme.textPrimary)
           Text($r('app.string.s_486e6b598c'))
-            .fontSize(ROW_VALUE_FONT_SIZE_FP)
+            .fontSize(ACCOUNT_SUBTITLE_FONT_SIZE_FP)
             .fontColor(this.theme.textSecondary)
         }
         .alignItems(HorizontalAlign.Start)

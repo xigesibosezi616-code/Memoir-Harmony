@@ -8,6 +8,7 @@
  * 路由：系统路由表（router_map.json → name `Language`），
  * 一级页「语言」行直通（R-SETTINGS-02 不套二级页）。
  */
+import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
@@ -15,9 +16,6 @@ import { STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP } from '../../services/ImmersiveChrome';
 import { STORAGE_KEY_APP_LANGUAGE, STORAGE_KEY_LANGUAGE_MANAGER,
   LanguageManager, LanguageOption } from '../../services/LanguageManager';
-
-/** 顶栏一行的高（返回圆钮 + 居中标题） */
-const TOP_BAR_ROW_HEIGHT_VP: number = 44;
 
 @Builder
 export function LanguagePickerBuilder() {
@@ -129,6 +127,7 @@ export struct LanguagePickerView {
     }
     .width('100%')
     .height(TOP_BAR_ROW_HEIGHT_VP)
+    .margin({ bottom: TOP_BAR_CONTENT_GAP_VP })
   }
 
   // ---- 单个语言行（自称 + 当前语言打勾） ----

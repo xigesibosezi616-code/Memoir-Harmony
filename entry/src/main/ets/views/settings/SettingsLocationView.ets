@@ -9,6 +9,7 @@
  *
  * 路由：系统路由表（router_map.json → name `LocationSettings`）。
  */
+import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
@@ -18,9 +19,6 @@ import { AppPrefs, PREF_KEY_LOCATION_RECORDING_ENABLED,
   PREF_KEY_LOCATION_PRECISION } from '../../services/AppPrefs';
 import { LOCATION_PRECISION_CITY, LOCATION_PRECISION_DISTRICT,
   LOCATION_PRECISION_STREET } from '../../services/PlaceWeatherFormat';
-
-/** 顶栏一行的高（返回圆钮 + 居中标题） */
-const TOP_BAR_ROW_HEIGHT_VP: number = 44;
 
 /** 一档位置精度（值 + 名 + 说明词条） */
 class PrecisionSpec {
@@ -169,6 +167,7 @@ export struct SettingsLocationView {
     }
     .width('100%')
     .height(TOP_BAR_ROW_HEIGHT_VP)
+    .margin({ bottom: TOP_BAR_CONTENT_GAP_VP })
   }
 
   // ---- 记录位置开关（关掉只影响地点，天气照常） ----

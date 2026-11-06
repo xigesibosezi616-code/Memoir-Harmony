@@ -12,6 +12,7 @@
  *
  * 路由：系统路由表（router_map.json → name `Appearance`）。
  */
+import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME, STORAGE_KEY_THEME_MANAGER, ThemeManager } from '../../theme/ThemeManager';
@@ -20,9 +21,6 @@ import { STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP } from '../../services/ImmersiveChrome';
 import { AppPrefs, PREF_KEY_SHOW_SPLASH_ANIMATION,
   HOME_DISPLAY_MODE_SHOWCASE, HOME_DISPLAY_MODE_LIST } from '../../services/AppPrefs';
-
-/** 顶栏一行的高（返回圆钮 + 居中标题） */
-const TOP_BAR_ROW_HEIGHT_VP: number = 44;
 
 /** 手记页展示方式一行描述（大屏 / 列表 + 取值 + 说明词条） */
 class HomeModeSpec {
@@ -188,6 +186,7 @@ export struct SettingsAppearanceView {
     }
     .width('100%')
     .height(TOP_BAR_ROW_HEIGHT_VP)
+    .margin({ bottom: TOP_BAR_CONTENT_GAP_VP })
   }
 
   // ---- 主题选择（6.2 接路由；本卡先立行） ----

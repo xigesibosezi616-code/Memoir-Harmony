@@ -10,6 +10,7 @@
  * - 空态「信箱还是空的」；到点的信由 onShown 全量重查 + nowMs 推进双驱动
  * - 路由：邮筒 tab 内 Navigation（router_map `Letterbox`），邮筒页右上角推入
  */
+import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { relationalStore } from '@kit.ArkData';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../../theme/AppTheme';
@@ -34,8 +35,6 @@ import { STORAGE_KEY_POSTBOX_VISIBLE_TICK } from './PostBoxTabView';
 const DOMAIN = 0x0000;
 const TAG = 'LetterboxView';
 
-/** 顶栏一行的高（返回圆钮 + 居中标题） */
-const TOP_BAR_ROW_HEIGHT_VP: number = 44;
 /** 「此刻」推进间隔（R-BOX-02），对齐 iOS Task.sleep 5 秒 */
 const NOW_TICK_INTERVAL_MS: number = 5000;
 /** 预览截取长度（iOS body.prefix(60) 同款） */
@@ -224,6 +223,7 @@ export struct LetterboxView {
     }
     .width('100%')
     .height(TOP_BAR_ROW_HEIGHT_VP)
+    .margin({ bottom: TOP_BAR_CONTENT_GAP_VP })
   }
 
   // ---- 空态：信箱还是空的（有信在路上时补一句） ----

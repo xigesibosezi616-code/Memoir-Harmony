@@ -13,6 +13,7 @@
  *
  * 路由：系统路由表（router_map.json → name `Data`）。
  */
+import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
@@ -22,9 +23,6 @@ import { STORAGE_KEY_SAFE_AREA_TOP_VP,
 import { MediaStorageService } from '../../services/MediaStorageService';
 import { MediaUsage } from '../../services/MediaStorage';
 import { AppDatabase } from '../../data/Database';
-
-/** 顶栏一行的高（返回圆钮 + 居中标题） */
-const TOP_BAR_ROW_HEIGHT_VP: number = 44;
 
 @Builder
 export function SettingsDataBuilder() {
@@ -176,6 +174,7 @@ export struct SettingsDataView {
     }
     .width('100%')
     .height(TOP_BAR_ROW_HEIGHT_VP)
+    .margin({ bottom: TOP_BAR_CONTENT_GAP_VP })
   }
 
   // ---- 云同步（R-DATA-05：如实展示；6.6 接真状态） ----

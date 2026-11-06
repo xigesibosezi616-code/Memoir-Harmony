@@ -13,8 +13,9 @@
  *   本地 token 指向的身份不存在了，必须用返回 token+user 覆盖（establish），
  *   并提示「已找回你的账号」（R-ACCOUNT-04）；否则只刷快照（updateUser）。
  *
- * 华为账号登录（U02 R-ACCOUNT-09）：官方 LoginWithHuaweiIDButton（loginType: ID）
- * 放手机号登录下面（仅登录模式），拿凭据 idToken 交 POST /auth/huawei——
+ * 华为账号登录（U02 R-ACCOUNT-09）：自绘红按钮（华为 logo + 文案）放手机号登录
+ * 下面（仅登录模式），点击走请求式授权（HuaweiIdAuth.authorize，forceLogin，
+ * 与绑定/注销同一套授权界面），拿 idToken 交 POST /auth/huawei——
  * unionID / openID 不上送（服务端只认验过签的 idToken）。
  * 三分支：503 huawei_disabled → 「华为账号登录暂未开放，请先用手机号登录」；
  * 用户取消 / 未登录华为账号 → 静默；其他失败 → 「华为账号授权失败」+ 完整日志。
@@ -22,8 +23,6 @@
  * 路由：系统路由表（router_map.json → name `Login`），设置页推入；
  * 悬浮 Tab 栏在页面上期间隐藏（STORAGE_KEY_HIDE_TAB_BAR，接近日志 sheet 盖全屏的语义）。
  */
-import { LoginWithHuaweiIDButton, loginComponentManager } from '@kit.AccountKit';
-import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
@@ -34,6 +33,7 @@ import { STORAGE_KEY_HIDE_TAB_BAR, STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP } from '../../services/ImmersiveChrome';
 import { AuthLogic } from '../../services/auth/AuthLogic';
 import { HuaweiIdProof, HuaweiAuthLogic } from '../../services/auth/HuaweiAuthLogic';
+import { HuaweiIdAuth, HuaweiIdAuthError } from '../../services/auth/HuaweiIdAuth';
 import { HttpError } from '../../services/http/HttpError';
 import { STORAGE_KEY_SESSION_TICK } from '../../services/auth/UserSession';
 import { SendCodeResponse, AuthResponse, BindPhoneResponse } from '../../models/Api';
@@ -65,16 +65,8 @@ export struct LoginView {
   @State private countdown: number = 0;
   private countdownTimerId: number = -1;
   private navPathStack: NavPathStack = new NavPathStack();
-  /** 华为账号登录按钮控制器（官方组件；回调在 aboutToAppear 注册） */
-  private huaweiButtonController: loginComponentManager.LoginWithHuaweiIDButtonController =
-    new loginComponentManager.LoginWithHuaweiIDButtonController();
-
-  aboutToAppear(): void {
-    this.huaweiButtonController.onClickLoginWithHuaweiIDButton(
-      (error: BusinessError, credential: loginComponentManager.HuaweiIDCredential): void => {
-        this.onHuaweiCredential(error, credential);
-      });
-  }
+  /** 华为授权进行中（防授权面板弹出前连点重复拉起） */
+  private huaweiAuthorizing: boolean = false;
 
   aboutToDisappear(): void {
     this.stopCountdown();
@@ -131,20 +123,29 @@ export struct LoginView {
 
           this.primaryButton()
 
-          // 华为账号登录（U02 R-ACCOUNT-01/09）：官方按钮组件按华为按钮规范放手机号登录
-          // 下面；仅登录模式（bindPhone 模式不加），手机号步才出现（进了验证码步已选定短信）
+          // 华为账号登录（U02 R-ACCOUNT-01/09）：自绘红按钮（华为 logo + 文案）放手机号
+          // 登录下面；仅登录模式（bindPhone 模式不加），手机号步才出现（进了验证码步已选定短信）
           if (this.mode === 0 && this.step === 0) {
-            LoginWithHuaweiIDButton({
-              params: {
-                style: loginComponentManager.Style.BUTTON_RED,
-                borderRadius: 24,
-                loginType: loginComponentManager.LoginType.ID,
-                supportDarkMode: true
-              },
-              controller: this.huaweiButtonController
-            })
-            .height(48)
+            Button({ stateEffect: true }) {
+              Row({ space: 8 }) {
+                Image($r('app.media.ic_huawei_logo_white'))
+                  .width(22)
+                  .height(22)
+                  .objectFit(ImageFit.Contain)
+                Text($r('app.string.s_02a00a2547'))
+                  .fontSize(16)
+                  .fontWeight(FontWeight.Medium)
+                  .fontColor(Color.White)
+              }
+              .alignItems(VerticalAlign.Center)
+            }
             .width('100%')
+            .height(48)
+            .backgroundColor('#CE0E2D')
+            .borderRadius(24)
+            .onClick((): void => {
+              this.startHuaweiLogin();
+            })
           }
 
           if (this.step === 1) {
@@ -438,27 +439,45 @@ export struct LoginView {
 
   // ---- 华为账号登录（U02-1）----
 
-  /** 官方按钮回调分流：取消/未登录静默；无凭证单独提示；拿到 idToken 走 /auth/huawei */
-  private onHuaweiCredential(error: BusinessError,
-    credential: loginComponentManager.HuaweiIDCredential): void {
-    if (error) {
-      // 用户取消 / 未登录华为账号：静默回登录页，不弹错（U02 R-ACCOUNT-09）
-      if (HuaweiAuthLogic.isSilentKitError(error.code)) {
+  /** 华为账号登录入口：请求式授权（forceLogin，与绑定/注销同一套授权界面）拿
+   *  idToken → loginWithHuawei；取消/未登录静默（U02 R-ACCOUNT-09） */
+  private async startHuaweiLogin(): Promise<void> {
+    if (this.busy || this.huaweiAuthorizing) {
+      return;
+    }
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    this.huaweiAuthorizing = true;
+    try {
+      const proof: HuaweiIdProof = await HuaweiIdAuth.authorize(context);
+      await this.loginWithHuawei(proof.idToken);
+    } catch (e) {
+      this.presentHuaweiKitError(e);
+    } finally {
+      this.huaweiAuthorizing = false;
+    }
+  }
+
+  /** 华为授权 kit 错误分流：取消/未登录静默；无凭证（code 0）单独提示；其余授权失败 + 日志 */
+  private presentHuaweiKitError(e: Object): void {
+    if (e instanceof HuaweiIdAuthError) {
+      if (e.code === 0) {
+        hilog.error(DOMAIN, TAG, 'huawei login no idToken in credential');
+        this.presentResourceToast($r('app.string.s_2b42a64cab'), ErrorToastKind.Error);
+        return;
+      }
+      if (HuaweiAuthLogic.isSilentKitError(e.code)) {
+        // 用户取消 / 未登录华为账号：静默回登录页，不弹错（U02 R-ACCOUNT-09）
         return;
       }
       hilog.error(DOMAIN, TAG, 'huawei login failed: %{public}d %{public}s',
-        error.code, error.message);
+        e.code, e.message);
       this.presentResourceToast($r('app.string.s_a23663f119'), ErrorToastKind.Error);
       return;
     }
-    const proof: HuaweiIdProof | null = HuaweiAuthLogic.proofFor(
-      credential.idToken, credential.authorizationCode);
-    if (proof === null) {
-      hilog.error(DOMAIN, TAG, 'huawei login no idToken in credential');
-      this.presentResourceToast($r('app.string.s_2b42a64cab'), ErrorToastKind.Error);
-      return;
-    }
-    this.loginWithHuawei(proof.idToken);
+    this.presentAuthError(e, $r('app.string.s_a23663f119'));
   }
 
   /** 华为账号登录：POST /auth/huawei → establish（同验码登录）；503 huawei_disabled

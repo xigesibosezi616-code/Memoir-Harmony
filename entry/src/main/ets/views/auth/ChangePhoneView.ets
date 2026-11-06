@@ -14,6 +14,7 @@
  * 成功：updateUser 刷快照 + 「手机号已换绑」+ 退回；失败 toast（服务端文案优先）。
  * 路由：系统路由表（router_map.json → name `ChangePhone`），账户页手机号行推入。
  */
+import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
@@ -25,9 +26,6 @@ import { AuthLogic } from '../../services/auth/AuthLogic';
 import { HttpError } from '../../services/http/HttpError';
 import { STORAGE_KEY_SESSION_TICK } from '../../services/auth/UserSession';
 import { SendCodeResponse } from '../../models/Api';
-
-/** 顶栏一行的高（返回圆钮 + 居中标题） */
-const TOP_BAR_ROW_HEIGHT_VP: number = 44;
 
 @Builder
 export function ChangePhoneBuilder() {
@@ -156,6 +154,7 @@ export struct ChangePhoneView {
     }
     .width('100%')
     .height(TOP_BAR_ROW_HEIGHT_VP)
+    .margin({ bottom: TOP_BAR_CONTENT_GAP_VP })
   }
 
   // ---- 第一步：验证当前手机号 ----

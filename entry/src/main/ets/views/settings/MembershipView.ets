@@ -7,6 +7,7 @@
  *
  * 路由：系统路由表（router_map.json → name `Membership`）。
  */
+import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
@@ -15,9 +16,6 @@ import { STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP } from '../../services/ImmersiveChrome';
 import { PostingRun } from '../../models/LetterPostingFlightGeometry';
 import { WaxSeal } from '../postbox/WaxSeal';
-
-/** 顶栏一行的高（返回圆钮 + 居中标题） */
-const TOP_BAR_ROW_HEIGHT_VP: number = 44;
 
 /** 骨架态火漆印直径（和付费页那枚是同一枚） */
 const SEAL_SIZE_VP: number = 64;
@@ -121,5 +119,6 @@ export struct MembershipView {
     }
     .width('100%')
     .height(TOP_BAR_ROW_HEIGHT_VP)
+    .margin({ bottom: TOP_BAR_CONTENT_GAP_VP })
   }
 }

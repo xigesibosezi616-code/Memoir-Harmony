@@ -1,10 +1,11 @@
 /**
  * 华为账号授权 Account Kit 壳（U02 更新包）。
  *
- * 登录页 / 注销页用官方 LoginWithHuaweiIDButton 组件（回调直接给 HuaweiIDCredential）；
- * 本壳服务没有官方按钮的入口——账户页「绑定华为账号」行点行触发：
- * authentication.HuaweiIDProvider().createLoginWithHuaweiIDRequest()（forceLogin = true）
- * 走同样的华为账号授权界面。
+ * 自己触发授权的入口都走本壳（请求式授权，forceLogin = true，与官方按钮同一套
+ * 华为账号授权界面）：登录页自绘华为按钮（2026-11-07 起登录不再用官方
+ * LoginWithHuaweiIDButton——设备上无 AGC 配置时官方按钮不渲染华为 logo，用户
+ * 要求换成自绘按钮带华为图标）、账户页「绑定华为账号」行点行触发。
+ * 注销页仍用官方 LoginWithHuaweiIDButton 组件（回调直接给 HuaweiIDCredential）。
  *
  * import Account Kit，本地单测跑不了；纯逻辑在 HuaweiAuthLogic（有单测）。
  * 取消 / 未登录的静默判断在调用方（HuaweiAuthLogic.isSilentKitError）。

@@ -22,6 +22,7 @@
  * 用户正在看的输入框旁边，R-ACCOUNT-07）。
  * 路由：系统路由表（router_map.json → name `DeleteAccount`），账户页注销行推入。
  */
+import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { LoginWithHuaweiIDButton, loginComponentManager } from '@kit.AccountKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
@@ -40,9 +41,6 @@ import { SendCodeResponse } from '../../models/Api';
 
 const DOMAIN = 0x0000;
 const TAG = 'DeleteAccountView';
-
-/** 顶栏一行的高（返回圆钮 + 居中标题） */
-const TOP_BAR_ROW_HEIGHT_VP: number = 44;
 
 @Builder
 export function DeleteAccountBuilder() {
@@ -192,6 +190,7 @@ export struct DeleteAccountView {
     }
     .width('100%')
     .height(TOP_BAR_ROW_HEIGHT_VP)
+    .margin({ bottom: TOP_BAR_CONTENT_GAP_VP })
   }
 
   // ---- 第一步：说明（删什么、不删什么、无法恢复） ----

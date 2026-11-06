@@ -12,6 +12,7 @@
  *   点击开付费页等付费体系卡片接通
  * - 路由：邮筒 tab 内 Navigation（router_map `LetterDetail`），参数 = 信 id
  */
+import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { relationalStore } from '@kit.ArkData';
 import { LengthMetrics } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
@@ -36,9 +37,6 @@ import { LetterStationery } from './LetterStationery';
 
 const DOMAIN = 0x0000;
 const TAG = 'LetterDetailView';
-
-/** 顶栏一行的高（返回圆钮 + 居中标题） */
-const TOP_BAR_ROW_HEIGHT_VP: number = 44;
 
 /** 系统路由表入口（router_map.json → name `LetterDetail`）：信箱行推入 */
 @Builder
@@ -332,6 +330,7 @@ export struct LetterDetailView {
     }
     .width('100%')
     .height(TOP_BAR_ROW_HEIGHT_VP)
+    .margin({ bottom: TOP_BAR_CONTENT_GAP_VP })
   }
 
   // ---- 信末会员小字（R-BOX-08，入口先留） ----

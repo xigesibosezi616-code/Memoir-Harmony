@@ -20,6 +20,7 @@
  *
  * 路由：系统路由表（router_map.json → name `Account`），设置页账户卡推入。
  */
+import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
@@ -37,9 +38,6 @@ import { UserDTO } from '../../models/Api';
 
 const DOMAIN = 0x0000;
 const TAG = 'SettingsAccountView';
-
-/** 顶栏一行的高（返回圆钮 + 居中标题） */
-const TOP_BAR_ROW_HEIGHT_VP: number = 44;
 
 @Builder
 export function SettingsAccountBuilder() {
@@ -231,6 +229,7 @@ export struct SettingsAccountView {
     }
     .width('100%')
     .height(TOP_BAR_ROW_HEIGHT_VP)
+    .margin({ bottom: TOP_BAR_CONTENT_GAP_VP })
   }
 
   // ---- 昵称行：值 = 昵称 / 未设置 ----
@@ -354,11 +353,10 @@ export struct SettingsAccountView {
   private huaweiRow() {
     Column() {
       Row({ space: 10 }) {
-        SymbolGlyph($r('sys.symbol.person_crop_circle_fill'))
-          .fontSize(14)
-          .fontWeight(FontWeight.Medium)
-          .fontColor([this.theme.textSecondary])
+        Image(this.huaweiLogoRes())
           .width(20)
+          .height(20)
+          .objectFit(ImageFit.Contain)
         Text($r('app.string.s_c57df07ccd'))
           .fontSize(this.theme.bodyFont.size)
           .fontWeight(this.theme.bodyFont.weight)
@@ -405,6 +403,14 @@ export struct SettingsAccountView {
     }
     .width('100%')
     .alignItems(HorizontalAlign.Start)
+  }
+
+  /** 华为 logo 按主题取图：浅色主题彩色版（红瓣黑字），深色主题（皮革/极夜）白色版 */
+  private huaweiLogoRes(): Resource {
+    if (this.theme.id === 'leather' || this.theme.id === 'polar') {
+      return $r('app.media.ic_huawei_logo_white');
+    }
+    return $r('app.media.ic_huawei_logo');
   }
 
   // ---- 昵称编辑弹窗（BookDetail deleteConfirmDialog 同款内联浮层） ----
