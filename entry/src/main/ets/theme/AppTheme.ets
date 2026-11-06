@@ -23,6 +23,12 @@ export interface AppTheme {
   surfaceBackground: ResourceColor;
   /** 侧栏 / 底栏背景 */
   sidebarBackground: ResourceColor;
+  /**
+   * 设置 tab 页底色（2026-11-07 用户拍板：设置一级页 1:1 华为系统设置，
+   * 华为结构 = 页底比分组卡深一档，卡靠色差成型；浅色主题纸面降一档、
+   * 深色主题压更黑。卡仍用 cardBackground 不动）
+   */
+  settingsPageBackground: ResourceColor;
 
   // ---- 文字（3）----
   /** 主文字 */

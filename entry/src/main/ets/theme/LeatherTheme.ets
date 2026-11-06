@@ -12,6 +12,8 @@ export class LeatherTheme implements AppTheme {
   readonly cardBackground: ResourceColor = 0xFF241C16;
   readonly surfaceBackground: ResourceColor = 0xFF2A2019;
   readonly sidebarBackground: ResourceColor = 0xFF140E0A;
+  /** 设置页底：压更黑（卡 241C16 浮其上，华为深色结构同款） */
+  readonly settingsPageBackground: ResourceColor = 0xFF140E0A;
 
   readonly textPrimary: ResourceColor = 0xFFD4C4A8;
   readonly textSecondary: ResourceColor = 0xFF8A7B6A;

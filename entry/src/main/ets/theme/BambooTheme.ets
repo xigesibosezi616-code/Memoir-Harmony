@@ -13,6 +13,8 @@ export class BambooTheme implements AppTheme {
   readonly cardBackground: ResourceColor = 0xFFFAF7F2;
   readonly surfaceBackground: ResourceColor = 0xFFF5F0E7;
   readonly sidebarBackground: ResourceColor = 0xFFF0EBE1;
+  /** 设置页底：纸面降一档（卡 FAF7F2 浮其上，华为浅色结构同款） */
+  readonly settingsPageBackground: ResourceColor = 0xFFF0EBE1;
 
   readonly textPrimary: ResourceColor = 0xFF3D3428;
   readonly textSecondary: ResourceColor = 0xFF8B7E6A;
