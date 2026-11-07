@@ -41,6 +41,16 @@
       "buildFunction": "SettingsAboutBuilder"
     },
     {
+      "name": "Privacy",
+      "pageSourceFile": "src/main/ets/views/legal/LegalDocumentPage.ets",
+      "buildFunction": "PrivacyPageBuilder"
+    },
+    {
+      "name": "Terms",
+      "pageSourceFile": "src/main/ets/views/legal/LegalDocumentPage.ets",
+      "buildFunction": "TermsPageBuilder"
+    },
+    {
       "name": "ChangePhone",
       "pageSourceFile": "src/main/ets/views/auth/ChangePhoneView.ets",
       "buildFunction": "ChangePhoneBuilder"
