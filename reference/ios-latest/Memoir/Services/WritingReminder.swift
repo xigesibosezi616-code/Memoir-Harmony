@@ -49,29 +49,32 @@ enum WritingReminder {
     }
 
     private static func rescheduleNow(context: ModelContext) async {
-        let defaults = UserDefaults.standard
-        let enabled = defaults.bool(forKey: enabledKey)
-        let minutes = defaults.object(forKey: minutesKey) as? Int ?? defaultMinutes
-        let weekdays = Set((defaults.string(forKey: weekdaysKey) ?? defaultWeekdays).compactMap(\.wholeNumberValue))
+        let settings = Settings.current
         let writtenToday = hasEntryToday(context: context)
         let center = UNUserNotificationCenter.current()
 
         // 1. 收掉旧的：还没到点的实况、排着的通知全部重来；已经在锁屏上的，今天写过了或关了提醒才收
         for activity in Activity<WritingReminderAttributes>.activities {
             let showing = activity.activityState == .active && (activity.content.staleDate ?? .distantFuture) > .now
-            if showing && enabled && !writtenToday { continue }
+            if showing && settings.enabled && !writtenToday { continue }
             await activity.end(nil, dismissalPolicy: .immediate)
         }
         let ours = await center.pendingNotificationRequests().map(\.identifier).filter { $0.hasPrefix(notificationPrefix) }
         center.removePendingNotificationRequests(withIdentifiers: ours)
-        if writtenToday || !enabled {
+        if writtenToday || !settings.enabled {
             let shown = await center.deliveredNotifications().map(\.request.identifier).filter { $0.hasPrefix(notificationPrefix) }
             center.removeDeliveredNotifications(withIdentifiers: shown)
         }
-        guard enabled, !weekdays.isEmpty else { return }
+        guard settings.enabled, !settings.weekdays.isEmpty else {
+            NSLog("[WritingReminder] 提醒关着，没排")
+            return
+        }
 
         // 2. 排新的
-        var dates = upcoming(from: .now, minutes: minutes, weekdays: weekdays, skipToday: writtenToday)
+        var dates = upcoming(from: .now, minutes: settings.minutes, weekdays: settings.weekdays, skipToday: writtenToday)
+        // 真机上「怎么没响」多半是这一句：当天写过就跳过今天（2026-11-07 就是凌晨写了一篇，白天怎么设都不响）
+        NSLog("[WritingReminder] 重排：今天写过=%d，下一次 %@，通知权限 %d", writtenToday ? 1 : 0,
+              String(describing: dates.first), await center.notificationSettings().authorizationStatus.rawValue)
         guard !dates.isEmpty else { return }
         if #available(iOS 26.0, *), scheduleLiveActivity(at: dates[0]) {
             dates.removeFirst()
@@ -79,6 +82,43 @@ enum WritingReminder {
         for date in dates {
             await scheduleNotification(at: date)
         }
+    }
+
+    /// 设置页那三项（`@AppStorage` 用同名 key）
+    private struct Settings {
+        let enabled: Bool
+        let minutes: Int
+        let weekdays: Set<Int>
+
+        static var current: Settings {
+            let defaults = UserDefaults.standard
+            return Settings(
+                enabled: defaults.bool(forKey: enabledKey),
+                minutes: defaults.object(forKey: minutesKey) as? Int ?? defaultMinutes,
+                weekdays: Set((defaults.string(forKey: weekdaysKey) ?? defaultWeekdays).compactMap(\.wholeNumberValue)))
+        }
+    }
+
+    // MARK: - 下一次（设置页显示）
+
+    struct NextReminder {
+        let date: Date
+        /// 今天本来该提醒、因为今天已经写过才跳过的
+        let skippedToday: Bool
+    }
+
+    /// 下一次提醒在什么时候。设置页提醒那一组下面显示，**不然「今天写过就不提醒」看起来就是坏了**
+    /// （2026-11-07 真机：凌晨写了一篇，白天把时间设到几分钟后，实况和通知都不出）。关着提醒返回 nil
+    static func next(context: ModelContext, now: Date = .now) -> NextReminder? {
+        let settings = Settings.current
+        guard settings.enabled, !settings.weekdays.isEmpty else { return nil }
+        let writtenToday = hasEntryToday(context: context)
+        guard let date = upcoming(from: now, minutes: settings.minutes, weekdays: settings.weekdays, skipToday: writtenToday).first
+        else { return nil }
+        let todayWouldRing = writtenToday
+            && upcoming(from: now, minutes: settings.minutes, weekdays: settings.weekdays, skipToday: false)
+                .first.map { Calendar.current.isDate($0, inSameDayAs: now) } == true
+        return NextReminder(date: date, skippedToday: todayWouldRing)
     }
 
     // MARK: - 什么时候
@@ -136,7 +176,10 @@ enum WritingReminder {
     /// 排一个到点拉起的实况。排不上（用户关了实况、系统拒了）返回 false，这一次改用普通通知
     @available(iOS 26.0, *)
     private static func scheduleLiveActivity(at date: Date) -> Bool {
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return false }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
+            NSLog("[WritingReminder] 实况被关了，改用通知")
+            return false
+        }
         let midnight = Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: date))
         let line = line(for: date)
         let state = WritingReminderAttributes.ContentState(
@@ -149,13 +192,14 @@ enum WritingReminder {
             body: LocalizedStringResource(String.LocalizationValue(line), table: "Verbatim"),
             sound: .default)
         do {
-            _ = try Activity.request(
+            let activity = try Activity.request(
                 attributes: WritingReminderAttributes(themeID: UserDefaults.standard.string(forKey: "selectedTheme") ?? "bamboo"),
                 content: ActivityContent(state: state, staleDate: midnight),
                 pushType: nil,
                 style: .standard,
                 alertConfiguration: alert,
                 start: date)
+            NSLog("[WritingReminder] 排好实况 %@，到点 %@", activity.id, String(describing: date))
             return true
         } catch {
             NSLog("[WritingReminder] 排实况失败，改用通知: %@", String(describing: error))

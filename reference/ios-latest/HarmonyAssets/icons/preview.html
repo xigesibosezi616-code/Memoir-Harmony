@@ -1,6 +1,6 @@
 <!doctype html><meta charset=utf-8><title>尺素全部图标 · 鸿蒙对照</title><style>body{font:14px/1.6 -apple-system,'PingFang SC',sans-serif;max-width:1100px;margin:24px auto;padding:0 16px;background:#F0EBE1;color:#3D3428}table{border-collapse:collapse;width:100%;background:#FAF7F2;margin:8px 0 20px}td,th{border:1px solid #E8E2D6;padding:6px 8px;vertical-align:middle;text-align:left}th{background:#F5F0E8}code{background:#EFE8DC;padding:1px 4px;border-radius:3px}pre{background:#EFE8DC;padding:10px}blockquote{color:#8B7E6A;margin:4px 0}p.li{margin:2px 0 2px 12px}</style>
 <h1>尺素全部图标 · 鸿蒙对照</h1>
-<blockquote>2026-11-07 iOS 侧出，对应更新包 <b>U19</b>（设置全部页面详解）。由 <code>Scripts/make_harmony_icon_catalog.py</code> 生成，<b>不要手改</b>（改脚本里的表再重跑）。</blockquote>
+<blockquote>2026-11-07 iOS 侧出，对应更新包 <b>U19</b>（设置全部页面详解）；<b>U20 改成纯文字 + 代码</b>（DevEco 的 agent 看不见图片：这份不插图，图标只写名字，火漆印给代码）。由 <code>Scripts/make_harmony_icon_catalog.py</code> 生成，<b>不要手改</b>（改脚本里的表再重跑）。</blockquote>
 <blockquote>设置各页每一行用哪个图标、放在哪，见同级目录 <code>../settings_pages/SETTINGS_PAGES.md</code>；这份按「图标」列全 App。</blockquote>
 <h2>先读这四条</h2>
 <p class=li>1. <b>App 里的图标分两种</b>：尺素<b>自己画的</b>（设置首页那套线条、火漆印、手写 m. …）→ 给图片，拿来就放；iOS 用苹果 <b>SF Symbols</b> 的 → 不给图片，用鸿蒙系统自带的 <b>HarmonyOS Symbol</b></p>
@@ -12,30 +12,93 @@
      .fontColor([主题的图标线色])          // 单色，颜色跟主题（见 settings_icons/GUIDE.md 的颜色表）
 </pre>
 <p>   表里标「图标库网页没列，字体里有」的，是鸿蒙系统字体里有、但官方图标库网页没展示的名字 —— 在 DevEco 里输 <code>sys.symbol.</code> 看补全核对；真没有就用同一行「意思」找一个最接近的，并告诉 iOS 侧改表。一部分老图标在系统里是 <code>ohos_</code> 开头（如 <code>sys.symbol.ohos_trash</code>），两个都有时用不带前缀的</p>
-<p class=li>4. 表里的小图（<code>harmony_symbols/</code>）是拿官方字体画的<b>预览</b>，只给人看，<b>不要拷进工程</b> —— 工程里用 <code>sys.symbol.*</code>，系统会跟着字号、粗细、深浅色画</p>
+<p class=li>4. 这份<b>只有字和代码</b>：图标写名字，自己画的写文件名和尺寸，火漆印给 ArkTS 代码。同目录 <code>preview.html</code> 是给人看的网页版（多一列小图）；<code>harmony_symbols/</code> 的小图是拿官方字体画的预览，<b>不要拷进工程、也不用打开</b> —— 工程里用 <code>sys.symbol.*</code>，系统会跟着字号、粗细、深浅色画</p>
 <hr>
 <h2>一、尺素自己画的（给图片）</h2>
 <h3>设置首页（U10 已交付，图在 <code>../settings_icons/</code>）</h3>
-<p>四套主题各一套、带好了圆框和颜色，怎么放见 <code>../settings_icons/GUIDE.md</code>。下面是素笺那套：</p>
+<p>四套主题各一套、带好了圆框和颜色，拷进资源按文件名引用（<code>$r(&#x27;app.media.文件名&#x27;)</code>），怎么放见 <code>../settings_icons/GUIDE.md</code>：</p>
 <table>
-<tr><th>图</th><th>文件名（<code>&lt;主题&gt;</code> 换成主题 id）</th><th>用在哪</th></tr>
-<tr><td><img src="../settings_icons/png/bamboo/ic_settings_appearance_bamboo.png" width="30" alt="外观"></td><td><code>ic_settings_appearance_&lt;主题&gt;</code></td><td>外观</td></tr>
-<tr><td><img src="../settings_icons/png/bamboo/ic_settings_journal_bamboo.png" width="30" alt="日记"></td><td><code>ic_settings_journal_&lt;主题&gt;</code></td><td>日记</td></tr>
-<tr><td><img src="../settings_icons/png/bamboo/ic_settings_penpal_bamboo.png" width="30" alt="笔友"></td><td><code>ic_settings_penpal_&lt;主题&gt;</code></td><td>笔友</td></tr>
-<tr><td><img src="../settings_icons/png/bamboo/ic_settings_location_bamboo.png" width="30" alt="位置与天气"></td><td><code>ic_settings_location_&lt;主题&gt;</code></td><td>位置与天气</td></tr>
-<tr><td><img src="../settings_icons/png/bamboo/ic_settings_language_bamboo.png" width="30" alt="语言"></td><td><code>ic_settings_language_&lt;主题&gt;</code></td><td>语言</td></tr>
-<tr><td><img src="../settings_icons/png/bamboo/ic_settings_data_bamboo.png" width="30" alt="数据与备份"></td><td><code>ic_settings_data_&lt;主题&gt;</code></td><td>数据与备份</td></tr>
-<tr><td><img src="../settings_icons/png/bamboo/ic_settings_stats_bamboo.png" width="30" alt="写作统计"></td><td><code>ic_settings_stats_&lt;主题&gt;</code></td><td>写作统计</td></tr>
-<tr><td><img src="../settings_icons/png/bamboo/ic_settings_rate_bamboo.png" width="30" alt="给我们评分（华为应用市场的购物袋）"></td><td><code>ic_settings_rate_&lt;主题&gt;</code></td><td>给我们评分（华为应用市场的购物袋）</td></tr>
-<tr><td><img src="../settings_icons/png/bamboo/ic_settings_feedback_bamboo.png" width="30" alt="反馈与建议"></td><td><code>ic_settings_feedback_&lt;主题&gt;</code></td><td>反馈与建议</td></tr>
-<tr><td><img src="../settings_icons/png/bamboo/ic_settings_about_bamboo.png" width="30" alt="关于"></td><td><code>ic_settings_about_&lt;主题&gt;</code></td><td>关于</td></tr>
-<tr><td><img src="../settings_icons/png/bamboo/ic_follow_xiaohongshu_bamboo.png" width="30" alt="关注我们 · 小红书"></td><td><code>ic_follow_xiaohongshu_&lt;主题&gt;</code></td><td>关注我们 · 小红书</td></tr>
-<tr><td><img src="../settings_icons/png/bamboo/ic_follow_douyin_bamboo.png" width="30" alt="关注我们 · 抖音"></td><td><code>ic_follow_douyin_&lt;主题&gt;</code></td><td>关注我们 · 抖音</td></tr>
-<tr><td><img src="../settings_icons/png/bamboo/ic_follow_weibo_bamboo.png" width="30" alt="关注我们 · 微博"></td><td><code>ic_follow_weibo_&lt;主题&gt;</code></td><td>关注我们 · 微博</td></tr>
-<tr><td><img src="../settings_icons/png/bamboo/img_avatar_mark_bamboo.png" width="44" alt="账户卡头像（手写 m.）"></td><td><code>img_avatar_mark_&lt;主题&gt;</code></td><td>账户卡头像（手写 m.）</td></tr>
+<tr><th>图</th><th>文件名（<code>&lt;主题&gt;</code> 换成主题 id：bamboo / leather / kent / polar）</th><th>显示尺寸</th><th>用在哪</th></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_appearance_bamboo.png" width="30" alt="外观"></td><td><code>ic_settings_appearance_&lt;主题&gt;</code></td><td>30vp</td><td>外观</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_journal_bamboo.png" width="30" alt="日记"></td><td><code>ic_settings_journal_&lt;主题&gt;</code></td><td>30vp</td><td>日记</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_penpal_bamboo.png" width="30" alt="笔友"></td><td><code>ic_settings_penpal_&lt;主题&gt;</code></td><td>30vp</td><td>笔友</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_location_bamboo.png" width="30" alt="位置与天气"></td><td><code>ic_settings_location_&lt;主题&gt;</code></td><td>30vp</td><td>位置与天气</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_language_bamboo.png" width="30" alt="语言"></td><td><code>ic_settings_language_&lt;主题&gt;</code></td><td>30vp</td><td>语言</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_data_bamboo.png" width="30" alt="数据与备份"></td><td><code>ic_settings_data_&lt;主题&gt;</code></td><td>30vp</td><td>数据与备份</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_stats_bamboo.png" width="30" alt="写作统计"></td><td><code>ic_settings_stats_&lt;主题&gt;</code></td><td>30vp</td><td>写作统计</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_rate_bamboo.png" width="30" alt="给我们评分（华为应用市场的购物袋）"></td><td><code>ic_settings_rate_&lt;主题&gt;</code></td><td>30vp</td><td>给我们评分（华为应用市场的购物袋）</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_feedback_bamboo.png" width="30" alt="反馈与建议"></td><td><code>ic_settings_feedback_&lt;主题&gt;</code></td><td>30vp</td><td>反馈与建议</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_about_bamboo.png" width="30" alt="关于"></td><td><code>ic_settings_about_&lt;主题&gt;</code></td><td>30vp</td><td>关于</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_follow_xiaohongshu_bamboo.png" width="30" alt="关注我们 · 小红书"></td><td><code>ic_follow_xiaohongshu_&lt;主题&gt;</code></td><td>30vp</td><td>关注我们 · 小红书</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_follow_douyin_bamboo.png" width="30" alt="关注我们 · 抖音"></td><td><code>ic_follow_douyin_&lt;主题&gt;</code></td><td>30vp</td><td>关注我们 · 抖音</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_follow_weibo_bamboo.png" width="30" alt="关注我们 · 微博"></td><td><code>ic_follow_weibo_&lt;主题&gt;</code></td><td>30vp</td><td>关注我们 · 微博</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/img_avatar_mark_bamboo.png" width="44" alt="账户卡头像（手写 m.）"></td><td><code>img_avatar_mark_&lt;主题&gt;</code></td><td>60vp</td><td>账户卡头像（手写 m.）</td></tr>
 </table>
 <h3>火漆印（尺素会员）—— 这次新出</h3>
-<p>一枚深红的蜡、边缘不规则地溢开一圈、中间压一个字。拿 iOS 的 <code>Views/Components/WaxSeal.swift</code> 原样画出来的。四套主题都是<b>同一个颜色</b>（蜡的颜色不跟主题）。</p>
+<p>一枚深红的蜡、边缘不规则地溢开一圈、中间压一个字。四套主题都是<b>同一个颜色</b>（蜡的颜色不跟主题）。iOS 是纯代码画的（<code>Views/Components/WaxSeal.swift</code>：七个圆 + 一个径向渐变 + 两道细圈 + 两层字），<b>鸿蒙照下面这段 ArkTS 一一对应地画，不用图片</b>：</p>
+<pre>
+// 火漆印。和 iOS WaxSeal.swift 一一对应：size = 印的直径（vp），mark = 压的字（规则见下）
+// 颜色写成 ARGB：#47000000 = 黑 28%，#38FFFFFF = 白 22%，#38000000 = 黑 22%，#2EFFFFFF = 白 18%，#40000000 = 黑 25%
+@Component
+export struct WaxSeal {
+  @Prop size: number = 64
+  @Prop mark: string = &#x27;素&#x27;
+
+  build() {
+    Stack() {                                   // 默认居中对齐；后写的叠在上面
+      // 1. 溢开的蜡：7 个实心圆，直径 size×0.42，颜色 #8E2B24；
+      //    圆心在以印中心为圆心、半径 size×0.31 的圆周上，第 i 个的角度 = i/7×360°（0° 在正右方，往下转）
+      ForEach([0, 1, 2, 3, 4, 5, 6], (i: number) =&gt; {
+        Column()
+          .width(this.size * 0.42).height(this.size * 0.42)
+          .borderRadius(this.size * 0.21)
+          .backgroundColor(&#x27;#8E2B24&#x27;)
+          .offset({ x: Math.cos(i / 7 * 2 * Math.PI) * this.size * 0.31,
+                    y: Math.sin(i / 7 * 2 * Math.PI) * this.size * 0.31 })
+      })
+      // 2. 蜡面：直径 size×0.84 的圆，径向渐变 #B54A3E（中心）→ #8E2B24（半径 size×0.5 处），
+      //    渐变中心在这个圆的左上：横 38%、竖 32%
+      Column()
+        .width(this.size * 0.84).height(this.size * 0.84)
+        .borderRadius(this.size * 0.42)
+        .radialGradient({
+          center: [this.size * 0.84 * 0.38, this.size * 0.84 * 0.32],
+          radius: this.size * 0.5,
+          colors: [[&#x27;#B54A3E&#x27;, 0], [&#x27;#8E2B24&#x27;, 1]]
+        })
+      // 3. 压印的内圈：直径 size×0.62 的细圈，黑 22%、线宽 size×0.02
+      Column()
+        .width(this.size * 0.62).height(this.size * 0.62)
+        .borderRadius(this.size * 0.31)
+        .borderWidth(this.size * 0.02).borderColor(&#x27;#38000000&#x27;)
+      // 4. 同一圈的受光边：白 18%、线宽 size×0.015，往右下各偏 size×0.008
+      Column()
+        .width(this.size * 0.62).height(this.size * 0.62)
+        .borderRadius(this.size * 0.31)
+        .borderWidth(this.size * 0.015).borderColor(&#x27;#2EFFFFFF&#x27;)
+        .offset({ x: this.size * 0.008, y: this.size * 0.008 })
+      // 5. 字：底层黑 28%
+      Text(this.mark)
+        .fontSize(`${this.size * 0.32}vp`)         // 用 vp，不跟系统字体大小缩放
+        .fontWeight(600)                          // 半粗
+        .fontColor(&#x27;#47000000&#x27;)
+      // 6. 字：上层白 22%，往右下各偏 size×0.012 —— 压进蜡里、一边受光
+      Text(this.mark)
+        .fontSize(`${this.size * 0.32}vp`)
+        .fontWeight(600)
+        .fontColor(&#x27;#38FFFFFF&#x27;)
+        .offset({ x: this.size * 0.012, y: this.size * 0.012 })
+    }
+    .width(this.size).height(this.size)       // 七个圆会探出这个框一点点，不要裁
+    .shadow({ radius: 3, color: &#x27;#40000000&#x27;, offsetX: 0, offsetY: 2 })  // 整枚印一个影子：黑 25%、模糊 3、往下 2
+    .accessibilityLevel(&#x27;no&#x27;)                 // 印本身不念；它所在的那一行 / 那个标记念「尺素会员」
+  }
+}
+</pre>
+<p class=li>- 字体：iOS 是系统的<b>衬线</b>体（<code>design: .serif</code>）。鸿蒙系统里有衬线中文字体就用它，没有就用默认的 HarmonyOS Sans，字重都是 600</p>
+<p class=li>- 印面的字<b>不翻译、不跟语言变</b></p>
+<p class=li>- 验收（按数字核对，不用比图）：<code>size</code> 26 时七个小圆直径 10.92vp、蜡面 21.84vp、内圈 16.12vp、字号 8.32vp；四套主题下颜色不变；读屏不念印上的字</p>
+<p class=li>- iOS 侧也导出了现成的图（<code>wax_seal/</code>，四倍图），<b>用代码画就不需要它们</b>；实在要用图时：<code>img_wax_seal_blank.png</code> 是空白印面（印的直径 = 图片边长 × 68⁄86，字照上面第 5、6 步叠上去），<code>img_member_badge.png</code> 是压「素」的小标记（印的直径 = 图片边长 × 18⁄30）</p>
 <table>
 <tr><th>图</th><th>文件</th><th>说明</th></tr>
 <tr><td><img src="wax_seal/img_wax_seal_blank.png" width="64" alt="空白印面（鸿蒙用这张，上面自己压字）"></td><td><code>wax_seal/img_wax_seal_blank.png</code></td><td>空白印面（鸿蒙用这张，上面自己压字）</td></tr>
@@ -45,25 +108,19 @@
 <tr><td><img src="wax_seal/sample_wax_seal_row_26pt.png" width="64" alt="样张：设置首页那行的大小（26pt）"></td><td><code>wax_seal/sample_wax_seal_row_26pt.png</code></td><td>样张：设置首页那行的大小（26pt）</td></tr>
 <tr><td><img src="wax_seal/img_member_badge.png" width="64" alt="会员款小标记（压「素」，16–18pt，固定的，直接用）"></td><td><code>wax_seal/img_member_badge.png</code></td><td>会员款小标记（压「素」，16–18pt，固定的，直接用）</td></tr>
 </table>
-<p><b>用在哪</b>（大小是印本身的直径）：</p>
+<p><b>用在哪</b>（大小是印本身的直径，就是 <code>WaxSeal</code> 的 <code>size</code>）：</p>
 <table>
 <tr><th>位置</th><th>大小</th><th>压什么字</th></tr>
 <tr><td>设置首页「尺素会员」那一行的行首（不套框，占 30vp 宽，和下面各行的字对齐）</td><td>26vp</td><td>用户昵称的首字</td></tr>
 <tr><td>付费页顶上</td><td>68vp</td><td>用户昵称的首字</td></tr>
 <tr><td>会员页（已开通，设置 → 尺素会员）顶上</td><td>60vp</td><td>用户昵称的首字</td></tr>
-<tr><td>会员款旁边的小标记，<b>只给还不是会员的人看</b>：设置 → 日记 → 照片相纸样式（字后面）、尺素相机选相纸、日记本封面版式（右上角）</td><td>16vp</td><td>固定「素」→ 直接用 <code>img_member_badge.png</code></td></tr>
-<tr><td>同上：写日记插照片时选相纸（右上角）</td><td>18vp</td><td>同上</td></tr>
-<tr><td>写作统计「情绪小结」卡片标题后面（不是会员时）</td><td>15vp</td><td>同上</td></tr>
-<tr><td>读完一封来信，页底一行「想让笔友每篇都回？了解尺素会员」的行首（不是会员时，点了开付费页）</td><td>16vp</td><td>同上</td></tr>
+<tr><td>会员款旁边的小标记，<b>只给还不是会员的人看</b>：设置 → 日记 → 照片相纸样式（名字后面隔 12vp）、尺素相机选相纸、日记本封面版式（右上角）</td><td>16vp</td><td>固定「素」</td></tr>
+<tr><td>同上：写日记插照片时选相纸（右上角）</td><td>18vp</td><td>固定「素」</td></tr>
+<tr><td>写作统计「情绪小结」卡片标题后面（不是会员时）</td><td>15vp</td><td>固定「素」</td></tr>
+<tr><td>读完一封来信，页底一行「想让笔友每篇都回？了解尺素会员」的行首（不是会员时，点了开付费页）</td><td>16vp</td><td>固定「素」</td></tr>
 </table>
-<p>小标记的图四周也留了影子的边：<b>印的直径 = 图片边长 × 18 ⁄ 30</b>，要显示 S vp 的印，图片放 <code>S × 30 ⁄ 18</code> vp 见方。读屏念「尺素会员」。</p>
+<p>会员小标记就是 <code>WaxSeal({ size: 16, mark: &#x27;素&#x27; })</code>，外面那一层读屏念「尺素会员」。</p>
 <p><b>压什么字</b>（照 iOS <code>WaxSeal.initial(of:)</code>）：昵称去掉首尾空白后的第一个字；中文取第一个字，拉丁字母取首字母并大写；没昵称、或第一个字是表情 / 符号 / 数字 → 压「素」。</p>
-<p><b>鸿蒙怎么压字</b>：每个人的字不一样，做不成固定图 —— 放空白印面 <code>img_wax_seal_blank.png</code>，上面叠两层同样的字：</p>
-<p class=li>- 图片四周留了影子的边：<b>印本身的直径 = 图片边长 × 68 ⁄ 86</b>。所以要显示 S vp 的印，图片放 <code>S × 86 ⁄ 68</code> vp 见方，字的中心 = 图片中心</p>
-<p class=li>- 字号 <code>S × 0.32</code>，<b>衬线、半粗</b>（iOS 是系统衬线体 New York；鸿蒙用系统里有的衬线中文字体，没有就用 HarmonyOS Sans 半粗）</p>
-<p class=li>- 底层：黑色、不透明度 28%；上层：白色、不透明度 22%，往右下各偏 <code>S × 0.012</code> —— 压进蜡里、一边受光的样子</p>
-<p class=li>- 印面的字<b>不翻译、不跟语言变</b>；读屏念「尺素会员」，不念那个字</p>
-<p class=li>- 对照样张 <code>sample_wax_seal_*.png</code> 验收</p>
 <h3>其他自己画的部件（不是小图标，规格在各自的更新包里）</h3>
 <table>
 <tr><th>是什么</th><th>规格在哪</th><th>iOS 源码</th></tr>
@@ -311,4 +368,4 @@
 <p>天气图标颜色跟着所在那一行字的颜色（iOS 是次要文字色），大小比那一行的字小一号；地名前的小定位比天气图标再小 1。</p>
 <hr>
 <h2>四、以后改了怎么办</h2>
-<p>iOS 侧改 <code>Scripts/make_harmony_icon_catalog.py</code> 里的表（或改了 <code>WaxSeal.swift</code>）后重跑，整个 <code>icons/</code> 目录重出；鸿蒙按新表换 <code>sys.symbol</code> 名、整批替换 <code>wax_seal/</code> 的图。<b>不要在鸿蒙这边手改图。</b></p>
+<p>iOS 侧改 <code>Scripts/make_harmony_icon_catalog.py</code> 里的表（或改了 <code>WaxSeal.swift</code>，同时改上面那段 ArkTS）后重跑，整个 <code>icons/</code> 目录重出，并写进新的更新包；鸿蒙按新表换 <code>sys.symbol</code> 名、按新代码改 <code>WaxSeal</code>。<b>不要在鸿蒙这边手改图。</b></p>

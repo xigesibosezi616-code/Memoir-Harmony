@@ -2918,6 +2918,53 @@
         }
       }
     },
+    "下一次提醒：%@" : {
+      "comment" : "设置 → 日记 → 提醒写日记那一组下面：下一次提醒的时间，%@ 例：今天 21:00 / 明天 21:00 / 2026年11月10日 21:00（已按 App 语言排好）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next reminder: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Próximo recordatorio: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prochain rappel : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次のお知らせ：%@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다음 알림: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一次提醒：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一次提醒：%@"
+          }
+        }
+      }
+    },
     "下一步" : {
       "localizations" : {
         "en" : {
@@ -4219,6 +4266,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "「今天發生的小事，未來可能是大事」"
+          }
+        }
+      }
+    },
+    "今天已经写过，今天不再提醒。" : {
+      "comment" : "设置 → 日记 → 提醒写日记那一组下面：今天已经写过日记，所以今天到点不提醒（下面一行是下一次提醒的时间）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’ve already written today, so there’s no reminder today."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya escribiste hoy, así que hoy no habrá recordatorio."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous avez déjà écrit aujourd’hui : pas de rappel aujourd’hui."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日はもう書いたので、今日はお知らせしません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오늘은 이미 썼으니 오늘은 알리지 않아요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今天已经写过，今天不再提醒。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今天已經寫過，今天不再提醒。"
           }
         }
       }

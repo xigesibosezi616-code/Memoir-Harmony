@@ -24,6 +24,8 @@ struct SettingsJournalView: View {
     @AppStorage(WritingReminder.weekdaysKey) private var reminderWeekdays = WritingReminder.defaultWeekdays
     /// 用户在系统设置里关了尺素的通知：开着提醒也发不出来，要告诉他
     @State private var notificationsDenied = false
+    /// 下一次提醒（显示在这一组下面；今天因为写过而跳过的也说出来）
+    @State private var nextReminder: WritingReminder.NextReminder?
 
     private var defaultPaperStyleDisplay: LocalizedStringKey {
         // 显示实际生效的那个（会员到期后会员款退回宝丽来，见 `PaperStyle.defaultStyle`）
@@ -67,6 +69,10 @@ struct SettingsJournalView: View {
             reminderSection(theme: theme)
         }
         .task { await refreshNotificationStatus() }
+        .onAppear(perform: refreshNextReminder)
+        .onChange(of: reminderOn) { refreshNextReminder() }
+        .onChange(of: reminderMinutes) { refreshNextReminder() }
+        .onChange(of: reminderWeekdays) { refreshNextReminder() }
     }
 
     // MARK: - 提醒写日记
@@ -109,6 +115,15 @@ struct SettingsJournalView: View {
                         .foregroundStyle(theme.accent)
                     }
                 }
+                if reminderOn, let next = nextReminder {
+                    VStack(alignment: .leading, spacing: 2) {
+                        if next.skippedToday {
+                            Text("今天已经写过，今天不再提醒。")
+                        }
+                        Text("下一次提醒：\(Self.formatNext(next.date))")
+                    }
+                    .foregroundStyle(theme.textSecondary)
+                }
                 if #available(iOS 26.0, *) {
                     Text("到点在锁屏和灵动岛上轻轻提醒一下；那天写过了就不打扰。")
                 } else {
@@ -148,6 +163,20 @@ struct SettingsJournalView: View {
             reminderWeekdays = days.sorted().map(String.init).joined()
             Task { await WritingReminder.reschedule(context: modelContext) }
         }
+    }
+
+    private func refreshNextReminder() {
+        nextReminder = WritingReminder.next(context: modelContext)
+    }
+
+    /// 「今天 21:00」「明天 21:00」，再往后是日期 + 时间；跟 App 选的语言
+    private static func formatNext(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = appLocale
+        formatter.doesRelativeDateFormatting = true
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 
     private func refreshNotificationStatus() async {
