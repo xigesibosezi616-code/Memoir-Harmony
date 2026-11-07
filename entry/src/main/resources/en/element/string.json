@@ -197,6 +197,122 @@
       "value": "HUAWEI ID linked"
     },
     {
+      "name": "s_0f449019e8",
+      "value": "Calculating…"
+    },
+    {
+      "name": "s_6ed1b2bd01",
+      "value": "Cloud Sync"
+    },
+    {
+      "name": "s_b9004e6f7b",
+      "value": "Off"
+    },
+    {
+      "name": "s_f71802e114",
+      "value": "Your journals live only on this device and will be lost if you delete the app. Export a backup regularly."
+    },
+    {
+      "name": "s_02a00a2547",
+      "value": "Sign in with HUAWEI ID"
+    },
+    {
+      "name": "s_f6f7c46fd6",
+      "value": "Couldn't open AppGallery"
+    },
+    {
+      "name": "s_a9c8397cce",
+      "value": "World Pen Pals"
+    },
+    {
+      "name": "s_ceab2d4c71",
+      "value": "World pen pals map"
+    },
+    {
+      "name": "s_df6331be72",
+      "value": "World pen pals are for members, so this letter couldn't be sent"
+    },
+    {
+      "name": "s_3a5fd35d41",
+      "value": "Location is off, so every reply counts as a day or two"
+    },
+    {
+      "name": "s_f93c4db3ab",
+      "value": "Fast letter delivery"
+    },
+    {
+      "name": "s_bdfe921dd3",
+      "value": "1 min ≈ 1 day: replies arrive in 15 s to 3 min. On by default. Only affects letters sent while on."
+    },
+    {
+      "name": "s_ea5026fc0f",
+      "value": "TEST BUILD"
+    },
+    {
+      "name": "s_b0059123ef",
+      "value": "Opening the backup…"
+    },
+    {
+      "name": "s_cd74f09629",
+      "value": "Importing…"
+    },
+    {
+      "name": "s_ebabcca5f6",
+      "value": "Photos & recordings"
+    },
+    {
+      "name": "s_199e333f97",
+      "value": "Not included"
+    },
+    {
+      "name": "s_d4e077f9d4",
+      "value": "Exported at"
+    },
+    {
+      "name": "s_16593aa84d",
+      "value": "From"
+    },
+    {
+      "name": "s_e83afd599a",
+      "value": "Estimated size"
+    },
+    {
+      "name": "s_6b19ea408a",
+      "value": "Encrypt with a password"
+    },
+    {
+      "name": "s_b991e9b2ca",
+      "value": "Entries added"
+    },
+    {
+      "name": "s_c558e955b8",
+      "value": "Skipped (already present)"
+    },
+    {
+      "name": "s_e32c03cfb9",
+      "value": "Letters added"
+    },
+    {
+      "name": "s_6fde12863f",
+      "value": "Journals added"
+    },
+    {
+      "name": "s_573ee77a59",
+      "value": "Couldn't open the backup"
+    },
+    {
+      "name": "s_a01a8d5393",
+      "value": "Import failed"
+    },
+    {
+      "name": "s_da142a5478",
+      "value": "%d letters"
+    },
+    {
+      "name": "s_820929d497",
+      "value": "%d files"
+    },
+    {
       "name": "s_00360964eb",
       "value": "Japan Federation of Printing Industries, glossary of printing terms; Musashino Art University, Zokei File. The claim that the name was coined in Japan appears in Tokushu Paper Manufacturing's fifty-year history."
     },
@@ -245,6 +361,10 @@
       "value": "Invalid request address"
     },
     {
+      "name": "s_03290288e1",
+      "value": "Past summaries"
+    },
+    {
       "name": "s_0399ad7167",
       "value": "Terms of Service"
     },
@@ -273,6 +393,10 @@
       "value": "Stressed"
     },
     {
+      "name": "s_05a978d5cb",
+      "value": "Weather, places, days and times appear once a group has at least 3 entries with a mood. Keep writing and the patterns will surface."
+    },
+    {
       "name": "s_05aa9400bd",
       "value": "Disgusted"
     },
@@ -291,6 +415,10 @@
     {
       "name": "s_07315b84c5",
       "value": "Show selected emoji"
+    },
+    {
+      "name": "s_083af3c4ae",
+      "value": "Couldn't collect your stamps. Try again in a moment"
     },
     {
       "name": "s_084f68942b",
@@ -341,6 +469,10 @@
       "value": "“Letting yourself be unhappy is its own kind of kindness.”"
     },
     {
+      "name": "s_09f515b893",
+      "value": "Days & times"
+    },
+    {
       "name": "s_09f81f62fd",
       "value": "Excited"
     },
@@ -381,12 +513,24 @@
       "value": "Location is off — open Settings to turn it on"
     },
     {
+      "name": "s_0d05046a43",
+      "value": "Clear"
+    },
+    {
       "name": "s_0d4dd89acf",
       "value": "11-digit phone number"
     },
     {
+      "name": "s_0d7248908c",
+      "value": "Every week, month and year: a short summary and a few suggestions, to help you see how you’ve been feeling."
+    },
+    {
       "name": "s_0e37efff8d",
       "value": "Your session has expired. Please sign in again."
+    },
+    {
+      "name": "s_0e458fad76",
+      "value": "Late night"
     },
     {
       "name": "s_0e978c435e",
@@ -465,6 +609,10 @@
       "value": "City level only, e.g. “Guangzhou”"
     },
     {
+      "name": "s_13d5da7b00",
+      "value": "Give your notebook a name"
+    },
+    {
       "name": "s_13d655e2da",
       "value": "%s is a fictional AI pen pal in Memoir."
     },
@@ -479,6 +627,10 @@
     {
       "name": "s_14c9516e3f",
       "value": "Too many requests — try again later"
+    },
+    {
+      "name": "s_14f2f7ca94",
+      "value": "Your pen pal will sign letters with this name. You can change it later in Settings."
     },
     {
       "name": "s_15b21b73b7",
@@ -497,6 +649,10 @@
       "value": "Choose a paper style"
     },
     {
+      "name": "s_167e9b5f39",
+      "value": "20 stamps every week"
+    },
+    {
       "name": "s_168b37f367",
       "value": "The early hours belong to you alone."
     },
@@ -509,8 +665,16 @@
       "value": "Turn Off Test Membership"
     },
     {
+      "name": "s_172fb7196f",
+      "value": "Morning"
+    },
+    {
       "name": "s_173e51e1e5",
       "value": "Verify your current number first"
+    },
+    {
+      "name": "s_1774516a30",
+      "value": "Write in this one —\ntap here to begin"
     },
     {
       "name": "s_17f7c3a2d7",
@@ -519,6 +683,10 @@
     {
       "name": "s_181e010524",
       "value": "Embarrassed"
+    },
+    {
+      "name": "s_18a4b0fa09",
+      "value": "This summary couldn’t be written. It’ll try again next time you open this page."
     },
     {
       "name": "s_18cb8ddf9d",
@@ -581,6 +749,10 @@
       "value": "%s / year"
     },
     {
+      "name": "s_1dfaab6548",
+      "value": "Afternoon"
+    },
+    {
       "name": "s_1e2443b94b",
       "value": "Membership is free during testing. Turn it off to go back to the free version."
     },
@@ -615,6 +787,10 @@
     {
       "name": "s_215574245b",
       "value": "Delete Entry"
+    },
+    {
+      "name": "s_21a8e41cf6",
+      "value": "Douyin"
     },
     {
       "name": "s_21f1e88275",
@@ -685,16 +861,32 @@
       "value": "This is a text-only backup — the imported entries will have no photos or recordings."
     },
     {
+      "name": "s_26825deedb",
+      "value": "Mood over time"
+    },
+    {
       "name": "s_26f030bca7",
       "value": "Waiting…"
+    },
+    {
+      "name": "s_27e4fe4c3f",
+      "value": "OK"
     },
     {
       "name": "s_282ab93d10",
       "value": "Total"
     },
     {
+      "name": "s_2870d2ab3b",
+      "value": "New Friends & Old"
+    },
+    {
       "name": "s_287dbc9adc",
       "value": "Reflective"
+    },
+    {
+      "name": "s_2895d69933",
+      "value": "Feedback & Suggestions"
     },
     {
       "name": "s_28c46f23f7",
@@ -763,6 +955,10 @@
     {
       "name": "s_2ca8ce9b3f",
       "value": "%s first year"
+    },
+    {
+      "name": "s_2ca9b1648a",
+      "value": "Try writing your first entry"
     },
     {
       "name": "s_2d54b2d8e5",
@@ -877,6 +1073,10 @@
       "value": "You can skip this and change it later in Settings"
     },
     {
+      "name": "s_369ff2e38f",
+      "value": "Pause for a moment and give today a few lines."
+    },
+    {
       "name": "s_36c6be2be0",
       "value": "Added"
     },
@@ -909,6 +1109,10 @@
       "value": "A photo was taken off · %s"
     },
     {
+      "name": "s_39b6b4c787",
+      "value": "Cloudy"
+    },
+    {
       "name": "s_39bc5e6806",
       "value": "This backup is encrypted"
     },
@@ -917,12 +1121,16 @@
       "value": "Writing calendar"
     },
     {
+      "name": "s_39d12e73fb",
+      "value": "Collect"
+    },
+    {
       "name": "s_3a31adc3b5",
       "value": "Content"
     },
     {
-      "name": "s_3a5fd35d41",
-      "value": "Location is off, so every reply counts as a day or two"
+      "name": "s_3a81e4d1ae",
+      "value": "You've written your first entry.\nGo to “Mailbox” and send it to your pen pal"
     },
     {
       "name": "s_3aaae04c18",
@@ -973,6 +1181,10 @@
       "value": "Search for a place"
     },
     {
+      "name": "s_3c76ec910a",
+      "value": "Most frequent feelings"
+    },
+    {
       "name": "s_3d04880897",
       "value": "Start importing"
     },
@@ -983,6 +1195,10 @@
     {
       "name": "s_3d7a66408e",
       "value": "How lovely. Hold on to this moment."
+    },
+    {
+      "name": "s_3d82a5c98a",
+      "value": "Pinch with two fingers to see more entries at once"
     },
     {
       "name": "s_3d93dce578",
@@ -1015,6 +1231,10 @@
     {
       "name": "s_3fb4374f11",
       "value": "Bamboo cut and steeped in the pond — the sheet still carries its green scent"
+    },
+    {
+      "name": "s_3fd47f4390",
+      "value": "Stamps in your wallet: %d"
     },
     {
       "name": "s_40525a7328",
@@ -1081,6 +1301,10 @@
       "value": "No entries to back up yet"
     },
     {
+      "name": "s_43c9272ab2",
+      "value": "First, make a notebook of your own"
+    },
+    {
       "name": "s_446462a28f",
       "value": "“Even an ordinary day holds something out of the ordinary.”"
     },
@@ -1093,12 +1317,20 @@
       "value": "Letterbox"
     },
     {
+      "name": "s_451b86707b",
+      "value": "Week"
+    },
+    {
       "name": "s_45260c7012",
       "value": "%s per year. Renews automatically within 24 hours before it ends. Cancel anytime in Settings → Apple Account → Subscriptions."
     },
     {
       "name": "s_4562024dde",
       "value": "Apply"
+    },
+    {
+      "name": "s_45ea420b4e",
+      "value": "Today’s page is still blank."
     },
     {
       "name": "s_4696b4622d",
@@ -1113,12 +1345,20 @@
       "value": "“Summer runs long. A few words make good shade.”"
     },
     {
+      "name": "s_479fcc1cc0",
+      "value": "Later"
+    },
+    {
       "name": "s_482d201d8b",
       "value": "Link a phone number so you can recover this account"
     },
     {
       "name": "s_482d69aab3",
       "value": "%ds"
+    },
+    {
+      "name": "s_486e6b598c",
+      "value": "Sign in to get letters from your pen pal"
     },
     {
       "name": "s_487942b7ff",
@@ -1185,6 +1425,10 @@
       "value": "Change the theme only"
     },
     {
+      "name": "s_4cbf770f3e",
+      "value": "Mood summary"
+    },
+    {
       "name": "s_4cd30ef91e",
       "value": "Save Draft"
     },
@@ -1203,6 +1447,10 @@
     {
       "name": "s_4e1393a65c",
       "value": "All Entries"
+    },
+    {
+      "name": "s_4e664be1f8",
+      "value": "Try writing your first entry —\nhead back to “Records”"
     },
     {
       "name": "s_4e6b4fffe0",
@@ -1239,6 +1487,10 @@
     {
       "name": "s_50f87ef514",
       "value": "No moods recorded in this period"
+    },
+    {
+      "name": "s_51070c8fd7",
+      "value": "Journaling Reminder"
     },
     {
       "name": "s_514c04d14d",
@@ -1349,6 +1601,10 @@
       "value": "Clear leftover files?"
     },
     {
+      "name": "s_58db88cd01",
+      "value": "This week's stamps are here"
+    },
+    {
       "name": "s_596b003c23",
       "value": "Eggplant"
     },
@@ -1395,6 +1651,10 @@
     {
       "name": "s_5c7cc8abd6",
       "value": "Call %s"
+    },
+    {
+      "name": "s_5cc6e4a916",
+      "value": "No phone number linked"
     },
     {
       "name": "s_5cd32361fa",
@@ -1445,6 +1705,10 @@
       "value": "Turn right"
     },
     {
+      "name": "s_5f402594e5",
+      "value": "When a year ends, open this page to find a summary of it (the year needs at least 3 entries with a mood)."
+    },
+    {
       "name": "s_5f7e5d5768",
       "value": "Playing"
     },
@@ -1493,6 +1757,10 @@
       "value": "Mood Icon"
     },
     {
+      "name": "s_640ccbdbf8",
+      "value": "Done? Tap here to save"
+    },
+    {
       "name": "s_643e29f431",
       "value": "All written. How are you feeling right now?"
     },
@@ -1507,6 +1775,10 @@
     {
       "name": "s_65fc81e161",
       "value": "Turn On"
+    },
+    {
+      "name": "s_6685eb0b7f",
+      "value": "At the time you choose, you’ll get a gentle notification. If you’ve already written that day, it stays quiet."
     },
     {
       "name": "s_674bd11a2a",
@@ -1527,6 +1799,10 @@
     {
       "name": "s_67a01a5a15",
       "value": "Highlight"
+    },
+    {
+      "name": "s_67ad407dba",
+      "value": "Places & mood"
     },
     {
       "name": "s_67f415d86d",
@@ -1569,6 +1845,10 @@
       "value": "Remove Highlight"
     },
     {
+      "name": "s_6aba76608a",
+      "value": "The pen’s on the desk, and the paper’s laid out."
+    },
+    {
       "name": "s_6aed7c48be",
       "value": "Link"
     },
@@ -1595,6 +1875,14 @@
     {
       "name": "s_6b7fba6ac9",
       "value": "Notebooks with the same name"
+    },
+    {
+      "name": "s_6ba7736cd2",
+      "value": "When a month ends, open this page to find a summary of it (the month needs at least 3 entries with a mood)."
+    },
+    {
+      "name": "s_6c01b0cfd0",
+      "value": "Sign In"
     },
     {
       "name": "s_6c14bd7f6f",
@@ -1629,8 +1917,16 @@
       "value": "Radiant"
     },
     {
+      "name": "s_6e02b95e03",
+      "value": "How was today? A line or two is plenty."
+    },
+    {
       "name": "s_6e5c04b091",
       "value": "Each theme has its own icon. New themes will add new icons here."
+    },
+    {
+      "name": "s_6e708ba759",
+      "value": "Repeat"
     },
     {
       "name": "s_6ec8fe27cd",
@@ -1639,6 +1935,10 @@
     {
       "name": "s_6efeb2c455",
       "value": "“The past doesn't vanish — it waits for you to look back.”"
+    },
+    {
+      "name": "s_6f14c2641c",
+      "value": "Year"
     },
     {
       "name": "s_6f69dd45f8",
@@ -1737,6 +2037,10 @@
       "value": "“A pen and a page make a whole world.”"
     },
     {
+      "name": "s_76a4159492",
+      "value": "Evening"
+    },
+    {
       "name": "s_76ce8e3d5e",
       "value": "Synced"
     },
@@ -1769,6 +2073,10 @@
       "value": "Restore Purchases"
     },
     {
+      "name": "s_791054f6b1",
+      "value": "Write a few more entries to see the trend"
+    },
+    {
       "name": "s_7945500987",
       "value": "Choose from Photos"
     },
@@ -1777,8 +2085,16 @@
       "value": "Change phone number"
     },
     {
+      "name": "s_79fc2f66bb",
+      "value": "Notifications are off, so reminders can’t be sent."
+    },
+    {
       "name": "s_7afd163467",
       "value": "We hope this short pause helped you feel a little better."
+    },
+    {
+      "name": "s_7b8bf30fdb",
+      "value": "Before today slips away, save it a page."
     },
     {
       "name": "s_7bb5b11a5d",
@@ -1803,6 +2119,10 @@
     {
       "name": "s_7d07a38a9f",
       "value": "You're out of stamps. A new pack is on its way"
+    },
+    {
+      "name": "s_7d742a7f9f",
+      "value": "Snow"
     },
     {
       "name": "s_7d84c682b8",
@@ -1835,6 +2155,10 @@
     {
       "name": "s_7fbe49401c",
       "value": "Link phone number"
+    },
+    {
+      "name": "s_803a50292d",
+      "value": "Sign in to your Memoir account and a summary will be written after each period."
     },
     {
       "name": "s_805a0473b6",
@@ -1877,6 +2201,10 @@
       "value": "Low"
     },
     {
+      "name": "s_82a71e9578",
+      "value": "Write a few lines about today,\nor tap here to take a photo"
+    },
+    {
       "name": "s_82aa40f702",
       "value": "%d pages · about %s"
     },
@@ -1911,6 +2239,10 @@
     {
       "name": "s_84476c8174",
       "value": "Location"
+    },
+    {
+      "name": "s_85a1088852",
+      "value": "Weather & mood"
     },
     {
       "name": "s_85a35ccdd6",
@@ -1977,6 +2309,14 @@
       "value": "Error while packaging: %s"
     },
     {
+      "name": "s_8995b89799",
+      "value": "Rain"
+    },
+    {
+      "name": "s_89b4aa6364",
+      "value": "Time"
+    },
+    {
       "name": "s_89c7b03a96",
       "value": "Layout"
     },
@@ -2011,6 +2351,10 @@
     {
       "name": "s_8b5b1182d2",
       "value": "Not signed in to iCloud"
+    },
+    {
+      "name": "s_8bfd252f98",
+      "value": "Pick a cover you like,\nthen tap here"
     },
     {
       "name": "s_8c276c1fea",
@@ -2055,6 +2399,14 @@
     {
       "name": "s_8e39a34dcc",
       "value": "“A cup of tea is just long enough to write down a mood.”"
+    },
+    {
+      "name": "s_8e54b4b852",
+      "value": "Added to your stamps"
+    },
+    {
+      "name": "s_8eb2a62b5d",
+      "value": "Search your journal"
     },
     {
       "name": "s_8ec3a93dbd",
@@ -2121,8 +2473,16 @@
       "value": "“Writing is the gentlest way to resist forgetting.”"
     },
     {
+      "name": "s_91d339156f",
+      "value": "A reply from %s has arrived —\ncheck the “Mailbox”"
+    },
+    {
       "name": "s_91e5f2c416",
       "value": "“No need to seem strong. It's only you here.”"
+    },
+    {
+      "name": "s_9289668c74",
+      "value": "Sign in to send your entries to your pen pal"
     },
     {
       "name": "s_930c3a22eb",
@@ -2149,6 +2509,10 @@
       "value": "Please talk to someone you trust, or contact a crisis line."
     },
     {
+      "name": "s_94aae40757",
+      "value": "Entries: %d"
+    },
+    {
       "name": "s_9545e4dc22",
       "value": "I understand, continue"
     },
@@ -2159,6 +2523,10 @@
     {
       "name": "s_95a69206f7",
       "value": "This moment is on paper now"
+    },
+    {
+      "name": "s_960e2f7361",
+      "value": "Type a name"
     },
     {
       "name": "s_974bfbcc56",
@@ -2245,6 +2613,10 @@
       "value": "Draft saved"
     },
     {
+      "name": "s_9d972e7230",
+      "value": "Weibo"
+    },
+    {
       "name": "s_9ddfc6f8d5",
       "value": "Choose recipients"
     },
@@ -2293,6 +2665,10 @@
       "value": "Writing…"
     },
     {
+      "name": "s_a1293d0d15",
+      "value": "One stamp sends one letter, and every letter gets a reply. Free: 3 a week. Unused stamps keep adding up."
+    },
+    {
       "name": "s_a20949550e",
       "value": "Join"
     },
@@ -2337,6 +2713,10 @@
       "value": "Wrong file format — it may be damaged"
     },
     {
+      "name": "s_a50846ec66",
+      "value": "Pen pal map"
+    },
+    {
       "name": "s_a5b49a429e",
       "value": "Brave"
     },
@@ -2347,6 +2727,10 @@
     {
       "name": "s_a671f238f1",
       "value": "Street"
+    },
+    {
+      "name": "s_a6b3821680",
+      "value": "Pleasant"
     },
     {
       "name": "s_a7e0766525",
@@ -2381,10 +2765,6 @@
       "value": "Where the pixels go dark, the deepest night begins"
     },
     {
-      "name": "s_a9c8397cce",
-      "value": "World Pen Pals"
-    },
-    {
       "name": "s_a9d57f8585",
       "value": "Write this moment down"
     },
@@ -2407,6 +2787,10 @@
     {
       "name": "s_abafd65e30",
       "value": "Bamboo"
+    },
+    {
+      "name": "s_abf21e4e09",
+      "value": "Write it down"
     },
     {
       "name": "s_aca36c266f",
@@ -2445,6 +2829,10 @@
       "value": "Notebook name"
     },
     {
+      "name": "s_ae49423591",
+      "value": "At the time you choose, a gentle reminder appears on the Lock Screen and in the Dynamic Island. If you’ve already written that day, it stays quiet."
+    },
+    {
       "name": "s_ae7b18f8be",
       "value": "Tap the mailbox to send the checked entries to %s"
     },
@@ -2467,6 +2855,10 @@
     {
       "name": "s_b065d573da",
       "value": "Could not write the letter"
+    },
+    {
+      "name": "s_b08cdeb8a7",
+      "value": "Fog & haze"
     },
     {
       "name": "s_b0e24833f7",
@@ -2493,6 +2885,10 @@
       "value": "Delete Account"
     },
     {
+      "name": "s_b27ed81c0c",
+      "value": "Fifteen pen pals across the globe write back in their own language, with a translation on the back"
+    },
+    {
       "name": "s_b27fe843c8",
       "value": "Couldn't save the letter waiting on the server"
     },
@@ -2515,6 +2911,10 @@
     {
       "name": "s_b3addb5e3f",
       "value": "Linked"
+    },
+    {
+      "name": "s_b3b3aad8cc",
+      "value": "Open this reply"
     },
     {
       "name": "s_b3f3b0c40c",
@@ -2553,12 +2953,20 @@
       "value": "Couldn’t put these entries back"
     },
     {
+      "name": "s_b6fed9af83",
+      "value": "Date"
+    },
+    {
       "name": "s_b72205943e",
       "value": "Tap Get code and we’ll text your currently linked number."
     },
     {
       "name": "s_b74d58bd95",
       "value": "“There's a new beginning in the spring wind.”"
+    },
+    {
+      "name": "s_b74e36c260",
+      "value": "Adds a search button to the right of the tab bar, so you can find past entries by keyword."
     },
     {
       "name": "s_b7607a6106",
@@ -2603,6 +3011,10 @@
     {
       "name": "s_b981bb73cb",
       "value": "The afternoon light is gentle. So are you."
+    },
+    {
+      "name": "s_b9b46dfdea",
+      "value": "%s's reply is here —\nopen your “Letterbox”"
     },
     {
       "name": "s_b9c6b284ee",
@@ -2655,6 +3067,10 @@
     {
       "name": "s_bd86a7ba02",
       "value": "Submitted. Your membership will start once it's approved."
+    },
+    {
+      "name": "s_bdba2be68c",
+      "value": "Writing to pen pals around the world is for members, so this letter couldn't be sent"
     },
     {
       "name": "s_bddddc8c10",
@@ -2745,6 +3161,14 @@
       "value": "Account"
     },
     {
+      "name": "s_c4031b3ee9",
+      "value": "Anything you’d like to remember?"
+    },
+    {
+      "name": "s_c446cab9ee",
+      "value": "Email address copied: %s"
+    },
+    {
       "name": "s_c488684daf",
       "value": "Delete photo"
     },
@@ -2777,6 +3201,10 @@
       "value": "New phone number"
     },
     {
+      "name": "s_c5d3aa4462",
+      "value": "No Results"
+    },
+    {
       "name": "s_c5e6652443",
       "value": "%s has written back a few times this month — a slow correspondent. Let's continue next month."
     },
@@ -2803,6 +3231,10 @@
     {
       "name": "s_c7a3044d8f",
       "value": "New Notebook"
+    },
+    {
+      "name": "s_c8356051fa",
+      "value": "One stamp for each letter you send"
     },
     {
       "name": "s_c8d09cf955",
@@ -2917,10 +3349,6 @@
       "value": "Sent. Write something new and you can send again."
     },
     {
-      "name": "s_ceab2d4c71",
-      "value": "World pen pals map"
-    },
-    {
       "name": "s_cf9d76b498",
       "value": "Learn about Memoir Plus"
     },
@@ -2985,6 +3413,10 @@
       "value": "Sync error"
     },
     {
+      "name": "s_d6389cc426",
+      "value": "Longest streak"
+    },
+    {
       "name": "s_d63d98608d",
       "value": "Tired"
     },
@@ -2993,8 +3425,16 @@
       "value": "Open this letter"
     },
     {
+      "name": "s_d65522170f",
+      "value": "Keep writing about your life.\nEvery little moment can live here — and when you want to share, send it to your pen pal."
+    },
+    {
       "name": "s_d67f0e000d",
       "value": "Every photo paper and cover layout"
+    },
+    {
+      "name": "s_d766900cbc",
+      "value": "Find words you've written in titles and entries"
     },
     {
       "name": "s_d78cde076b",
@@ -3005,12 +3445,28 @@
       "value": "After changing, sign in with the new number."
     },
     {
+      "name": "s_d89283676b",
+      "value": "Follow us"
+    },
+    {
       "name": "s_d946dacd50",
       "value": "Happy"
     },
     {
+      "name": "s_d96d6f2e5f",
+      "value": "Writing this summary…"
+    },
+    {
+      "name": "s_d9b59879f3",
+      "value": "Month"
+    },
+    {
       "name": "s_d9b91c877d",
       "value": "Change Paper"
+    },
+    {
+      "name": "s_dab4f23d78",
+      "value": "Unpleasant"
     },
     {
       "name": "s_daf00cb705",
@@ -3033,6 +3489,10 @@
       "value": "“A diary isn't for others. It's for the person you'll become.”"
     },
     {
+      "name": "s_dce5f6e4df",
+      "value": "Account, phone number and sign-in"
+    },
+    {
       "name": "s_dcf37c99eb",
       "value": "Time keeps moving. Some feelings deserve to stay."
     },
@@ -3047,10 +3507,6 @@
     {
       "name": "s_df5dc2b3c5",
       "value": "**The entries, photos and recordings you write are never uploaded to our servers.** They stay on your device and sync between your own devices through your own iCloud, which we cannot access or read."
-    },
-    {
-      "name": "s_df6331be72",
-      "value": "World pen pals are for members, so this letter couldn't be sent"
     },
     {
       "name": "s_df73c654d2",
@@ -3089,8 +3545,20 @@
       "value": "Very pleasant"
     },
     {
+      "name": "s_e2866d0815",
+      "value": "Xiaohongshu"
+    },
+    {
       "name": "s_e2aedf50f2",
       "value": "“Accepting who you are right now is the best beginning.”"
+    },
+    {
+      "name": "s_e2d53a6d3a",
+      "value": "Try again"
+    },
+    {
+      "name": "s_e3c8a9d071",
+      "value": "No entries contain “%s”"
     },
     {
       "name": "s_e3e397c743",
@@ -3249,6 +3717,10 @@
       "value": "“You're already braver than you were yesterday.”"
     },
     {
+      "name": "s_efce771fc5",
+      "value": "Mood Insights"
+    },
+    {
       "name": "s_efeb0dc955",
       "value": "iCloud Sync"
     },
@@ -3257,8 +3729,20 @@
       "value": "Looking for nearby places…"
     },
     {
+      "name": "s_f02d71af1a",
+      "value": "Location is off, so every reply counts as a day or two"
+    },
+    {
+      "name": "s_f04090805c",
+      "value": "Search"
+    },
+    {
       "name": "s_f075b5a3ad",
       "value": "Everything is still — a good time to hear yourself."
+    },
+    {
+      "name": "s_f0b2b86513",
+      "value": "Windy"
     },
     {
       "name": "s_f2187b0114",
@@ -3369,6 +3853,10 @@
       "value": "Anxious"
     },
     {
+      "name": "s_f8c5f7dd72",
+      "value": "When a week ends, open this page to find a summary of it (the week needs at least 3 entries with a mood)."
+    },
+    {
       "name": "s_f8d820eebf",
       "value": "%1$d / %2$d"
     },
@@ -3453,6 +3941,10 @@
       "value": "Passionate"
     },
     {
+      "name": "s_fe3676e6f6",
+      "value": "Your letter is on its way.\n%s will write back after reading it — in a few hours, in your Letterbox."
+    },
+    {
       "name": "s_fe9ea3f070",
       "value": "This year"
     },
@@ -3507,162 +3999,6 @@
     {
       "name": "s_e15f73bdc6",
       "value": "memoir uses the camera to add photos to your entries."
-    },
-    {
-      "name": "s_ea5026fc0f",
-      "value": "TEST BUILD"
-    },
-    {
-      "name": "s_f93c4db3ab",
-      "value": "Fast letter delivery"
-    },
-    {
-      "name": "s_bdfe921dd3",
-      "value": "1 min ≈ 1 day: replies arrive in 15 s to 3 min. On by default. Only affects letters sent while on."
-    },
-    {
-      "name": "s_6ed1b2bd01",
-      "value": "Cloud Sync"
-    },
-    {
-      "name": "s_b9004e6f7b",
-      "value": "Off"
-    },
-    {
-      "name": "s_f71802e114",
-      "value": "Your journals live only on this device and will be lost if you delete the app. Export a backup regularly."
-    },
-    {
-      "name": "s_0f449019e8",
-      "value": "Calculating…"
-    },
-    {
-      "name": "s_f6f7c46fd6",
-      "value": "Couldn't open AppGallery"
-    },
-    {
-      "name": "s_d89283676b",
-      "value": "Follow us"
-    },
-    {
-      "name": "s_2895d69933",
-      "value": "Feedback & Suggestions"
-    },
-    {
-      "name": "s_5cc6e4a916",
-      "value": "No phone number linked"
-    },
-    {
-      "name": "s_486e6b598c",
-      "value": "Sign in to get letters from your pen pal"
-    },
-    {
-      "name": "s_dce5f6e4df",
-      "value": "Account, phone number and sign-in"
-    },
-    {
-      "name": "s_c446cab9ee",
-      "value": "Email address copied: %s"
-    },
-    {
-      "name": "s_e2866d0815",
-      "value": "Xiaohongshu"
-    },
-    {
-      "name": "s_21a8e41cf6",
-      "value": "Douyin"
-    },
-    {
-      "name": "s_9d972e7230",
-      "value": "Weibo"
-    },
-    {
-      "name": "s_02a00a2547",
-      "value": "Sign in with HUAWEI ID"
-    },
-    {
-      "name": "s_d6389cc426",
-      "value": "Longest streak"
-    },
-    {
-      "name": "s_efce771fc5",
-      "value": "Mood Insights"
-    },
-    {
-      "name": "s_26825deedb",
-      "value": "Mood over time"
-    },
-    {
-      "name": "s_3c76ec910a",
-      "value": "Most frequent feelings"
-    },
-    {
-      "name": "s_85a1088852",
-      "value": "Weather & mood"
-    },
-    {
-      "name": "s_67ad407dba",
-      "value": "Places & mood"
-    },
-    {
-      "name": "s_09f515b893",
-      "value": "Days & times"
-    },
-    {
-      "name": "s_05a978d5cb",
-      "value": "Weather, places, days and times appear once a group has at least 3 entries with a mood. Keep writing and the patterns will surface."
-    },
-    {
-      "name": "s_791054f6b1",
-      "value": "Write a few more entries to see the trend"
-    },
-    {
-      "name": "s_a6b3821680",
-      "value": "Pleasant"
-    },
-    {
-      "name": "s_dab4f23d78",
-      "value": "Unpleasant"
-    },
-    {
-      "name": "s_0d05046a43",
-      "value": "Clear"
-    },
-    {
-      "name": "s_39b6b4c787",
-      "value": "Cloudy"
-    },
-    {
-      "name": "s_8995b89799",
-      "value": "Rain"
-    },
-    {
-      "name": "s_7d742a7f9f",
-      "value": "Snow"
-    },
-    {
-      "name": "s_b08cdeb8a7",
-      "value": "Fog & haze"
-    },
-    {
-      "name": "s_f0b2b86513",
-      "value": "Windy"
-    },
-    {
-      "name": "s_172fb7196f",
-      "value": "Morning"
-    },
-    {
-      "name": "s_1dfaab6548",
-      "value": "Afternoon"
-    },
-    {
-      "name": "s_76a4159492",
-      "value": "Evening"
-    },
-    {
-      "name": "s_0e458fad76",
-      "value": "Late night"
     }
   ]
 }

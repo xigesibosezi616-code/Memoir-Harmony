@@ -816,3 +816,30 @@ REFUSED_MS 一震即可（管道已留：posting 分支跳过、finishPosting �
 **决策**：以用户观感为准——信封居中，不追 iOS 的偏下。iOS 抽信纸冒头 0.8 信封高的
 余量仍足（信封上沿 1072px，信纸冒头顶到 ~509px，标题区 ~256px 之下）。
 若后续 iOS 侧对齐，需回头核两种摆位的观感差。
+
+### Q41 ✅ 6.4 「鸿蒙导出包在 iPhone 上录音块盖住照片」：根因在 iOS 渲染层（全宽录音锚点 × 浮动相纸排除区），鸿蒙导出 wire 实证无责（2026-11-07 结案）
+
+**用户报告**（催办三次）：鸿蒙导出 → iPhone 导入后，正文里的录音卡片压在照片相纸上（鸿蒙端同篇显示正常）。
+
+**排查证据链（2026-11-07）**：
+
+- **wire 字节级比对**：Node 解密真机导出包（MEMOIRBK 头：8B 魔数 + 2B 版本/标志 + 16B salt + 12B nonce；PBKDF2-HMAC-SHA256 ×210000；AES-256-GCM）与 iOS 样本包对照：照片块 wire 逐字段一致（type/file/paperStyle/position/rotationAngle，pretty JSON 同构）；录音块 wire 由 `makeWireBlock` 代码路径可证与 iOS `makeBackupEntry` 完全同构（type/file 扁平文件名/addedAt）。微信往返导入实证文件可达、录音卡在 iPhone 上有渲染。
+- **重建等价**：iOS `RichDocument.attributedString(from:)` 对 photo 锚点行 + audio 整行锚点的重建，与本机原生创建（`insertPhoto`→`insertAudio`）产出**完全相同**的文本（`\uFFFC\n\uFFFC\n`）——同样内容在 iOS 本机新建**同样复现**，与「导入」无关。
+- **重叠机制**（`RichTextView.swift`）：`layoutAudios()` 把录音卡按附件 bounds 的**容器全宽**画在锚点行上；相纸排除区（`exclusionPaths`）只影响文本布局，不裁录音卡绘制宽度。锚点行落在相纸纵向跨度内（照片与录音之间没有足够文字下推）时，全宽录音卡右段直接压在相纸上；audio views 后于 photo views `addSubview`，z 序在上——正是「录音盖照片」。痕迹行（`TraceAnchorAttachment`）共用同一 frame 计算，同病。
+- **鸿蒙端正常的原理**：`ReaderPageView` 块分组垂直堆叠（FullText / PhotoWithText / StandalonePhoto / Audio / Trace 各自成行），录音组永远在照片组下方，几何上不可能重叠。
+
+**结论**：鸿蒙导出序列化**无需改动**（与 iOS 自导 wire 同构，已实证）。修复在 iOS 侧 `RichTextView.layoutAudios()`：锚点行与 `photoFrames` 相交时把卡宽收进可用区（录音卡与痕迹行一并修）：
+
+```swift
+var cardWidth = bounds.width
+for frame in photoFrames.values
+where frame.minY < baseline && frame.maxY > baseline - bounds.height {
+    cardWidth = min(cardWidth, frame.minX < 1 ? frame.minX : frame.minX - CGFloat(Self.photoGap))
+}
+let frame = CGRect(x: line.minX, y: baseline - bounds.maxY,
+                   width: max(cardWidth, 0), height: bounds.height)
+```
+
+更彻底的替代（锚点宽度按行可用宽自适应，需 `layoutPhotos` 式迭代收敛）留 iOS 侧权衡。**最新 iOS 源不在本机**（reference/ 为只读快照；Desktop/Memoir 为旧版无 RichText/Backup），此补丁需用户带回 iOS 工程落地。
+
+**鸿蒙侧遗留**：无。6.4 该项鸿蒙侧验收通过（包格式正确、iOS 侧数据还原正确；显示差异属 iOS 渲染缺陷）。

@@ -13,6 +13,9 @@
  *
  * 路由：系统路由表（router_map.json → name `Data`）。
  */
+import { picker } from '@kit.CoreFileKit';
+import { BusinessError } from '@kit.BasicServicesKit';
+import { hilog } from '@kit.PerformanceAnalysisKit';
 import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
@@ -23,6 +26,10 @@ import { STORAGE_KEY_SAFE_AREA_TOP_VP,
 import { MediaStorageService } from '../../services/MediaStorageService';
 import { MediaUsage } from '../../services/MediaStorage';
 import { AppDatabase } from '../../data/Database';
+import { BackupFormat } from '../../services/backup/BackupFormat';
+
+const DOMAIN = 0x0000;
+const TAG = 'SettingsDataView';
 
 @Builder
 export function SettingsDataBuilder() {
@@ -229,7 +236,7 @@ export struct SettingsDataView {
     .padding({ top: 15, bottom: 15, left: 20, right: 20 })
     .alignItems(VerticalAlign.Center)
     .onClick((): void => {
-      // 6.5：this.navPathStack.pushPathByName('BackupExport', '');
+      this.navPathStack.pushPathByName('BackupExport', '');
     })
   }
 
@@ -256,7 +263,7 @@ export struct SettingsDataView {
     .padding({ top: 15, bottom: 15, left: 20, right: 20 })
     .alignItems(VerticalAlign.Center)
     .onClick((): void => {
-      // 6.4：this.navPathStack.pushPathByName('BackupImport', '');
+      this.pickBackupFile();
     })
   }
 
@@ -326,6 +333,30 @@ export struct SettingsDataView {
   }
 
   // ---- 动作 ----
+
+  /**
+   * 6.4 导入备份：系统文件选择器挑 .memoir，选完把选择器 URI 直接推给
+   * 导入页（导入页第一件事就把它拷进沙箱——选择器 URI 的临时读权限随时会失效）。
+   * 用户取消不算错，静默返回。
+   */
+  private pickBackupFile(): void {
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const options = new picker.DocumentSelectOptions();
+    options.fileSuffixFilters = ['.' + BackupFormat.fileExtension];
+    options.maxSelectNumber = 1;
+    const docPicker = new picker.DocumentViewPicker(context);
+    docPicker.select(options).then((uris: Array<string>): void => {
+      if (uris.length > 0) {
+        this.navPathStack.pushPathByName('BackupImport', uris[0]);
+      }
+    }).catch((err: BusinessError): void => {
+      hilog.warn(DOMAIN, TAG, 'document picker cancelled: %{public}d %{public}s',
+        err.code, err.message);
+    });
+  }
 
   /** 扫盘统计媒体占用（onReady 触发一次；清理后重扫）。放异步任务里，不阻塞渲染 */
   private scanMediaUsage(): void {

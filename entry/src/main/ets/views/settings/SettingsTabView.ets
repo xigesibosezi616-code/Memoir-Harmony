@@ -45,6 +45,8 @@ import { STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP } from '../../services/ImmersiveChrome';
 import { STORAGE_KEY_SESSION_TICK } from '../../services/auth/UserSession';
 import { AuthLogic } from '../../services/auth/AuthLogic';
+import { STORAGE_KEY_BACKUP_IMPORT_REQUEST_TICK,
+  STORAGE_KEY_BACKUP_IMPORT_SOURCE } from '../../services/backup/BackupImportService';
 import { STORAGE_KEY_APP_LANGUAGE, LanguageManager,
   LanguageOption } from '../../services/LanguageManager';
 import { PostingRun } from '../../models/LetterPostingFlightGeometry';
@@ -139,6 +141,11 @@ export struct SettingsTabView {
   @StorageProp(STORAGE_KEY_APP_LANGUAGE) appLanguage: string = 'en';
   /** 离开设置 tab → 导航栈重置回首页（R-SETTINGS-03） */
   @StorageProp(STORAGE_KEY_SETTINGS_RESET_TICK) @Watch('onResetTick') resetTick: number = 0;
+  /** 6.4 文件关联打开备份包：主框架已切到设置 tab（MainTabsView bump）→ 推导入页。
+   *  冷启动链（EntryAbility → MainTabsView aboutToAppear bump）发生在本页挂载
+   *  序附近，@Watch 首值不触发 → aboutToAppear 手动消费兜底 */
+  @StorageProp(STORAGE_KEY_BACKUP_IMPORT_REQUEST_TICK)
+  @Watch('onBackupImportRequested') backupImportRequestTick: number = 0;
 
   @State private loggedIn: boolean = false;
   /** 账户卡主标题：昵称优先，其次脱敏手机号，再兜底「已登录」 */
@@ -151,6 +158,10 @@ export struct SettingsTabView {
 
   aboutToAppear(): void {
     this.refreshSessionState();
+    // 6.4 文件关联冷启动路由：挂载前主框架可能已 bump，手动消费
+    if (this.backupImportRequestTick > 0) {
+      this.onBackupImportRequested();
+    }
   }
 
   build() {
@@ -717,6 +728,17 @@ export struct SettingsTabView {
   /** 离开设置 tab → 导航栈重置回首页（R-SETTINGS-03：离开时清，不是进入时） */
   onResetTick(): void {
     this.navPathStack.clear();
+  }
+
+  /** 6.4 文件关联打开备份包：推导入页（参数 = EntryAbility 落好的沙箱中转副本路径） */
+  onBackupImportRequested(): void {
+    AppStorage.setOrCreate(STORAGE_KEY_BACKUP_IMPORT_REQUEST_TICK, 0);
+    const source: string = AppStorage.get<string>(STORAGE_KEY_BACKUP_IMPORT_SOURCE) ?? '';
+    if (source.length === 0) {
+      return;
+    }
+    AppStorage.setOrCreate(STORAGE_KEY_BACKUP_IMPORT_SOURCE, '');
+    this.navPathStack.pushPathByName('BackupImport', source);
   }
 
   /** 从会话容器重读登录态：主标题昵称优先、其次脱敏手机号、再兜底「已登录」；

@@ -252,6 +252,143 @@ const HAND_STRINGS = {
     'en': 'HUAWEI ID linked', 'ja': 'HUAWEI ID を連携しました',
     'ko': 'HUAWEI ID가 연결되었어요', 'fr': 'HUAWEI ID associé',
     'es': 'HUAWEI ID vinculado' },
+  // ---- 6.1–6.3 历代手补词条（当时直接写进 string.json、没进 HAND_STRINGS，
+  //      2026-11-07 重跑脚本被洗掉后从 git HEAD 1f61a6b 等提交逐语言迁回；译文原样保留勿改）----
+  s_0f449019e8: { // 统计中…
+    'zh-Hans': '统计中…', 'zh-Hant': '統計中…', 'en': 'Calculating…',
+    'ja': '計算中…', 'ko': '계산 중…', 'fr': 'Calcul…', 'es': 'Calculando…' },
+  s_6ed1b2bd01: { // 云同步
+    'zh-Hans': '云同步', 'zh-Hant': '雲端同步', 'en': 'Cloud Sync',
+    'ja': 'クラウド同期', 'ko': '클라우드 동기화', 'fr': 'Synchronisation cloud',
+    'es': 'Sincronización en la nube' },
+  s_b9004e6f7b: { // 未开启
+    'zh-Hans': '未开启', 'zh-Hant': '未開啟', 'en': 'Off',
+    'ja': 'オフ', 'ko': '꺼짐', 'fr': 'Désactivé', 'es': 'Desactivado' },
+  s_f71802e114: { // 日记只保存在这台设备上，卸载会丢失。建议定期「导出备份」。
+    'zh-Hans': '日记只保存在这台设备上，卸载会丢失。建议定期「导出备份」。',
+    'zh-Hant': '日記只儲存在這台裝置上，解除安裝會遺失。建議定期「匯出備份」。',
+    'en': 'Your journals live only on this device and will be lost if you delete the app. Export a backup regularly.',
+    'ja': '日記はこの端末にのみ保存され、Appを削除すると失われます。定期的に「バックアップを書き出す」ことをおすすめします。',
+    'ko': '일기가 이 기기에만 저장되어 앱을 삭제하면 사라집니다. 정기적으로 「백업 내보내기」를 권장합니다.',
+    'fr': "Vos journaux ne sont que sur cet appareil et seront perdus si vous supprimez l'app. Pensez à exporter régulièrement une sauvegarde.",
+    'es': 'Tus diarios solo están en este dispositivo y se perderán si eliminas la app. Exporta una copia con regularidad.' },
+  s_02a00a2547: { // 华为账号登录
+    'zh-Hans': '华为账号登录', 'zh-Hant': '華為帳號登入',
+    'en': 'Sign in with HUAWEI ID', 'ja': 'HUAWEI ID でサインイン',
+    'ko': 'HUAWEI ID로 로그인', 'fr': 'Se connecter avec un HUAWEI ID',
+    'es': 'Iniciar sesión con HUAWEI ID' },
+  s_f6f7c46fd6: { // 打不开应用市场
+    'zh-Hans': '打不开应用市场', 'zh-Hant': '打不開應用市場',
+    'en': "Couldn't open AppGallery", 'ja': 'AppGalleryを開けません',
+    'ko': 'AppGallery를 열 수 없어요', 'fr': "Impossible d'ouvrir AppGallery",
+    'es': 'No se pudo abrir AppGallery' },
+  s_a9c8397cce: { // 世界笔友
+    'zh-Hans': '世界笔友', 'zh-Hant': '世界筆友', 'en': 'World Pen Pals',
+    'ja': '世界のペンフレンド', 'ko': '세계의 펜팔',
+    'fr': 'Correspondants du monde', 'es': 'Amigos por carta del mundo' },
+  s_ceab2d4c71: { // 世界笔友地图
+    'zh-Hans': '世界笔友地图', 'zh-Hant': '世界筆友地圖',
+    'en': 'World pen pals map', 'ja': '世界のペンフレンドの地図',
+    'ko': '세계 펜팔 지도', 'fr': 'Carte des correspondants',
+    'es': 'Mapa de amigos por carta' },
+  s_df6331be72: { // 世界笔友是尺素会员的，这封信没能寄出
+    'zh-Hans': '世界笔友是尺素会员的，这封信没能寄出',
+    'zh-Hant': '世界筆友是尺素會員的，這封信沒能寄出',
+    'en': "World pen pals are for members, so this letter couldn't be sent",
+    'ja': '世界のペンフレンドは会員向けです。この手紙は送れませんでした',
+    'ko': '세계의 펜팔은 회원 전용이라 이 편지를 보내지 못했어요',
+    'fr': "Les correspondants du monde sont réservés aux membres : cette lettre n'est pas partie",
+    'es': 'Los amigos por carta del mundo son para miembros: esta carta no se pudo enviar' },
+  s_3a5fd35d41: { // 定位没开，世界笔友的回信都按一两天算
+    'zh-Hans': '定位没开，世界笔友的回信都按一两天算',
+    'zh-Hant': '定位沒開，世界筆友的回信都按一兩天算',
+    'en': 'Location is off, so every reply counts as a day or two',
+    'ja': '位置情報がオフなので、返事はどれも1〜2日で届きます',
+    'ko': '위치가 꺼져 있어 답장은 모두 하루이틀로 계산돼요',
+    'fr': 'Localisation désactivée : chaque réponse met un ou deux jours',
+    'es': 'La ubicación está desactivada: cada respuesta tarda uno o dos días' },
+  s_f93c4db3ab: { // 回信加速
+    'zh-Hans': '回信加速', 'zh-Hant': '回信加速', 'en': 'Fast letter delivery',
+    'ja': '返信をはやくする', 'ko': '회신 가속',
+    'fr': 'Livraison rapide des lettres', 'es': 'Entrega rápida de cartas' },
+  s_bdfe921dd3: { // 1 分钟 ≈ 1 天：回信最快 15 秒、最慢 3 分钟到达。默认开启，只影响开启后寄出的信。
+    'zh-Hans': '1 分钟 ≈ 1 天：回信最快 15 秒、最慢 3 分钟到达。默认开启，只影响开启后寄出的信。',
+    'zh-Hant': '1 分鐘 ≈ 1 天：回信最快 15 秒、最慢 3 分鐘到達。預設開啟，只影響開啟後寄出的信。',
+    'en': '1 min ≈ 1 day: replies arrive in 15 s to 3 min. On by default. Only affects letters sent while on.',
+    'ja': '1分 ≈ 1日：返信は最短15秒、最長3分で届きます。デフォルトでオン。オンの間に送った手紙にのみ適用されます。',
+    'ko': '1분 ≈ 1일: 회신이 최소 15초, 최대 3분 안에 도착합니다. 기본 켜짐. 켜져 있는 동안 보낸 편지에만 적용됩니다.',
+    'fr': '1 min ≈ 1 jour : les réponses arrivent en 15 s à 3 min. Activé par défaut. Ne concerne que les lettres envoyées lorsqu’il est activé.',
+    'es': '1 min ≈ 1 día: las respuestas llegan en 15 s a 3 min. Activado por defecto. Solo afecta a las cartas enviadas mientras esté activado.' },
+  s_ea5026fc0f: { // 测试构建
+    'zh-Hans': '测试构建', 'zh-Hant': '測試構建', 'en': 'TEST BUILD',
+    'ja': 'テストビルド', 'ko': '테스트 빌드', 'fr': 'VERSION DE TEST',
+    'es': 'VERSIÓN DE PRUEBA' },
+  // ---- 6.4/6.5 备份包（iOS Text(String)/String 插值不查表——xcstrings 里没有的
+  //      视图短词与计数格式句，鸿蒙侧补齐；译文对齐 iOS 既有术语：読み込む=导入、
+  //      書き出す=导出、届いた手紙=来信、바져오기=导入、copia=备份）----
+  s_b0059123ef: { // 正在打开备份包…
+    'zh-Hans': '正在打开备份包…', 'zh-Hant': '正在打開備份包…',
+    'en': 'Opening the backup…', 'ja': 'バックアップを開いています…',
+    'ko': '백업을 여는 중…', 'fr': 'Ouverture de la sauvegarde…',
+    'es': 'Abriendo la copia…' },
+  s_cd74f09629: { // 正在导入…
+    'zh-Hans': '正在导入…', 'zh-Hant': '正在匯入…', 'en': 'Importing…',
+    'ja': '読み込み中…', 'ko': '가져오는 중…', 'fr': 'Importation…',
+    'es': 'Importando…' },
+  s_ebabcca5f6: { // 照片与录音
+    'zh-Hans': '照片与录音', 'zh-Hant': '照片與錄音', 'en': 'Photos & recordings',
+    'ja': '写真と録音', 'ko': '사진과 녹음', 'fr': 'Photos et enregistrements',
+    'es': 'Fotos y grabaciones' },
+  s_199e333f97: { // 未包含
+    'zh-Hans': '未包含', 'zh-Hant': '未包含', 'en': 'Not included',
+    'ja': '含まれない', 'ko': '미포함', 'fr': 'Non inclus', 'es': 'No incluido' },
+  s_d4e077f9d4: { // 导出时间
+    'zh-Hans': '导出时间', 'zh-Hant': '匯出時間', 'en': 'Exported at',
+    'ja': '書き出し日時', 'ko': '내보낸 시각', 'fr': 'Exporté le',
+    'es': 'Fecha de exportación' },
+  s_16593aa84d: { // 来自（备份包来源行的行标签）
+    'zh-Hans': '来自', 'zh-Hant': '來自', 'en': 'From', 'ja': '送信元',
+    'ko': '출처', 'fr': 'Provenance', 'es': 'Origen' },
+  s_e83afd599a: { // 预计大小
+    'zh-Hans': '预计大小', 'zh-Hant': '預計大小', 'en': 'Estimated size',
+    'ja': '推定サイズ', 'ko': '예상 크기', 'fr': 'Taille estimée',
+    'es': 'Tamaño estimado' },
+  s_6b19ea408a: { // 用密码加密
+    'zh-Hans': '用密码加密', 'zh-Hant': '用密碼加密', 'en': 'Encrypt with a password',
+    'ja': 'パスワードで暗号化', 'ko': '비밀번호로 암호화',
+    'fr': 'Chiffrer avec un mot de passe', 'es': 'Cifrar con contraseña' },
+  s_b991e9b2ca: { // 新增日记
+    'zh-Hans': '新增日记', 'zh-Hant': '新增日記', 'en': 'Entries added',
+    'ja': '追加された日記', 'ko': '추가된 일기', 'fr': 'Entrées ajoutées',
+    'es': 'Entradas añadidas' },
+  s_c558e955b8: { // 跳过（已存在）
+    'zh-Hans': '跳过（已存在）', 'zh-Hant': '跳過（已存在）',
+    'en': 'Skipped (already present)', 'ja': 'スキップ（既にあり）',
+    'ko': '건너뜀(이미 있음)', 'fr': 'Ignorées (déjà présentes)',
+    'es': 'Omitidas (ya presentes)' },
+  s_e32c03cfb9: { // 新增来信
+    'zh-Hans': '新增来信', 'zh-Hant': '新增來信', 'en': 'Letters added',
+    'ja': '追加された手紙', 'ko': '추가된 편지', 'fr': 'Lettres ajoutées',
+    'es': 'Cartas añadidas' },
+  s_6fde12863f: { // 新增日记本
+    'zh-Hans': '新增日记本', 'zh-Hant': '新增日記本', 'en': 'Journals added',
+    'ja': '追加された日記帳', 'ko': '추가된 일기장', 'fr': 'Journaux ajoutés',
+    'es': 'Diarios añadidos' },
+  s_573ee77a59: { // 打开备份包失败
+    'zh-Hans': '打开备份包失败', 'zh-Hant': '打不開備份包',
+    'en': "Couldn't open the backup", 'ja': 'バックアップを開けません',
+    'ko': '백업을 열 수 없어요', 'fr': "Impossible d'ouvrir la sauvegarde",
+    'es': 'No se pudo abrir la copia' },
+  s_a01a8d5393: { // 导入失败
+    'zh-Hans': '导入失败', 'zh-Hant': '匯入失敗', 'en': 'Import failed',
+    'ja': '読み込めませんでした', 'ko': '가져오지 못했어요',
+    'fr': "Échec de l'import", 'es': 'Error al importar' },
+  s_da142a5478: { // %d 封（来信计数）
+    'zh-Hans': '%d 封', 'zh-Hant': '%d 封', 'en': '%d letters', 'ja': '%d通',
+    'ko': '%d통', 'fr': '%d lettres', 'es': '%d cartas' },
+  s_820929d497: { // %d 个（照片与录音计数）
+    'zh-Hans': '%d 个', 'zh-Hant': '%d 個', 'en': '%d files', 'ja': '%d個',
+    'ko': '%d개', 'fr': '%d fichiers', 'es': '%d archivos' },
 };
 
 /** 把 LANGS 之外的固定条目（keepOriginals）按语言拼出来；appName 来自 xcstrings */
@@ -523,6 +660,14 @@ function main() {
   for (const [src, dst] of IMAGE_MAP) {
     const from = path.join(IOS_MEMOIR, src);
     if (!fs.existsSync(from)) {
+      // iOS 侧把图标物料换成了 SVG（AppIcon .icon / AppIconPreview_Polar），
+      // 老副本里没有 PNG。鸿蒙侧已有上一次拷好的成品时不挡流程，只告警；
+      // 真缺（目标也不存在）才抛错
+      const to = path.join(ENTRY_RES, 'base', 'media', dst);
+      if (fs.existsSync(to)) {
+        console.warn(`⚠️ 图片源缺失（保留现有成品）: ${src}`);
+        continue;
+      }
       throw new Error(`图片源缺失: ${src}`);
     }
     const to = path.join(ENTRY_RES, 'base', 'media', dst);

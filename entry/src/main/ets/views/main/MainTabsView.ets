@@ -25,6 +25,8 @@ import { LetterRepository } from '../../data/LetterRepository';
 import { arrivalRemindersOf } from '../../models/NotifyLogic';
 import { LetterNotifications, STORAGE_KEY_OPEN_LETTERBOX_TICK,
   STORAGE_KEY_POSTBOX_OPEN_LETTERBOX_TICK } from '../../services/LetterNotifications';
+import { STORAGE_KEY_OPEN_BACKUP_IMPORT_TICK,
+  STORAGE_KEY_BACKUP_IMPORT_REQUEST_TICK } from '../../services/backup/BackupImportService';
 import {
   STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP,
@@ -71,6 +73,10 @@ export struct MainTabsView {
    *  冷启动 bump 发生在挂载前，@Watch 首值不触发 → aboutToAppear 手动消费 */
   @StorageProp(STORAGE_KEY_OPEN_LETTERBOX_TICK)
   @Watch('onOpenLetterboxRequested') openLetterboxTick: number = 0;
+  /** 6.4 文件关联打开备份包（EntryAbility intake 后 +1）→ 切设置 tab 并让设置栈
+   *  推导入页。冷启动 bump 同样在挂载前 → aboutToAppear 手动消费 */
+  @StorageProp(STORAGE_KEY_OPEN_BACKUP_IMPORT_TICK)
+  @Watch('onOpenBackupImportRequested') openBackupImportTick: number = 0;
 
   private readonly tabs: TabSpec[] = [
     new TabSpec(0, $r('app.string.s_9058a1c2c5'), $r('app.media.tab_notebook')),
@@ -117,6 +123,10 @@ export struct MainTabsView {
     // 5.4 点通知冷启动路由（R-NOTIFY-05）：挂载前 EntryAbility 已 bump，手动消费
     if (this.openLetterboxTick > 0) {
       this.onOpenLetterboxRequested();
+    }
+    // 6.4 文件关联冷启动路由：挂载前 EntryAbility 已 intake 并 bump，手动消费
+    if (this.openBackupImportTick > 0) {
+      this.onOpenBackupImportRequested();
     }
   }
 
@@ -169,6 +179,17 @@ export struct MainTabsView {
     this.currentTab = 2;
     AppStorage.setOrCreate(STORAGE_KEY_POSTBOX_OPEN_LETTERBOX_TICK,
       (AppStorage.get<number>(STORAGE_KEY_POSTBOX_OPEN_LETTERBOX_TICK) ?? 0) + 1);
+  }
+
+  /**
+   * 6.4 文件关联路由：切设置 tab + 通知设置栈推导入页（中转副本路径在
+   * STORAGE_KEY_BACKUP_IMPORT_SOURCE 里，SettingsTabView 消费时取）；消费即清零
+   */
+  private onOpenBackupImportRequested(): void {
+    AppStorage.setOrCreate(STORAGE_KEY_OPEN_BACKUP_IMPORT_TICK, 0);
+    this.currentTab = 3;
+    AppStorage.setOrCreate(STORAGE_KEY_BACKUP_IMPORT_REQUEST_TICK,
+      (AppStorage.get<number>(STORAGE_KEY_BACKUP_IMPORT_REQUEST_TICK) ?? 0) + 1);
   }
 
   build() {

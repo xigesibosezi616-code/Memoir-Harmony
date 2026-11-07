@@ -54,6 +54,8 @@ import letterOpeningTimelineTest from './test/LetterOpeningTimeline.test'
 import letterOpeningHapticPatternTest from './test/LetterOpeningHapticPattern.test'
 import statsCalculatorBundle from './test/StatsCalculator.test'
 import moodInsightsBundle from './test/MoodInsights.test'
+import backupFormatTest from './test/BackupFormat.test'
+import backupTagPlanTest from './test/BackupTagPlan.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -112,4 +114,6 @@ export default function testsuite() {
   letterOpeningHapticPatternTest()
   statsCalculatorBundle()
   moodInsightsBundle()
+  backupFormatTest()
+  backupTagPlanTest()
 }

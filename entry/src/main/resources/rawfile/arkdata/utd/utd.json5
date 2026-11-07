@@ -1,0 +1,12 @@
+{
+  "UniformDataTypeDeclarations": [
+    {
+      "TypeId": "com.sinaratech.memoir.hmos.memoir",
+      "BelongingToTypes": ["general.archive", "general.file"],
+      "FilenameExtensions": [".memoir"],
+      "MIMETypes": ["application/octet-stream"],
+      "Description": "Memoir backup package",
+      "ReferenceURL": ""
+    }
+  ]
+}

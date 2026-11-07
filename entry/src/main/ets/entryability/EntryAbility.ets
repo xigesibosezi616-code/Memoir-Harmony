@@ -29,6 +29,9 @@ import {
   continuationPayloadFits,
   encodeDraftForContinuation
 } from '../services/AppContinuation';
+import { BackupFormat } from '../services/backup/BackupFormat';
+import { BackupImportService, STORAGE_KEY_OPEN_BACKUP_IMPORT_TICK,
+  STORAGE_KEY_BACKUP_IMPORT_SOURCE } from '../services/backup/BackupImportService';
 
 const DOMAIN = 0x0000;
 const TAG = 'EntryAbility';
@@ -45,6 +48,9 @@ export default class EntryAbility extends UIAbility {
     // 5.4 点通知冷启动（R-NOTIFY-05）：want 带 openLetterbox → 发 tick，
     // 主框架挂载后消费（MainTabsView aboutToAppear 手动读，@Watch 首值不触发）
     this.bumpOpenLetterboxIfRequested(want);
+    // 6.4 文件关联冷启动（「用尺素打开 .memoir」）：立刻把 URI 落成沙箱副本
+    // （临时读权限随时会失效），主框架挂载后消费 tick 切设置 tab
+    this.intakeBackupOpenIfRequested(want);
   }
 
   /**
@@ -110,6 +116,34 @@ export default class EntryAbility extends UIAbility {
     this.stashContinuedDraftIfAny(want, launchParam);
     // 5.4 点通知热启动（R-NOTIFY-05）：App 活着时点通知 → 主框架 @Watch 消费
     this.bumpOpenLetterboxIfRequested(want);
+    // 6.4 文件关联热启动：App 活着时「用尺素打开 .memoir」→ @Watch 链消费
+    this.intakeBackupOpenIfRequested(want);
+  }
+
+  /**
+   * 6.4 文件关联（module.json5 skills viewData + 自定义 UTD）：别的应用（文件管理器、
+   * 微信等）把 .memoir 交给本 Ability 时 want.uri 是带临时读权限的 file:// URI ——
+   * 拿到就立刻拷进沙箱固定位置，之后导入页全部走这份副本。
+   * 拷完写 AppStorage：源路径 + 打开信号（MainTabsView 消费切设置 tab，
+   * SettingsTabView 消费推导入页）。
+   */
+  private intakeBackupOpenIfRequested(want: Want): void {
+    const uri: string | undefined = want.uri;
+    if (uri === undefined
+      || !uri.toLowerCase().endsWith('.' + BackupFormat.fileExtension)) {
+      return;
+    }
+    const intake = async (): Promise<string> => {
+      return BackupImportService.intakeExternalFile(this.context, uri);
+    };
+    intake().then((path: string): void => {
+      AppStorage.setOrCreate(STORAGE_KEY_BACKUP_IMPORT_SOURCE, path);
+      AppStorage.setOrCreate(STORAGE_KEY_OPEN_BACKUP_IMPORT_TICK,
+        (AppStorage.get<number>(STORAGE_KEY_OPEN_BACKUP_IMPORT_TICK) ?? 0) + 1);
+      hilog.info(DOMAIN, TAG, '%{public}s', 'memoir backup open requested via file association');
+    }).catch((err: Object): void => {
+      hilog.error(DOMAIN, TAG, 'intake backup file failed: %{public}s', JSON.stringify(err));
+    });
   }
 
   /** 点到达通知打开（R-NOTIFY-05）：wantAgent parameters 带 openLetterbox → +1 信号 */

@@ -109,6 +109,16 @@
       "name": "Stats",
       "pageSourceFile": "src/main/ets/views/settings/StatsView.ets",
       "buildFunction": "StatsBuilder"
+    },
+    {
+      "name": "BackupImport",
+      "pageSourceFile": "src/main/ets/views/settings/BackupImportView.ets",
+      "buildFunction": "BackupImportBuilder"
+    },
+    {
+      "name": "BackupExport",
+      "pageSourceFile": "src/main/ets/views/settings/BackupExportView.ets",
+      "buildFunction": "BackupExportBuilder"
     }
   ]
 }

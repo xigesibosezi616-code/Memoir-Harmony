@@ -293,8 +293,9 @@ function fieldBoolean(rec: Record<string, Object>, key: string): boolean | undef
   return typeof v === 'boolean' ? v : undefined;
 }
 
-/** 解码一段文字格式。location / length 缺失或类型不对 → 整段丢弃 */
-function decodeStyleRun(raw: Object): TextStyleRun | undefined {
+/** 解码一段文字格式。location / length 缺失或类型不对 → 整段丢弃。
+ *  备份包（services/backup）也复用这段解析：包里的 styles 与库里的字段一致 */
+export function decodeStyleRun(raw: Object): TextStyleRun | undefined {
   const rec = raw as Record<string, Object>;
   const location = fieldNumber(rec, 'location');
   const length = fieldNumber(rec, 'length');

@@ -89,6 +89,18 @@
             "actions": [
               "ohos.want.action.home"
             ]
+          },
+          {
+            "actions": [
+              "ohos.want.action.viewData"
+            ],
+            "uris": [
+              {
+                "scheme": "file",
+                "type": "com.sinaratech.memoir.hmos.memoir",
+                "linkFeature": "FileOpen"
+              }
+            ]
           }
         ]
       }

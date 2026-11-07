@@ -197,6 +197,122 @@
       "value": "HUAWEI ID associé"
     },
     {
+      "name": "s_0f449019e8",
+      "value": "Calcul…"
+    },
+    {
+      "name": "s_6ed1b2bd01",
+      "value": "Synchronisation cloud"
+    },
+    {
+      "name": "s_b9004e6f7b",
+      "value": "Désactivé"
+    },
+    {
+      "name": "s_f71802e114",
+      "value": "Vos journaux ne sont que sur cet appareil et seront perdus si vous supprimez l'app. Pensez à exporter régulièrement une sauvegarde."
+    },
+    {
+      "name": "s_02a00a2547",
+      "value": "Se connecter avec un HUAWEI ID"
+    },
+    {
+      "name": "s_f6f7c46fd6",
+      "value": "Impossible d'ouvrir AppGallery"
+    },
+    {
+      "name": "s_a9c8397cce",
+      "value": "Correspondants du monde"
+    },
+    {
+      "name": "s_ceab2d4c71",
+      "value": "Carte des correspondants"
+    },
+    {
+      "name": "s_df6331be72",
+      "value": "Les correspondants du monde sont réservés aux membres : cette lettre n'est pas partie"
+    },
+    {
+      "name": "s_3a5fd35d41",
+      "value": "Localisation désactivée : chaque réponse met un ou deux jours"
+    },
+    {
+      "name": "s_f93c4db3ab",
+      "value": "Livraison rapide des lettres"
+    },
+    {
+      "name": "s_bdfe921dd3",
+      "value": "1 min ≈ 1 jour : les réponses arrivent en 15 s à 3 min. Activé par défaut. Ne concerne que les lettres envoyées lorsqu’il est activé."
+    },
+    {
+      "name": "s_ea5026fc0f",
+      "value": "VERSION DE TEST"
+    },
+    {
+      "name": "s_b0059123ef",
+      "value": "Ouverture de la sauvegarde…"
+    },
+    {
+      "name": "s_cd74f09629",
+      "value": "Importation…"
+    },
+    {
+      "name": "s_ebabcca5f6",
+      "value": "Photos et enregistrements"
+    },
+    {
+      "name": "s_199e333f97",
+      "value": "Non inclus"
+    },
+    {
+      "name": "s_d4e077f9d4",
+      "value": "Exporté le"
+    },
+    {
+      "name": "s_16593aa84d",
+      "value": "Provenance"
+    },
+    {
+      "name": "s_e83afd599a",
+      "value": "Taille estimée"
+    },
+    {
+      "name": "s_6b19ea408a",
+      "value": "Chiffrer avec un mot de passe"
+    },
+    {
+      "name": "s_b991e9b2ca",
+      "value": "Entrées ajoutées"
+    },
+    {
+      "name": "s_c558e955b8",
+      "value": "Ignorées (déjà présentes)"
+    },
+    {
+      "name": "s_e32c03cfb9",
+      "value": "Lettres ajoutées"
+    },
+    {
+      "name": "s_6fde12863f",
+      "value": "Journaux ajoutés"
+    },
+    {
+      "name": "s_573ee77a59",
+      "value": "Impossible d'ouvrir la sauvegarde"
+    },
+    {
+      "name": "s_a01a8d5393",
+      "value": "Échec de l'import"
+    },
+    {
+      "name": "s_da142a5478",
+      "value": "%d lettres"
+    },
+    {
+      "name": "s_820929d497",
+      "value": "%d fichiers"
+    },
+    {
       "name": "s_00360964eb",
       "value": "Fédération japonaise des industries de l'imprimerie, glossaire des termes d'imprimerie ; université des arts Musashino, fichier Zokei. L'attribution du nom au Japon est rapportée dans les cinquante ans d'histoire de Tokushu Paper Manufacturing."
     },
@@ -245,6 +361,10 @@
       "value": "Adresse de requête invalide"
     },
     {
+      "name": "s_03290288e1",
+      "value": "Bilans précédents"
+    },
+    {
       "name": "s_0399ad7167",
       "value": "Conditions d’utilisation"
     },
@@ -273,6 +393,10 @@
       "value": "Stress"
     },
     {
+      "name": "s_05a978d5cb",
+      "value": "La météo, les lieux, les jours et les moments s’affichent dès qu’un groupe compte au moins 3 entrées avec une humeur. Continuez d’écrire : les tendances apparaîtront peu à peu."
+    },
+    {
       "name": "s_05aa9400bd",
       "value": "Dégoût"
     },
@@ -291,6 +415,10 @@
     {
       "name": "s_07315b84c5",
       "value": "Afficher l'émoji choisi"
+    },
+    {
+      "name": "s_083af3c4ae",
+      "value": "Impossible de récupérer les timbres. Réessayez dans un instant"
     },
     {
       "name": "s_084f68942b",
@@ -341,6 +469,10 @@
       "value": "« S'autoriser à aller mal est aussi une forme de douceur. »"
     },
     {
+      "name": "s_09f515b893",
+      "value": "Jours et moments"
+    },
+    {
       "name": "s_09f81f62fd",
       "value": "Enthousiasme"
     },
@@ -381,12 +513,24 @@
       "value": "La localisation est désactivée — activez-la dans Réglages"
     },
     {
+      "name": "s_0d05046a43",
+      "value": "Dégagé"
+    },
+    {
       "name": "s_0d4dd89acf",
       "value": "Numéro à 11 chiffres"
     },
     {
+      "name": "s_0d7248908c",
+      "value": "Chaque semaine, chaque mois et chaque année : un court bilan et quelques suggestions pour mieux comprendre vos humeurs."
+    },
+    {
       "name": "s_0e37efff8d",
       "value": "Votre session a expiré. Veuillez vous reconnecter."
+    },
+    {
+      "name": "s_0e458fad76",
+      "value": "Nuit"
     },
     {
       "name": "s_0e978c435e",
@@ -465,6 +609,10 @@
       "value": "Ville uniquement, ex. « Canton »"
     },
     {
+      "name": "s_13d5da7b00",
+      "value": "Donnez un nom à votre carnet"
+    },
+    {
       "name": "s_13d655e2da",
       "value": "%s est un correspondant IA fictif de Déjà Vu."
     },
@@ -479,6 +627,10 @@
     {
       "name": "s_14c9516e3f",
       "value": "Trop de requêtes — réessayez plus tard"
+    },
+    {
+      "name": "s_14f2f7ca94",
+      "value": "Votre correspondant signera ses lettres de ce nom. Vous pourrez le changer plus tard dans les Réglages."
     },
     {
       "name": "s_15b21b73b7",
@@ -497,6 +649,10 @@
       "value": "Choisir un style de papier"
     },
     {
+      "name": "s_167e9b5f39",
+      "value": "20 timbres par semaine"
+    },
+    {
       "name": "s_168b37f367",
       "value": "Les premières heures n'appartiennent qu'à toi."
     },
@@ -509,8 +665,16 @@
       "value": "Désactiver l’abonnement test"
     },
     {
+      "name": "s_172fb7196f",
+      "value": "Matin"
+    },
+    {
       "name": "s_173e51e1e5",
       "value": "Vérifiez d’abord votre numéro actuel"
+    },
+    {
+      "name": "s_1774516a30",
+      "value": "Écrivez dans celui-ci :\ntouchez ici pour commencer"
     },
     {
       "name": "s_17f7c3a2d7",
@@ -519,6 +683,10 @@
     {
       "name": "s_181e010524",
       "value": "Gêne"
+    },
+    {
+      "name": "s_18a4b0fa09",
+      "value": "Ce bilan n’a pas pu être rédigé. Nouvel essai à la prochaine ouverture."
     },
     {
       "name": "s_18cb8ddf9d",
@@ -581,6 +749,10 @@
       "value": "%s / an"
     },
     {
+      "name": "s_1dfaab6548",
+      "value": "Après-midi"
+    },
+    {
       "name": "s_1e2443b94b",
       "value": "L’abonnement est gratuit pendant les tests. Désactivez-le pour revenir à la version gratuite."
     },
@@ -615,6 +787,10 @@
     {
       "name": "s_215574245b",
       "value": "Supprimer l'entrée"
+    },
+    {
+      "name": "s_21a8e41cf6",
+      "value": "Douyin"
     },
     {
       "name": "s_21f1e88275",
@@ -685,16 +861,32 @@
       "value": "Il s'agit d'une sauvegarde texte seul : les entrées importées n'auront ni photo ni enregistrement."
     },
     {
+      "name": "s_26825deedb",
+      "value": "Évolution de l’humeur"
+    },
+    {
       "name": "s_26f030bca7",
       "value": "En attente…"
+    },
+    {
+      "name": "s_27e4fe4c3f",
+      "value": "D’accord"
     },
     {
       "name": "s_282ab93d10",
       "value": "Total"
     },
     {
+      "name": "s_2870d2ab3b",
+      "value": "Amis d’hier et d’aujourd’hui"
+    },
+    {
       "name": "s_287dbc9adc",
       "value": "Songeur"
+    },
+    {
+      "name": "s_2895d69933",
+      "value": "Avis et suggestions"
     },
     {
       "name": "s_28c46f23f7",
@@ -763,6 +955,10 @@
     {
       "name": "s_2ca8ce9b3f",
       "value": "%s la 1re année"
+    },
+    {
+      "name": "s_2ca9b1648a",
+      "value": "Écrivez votre première page"
     },
     {
       "name": "s_2d54b2d8e5",
@@ -877,6 +1073,10 @@
       "value": "Vous pouvez passer et le changer plus tard dans les réglages"
     },
     {
+      "name": "s_369ff2e38f",
+      "value": "Prends un instant pour écrire quelques lignes sur aujourd’hui."
+    },
+    {
       "name": "s_36c6be2be0",
       "value": "Ajouté"
     },
@@ -909,6 +1109,10 @@
       "value": "Une photo a été retirée · %s"
     },
     {
+      "name": "s_39b6b4c787",
+      "value": "Nuageux"
+    },
+    {
       "name": "s_39bc5e6806",
       "value": "Cette sauvegarde est chiffrée"
     },
@@ -917,12 +1121,16 @@
       "value": "Calendrier d’écriture"
     },
     {
+      "name": "s_39d12e73fb",
+      "value": "Récupérer"
+    },
+    {
       "name": "s_3a31adc3b5",
       "value": "Contentement"
     },
     {
-      "name": "s_3a5fd35d41",
-      "value": "Localisation désactivée : chaque réponse met un ou deux jours"
+      "name": "s_3a81e4d1ae",
+      "value": "Vous avez écrit votre première page.\nAllez dans « Boîte aux lettres » pour l’envoyer à votre correspondant"
     },
     {
       "name": "s_3aaae04c18",
@@ -973,6 +1181,10 @@
       "value": "Rechercher un lieu"
     },
     {
+      "name": "s_3c76ec910a",
+      "value": "Émotions les plus fréquentes"
+    },
+    {
       "name": "s_3d04880897",
       "value": "Lancer l'import"
     },
@@ -983,6 +1195,10 @@
     {
       "name": "s_3d7a66408e",
       "value": "Quel bonheur. Garde précieusement ce moment."
+    },
+    {
+      "name": "s_3d82a5c98a",
+      "value": "Pincez avec deux doigts pour voir plus de pages à la fois"
     },
     {
       "name": "s_3d93dce578",
@@ -1015,6 +1231,10 @@
     {
       "name": "s_3fb4374f11",
       "value": "Bambou coupé, trempé à l'étang — le papier en garde l'odeur verte"
+    },
+    {
+      "name": "s_3fd47f4390",
+      "value": "Timbres en réserve : %d"
     },
     {
       "name": "s_40525a7328",
@@ -1081,6 +1301,10 @@
       "value": "Aucune entrée à sauvegarder pour l’instant"
     },
     {
+      "name": "s_43c9272ab2",
+      "value": "Commencez par créer votre propre carnet"
+    },
+    {
       "name": "s_446462a28f",
       "value": "« Même un jour ordinaire recèle quelque chose qui ne l'est pas. »"
     },
@@ -1093,12 +1317,20 @@
       "value": "Courrier"
     },
     {
+      "name": "s_451b86707b",
+      "value": "Semaine"
+    },
+    {
       "name": "s_45260c7012",
       "value": "%s par an. Renouvellement automatique dans les 24 heures précédant l'échéance. Résiliable à tout moment dans Réglages → Compte Apple → Abonnements."
     },
     {
       "name": "s_4562024dde",
       "value": "Appliquer"
+    },
+    {
+      "name": "s_45ea420b4e",
+      "value": "La page d’aujourd’hui est encore blanche."
     },
     {
       "name": "s_4696b4622d",
@@ -1113,12 +1345,20 @@
       "value": "« L'été s'étire ; quelques mots font de l'ombre. »"
     },
     {
+      "name": "s_479fcc1cc0",
+      "value": "Plus tard"
+    },
+    {
       "name": "s_482d201d8b",
       "value": "Liez un numéro pour pouvoir récupérer ce compte"
     },
     {
       "name": "s_482d69aab3",
       "value": "%ds"
+    },
+    {
+      "name": "s_486e6b598c",
+      "value": "Connectez-vous pour recevoir les lettres de votre correspondant"
     },
     {
       "name": "s_487942b7ff",
@@ -1185,6 +1425,10 @@
       "value": "Changer seulement le thème"
     },
     {
+      "name": "s_4cbf770f3e",
+      "value": "Bilan d’humeur"
+    },
+    {
       "name": "s_4cd30ef91e",
       "value": "Enregistrer"
     },
@@ -1203,6 +1447,10 @@
     {
       "name": "s_4e1393a65c",
       "value": "Toutes les entrées"
+    },
+    {
+      "name": "s_4e664be1f8",
+      "value": "Écrivez votre première page :\nretournez dans « Journal »"
     },
     {
       "name": "s_4e6b4fffe0",
@@ -1239,6 +1487,10 @@
     {
       "name": "s_50f87ef514",
       "value": "Aucune humeur enregistrée sur cette période"
+    },
+    {
+      "name": "s_51070c8fd7",
+      "value": "Rappel d’écriture"
     },
     {
       "name": "s_514c04d14d",
@@ -1349,6 +1601,10 @@
       "value": "Nettoyer les fichiers résiduels ?"
     },
     {
+      "name": "s_58db88cd01",
+      "value": "Les timbres de la semaine sont arrivés"
+    },
+    {
       "name": "s_596b003c23",
       "value": "Aubergine"
     },
@@ -1395,6 +1651,10 @@
     {
       "name": "s_5c7cc8abd6",
       "value": "Appeler le %s"
+    },
+    {
+      "name": "s_5cc6e4a916",
+      "value": "Aucun numéro associé"
     },
     {
       "name": "s_5cd32361fa",
@@ -1445,6 +1705,10 @@
       "value": "Tourner à droite"
     },
     {
+      "name": "s_5f402594e5",
+      "value": "À la fin de chaque année, ouvrez cette page pour y trouver son bilan (au moins 3 entrées avec une humeur dans l’année)."
+    },
+    {
       "name": "s_5f7e5d5768",
       "value": "Lecture en cours"
     },
@@ -1493,6 +1757,10 @@
       "value": "Icône d'humeur"
     },
     {
+      "name": "s_640ccbdbf8",
+      "value": "Terminé ? Touchez ici pour enregistrer"
+    },
+    {
       "name": "s_643e29f431",
       "value": "C'est écrit. Comment te sens-tu en ce moment ?"
     },
@@ -1507,6 +1775,10 @@
     {
       "name": "s_65fc81e161",
       "value": "Activer"
+    },
+    {
+      "name": "s_6685eb0b7f",
+      "value": "À l’heure choisie, vous recevez une petite notification. Si vous avez déjà écrit ce jour-là, elle ne s’affiche pas."
     },
     {
       "name": "s_674bd11a2a",
@@ -1527,6 +1799,10 @@
     {
       "name": "s_67a01a5a15",
       "value": "Surligner"
+    },
+    {
+      "name": "s_67ad407dba",
+      "value": "Lieux et humeur"
     },
     {
       "name": "s_67f415d86d",
@@ -1569,6 +1845,10 @@
       "value": "Retirer le surlignage"
     },
     {
+      "name": "s_6aba76608a",
+      "value": "Le stylo est sur la table, la feuille est prête."
+    },
+    {
       "name": "s_6aed7c48be",
       "value": "Associer"
     },
@@ -1595,6 +1875,14 @@
     {
       "name": "s_6b7fba6ac9",
       "value": "Carnets portant le même nom"
+    },
+    {
+      "name": "s_6ba7736cd2",
+      "value": "À la fin de chaque mois, ouvrez cette page pour y trouver son bilan (au moins 3 entrées avec une humeur dans le mois)."
+    },
+    {
+      "name": "s_6c01b0cfd0",
+      "value": "Se connecter"
     },
     {
       "name": "s_6c14bd7f6f",
@@ -1629,8 +1917,16 @@
       "value": "En pleine lumière"
     },
     {
+      "name": "s_6e02b95e03",
+      "value": "Comment s’est passée ta journée ? Deux lignes suffisent."
+    },
+    {
       "name": "s_6e5c04b091",
       "value": "Chaque thème a son icône. Les nouveaux thèmes en ajouteront ici."
+    },
+    {
+      "name": "s_6e708ba759",
+      "value": "Répéter"
     },
     {
       "name": "s_6ec8fe27cd",
@@ -1639,6 +1935,10 @@
     {
       "name": "s_6efeb2c455",
       "value": "« Le passé ne disparaît pas : il attend que tu te retournes. »"
+    },
+    {
+      "name": "s_6f14c2641c",
+      "value": "Année"
     },
     {
       "name": "s_6f69dd45f8",
@@ -1737,6 +2037,10 @@
       "value": "« Une plume, une page : un monde entier. »"
     },
     {
+      "name": "s_76a4159492",
+      "value": "Soir"
+    },
+    {
       "name": "s_76ce8e3d5e",
       "value": "Synchronisé"
     },
@@ -1769,6 +2073,10 @@
       "value": "Restaurer les achats"
     },
     {
+      "name": "s_791054f6b1",
+      "value": "Encore quelques entrées pour voir la tendance"
+    },
+    {
       "name": "s_7945500987",
       "value": "Choisir dans Photos"
     },
@@ -1777,8 +2085,16 @@
       "value": "Changer de numéro"
     },
     {
+      "name": "s_79fc2f66bb",
+      "value": "Les notifications sont désactivées : le rappel ne peut pas être envoyé."
+    },
+    {
       "name": "s_7afd163467",
       "value": "En espérant que ce court instant t'ait fait un peu de bien."
+    },
+    {
+      "name": "s_7b8bf30fdb",
+      "value": "Avant que la journée ne s’achève, garde-lui une page."
     },
     {
       "name": "s_7bb5b11a5d",
@@ -1803,6 +2119,10 @@
     {
       "name": "s_7d07a38a9f",
       "value": "Plus de timbres. Un nouveau carnet arrive bientôt"
+    },
+    {
+      "name": "s_7d742a7f9f",
+      "value": "Neige"
     },
     {
       "name": "s_7d84c682b8",
@@ -1835,6 +2155,10 @@
     {
       "name": "s_7fbe49401c",
       "value": "Associer un numéro"
+    },
+    {
+      "name": "s_803a50292d",
+      "value": "Connectez-vous à votre compte Déjà Vu : un bilan sera rédigé à la fin de chaque période."
     },
     {
       "name": "s_805a0473b6",
@@ -1877,6 +2201,10 @@
       "value": "Abattu"
     },
     {
+      "name": "s_82a71e9578",
+      "value": "Écrivez quelques lignes sur votre journée,\nou touchez ici pour prendre une photo"
+    },
+    {
       "name": "s_82aa40f702",
       "value": "%d pages · environ %s"
     },
@@ -1911,6 +2239,10 @@
     {
       "name": "s_84476c8174",
       "value": "Localisation"
+    },
+    {
+      "name": "s_85a1088852",
+      "value": "Météo et humeur"
     },
     {
       "name": "s_85a35ccdd6",
@@ -1977,6 +2309,14 @@
       "value": "Erreur lors de l’archivage : %s"
     },
     {
+      "name": "s_8995b89799",
+      "value": "Pluie"
+    },
+    {
+      "name": "s_89b4aa6364",
+      "value": "Heure"
+    },
+    {
       "name": "s_89c7b03a96",
       "value": "Mise en page"
     },
@@ -2011,6 +2351,10 @@
     {
       "name": "s_8b5b1182d2",
       "value": "Non connecté à iCloud"
+    },
+    {
+      "name": "s_8bfd252f98",
+      "value": "Choisissez une couverture qui vous plaît,\npuis touchez ici"
     },
     {
       "name": "s_8c276c1fea",
@@ -2055,6 +2399,14 @@
     {
       "name": "s_8e39a34dcc",
       "value": "« Le temps d'un thé suffit à écrire ce qu'on ressent. »"
+    },
+    {
+      "name": "s_8e54b4b852",
+      "value": "Rangés avec vos timbres"
+    },
+    {
+      "name": "s_8eb2a62b5d",
+      "value": "Rechercher dans le journal"
     },
     {
       "name": "s_8ec3a93dbd",
@@ -2121,8 +2473,16 @@
       "value": "« Écrire est la façon la plus douce de résister à l'oubli. »"
     },
     {
+      "name": "s_91d339156f",
+      "value": "Une réponse de %s est arrivée :\nallez voir la « Boîte aux lettres »"
+    },
+    {
       "name": "s_91e5f2c416",
       "value": "« Inutile de faire semblant d'être fort : il n'y a que toi ici. »"
+    },
+    {
+      "name": "s_9289668c74",
+      "value": "Connectez-vous pour envoyer vos pages à votre correspondant"
     },
     {
       "name": "s_930c3a22eb",
@@ -2149,6 +2509,10 @@
       "value": "Parlez-en à une personne de confiance, ou contactez une ligne d'écoute."
     },
     {
+      "name": "s_94aae40757",
+      "value": "Pages : %d"
+    },
+    {
       "name": "s_9545e4dc22",
       "value": "J'ai compris, continuer"
     },
@@ -2159,6 +2523,10 @@
     {
       "name": "s_95a69206f7",
       "value": "Cet instant est désormais sur le papier"
+    },
+    {
+      "name": "s_960e2f7361",
+      "value": "Écrivez un nom"
     },
     {
       "name": "s_974bfbcc56",
@@ -2245,6 +2613,10 @@
       "value": "Brouillon enregistré"
     },
     {
+      "name": "s_9d972e7230",
+      "value": "Weibo"
+    },
+    {
       "name": "s_9ddfc6f8d5",
       "value": "Choisir les destinataires"
     },
@@ -2293,6 +2665,10 @@
       "value": "Rédaction en cours…"
     },
     {
+      "name": "s_a1293d0d15",
+      "value": "Un timbre, une lettre, et chaque lettre reçoit une réponse. Gratuit : 3 par semaine. Les timbres non utilisés s’accumulent."
+    },
+    {
       "name": "s_a20949550e",
       "value": "S'abonner"
     },
@@ -2337,6 +2713,10 @@
       "value": "Format de fichier incorrect — il est peut-être endommagé"
     },
     {
+      "name": "s_a50846ec66",
+      "value": "Carte des correspondants"
+    },
+    {
       "name": "s_a5b49a429e",
       "value": "Courage"
     },
@@ -2347,6 +2727,10 @@
     {
       "name": "s_a671f238f1",
       "value": "Rue"
+    },
+    {
+      "name": "s_a6b3821680",
+      "value": "Agréable"
     },
     {
       "name": "s_a7e0766525",
@@ -2381,10 +2765,6 @@
       "value": "Là où les pixels s'éteignent commence la nuit la plus profonde"
     },
     {
-      "name": "s_a9c8397cce",
-      "value": "Correspondants du monde"
-    },
-    {
       "name": "s_a9d57f8585",
       "value": "Écrire cet instant"
     },
@@ -2407,6 +2787,10 @@
     {
       "name": "s_abafd65e30",
       "value": "Bambou"
+    },
+    {
+      "name": "s_abf21e4e09",
+      "value": "Noter"
     },
     {
       "name": "s_aca36c266f",
@@ -2445,6 +2829,10 @@
       "value": "Nom du carnet"
     },
     {
+      "name": "s_ae49423591",
+      "value": "À l’heure choisie, un petit rappel s’affiche sur l’écran verrouillé et dans la Dynamic Island. Si vous avez déjà écrit ce jour-là, il ne s’affiche pas."
+    },
+    {
       "name": "s_ae7b18f8be",
       "value": "Touchez la boîte aux lettres pour envoyer à %s les pages cochées"
     },
@@ -2467,6 +2855,10 @@
     {
       "name": "s_b065d573da",
       "value": "Impossible d'écrire la lettre"
+    },
+    {
+      "name": "s_b08cdeb8a7",
+      "value": "Brouillard"
     },
     {
       "name": "s_b0e24833f7",
@@ -2493,6 +2885,10 @@
       "value": "Supprimer le compte"
     },
     {
+      "name": "s_b27ed81c0c",
+      "value": "Quinze correspondants à travers le monde vous répondent dans leur langue, avec une traduction au dos"
+    },
+    {
       "name": "s_b27fe843c8",
       "value": "Impossible d'enregistrer la lettre qui attendait sur le serveur"
     },
@@ -2515,6 +2911,10 @@
     {
       "name": "s_b3addb5e3f",
       "value": "Associé"
+    },
+    {
+      "name": "s_b3b3aad8cc",
+      "value": "Ouvrez cette réponse"
     },
     {
       "name": "s_b3f3b0c40c",
@@ -2553,12 +2953,20 @@
       "value": "Impossible de remettre ces pages"
     },
     {
+      "name": "s_b6fed9af83",
+      "value": "Date"
+    },
+    {
       "name": "s_b72205943e",
       "value": "Touchez « Obtenir le code » : nous l’enverrons à votre numéro actuel."
     },
     {
       "name": "s_b74d58bd95",
       "value": "« Le vent de printemps porte un recommencement. »"
+    },
+    {
+      "name": "s_b74e36c260",
+      "value": "Ajoute un bouton de recherche à droite de la barre d’onglets pour retrouver vos pages par mot-clé."
     },
     {
       "name": "s_b7607a6106",
@@ -2603,6 +3011,10 @@
     {
       "name": "s_b981bb73cb",
       "value": "La lumière de l'après-midi est douce. Toi aussi."
+    },
+    {
+      "name": "s_b9b46dfdea",
+      "value": "La réponse de %s est arrivée :\nouvrez votre « Courrier »"
     },
     {
       "name": "s_b9c6b284ee",
@@ -2655,6 +3067,10 @@
     {
       "name": "s_bd86a7ba02",
       "value": "Demande envoyée. L'abonnement démarrera dès qu'il sera approuvé."
+    },
+    {
+      "name": "s_bdba2be68c",
+      "value": "Écrire aux correspondants du monde entier est réservé aux membres : cette lettre n'est pas partie"
     },
     {
       "name": "s_bddddc8c10",
@@ -2745,6 +3161,14 @@
       "value": "Compte"
     },
     {
+      "name": "s_c4031b3ee9",
+      "value": "Quelque chose que tu voudrais garder ?"
+    },
+    {
+      "name": "s_c446cab9ee",
+      "value": "Adresse e-mail copiée : %s"
+    },
+    {
       "name": "s_c488684daf",
       "value": "Supprimer la photo"
     },
@@ -2777,6 +3201,10 @@
       "value": "Nouveau numéro"
     },
     {
+      "name": "s_c5d3aa4462",
+      "value": "Aucun résultat"
+    },
+    {
       "name": "s_c5e6652443",
       "value": "%s a déjà répondu plusieurs fois ce mois-ci. Une plume lente ; la suite le mois prochain."
     },
@@ -2803,6 +3231,10 @@
     {
       "name": "s_c7a3044d8f",
       "value": "Nouveau carnet"
+    },
+    {
+      "name": "s_c8356051fa",
+      "value": "Un timbre pour chaque lettre envoyée"
     },
     {
       "name": "s_c8d09cf955",
@@ -2917,10 +3349,6 @@
       "value": "Envoyé. Écrivez de nouvelles pages et revenez les envoyer."
     },
     {
-      "name": "s_ceab2d4c71",
-      "value": "Carte des correspondants"
-    },
-    {
       "name": "s_cf9d76b498",
       "value": "Découvrir Memoir Plus"
     },
@@ -2985,6 +3413,10 @@
       "value": "Erreur de synchronisation"
     },
     {
+      "name": "s_d6389cc426",
+      "value": "Plus longue série"
+    },
+    {
       "name": "s_d63d98608d",
       "value": "Fatigué"
     },
@@ -2993,8 +3425,16 @@
       "value": "Ouvrir la lettre"
     },
     {
+      "name": "s_d65522170f",
+      "value": "Racontez votre vie, souvent.\nChaque petit moment peut rester ici ; et quand vous aurez envie de le partager, envoyez-le à votre correspondant."
+    },
+    {
       "name": "s_d67f0e000d",
       "value": "Tous les papiers photo et mises en page de couverture"
+    },
+    {
+      "name": "s_d766900cbc",
+      "value": "Retrouvez des mots écrits dans vos titres et vos pages"
     },
     {
       "name": "s_d78cde076b",
@@ -3005,12 +3445,28 @@
       "value": "Après le changement, connectez-vous avec le nouveau numéro."
     },
     {
+      "name": "s_d89283676b",
+      "value": "Suivez-nous"
+    },
+    {
       "name": "s_d946dacd50",
       "value": "Bonheur"
     },
     {
+      "name": "s_d96d6f2e5f",
+      "value": "Rédaction du bilan…"
+    },
+    {
+      "name": "s_d9b59879f3",
+      "value": "Mois"
+    },
+    {
       "name": "s_d9b91c877d",
       "value": "Changer de papier"
+    },
+    {
+      "name": "s_dab4f23d78",
+      "value": "Désagréable"
     },
     {
       "name": "s_daf00cb705",
@@ -3033,6 +3489,10 @@
       "value": "« Un journal ne s'écrit pas pour autrui, mais pour soi plus tard. »"
     },
     {
+      "name": "s_dce5f6e4df",
+      "value": "Compte, numéro et connexion"
+    },
+    {
       "name": "s_dcf37c99eb",
       "value": "Le temps passe. Certains sentiments méritent de rester."
     },
@@ -3047,10 +3507,6 @@
     {
       "name": "s_df5dc2b3c5",
       "value": "**Le texte, les photos et les enregistrements que vous écrivez ne sont jamais envoyés à nos serveurs.** Ils restent sur votre appareil et se synchronisent entre vos appareils via votre propre iCloud, auquel nous n’avons pas accès."
-    },
-    {
-      "name": "s_df6331be72",
-      "value": "Les correspondants du monde sont réservés aux membres : cette lettre n'est pas partie"
     },
     {
       "name": "s_df73c654d2",
@@ -3089,8 +3545,20 @@
       "value": "Très agréable"
     },
     {
+      "name": "s_e2866d0815",
+      "value": "Xiaohongshu"
+    },
+    {
       "name": "s_e2aedf50f2",
       "value": "« S'accepter tel qu'on est maintenant : voilà le meilleur commencement. »"
+    },
+    {
+      "name": "s_e2d53a6d3a",
+      "value": "Réessayer"
+    },
+    {
+      "name": "s_e3c8a9d071",
+      "value": "Aucune page ne contient « %s »"
     },
     {
       "name": "s_e3e397c743",
@@ -3249,6 +3717,10 @@
       "value": "« Tu es déjà plus courageux qu'hier. »"
     },
     {
+      "name": "s_efce771fc5",
+      "value": "Aperçu de vos humeurs"
+    },
+    {
       "name": "s_efeb0dc955",
       "value": "Synchronisation iCloud"
     },
@@ -3257,8 +3729,20 @@
       "value": "Recherche de lieux à proximité…"
     },
     {
+      "name": "s_f02d71af1a",
+      "value": "Localisation désactivée : chaque réponse met un ou deux jours"
+    },
+    {
+      "name": "s_f04090805c",
+      "value": "Recherche"
+    },
+    {
       "name": "s_f075b5a3ad",
       "value": "Tout s'est tu : le moment d'écouter ce qui vient de l'intérieur."
+    },
+    {
+      "name": "s_f0b2b86513",
+      "value": "Vent fort"
     },
     {
       "name": "s_f2187b0114",
@@ -3369,6 +3853,10 @@
       "value": "Anxiété"
     },
     {
+      "name": "s_f8c5f7dd72",
+      "value": "À la fin de chaque semaine, ouvrez cette page pour y trouver son bilan (au moins 3 entrées avec une humeur dans la semaine)."
+    },
+    {
       "name": "s_f8d820eebf",
       "value": "%1$d / %2$d"
     },
@@ -3453,6 +3941,10 @@
       "value": "Passion"
     },
     {
+      "name": "s_fe3676e6f6",
+      "value": "Votre lettre est partie.\n%s vous répondra après l’avoir lue : dans quelques heures, dans votre Courrier."
+    },
+    {
       "name": "s_fe9ea3f070",
       "value": "Cette année"
     },
@@ -3507,162 +3999,6 @@
     {
       "name": "s_e15f73bdc6",
       "value": "Déjà Vu utilise l’appareil photo pour ajouter des photos à vos entrées."
-    },
-    {
-      "name": "s_ea5026fc0f",
-      "value": "VERSION DE TEST"
-    },
-    {
-      "name": "s_f93c4db3ab",
-      "value": "Livraison rapide des lettres"
-    },
-    {
-      "name": "s_bdfe921dd3",
-      "value": "1 min ≈ 1 jour : les réponses arrivent en 15 s à 3 min. Activé par défaut. Ne concerne que les lettres envoyées lorsqu’il est activé."
-    },
-    {
-      "name": "s_6ed1b2bd01",
-      "value": "Synchronisation cloud"
-    },
-    {
-      "name": "s_b9004e6f7b",
-      "value": "Désactivé"
-    },
-    {
-      "name": "s_f71802e114",
-      "value": "Vos journaux ne sont que sur cet appareil et seront perdus si vous supprimez l'app. Pensez à exporter régulièrement une sauvegarde."
-    },
-    {
-      "name": "s_0f449019e8",
-      "value": "Calcul…"
-    },
-    {
-      "name": "s_f6f7c46fd6",
-      "value": "Impossible d'ouvrir AppGallery"
-    },
-    {
-      "name": "s_d89283676b",
-      "value": "Suivez-nous"
-    },
-    {
-      "name": "s_2895d69933",
-      "value": "Avis et suggestions"
-    },
-    {
-      "name": "s_5cc6e4a916",
-      "value": "Aucun numéro associé"
-    },
-    {
-      "name": "s_486e6b598c",
-      "value": "Connectez-vous pour recevoir les lettres de votre correspondant"
-    },
-    {
-      "name": "s_dce5f6e4df",
-      "value": "Compte, numéro et connexion"
-    },
-    {
-      "name": "s_c446cab9ee",
-      "value": "Adresse e-mail copiée : %s"
-    },
-    {
-      "name": "s_e2866d0815",
-      "value": "Xiaohongshu"
-    },
-    {
-      "name": "s_21a8e41cf6",
-      "value": "Douyin"
-    },
-    {
-      "name": "s_9d972e7230",
-      "value": "Weibo"
-    },
-    {
-      "name": "s_02a00a2547",
-      "value": "Se connecter avec un HUAWEI ID"
-    },
-    {
-      "name": "s_d6389cc426",
-      "value": "Plus longue série"
-    },
-    {
-      "name": "s_efce771fc5",
-      "value": "Aperçu de vos humeurs"
-    },
-    {
-      "name": "s_26825deedb",
-      "value": "Évolution de l’humeur"
-    },
-    {
-      "name": "s_3c76ec910a",
-      "value": "Émotions les plus fréquentes"
-    },
-    {
-      "name": "s_85a1088852",
-      "value": "Météo et humeur"
-    },
-    {
-      "name": "s_67ad407dba",
-      "value": "Lieux et humeur"
-    },
-    {
-      "name": "s_09f515b893",
-      "value": "Jours et moments"
-    },
-    {
-      "name": "s_05a978d5cb",
-      "value": "La météo, les lieux, les jours et les moments s’affichent dès qu’un groupe compte au moins 3 entrées avec une humeur. Continuez d’écrire : les tendances apparaîtront peu à peu."
-    },
-    {
-      "name": "s_791054f6b1",
-      "value": "Encore quelques entrées pour voir la tendance"
-    },
-    {
-      "name": "s_a6b3821680",
-      "value": "Agréable"
-    },
-    {
-      "name": "s_dab4f23d78",
-      "value": "Désagréable"
-    },
-    {
-      "name": "s_0d05046a43",
-      "value": "Dégagé"
-    },
-    {
-      "name": "s_39b6b4c787",
-      "value": "Nuageux"
-    },
-    {
-      "name": "s_8995b89799",
-      "value": "Pluie"
-    },
-    {
-      "name": "s_7d742a7f9f",
-      "value": "Neige"
-    },
-    {
-      "name": "s_b08cdeb8a7",
-      "value": "Brouillard"
-    },
-    {
-      "name": "s_f0b2b86513",
-      "value": "Vent fort"
-    },
-    {
-      "name": "s_172fb7196f",
-      "value": "Matin"
-    },
-    {
-      "name": "s_1dfaab6548",
-      "value": "Après-midi"
-    },
-    {
-      "name": "s_76a4159492",
-      "value": "Soir"
-    },
-    {
-      "name": "s_0e458fad76",
-      "value": "Nuit"
     }
   ]
 }

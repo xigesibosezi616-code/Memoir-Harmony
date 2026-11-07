@@ -60,6 +60,11 @@
       "source": "Localizable",
       "comment": "网络错误"
     },
+    "s_03290288e1": {
+      "zh": "往期小结",
+      "source": "Localizable",
+      "comment": "情绪小结：看以前的"
+    },
     "s_0399ad7167": {
       "zh": "用户协议",
       "source": "Localizable",
@@ -92,6 +97,11 @@
       "source": "Localizable",
       "comment": "心情页第二步的情绪词（苹果「健康」的情绪标签之一）"
     },
+    "s_05a978d5cb": {
+      "zh": "天气、地点、星期和时段，每一组至少记 3 篇心情才显示。多写几篇，规律会慢慢浮出来。",
+      "source": "Localizable",
+      "comment": "写作统计：为什么有的卡片没出来"
+    },
     "s_05aa9400bd": {
       "zh": "厌恶",
       "source": "Localizable",
@@ -112,6 +122,11 @@
     "s_07315b84c5": {
       "zh": "显示自选的表情符号",
       "source": "Localizable"
+    },
+    "s_083af3c4ae": {
+      "zh": "邮票没领到，过一会儿再试",
+      "source": "Localizable",
+      "comment": "每周领邮票：领取失败"
     },
     "s_084f68942b": {
       "zh": "获取验证码",
@@ -163,6 +178,11 @@
       "zh": "「允许自己不开心，也是一种温柔」",
       "source": "Localizable"
     },
+    "s_09f515b893": {
+      "zh": "星期与时段",
+      "source": "Localizable",
+      "comment": "写作统计：星期几、一天里哪段时间的平均心情"
+    },
     "s_09f81f62fd": {
       "zh": "兴奋",
       "source": "Localizable",
@@ -206,14 +226,29 @@
       "zh": "定位已关闭，去设置里开启",
       "source": "Localizable"
     },
+    "s_0d05046a43": {
+      "zh": "晴",
+      "source": "Localizable",
+      "comment": "天气分类：晴"
+    },
     "s_0d4dd89acf": {
       "zh": "11 位手机号",
       "source": "Localizable"
+    },
+    "s_0d7248908c": {
+      "zh": "每周、每月、每年，一段小结和几条建议，陪你看清这段时间的心情。",
+      "source": "Localizable",
+      "comment": "情绪小结：非会员看到的说明"
     },
     "s_0e37efff8d": {
       "zh": "登录已过期，请重新登录",
       "source": "Localizable",
       "comment": "登录态失效"
+    },
+    "s_0e458fad76": {
+      "zh": "深夜",
+      "source": "Localizable",
+      "comment": "一天里的时段：23–5 点"
     },
     "s_0e978c435e": {
       "zh": "辛苦了。停在这里，握着手机，什么都不用做",
@@ -298,6 +333,11 @@
       "zh": "只记到城市，如「广州市」",
       "source": "Localizable"
     },
+    "s_13d5da7b00": {
+      "zh": "给你的日记本起个名字",
+      "source": "Localizable",
+      "comment": "新手指引：新建日记本页指名字输入框"
+    },
     "s_13d655e2da": {
       "zh": "%s是尺素里虚构的 AI 笔友。",
       "source": "Localizable",
@@ -317,6 +357,11 @@
       "source": "Localizable",
       "comment": "AI 限流"
     },
+    "s_14f2f7ca94": {
+      "zh": "笔友会用这个名字给你写信，之后在设置里也能改",
+      "source": "Localizable",
+      "comment": "给笔友起名那一栏下面的小字（首启页、老用户补起名页）。起名不能跳过"
+    },
     "s_15b21b73b7": {
       "zh": "信没能寄出：%s",
       "source": "Localizable",
@@ -335,6 +380,11 @@
       "zh": "选择相纸样式",
       "source": "Localizable"
     },
+    "s_167e9b5f39": {
+      "zh": "每周 20 张邮票",
+      "source": "Localizable",
+      "comment": "付费页会员权益第一条标题（会员每周 20 张邮票，见 Backend stamps.ts MEMBER_PACK）"
+    },
     "s_168b37f367": {
       "zh": "早起的时光，是属于自己的",
       "source": "Localizable"
@@ -348,9 +398,19 @@
       "zh": "关闭测试会员",
       "source": "Localizable"
     },
+    "s_172fb7196f": {
+      "zh": "早上",
+      "source": "Localizable",
+      "comment": "一天里的时段：5–11 点"
+    },
     "s_173e51e1e5": {
       "zh": "先验证当前手机号",
       "source": "Localizable"
+    },
+    "s_1774516a30": {
+      "zh": "就写在这一本里，\n点这里开始写",
+      "source": "Localizable",
+      "comment": "新手指引：做好日记本后指「就写在这本里」"
     },
     "s_17f7c3a2d7": {
       "zh": "墨绿",
@@ -360,6 +420,11 @@
       "zh": "尴尬",
       "source": "Localizable",
       "comment": "心情页第二步的情绪词（苹果「健康」的情绪标签之一）"
+    },
+    "s_18a4b0fa09": {
+      "zh": "这期小结没写成，下次打开会再试。",
+      "source": "Localizable",
+      "comment": "情绪小结生成失败"
     },
     "s_18cb8ddf9d": {
       "zh": "看原文",
@@ -427,6 +492,11 @@
       "source": "Localizable",
       "comment": "付费页：年付价格"
     },
+    "s_1dfaab6548": {
+      "zh": "下午",
+      "source": "Localizable",
+      "comment": "一天里的时段：11–17 点"
+    },
     "s_1e2443b94b": {
       "zh": "测试期间开通不收费，关掉后回到免费版。",
       "source": "Localizable"
@@ -465,6 +535,11 @@
     "s_215574245b": {
       "zh": "删除日记",
       "source": "Localizable"
+    },
+    "s_21a8e41cf6": {
+      "zh": "抖音",
+      "source": "Localizable",
+      "comment": "设置页底部官方账号：抖音的 logo（读屏念这个名字）。平台名"
     },
     "s_21f1e88275": {
       "zh": "登录",
@@ -538,18 +613,38 @@
       "zh": "这是「仅文字」的备份，导入后日记里不会有照片和录音。",
       "source": "Localizable"
     },
+    "s_26825deedb": {
+      "zh": "心情走势",
+      "source": "Localizable",
+      "comment": "写作统计：心情折线图的标题"
+    },
     "s_26f030bca7": {
       "zh": "等待生成…",
       "source": "Localizable"
+    },
+    "s_27e4fe4c3f": {
+      "zh": "好",
+      "source": "Localizable",
+      "comment": "新手指引：卡片上收起的按钮（寄出去了 / 结束语）"
     },
     "s_282ab93d10": {
       "zh": "总篇数",
       "source": "Localizable"
     },
+    "s_2870d2ab3b": {
+      "zh": "今雨与雅故",
+      "source": "Localizable",
+      "comment": "世界笔友（15 位住在各地的笔友）在界面上的名字：笔友地图标题、付费页会员权益。2026-10-27 起取代「世界笔友」；取自杜甫「旧雨今雨」，新友与故交。各语言不硬译典故，取本语言里同样雅的「新朋友与老朋友」"
+    },
     "s_287dbc9adc": {
       "zh": "沉思",
       "source": "Localizable",
       "comment": "默认心情名。key 是数据库里存的英文标识，不要改。"
+    },
+    "s_2895d69933": {
+      "zh": "反馈与建议",
+      "source": "Localizable",
+      "comment": "设置首页一行的名字，也是邮件主题"
     },
     "s_28c46f23f7": {
       "zh": "孤独",
@@ -627,6 +722,11 @@
       "source": "Localizable",
       "comment": "付费页：年付首年优惠价"
     },
+    "s_2ca9b1648a": {
+      "zh": "试着写下你的第一篇日记吧",
+      "source": "Localizable",
+      "comment": "新手指引：记录页指着「写」"
+    },
     "s_2d54b2d8e5": {
       "zh": "把此刻的想法留住，以后会感谢自己",
       "source": "Localizable"
@@ -674,7 +774,8 @@
     },
     "s_300ee58e24": {
       "zh": "心情",
-      "source": "Localizable"
+      "source": "Localizable",
+      "comment": "心情走势图的纵轴（读屏用）"
     },
     "s_3017ebc38b": {
       "zh": "自豪",
@@ -751,6 +852,11 @@
       "zh": "可跳过，之后在设置里也能改",
       "source": "Localizable"
     },
+    "s_369ff2e38f": {
+      "zh": "停一下，给今天写几行。",
+      "source": "Localizable",
+      "comment": "提醒写日记：锁屏实况 / 通知里的一句话"
+    },
     "s_36c6be2be0": {
       "zh": "在收件人里",
       "source": "Localizable",
@@ -788,6 +894,11 @@
       "source": "Localizable",
       "comment": "正文：墨迹已干的照片被取下后留下的痕迹，%@ 是日期"
     },
+    "s_39b6b4c787": {
+      "zh": "多云",
+      "source": "Localizable",
+      "comment": "天气分类：多云 / 阴"
+    },
     "s_39bc5e6806": {
       "zh": "这个备份包加密了",
       "source": "Localizable"
@@ -796,15 +907,20 @@
       "zh": "写作日历",
       "source": "Localizable"
     },
+    "s_39d12e73fb": {
+      "zh": "领取",
+      "source": "Localizable",
+      "comment": "每周领邮票的小卡片：领取按钮"
+    },
     "s_3a31adc3b5": {
       "zh": "满足",
       "source": "Localizable",
       "comment": "心情页第二步的情绪词（苹果「健康」的情绪标签之一）"
     },
-    "s_3a5fd35d41": {
-      "zh": "定位没开，世界笔友的回信都按一两天算",
+    "s_3a81e4d1ae": {
+      "zh": "你已经写下一篇日记了，\n去「邮筒」试着把它寄给你的笔友",
       "source": "Localizable",
-      "comment": "世界笔友地图"
+      "comment": "新手指引：写好第一篇，底栏上方指「邮筒」"
     },
     "s_3aaae04c18": {
       "zh": "月度与年度回望",
@@ -856,6 +972,11 @@
       "zh": "搜索地点",
       "source": "Localizable"
     },
+    "s_3c76ec910a": {
+      "zh": "最常出现的情绪",
+      "source": "Localizable",
+      "comment": "写作统计：最常选的情绪词"
+    },
     "s_3d04880897": {
       "zh": "开始导入",
       "source": "Localizable"
@@ -868,6 +989,11 @@
       "zh": "真好。把这一刻好好收着",
       "source": "Localizable",
       "comment": "心情弹窗：心花怒放那档的提示"
+    },
+    "s_3d82a5c98a": {
+      "zh": "双指捏一捏，一屏看更多日记",
+      "source": "Localizable",
+      "comment": "大屏模式的捏合小彩蛋提示"
     },
     "s_3d93dce578": {
       "zh": "这个备份包需要密码",
@@ -902,6 +1028,11 @@
     "s_3fb4374f11": {
       "zh": "斩竹漂塘，纸上还留着竹的青气",
       "source": "Localizable"
+    },
+    "s_3fd47f4390": {
+      "zh": "邮票夹里有 %d 张邮票",
+      "source": "Localizable",
+      "comment": "笔友地图右上角邮票数（读屏）"
     },
     "s_40525a7328": {
       "zh": "保存失败",
@@ -974,6 +1105,11 @@
       "source": "Localizable",
       "comment": "备份导出错误"
     },
+    "s_43c9272ab2": {
+      "zh": "先给自己做一本日记本",
+      "source": "Localizable",
+      "comment": "新手指引：选日记本页指「想做一本新的日记？」"
+    },
     "s_446462a28f": {
       "zh": "「平凡的一天，也藏着不平凡的感受」",
       "source": "Localizable"
@@ -987,6 +1123,11 @@
       "zh": "信箱",
       "source": "Localizable"
     },
+    "s_451b86707b": {
+      "zh": "周",
+      "source": "Localizable",
+      "comment": "情绪小结：按周"
+    },
     "s_45260c7012": {
       "zh": "每年 %s。到期前 24 小时内自动续费，可随时在系统设置的 Apple 账户 → 订阅中取消。",
       "source": "Localizable",
@@ -995,6 +1136,11 @@
     "s_4562024dde": {
       "zh": "应用",
       "source": "Localizable"
+    },
+    "s_45ea420b4e": {
+      "zh": "今天的那页还空着。",
+      "source": "Localizable",
+      "comment": "提醒写日记：锁屏实况 / 通知里的一句话"
     },
     "s_4696b4622d": {
       "zh": "温柔的、话少的、爱引诗的……笔友的性格由你选",
@@ -1008,6 +1154,11 @@
       "zh": "「夏天太长了，需要一些文字来乘凉」",
       "source": "Localizable"
     },
+    "s_479fcc1cc0": {
+      "zh": "稍后",
+      "source": "Localizable",
+      "comment": "每周领邮票的小卡片：先关掉，下次进邮筒页再出"
+    },
     "s_482d201d8b": {
       "zh": "请绑定手机号以确保账号可找回",
       "source": "Localizable"
@@ -1015,6 +1166,11 @@
     "s_482d69aab3": {
       "zh": "%ds",
       "source": "Localizable"
+    },
+    "s_486e6b598c": {
+      "zh": "登录后才能收到笔友的回信",
+      "source": "Localizable",
+      "comment": "设置首页账户卡（没登录时）：「登录 / 注册」下面那行说明"
     },
     "s_487942b7ff": {
       "zh": "欢迎使用尺素。在开始之前，请您阅读并同意《隐私政策》与《用户协议》。",
@@ -1085,6 +1241,11 @@
       "zh": "仅更换主题",
       "source": "Localizable"
     },
+    "s_4cbf770f3e": {
+      "zh": "情绪小结",
+      "source": "Localizable",
+      "comment": "写作统计：会员的情绪小结卡片标题"
+    },
     "s_4cd30ef91e": {
       "zh": "保存草稿",
       "source": "Localizable"
@@ -1106,6 +1267,11 @@
       "zh": "全部日记",
       "source": "Localizable",
       "comment": "书架上的第一本：全部日记\n全部日记页标题"
+    },
+    "s_4e664be1f8": {
+      "zh": "试着写下你的第一篇日记吧，\n回到「记录」",
+      "source": "Localizable",
+      "comment": "新手指引：不在记录页时，底栏上方指「记录」"
     },
     "s_4e6b4fffe0": {
       "zh": "位置精度",
@@ -1144,6 +1310,11 @@
     "s_50f87ef514": {
       "zh": "这段时间还没有记录心情",
       "source": "Localizable"
+    },
+    "s_51070c8fd7": {
+      "zh": "提醒写日记",
+      "source": "Localizable",
+      "comment": "设置 → 日记：提醒写日记的开关"
     },
     "s_514c04d14d": {
       "zh": "没有住址 · 就在你身边",
@@ -1264,6 +1435,11 @@
       "zh": "清理残留文件？",
       "source": "Localizable"
     },
+    "s_58db88cd01": {
+      "zh": "这周的邮票到了",
+      "source": "Localizable",
+      "comment": "每周领邮票的小卡片：标题"
+    },
     "s_596b003c23": {
       "zh": "茄紫",
       "source": "Localizable"
@@ -1313,6 +1489,11 @@
       "zh": "拨打 %s",
       "source": "Localizable",
       "comment": "求助卡片（危险的那封世界笔友来信下面）：拨号按钮；%@ 是电话号码"
+    },
+    "s_5cc6e4a916": {
+      "zh": "还没有绑定手机号",
+      "source": "Localizable",
+      "comment": "设置首页账户卡里的提醒行（后面一个红点），点进去去绑定"
     },
     "s_5cd32361fa": {
       "zh": "宫格",
@@ -1367,6 +1548,11 @@
       "zh": "向右翻阅",
       "source": "Localizable"
     },
+    "s_5f402594e5": {
+      "zh": "每过完一年，打开这里就会有一份那一年的小结（那一年要记满 3 篇心情）。",
+      "source": "Localizable",
+      "comment": "情绪小结：还没有年小结"
+    },
     "s_5f7e5d5768": {
       "zh": "播放中",
       "source": "Localizable"
@@ -1418,6 +1604,11 @@
       "zh": "心情图标",
       "source": "Localizable"
     },
+    "s_640ccbdbf8": {
+      "zh": "写好了，点这里保存",
+      "source": "Localizable",
+      "comment": "新手指引：写了东西后指 ✓"
+    },
     "s_643e29f431": {
       "zh": "写完了，此刻的心情是？",
       "source": "Localizable",
@@ -1436,6 +1627,11 @@
       "zh": "打开",
       "source": "Localizable",
       "comment": "世界笔友地图：打开定位"
+    },
+    "s_6685eb0b7f": {
+      "zh": "到点发一条通知提醒一下；那天写过了就不打扰。",
+      "source": "Localizable",
+      "comment": "设置 → 日记 → 提醒写日记的说明（iOS 18–25，只有普通通知）"
     },
     "s_674bd11a2a": {
       "zh": "心花怒放",
@@ -1460,6 +1656,11 @@
       "zh": "荧光笔",
       "source": "Localizable",
       "comment": "正文选中文字的菜单：用荧光笔标记"
+    },
+    "s_67ad407dba": {
+      "zh": "地点与心情",
+      "source": "Localizable",
+      "comment": "写作统计：常写日记的地方的平均心情"
     },
     "s_67f415d86d": {
       "zh": "邮筒里还没有信",
@@ -1505,6 +1706,11 @@
       "source": "Localizable",
       "comment": "正文选中文字的菜单：去掉荧光笔"
     },
+    "s_6aba76608a": {
+      "zh": "笔在桌上，纸也铺好了。",
+      "source": "Localizable",
+      "comment": "提醒写日记：锁屏实况 / 通知里的一句话"
+    },
     "s_6aed7c48be": {
       "zh": "绑定",
       "source": "Localizable"
@@ -1535,6 +1741,16 @@
       "zh": "有同名的日记本",
       "source": "Localizable",
       "comment": "导入备份时遇到同名日记本的弹窗标题"
+    },
+    "s_6ba7736cd2": {
+      "zh": "每过完一个月，打开这里就会有一份那个月的小结（那个月要记满 3 篇心情）。",
+      "source": "Localizable",
+      "comment": "情绪小结：还没有月小结"
+    },
+    "s_6c01b0cfd0": {
+      "zh": "去登录",
+      "source": "Localizable",
+      "comment": "新手指引：没登录时卡片上的按钮"
     },
     "s_6c14bd7f6f": {
       "zh": "关闭",
@@ -1571,9 +1787,19 @@
       "source": "Localizable",
       "comment": "心情弹窗：九档档名 8"
     },
+    "s_6e02b95e03": {
+      "zh": "今天过得怎么样？写两句也好。",
+      "source": "Localizable",
+      "comment": "提醒写日记：锁屏实况 / 通知里的一句话"
+    },
     "s_6e5c04b091": {
       "zh": "每个主题配一个图标。以后新增主题时，这里也会多一个。",
       "source": "Localizable"
+    },
+    "s_6e708ba759": {
+      "zh": "重复",
+      "source": "Localizable",
+      "comment": "设置 → 日记 → 提醒写日记：一周里哪几天提醒"
     },
     "s_6ec8fe27cd": {
       "zh": "重新寄出",
@@ -1582,6 +1808,11 @@
     "s_6efeb2c455": {
       "zh": "「过去的事情不会消失，只是在等你回头看」",
       "source": "Localizable"
+    },
+    "s_6f14c2641c": {
+      "zh": "年",
+      "source": "Localizable",
+      "comment": "情绪小结：按年"
     },
     "s_6f69dd45f8": {
       "zh": "重录",
@@ -1685,6 +1916,11 @@
       "zh": "「一支笔，一页纸，就是一个世界」",
       "source": "Localizable"
     },
+    "s_76a4159492": {
+      "zh": "晚上",
+      "source": "Localizable",
+      "comment": "一天里的时段：17–23 点"
+    },
     "s_76ce8e3d5e": {
       "zh": "已同步",
       "source": "Localizable"
@@ -1718,6 +1954,11 @@
       "zh": "恢复购买",
       "source": "Localizable"
     },
+    "s_791054f6b1": {
+      "zh": "再写几篇，就能看出走势",
+      "source": "Localizable",
+      "comment": "写作统计：心情走势点太少时"
+    },
     "s_7945500987": {
       "zh": "从相册选照片",
       "source": "Localizable"
@@ -1726,10 +1967,20 @@
       "zh": "换绑手机号",
       "source": "Localizable"
     },
+    "s_79fc2f66bb": {
+      "zh": "通知没有打开，提醒发不出来。",
+      "source": "Localizable",
+      "comment": "设置 → 日记 → 提醒写日记：系统设置里关了尺素的通知，后面跟一个「去设置」按钮"
+    },
     "s_7afd163467": {
       "zh": "希望这短短的一会儿，让你好受了一点",
       "source": "Localizable",
       "comment": "心情弹窗：呼吸引导做完后的收尾（只说希望，不许写疗效）"
+    },
+    "s_7b8bf30fdb": {
+      "zh": "趁今天还没过完，留一页给它。",
+      "source": "Localizable",
+      "comment": "提醒写日记：锁屏实况 / 通知里的一句话"
     },
     "s_7bb5b11a5d": {
       "zh": "感恩",
@@ -1759,6 +2010,11 @@
       "source": "Localizable",
       "comment": "寄信被拦：邮票用完了"
     },
+    "s_7d742a7f9f": {
+      "zh": "雪",
+      "source": "Localizable",
+      "comment": "天气分类：雪（含雨夹雪、冰雹）"
+    },
     "s_7d84c682b8": {
       "zh": "封面颜色",
       "source": "Localizable"
@@ -1774,7 +2030,8 @@
     },
     "s_7debf9cb03": {
       "zh": "设置",
-      "source": "Localizable"
+      "source": "Localizable",
+      "comment": "设置页大标题"
     },
     "s_7ebd4ae074": {
       "zh": "肯特",
@@ -1793,6 +2050,11 @@
     "s_7fbe49401c": {
       "zh": "绑定手机号",
       "source": "Localizable"
+    },
+    "s_803a50292d": {
+      "zh": "登录尺素账号后，每过完一期就会自动写一份小结。",
+      "source": "Localizable",
+      "comment": "会员但没登录：情绪小结要账号"
     },
     "s_805a0473b6": {
       "zh": "「今天也是值得被记住的一天」",
@@ -1839,6 +2101,11 @@
       "source": "Localizable",
       "comment": "默认心情名。key 是数据库里存的英文标识，不要改。"
     },
+    "s_82a71e9578": {
+      "zh": "写几句今天的事，\n也可以点这里拍一张照片",
+      "source": "Localizable",
+      "comment": "新手指引：写日记页没写东西时指相机"
+    },
     "s_82aa40f702": {
       "zh": "共 %d 页 · 约 %s",
       "source": "Localizable",
@@ -1878,6 +2145,11 @@
     "s_84476c8174": {
       "zh": "定位",
       "source": "Localizable"
+    },
+    "s_85a1088852": {
+      "zh": "天气与心情",
+      "source": "Localizable",
+      "comment": "写作统计：不同天气下的平均心情"
     },
     "s_85a35ccdd6": {
       "zh": "合并到同名日记本",
@@ -1951,6 +2223,16 @@
       "source": "Localizable",
       "comment": "备份导出错误，%@ 是底层原因"
     },
+    "s_8995b89799": {
+      "zh": "雨",
+      "source": "Localizable",
+      "comment": "天气分类：雨（含雷雨、毛毛雨）"
+    },
+    "s_89b4aa6364": {
+      "zh": "时间",
+      "source": "Localizable",
+      "comment": "设置 → 日记 → 提醒写日记：几点提醒"
+    },
     "s_89c7b03a96": {
       "zh": "排法",
       "source": "Localizable",
@@ -1989,6 +2271,11 @@
     "s_8b5b1182d2": {
       "zh": "未登录 iCloud",
       "source": "Localizable"
+    },
+    "s_8bfd252f98": {
+      "zh": "挑一个喜欢的封面，\n好了点这里",
+      "source": "Localizable",
+      "comment": "新手指引：新建日记本页起好名后指「创建」"
     },
     "s_8c276c1fea": {
       "zh": "隐私政策",
@@ -2031,11 +2318,22 @@
     },
     "s_8dcc9a2d73": {
       "zh": "笔友",
-      "source": "Localizable"
+      "source": "Localizable",
+      "comment": "还没给笔友起名时，对笔友的称呼"
     },
     "s_8e39a34dcc": {
       "zh": "「一杯茶的时间，刚好够写一段心情」",
       "source": "Localizable"
+    },
+    "s_8e54b4b852": {
+      "zh": "放进邮票夹了",
+      "source": "Localizable",
+      "comment": "每周领邮票的小卡片：领到之后（上面一行是「+20」）"
+    },
+    "s_8eb2a62b5d": {
+      "zh": "搜索日记",
+      "source": "Localizable",
+      "comment": "搜索框占位"
     },
     "s_8ec3a93dbd": {
       "zh": "暂时无法连接 App Store，请稍后再试",
@@ -2106,9 +2404,19 @@
       "zh": "「文字是对抗遗忘的最温柔的方式」",
       "source": "Localizable"
     },
+    "s_91d339156f": {
+      "zh": "有一封来自%s的回信，\n去「邮筒」看看",
+      "source": "Localizable",
+      "comment": "新手指引：第一封回信到了，不在邮筒页时指「邮筒」，%@ 是写信人"
+    },
     "s_91e5f2c416": {
       "zh": "「不必假装坚强，这里只有你」",
       "source": "Localizable"
+    },
+    "s_9289668c74": {
+      "zh": "登录之后，就能把日记寄给笔友",
+      "source": "Localizable",
+      "comment": "新手指引：寄信那一步没登录时的卡片"
     },
     "s_930c3a22eb": {
       "zh": "「一个人的时候，文字就是最好的陪伴」",
@@ -2136,6 +2444,11 @@
       "source": "Localizable",
       "comment": "求助卡片（危险的那封世界笔友来信下面）：说明"
     },
+    "s_94aae40757": {
+      "zh": "%d 篇日记",
+      "source": "Localizable",
+      "comment": "搜索结果列表的小标题：搜到几篇（避开单复数：外语写成「日记：N」）"
+    },
     "s_9545e4dc22": {
       "zh": "我已了解，继续",
       "source": "Localizable"
@@ -2147,6 +2460,11 @@
     "s_95a69206f7": {
       "zh": "这一刻已经落在纸上",
       "source": "Localizable"
+    },
+    "s_960e2f7361": {
+      "zh": "写一个名字",
+      "source": "Localizable",
+      "comment": "给笔友起名的输入框里的提示（首启页、补起名页、设置里的笔友名）。笔友没有默认名，必须由用户自己起"
     },
     "s_974bfbcc56": {
       "zh": "极夜：极圈内冬季太阳终日不出地平线的现象，挪威特罗姆瑟每年约十一月底至次年一月中旬。系统级深色模式：Apple 于 2019 年随 iOS 13 推出 Dark Mode，同年 Google 在 Android 10 加入系统级深色主题。OLED 屏幕显示纯黑时，像素不发光。",
@@ -2241,6 +2559,11 @@
       "source": "Localizable",
       "comment": "草稿保存成功提示"
     },
+    "s_9d972e7230": {
+      "zh": "微博",
+      "source": "Localizable",
+      "comment": "设置页底部官方账号：微博的 logo（读屏念这个名字）。平台名"
+    },
     "s_9ddfc6f8d5": {
       "zh": "挑选收件人",
       "source": "Localizable",
@@ -2293,6 +2616,11 @@
       "zh": "正在写信…",
       "source": "Localizable"
     },
+    "s_a1293d0d15": {
+      "zh": "一张邮票寄一封信，每封都有回信；免费每周 3 张，没用完的一直攒着",
+      "source": "Localizable",
+      "comment": "付费页会员权益第一条说明（免费每周 3 张，见 FREE_PACK；邮票不清空）"
+    },
     "s_a20949550e": {
       "zh": "开通",
       "source": "Localizable"
@@ -2341,6 +2669,11 @@
       "source": "Localizable",
       "comment": "备份加解密错误"
     },
+    "s_a50846ec66": {
+      "zh": "笔友地图",
+      "source": "Localizable",
+      "comment": "邮筒页左上角入口（读屏），打开「今雨与雅故」地图"
+    },
     "s_a5b49a429e": {
       "zh": "勇敢",
       "source": "Localizable",
@@ -2354,6 +2687,11 @@
     "s_a671f238f1": {
       "zh": "街道",
       "source": "Localizable"
+    },
+    "s_a6b3821680": {
+      "zh": "愉快",
+      "source": "Localizable",
+      "comment": "心情走势纵轴顶端"
     },
     "s_a7e0766525": {
       "zh": "全部来信",
@@ -2391,11 +2729,6 @@
       "source": "Localizable",
       "comment": "主题「极夜」在主题列表里的副标题（OLED 屏上黑色像素是熄灭的）"
     },
-    "s_a9c8397cce": {
-      "zh": "世界笔友",
-      "source": "Localizable",
-      "comment": "世界笔友地图：标题"
-    },
     "s_a9d57f8585": {
       "zh": "写下这一刻",
       "source": "Localizable"
@@ -2420,6 +2753,11 @@
     "s_abafd65e30": {
       "zh": "素笺",
       "source": "Localizable"
+    },
+    "s_abf21e4e09": {
+      "zh": "记录一下",
+      "source": "Localizable",
+      "comment": "提醒写日记：锁屏实况上的按钮，点了去写日记"
     },
     "s_aca36c266f": {
       "zh": "「时间不会等你，但文字会」",
@@ -2460,6 +2798,11 @@
       "zh": "日记本名称",
       "source": "Localizable"
     },
+    "s_ae49423591": {
+      "zh": "到点在锁屏和灵动岛上轻轻提醒一下；那天写过了就不打扰。",
+      "source": "Localizable",
+      "comment": "设置 → 日记 → 提醒写日记的说明（iOS 26 起，用锁屏实况和灵动岛）"
+    },
     "s_ae7b18f8be": {
       "zh": "点邮筒，把勾上的日记寄给%s",
       "source": "Localizable"
@@ -2484,6 +2827,11 @@
     "s_b065d573da": {
       "zh": "写信失败",
       "source": "Localizable"
+    },
+    "s_b08cdeb8a7": {
+      "zh": "雾霾",
+      "source": "Localizable",
+      "comment": "天气分类：雾、霾、沙尘"
     },
     "s_b0e24833f7": {
       "zh": "展开",
@@ -2512,6 +2860,11 @@
       "zh": "注销账号",
       "source": "Localizable"
     },
+    "s_b27ed81c0c": {
+      "zh": "十五位住在世界各地的笔友，用母语给你回信，信纸背面附上译文",
+      "source": "Localizable",
+      "comment": "付费页会员权益：世界笔友（说明）"
+    },
     "s_b27fe843c8": {
       "zh": "没能收下服务器上的回信",
       "source": "Localizable",
@@ -2537,6 +2890,11 @@
     "s_b3addb5e3f": {
       "zh": "已绑定",
       "source": "Localizable"
+    },
+    "s_b3b3aad8cc": {
+      "zh": "点开这封回信",
+      "source": "Localizable",
+      "comment": "新手指引：信箱里框住第一封回信"
     },
     "s_b3f3b0c40c": {
       "zh": "已寄出，回信会在三天内寄到你的信箱",
@@ -2577,6 +2935,11 @@
       "source": "Localizable",
       "comment": "退信不寄了，写库失败"
     },
+    "s_b6fed9af83": {
+      "zh": "日期",
+      "source": "Localizable",
+      "comment": "心情走势图的横轴（读屏用）"
+    },
     "s_b72205943e": {
       "zh": "点「获取验证码」，我们会发送到你当前绑定的手机号。",
       "source": "Localizable"
@@ -2584,6 +2947,11 @@
     "s_b74d58bd95": {
       "zh": "「春天的风里藏着新的开始」",
       "source": "Localizable"
+    },
+    "s_b74e36c260": {
+      "zh": "打开后，底栏右边多一个搜索按钮，可以按关键字找写过的日记。",
+      "source": "Localizable",
+      "comment": "设置 → 外观「搜索日记」开关下面的说明"
     },
     "s_b7607a6106": {
       "zh": "设为封面",
@@ -2634,6 +3002,11 @@
     "s_b981bb73cb": {
       "zh": "午后的光线很温柔，你也是",
       "source": "Localizable"
+    },
+    "s_b9b46dfdea": {
+      "zh": "%s的回信到了，\n点开「信箱」看看",
+      "source": "Localizable",
+      "comment": "新手指引：第一封回信到了，邮筒页指「信箱」，%@ 是写信人"
     },
     "s_b9c6b284ee": {
       "zh": "你自己起名的笔友，用你的语言写信。",
@@ -2692,6 +3065,11 @@
       "zh": "已提交，等待批准后会员会自动生效",
       "source": "Localizable",
       "comment": "付费页：购买等待批准（家长批准等）"
+    },
+    "s_bdba2be68c": {
+      "zh": "给各地的笔友写信是尺素会员的，这封信没能寄出",
+      "source": "Localizable",
+      "comment": "寄给世界笔友被拦：不是会员"
     },
     "s_bddddc8c10": {
       "zh": "「改变不必是惊天动地的，写下来就是开始」",
@@ -2786,6 +3164,16 @@
       "zh": "账户",
       "source": "Localizable"
     },
+    "s_c4031b3ee9": {
+      "zh": "有什么想记下来的吗？",
+      "source": "Localizable",
+      "comment": "提醒写日记：锁屏实况 / 通知里的一句话"
+    },
+    "s_c446cab9ee": {
+      "zh": "邮箱地址已复制：%s",
+      "source": "Localizable",
+      "comment": "反馈与建议：手机上没有邮件 App 时"
+    },
     "s_c488684daf": {
       "zh": "删除照片",
       "source": "Localizable"
@@ -2821,6 +3209,11 @@
       "zh": "新手机号",
       "source": "Localizable"
     },
+    "s_c5d3aa4462": {
+      "zh": "没有找到",
+      "source": "Localizable",
+      "comment": "搜索页：没有搜到任何日记时的标题"
+    },
     "s_c5e6652443": {
       "zh": "这个月%s已经回过几封了。它写信慢，下个月再续。",
       "source": "Localizable",
@@ -2850,6 +3243,11 @@
     "s_c7a3044d8f": {
       "zh": "新建日记本",
       "source": "Localizable"
+    },
+    "s_c8356051fa": {
+      "zh": "寄信时，一封贴一张",
+      "source": "Localizable",
+      "comment": "每周领邮票的小卡片：说明"
     },
     "s_c8d09cf955": {
       "zh": "默认",
@@ -2975,11 +3373,6 @@
       "zh": "已寄出，写了新日记可以再来寄",
       "source": "Localizable"
     },
-    "s_ceab2d4c71": {
-      "zh": "世界笔友地图",
-      "source": "Localizable",
-      "comment": "邮筒页左上角入口（读屏）"
-    },
     "s_cf9d76b498": {
       "zh": "了解尺素会员",
       "source": "Localizable"
@@ -3051,6 +3444,11 @@
       "zh": "同步异常",
       "source": "Localizable"
     },
+    "s_d6389cc426": {
+      "zh": "最长连续",
+      "source": "Localizable",
+      "comment": "写作统计第一张卡片：历史上最长的连续写作天数（只升不降）"
+    },
     "s_d63d98608d": {
       "zh": "疲惫",
       "source": "Localizable",
@@ -3060,9 +3458,19 @@
       "zh": "拆开这封信",
       "source": "Localizable"
     },
+    "s_d65522170f": {
+      "zh": "请多记录你的生活。\n点点滴滴都可以留在这里，想分享了，就寄给你的笔友。",
+      "source": "Localizable",
+      "comment": "新手指引：读完第一封回信后的结束语"
+    },
     "s_d67f0e000d": {
       "zh": "全部相纸与封面版式",
       "source": "Localizable"
+    },
+    "s_d766900cbc": {
+      "zh": "搜标题和正文里写过的字",
+      "source": "Localizable",
+      "comment": "搜索页：还没输入关键字时的说明"
     },
     "s_d78cde076b": {
       "zh": "已开启",
@@ -3072,15 +3480,35 @@
       "zh": "换绑后，请用新手机号登录。",
       "source": "Localizable"
     },
+    "s_d89283676b": {
+      "zh": "关注我们",
+      "source": "Localizable",
+      "comment": "设置页最底下，一排官方账号小 logo（App Store、小红书、抖音、微博）上面的小标题"
+    },
     "s_d946dacd50": {
       "zh": "开心",
       "source": "Localizable",
       "comment": "心情页第二步的情绪词（苹果「健康」的情绪标签之一）"
     },
+    "s_d96d6f2e5f": {
+      "zh": "正在写这一期的小结…",
+      "source": "Localizable",
+      "comment": "情绪小结生成中"
+    },
+    "s_d9b59879f3": {
+      "zh": "月",
+      "source": "Localizable",
+      "comment": "情绪小结：按月"
+    },
     "s_d9b91c877d": {
       "zh": "换相纸",
       "source": "Localizable",
       "comment": "正文照片菜单：换相纸样式"
+    },
+    "s_dab4f23d78": {
+      "zh": "低落",
+      "source": "Localizable",
+      "comment": "心情走势纵轴底端"
     },
     "s_daf00cb705": {
       "zh": "傍晚的城市很美，你今天也是",
@@ -3102,6 +3530,11 @@
       "zh": "「日记不是给别人看的，是给未来的自己」",
       "source": "Localizable"
     },
+    "s_dce5f6e4df": {
+      "zh": "账号、手机号与登录方式",
+      "source": "Localizable",
+      "comment": "设置首页账户卡：名字下面那行说明（点进去是账号页）"
+    },
     "s_dcf37c99eb": {
       "zh": "时间在走，有些感受值得留下",
       "source": "Localizable"
@@ -3117,11 +3550,6 @@
     "s_df5dc2b3c5": {
       "zh": "**您写下的日记正文、照片与录音不会上传到我们的服务器。** 它们保存在您的设备上，并通过您本人的 iCloud 在您的设备之间同步，我们无法访问也无法读取。",
       "source": "Localizable"
-    },
-    "s_df6331be72": {
-      "zh": "世界笔友是尺素会员的，这封信没能寄出",
-      "source": "Localizable",
-      "comment": "寄给世界笔友被拦：不是会员"
     },
     "s_df73c654d2": {
       "zh": "生成备份包",
@@ -3162,9 +3590,24 @@
       "source": "Localizable",
       "comment": "心情弹窗：滑杆右端的刻度说明"
     },
+    "s_e2866d0815": {
+      "zh": "小红书",
+      "source": "Localizable",
+      "comment": "设置页底部官方账号：小红书的 logo（读屏念这个名字）。平台名"
+    },
     "s_e2aedf50f2": {
       "zh": "「接纳此刻的自己，是最好的开始」",
       "source": "Localizable"
+    },
+    "s_e2d53a6d3a": {
+      "zh": "重试",
+      "source": "Localizable",
+      "comment": "情绪小结没写成时重试"
+    },
+    "s_e3c8a9d071": {
+      "zh": "没有含「%s」的日记",
+      "source": "Localizable",
+      "comment": "搜索页：没搜到时的说明，%@ 是用户输入的关键字（引号写在译文里，各语言用自己的引号）"
     },
     "s_e3e397c743": {
       "zh": "绑定 Apple ID",
@@ -3330,6 +3773,11 @@
       "zh": "「你已经比昨天更勇敢了」",
       "source": "Localizable"
     },
+    "s_efce771fc5": {
+      "zh": "情绪捕捉",
+      "source": "Localizable",
+      "comment": "写作统计：情绪那一段的标题"
+    },
     "s_efeb0dc955": {
       "zh": "iCloud 同步",
       "source": "Localizable"
@@ -3338,9 +3786,24 @@
       "zh": "正在找附近的地点…",
       "source": "Localizable"
     },
+    "s_f02d71af1a": {
+      "zh": "定位没开，各地笔友的回信都按一两天算",
+      "source": "Localizable",
+      "comment": "笔友地图：没给定位时的提示"
+    },
+    "s_f04090805c": {
+      "zh": "搜索",
+      "source": "Localizable",
+      "comment": "搜索页标题"
+    },
     "s_f075b5a3ad": {
       "zh": "万籁俱寂，正好听听内心的声音",
       "source": "Localizable"
+    },
+    "s_f0b2b86513": {
+      "zh": "大风",
+      "source": "Localizable",
+      "comment": "天气分类：大风"
     },
     "s_f2187b0114": {
       "zh": "请求已取消",
@@ -3463,6 +3926,11 @@
       "source": "Localizable",
       "comment": "心情页第二步的情绪词（苹果「健康」的情绪标签之一）"
     },
+    "s_f8c5f7dd72": {
+      "zh": "每过完一周，打开这里就会有一份那一周的小结（那一周要记满 3 篇心情）。",
+      "source": "Localizable",
+      "comment": "情绪小结：还没有周小结"
+    },
     "s_f8d820eebf": {
       "zh": "%1$d / %2$d",
       "source": "Localizable"
@@ -3556,6 +4024,11 @@
       "zh": "热情",
       "source": "Localizable",
       "comment": "心情页第二步的情绪词（苹果「健康」的情绪标签之一）"
+    },
+    "s_fe3676e6f6": {
+      "zh": "信寄出去了。\n%s读完会给你回信，几个小时后就到，会放进信箱。",
+      "source": "Localizable",
+      "comment": "新手指引：第一封寄出后的卡片，%@ 是笔友名"
     },
     "s_fe9ea3f070": {
       "zh": "今年",
@@ -3742,25 +4215,121 @@
       "zh": "华为账号绑定成功",
       "source": "Hand"
     },
+    "s_0f449019e8": {
+      "zh": "统计中…",
+      "source": "Hand"
+    },
     "s_6ed1b2bd01": {
       "zh": "云同步",
-      "source": "HAND"
+      "source": "Hand"
     },
     "s_b9004e6f7b": {
       "zh": "未开启",
-      "source": "HAND"
+      "source": "Hand"
     },
     "s_f71802e114": {
       "zh": "日记只保存在这台设备上，卸载会丢失。建议定期「导出备份」。",
-      "source": "HAND"
+      "source": "Hand"
     },
-    "s_0f449019e8": {
-      "zh": "统计中…",
-      "source": "HAND"
+    "s_02a00a2547": {
+      "zh": "华为账号登录",
+      "source": "Hand"
     },
     "s_f6f7c46fd6": {
       "zh": "打不开应用市场",
-      "source": "HAND"
+      "source": "Hand"
+    },
+    "s_a9c8397cce": {
+      "zh": "世界笔友",
+      "source": "Hand"
+    },
+    "s_ceab2d4c71": {
+      "zh": "世界笔友地图",
+      "source": "Hand"
+    },
+    "s_df6331be72": {
+      "zh": "世界笔友是尺素会员的，这封信没能寄出",
+      "source": "Hand"
+    },
+    "s_3a5fd35d41": {
+      "zh": "定位没开，世界笔友的回信都按一两天算",
+      "source": "Hand"
+    },
+    "s_f93c4db3ab": {
+      "zh": "回信加速",
+      "source": "Hand"
+    },
+    "s_bdfe921dd3": {
+      "zh": "1 分钟 ≈ 1 天：回信最快 15 秒、最慢 3 分钟到达。默认开启，只影响开启后寄出的信。",
+      "source": "Hand"
+    },
+    "s_ea5026fc0f": {
+      "zh": "测试构建",
+      "source": "Hand"
+    },
+    "s_b0059123ef": {
+      "zh": "正在打开备份包…",
+      "source": "Hand"
+    },
+    "s_cd74f09629": {
+      "zh": "正在导入…",
+      "source": "Hand"
+    },
+    "s_ebabcca5f6": {
+      "zh": "照片与录音",
+      "source": "Hand"
+    },
+    "s_199e333f97": {
+      "zh": "未包含",
+      "source": "Hand"
+    },
+    "s_d4e077f9d4": {
+      "zh": "导出时间",
+      "source": "Hand"
+    },
+    "s_16593aa84d": {
+      "zh": "来自",
+      "source": "Hand"
+    },
+    "s_e83afd599a": {
+      "zh": "预计大小",
+      "source": "Hand"
+    },
+    "s_6b19ea408a": {
+      "zh": "用密码加密",
+      "source": "Hand"
+    },
+    "s_b991e9b2ca": {
+      "zh": "新增日记",
+      "source": "Hand"
+    },
+    "s_c558e955b8": {
+      "zh": "跳过（已存在）",
+      "source": "Hand"
+    },
+    "s_e32c03cfb9": {
+      "zh": "新增来信",
+      "source": "Hand"
+    },
+    "s_6fde12863f": {
+      "zh": "新增日记本",
+      "source": "Hand"
+    },
+    "s_573ee77a59": {
+      "zh": "打开备份包失败",
+      "source": "Hand"
+    },
+    "s_a01a8d5393": {
+      "zh": "导入失败",
+      "source": "Hand"
+    },
+    "s_da142a5478": {
+      "zh": "%d 封",
+      "source": "Hand"
+    },
+    "s_820929d497": {
+      "zh": "%d 个",
+      "source": "Hand"
     }
   }
 }
