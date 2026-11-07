@@ -17,6 +17,8 @@
 - iOS 源码（只读参考）：`reference/ios/`
 - 进度：`PROGRESS.md`
 
+**读文档不打开图片**（U20 R-DOC-01）：`docs/harmony-updates/` 和 `reference/ios-latest/HarmonyAssets/` 的规格以**文字和代码**为准，不打开图片；`preview.html`、`screenshots/` 是给人看的。
+
 **冲突时以谁为准**：iOS 源码 > `06_RULES.md` > 其余文档。发现冲突追加到 `09_OPEN_QUESTIONS.md`，不要自己挑一个。
 
 ## 语言

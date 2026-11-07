@@ -60,22 +60,24 @@ export struct WaxSeal {
         .width(this.sizeVp * 0.62)
         .height(this.sizeVp * 0.62)
         .offset({ x: this.sizeVp * 0.008, y: this.sizeVp * 0.008 })
-      // 压的字：深浅两层错开，像压进蜡里的凹刻
+      // 压的字：底层黑 28%、上层白 22% 往右下错开 —— 受光在右下（U20 对齐 iOS）
       Text(this.mark)
-        .fontSize(this.sizeVp * 0.32)
-        .fontWeight(FontWeight.Medium)
+        .fontSize(`${this.sizeVp * 0.32}vp`) // vp：不跟系统字体大小缩放（ICONS.md 火漆印规格）
+        .fontWeight(600) // iOS .semibold
         .fontFamily('serif')
-        .fontColor('#47363636')
-        .offset({ x: this.sizeVp * 0.012, y: this.sizeVp * 0.012 })
+        .fontColor('#47000000')
       Text(this.mark)
-        .fontSize(this.sizeVp * 0.32)
-        .fontWeight(FontWeight.Medium)
+        .fontSize(`${this.sizeVp * 0.32}vp`)
+        .fontWeight(600)
         .fontFamily('serif')
         .fontColor('#38FFFFFF')
+        .offset({ x: this.sizeVp * 0.012, y: this.sizeVp * 0.012 })
     }
     .width(this.sizeVp)
     .height(this.sizeVp)
     .shadow({ radius: 3, color: '#40000000', offsetX: 0, offsetY: 2 })
+    // 印本身不念（iOS .accessibilityHidden(true)）；所在行自己念「尺素会员」
+    .accessibilityLevel('no')
   }
 
   private spillIndexes(): number[] {

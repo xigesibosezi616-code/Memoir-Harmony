@@ -18,6 +18,7 @@
    - **更新包的卡片看 `reference/ios-latest/`**（iOS 最新的代码；包里说「iOS 仓库 `Memoir/Resources/...` 的素材直接拿去用」的，也在这里）
    - 七种语言的译文在 `reference/ios/Memoir/Localizable.xcstrings`、`reference/ios/Memoir/InfoPlist.xcstrings`（更新包用 `reference/ios-latest/` 里的这两份）
    - iOS 代码**只读、只参考**，不要逐行翻译，**不要改 `reference/` 下的任何文件**
+   - `docs/harmony-updates/` 和 `reference/ios-latest/HarmonyAssets/` 的规格以**文字和代码**为准，**不打开图片**；`preview.html`、`screenshots/` 是给人看的（U20 R-DOC-01）
 4. **先复述再动手**：用几行话告诉用户这一步要做什么、明确不做什么、怎么验收；有拿不准的先问，得到确认再写代码。
 5. **只做卡片「要做」里的事**；发现必须扩大范围才能完成，先停下来说明。
 6. **规则以 `docs/harmony-spec/06_RULES.md` 为准**；已交付的更新包里写了「取代 / 作废 R-XXX-NN」或新增的规则，以更新包为准。文档和 iOS 源码不一致时以 iOS 源码为准，并把不一致追加到 `docs/harmony-spec/09_OPEN_QUESTIONS.md` 的表尾（编号接着往下排）。

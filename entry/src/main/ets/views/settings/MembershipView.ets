@@ -17,8 +17,8 @@ import { STORAGE_KEY_SAFE_AREA_TOP_VP,
 import { PostingRun } from '../../models/LetterPostingFlightGeometry';
 import { WaxSeal } from '../postbox/WaxSeal';
 
-/** 骨架态火漆印直径（和付费页那枚是同一枚） */
-const SEAL_SIZE_VP: number = 64;
+/** 会员页火漆印直径（ICONS.md 用法表：会员页 60vp；付费页另一枚 68vp，Stage 7） */
+const SEAL_SIZE_VP: number = 60;
 
 @Builder
 export function MembershipBuilder() {
