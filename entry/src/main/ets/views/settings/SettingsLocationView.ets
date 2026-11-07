@@ -5,7 +5,8 @@
  * - 记录位置：开关（`locationRecordingEnabled`，默认开；关掉只影响日记记不记地点，
  *   **天气照常获取**——iOS 注释同款）
  * - 位置精度：市 / 区县 / 街道三档（`locationPrecision`，默认 city），
- *   官方 showActionSheet 三选一；当前档的说明文案跟在行下；开关关了整行收起
+ *   行尾值 + 上下小箭头，点击弹行尾小菜单（bindMenu，U19 R-SETTINGS-13：
+ *   当前项前面打勾、点菜单内外收起）；当前档的说明文案跟在行下；开关关了整行收起
  *
  * 路由：系统路由表（router_map.json → name `LocationSettings`）。
  */
@@ -198,7 +199,7 @@ export struct SettingsLocationView {
     .alignItems(VerticalAlign.Center)
   }
 
-  // ---- 位置精度（行值 + 官方 showActionSheet 三选一） ----
+  // ---- 位置精度（行尾值 + 上下小箭头 + 行尾小菜单，U19 R-SETTINGS-13） ----
 
   @Builder
   private precisionRow() {
@@ -214,50 +215,62 @@ export struct SettingsLocationView {
         .fontFamily(this.theme.bodyFont.family)
         .fontColor(this.theme.textPrimary)
         .layoutWeight(1)
-      Text(this.currentPrecision().nameRes)
-        .fontSize(this.theme.captionFont.size)
-        .fontWeight(this.theme.captionFont.weight)
-        .fontFamily(this.theme.captionFont.family)
-        .fontColor(this.theme.textTertiary)
-      SymbolGlyph($r('sys.symbol.chevron_right'))
-        .fontSize(13)
-        .fontWeight(FontWeight.Medium)
-        .fontColor([this.theme.textTertiary])
+      Row({ space: 4 }) {
+        Text(this.currentPrecision().nameRes)
+          .fontSize(this.theme.captionFont.size)
+          .fontWeight(this.theme.captionFont.weight)
+          .fontFamily(this.theme.captionFont.family)
+          .fontColor(this.theme.textTertiary)
+        Column() {
+          SymbolGlyph($r('sys.symbol.chevron_up'))
+            .fontSize(7)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([this.theme.textTertiary])
+          SymbolGlyph($r('sys.symbol.chevron_down'))
+            .fontSize(7)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([this.theme.textTertiary])
+        }
+      }
+      .alignItems(VerticalAlign.Center)
+      .bindMenu(this.precisionMenu, {
+        placement: Placement.BottomLeft,
+        backgroundColor: this.theme.settingsCardBackground,
+        borderRadius: 14
+      })
     }
     .width('100%')
     .padding({ top: 15, bottom: 15, left: 20, right: 20 })
     .alignItems(VerticalAlign.Center)
-    .onClick((): void => {
-      this.pickPrecision();
-    })
   }
 
-  /** 位置精度三选一（官方 showActionSheet；确认后落偏好并刷新行值） */
-  private pickPrecision(): void {
-    this.getUIContext().showActionSheet({
-      title: $r('app.string.s_4e6b4fffe0'),
-      message: $r('app.string.s_4e6b4fffe0'),
-      sheets: [
-        {
-          title: $r('app.string.s_7c130d80b8'),
-          action: (): void => {
-            this.setPrecision(LOCATION_PRECISION_CITY);
-          }
-        },
-        {
-          title: $r('app.string.s_328070e3ac'),
-          action: (): void => {
-            this.setPrecision(LOCATION_PRECISION_DISTRICT);
-          }
-        },
-        {
-          title: $r('app.string.s_a671f238f1'),
-          action: (): void => {
-            this.setPrecision(LOCATION_PRECISION_STREET);
-          }
+  /** 行尾小菜单（值下方弹出）：当前项前面打勾；点菜单内选项 / 点菜单外都收起（bindMenu 内建） */
+  @Builder
+  private precisionMenu() {
+    Column() {
+      ForEach(this.precisions, (spec: PrecisionSpec) => {
+        Row({ space: 10 }) {
+          SymbolGlyph($r('sys.symbol.checkmark'))
+            .fontSize(14)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([this.theme.accent])
+            .width(16)
+            .visibility(spec.value === this.currentPrecision().value ?
+              Visibility.Visible : Visibility.Hidden)
+          Text(spec.nameRes)
+            .fontSize(15)
+            .fontColor(this.theme.textPrimary)
+            .maxLines(1)
         }
-      ]
-    });
+        .padding({ left: 14, right: 20, top: 12, bottom: 12 })
+        .width('100%')
+        .onClick((): void => {
+          this.setPrecision(spec.value);
+        })
+      }, (spec: PrecisionSpec) => spec.value)
+    }
+    .width(150)
+    .alignItems(HorizontalAlign.Start)
   }
 
   /** 落偏好并刷新行值（ActionSheet 各项 action 里各自调用） */

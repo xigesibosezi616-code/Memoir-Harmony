@@ -6,7 +6,9 @@
  * - 启动动画：开关（`showSplashAnimation`，与 iOS 键同名；EntryAbility 启动时
  *   合并算 `showSplash`，这里只写偏好，下次启动生效）
  * - 手记页：大屏 / 列表（`homeDisplayMode`，U07 R-HOME-11 默认大屏）；
- *   行值 + 官方 showActionSheet 二选一，当前模式的说明文案跟在行下
+ *   行尾值 + 上下小箭头，点击弹行尾小菜单（bindMenu，U19 R-SETTINGS-13：
+ *   当前项前面打勾、点菜单内外收起；行图标跟着当前选的换，ICONS.md 178-179），
+ *   当前模式的说明文案跟在行下
  * - 「语言」不在这页——一级页单列一行直通选择页（R-SETTINGS-02）
  * - 封条提醒天数 / Live Photo 同步不做（Q10 死设置）
  *
@@ -297,12 +299,12 @@ export struct SettingsAppearanceView {
     .alignItems(VerticalAlign.Center)
   }
 
-  // ---- 手记页展示方式：行值 + 官方 showActionSheet ----
+  // ---- 手记页展示方式：行尾值 + 上下小箭头 + 行尾小菜单（U19 R-SETTINGS-13） ----
 
   @Builder
   private homeModeRow() {
     Row({ space: 10 }) {
-      SymbolGlyph($r('sys.symbol.rectangle_on_rectangle'))
+      SymbolGlyph(this.homeModeIcon())
         .fontSize(14)
         .fontWeight(FontWeight.Medium)
         .fontColor([this.theme.textSecondary])
@@ -313,44 +315,70 @@ export struct SettingsAppearanceView {
         .fontFamily(this.theme.bodyFont.family)
         .fontColor(this.theme.textPrimary)
         .layoutWeight(1)
-      Text(this.currentHomeMode().nameRes)
-        .fontSize(this.theme.captionFont.size)
-        .fontWeight(this.theme.captionFont.weight)
-        .fontFamily(this.theme.captionFont.family)
-        .fontColor(this.theme.textTertiary)
-      SymbolGlyph($r('sys.symbol.chevron_right'))
-        .fontSize(13)
-        .fontWeight(FontWeight.Medium)
-        .fontColor([this.theme.textTertiary])
+      Row({ space: 4 }) {
+        Text(this.currentHomeMode().nameRes)
+          .fontSize(this.theme.captionFont.size)
+          .fontWeight(this.theme.captionFont.weight)
+          .fontFamily(this.theme.captionFont.family)
+          .fontColor(this.theme.textTertiary)
+        Column() {
+          SymbolGlyph($r('sys.symbol.chevron_up'))
+            .fontSize(7)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([this.theme.textTertiary])
+          SymbolGlyph($r('sys.symbol.chevron_down'))
+            .fontSize(7)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([this.theme.textTertiary])
+        }
+      }
+      .alignItems(VerticalAlign.Center)
+      .bindMenu(this.homeModeMenu, {
+        placement: Placement.BottomLeft,
+        backgroundColor: this.theme.settingsCardBackground,
+        borderRadius: 14
+      })
     }
     .width('100%')
     .padding({ top: 15, bottom: 15, left: 20, right: 20 })
     .alignItems(VerticalAlign.Center)
-    .onClick((): void => {
-      this.pickHomeMode();
-    })
   }
 
-  /** 手记页展示方式二选一（官方 showActionSheet；确认后落偏好并刷新行值） */
-  private pickHomeMode(): void {
-    this.getUIContext().showActionSheet({
-      title: $r('app.string.s_712c2ff8d3'),
-      message: $r('app.string.s_712c2ff8d3'),
-      sheets: [
-        {
-          title: $r('app.string.s_1ab35f0df8'),
-          action: (): void => {
-            this.setHomeMode(HOME_DISPLAY_MODE_SHOWCASE);
-          }
-        },
-        {
-          title: $r('app.string.s_d46f82fdf0'),
-          action: (): void => {
-            this.setHomeMode(HOME_DISPLAY_MODE_LIST);
-          }
+  /** 手记页行图标：大屏 rectangle_on_rectangle / 列表 list_bullet（跟着当前选的换） */
+  private homeModeIcon(): Resource {
+    if (this.homeMode === HOME_DISPLAY_MODE_LIST) {
+      return $r('sys.symbol.list_bullet');
+    }
+    return $r('sys.symbol.rectangle_on_rectangle');
+  }
+
+  /** 行尾小菜单（值下方弹出）：当前项前面打勾；点菜单内选项 / 点菜单外都收起（bindMenu 内建） */
+  @Builder
+  private homeModeMenu() {
+    Column() {
+      ForEach(this.homeModes, (mode: HomeModeSpec) => {
+        Row({ space: 10 }) {
+          SymbolGlyph($r('sys.symbol.checkmark'))
+            .fontSize(14)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([this.theme.accent])
+            .width(16)
+            .visibility(mode.value === this.currentHomeMode().value ?
+              Visibility.Visible : Visibility.Hidden)
+          Text(mode.nameRes)
+            .fontSize(15)
+            .fontColor(this.theme.textPrimary)
+            .maxLines(1)
         }
-      ]
-    });
+        .padding({ left: 14, right: 20, top: 12, bottom: 12 })
+        .width('100%')
+        .onClick((): void => {
+          this.setHomeMode(mode.value);
+        })
+      }, (mode: HomeModeSpec) => mode.value)
+    }
+    .width(150)
+    .alignItems(HorizontalAlign.Start)
   }
 
   /** 落偏好并刷新行值（ActionSheet 各项 action 里各自调用） */
