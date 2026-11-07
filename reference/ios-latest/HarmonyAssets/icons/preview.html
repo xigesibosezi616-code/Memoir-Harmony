@@ -1,0 +1,314 @@
+<!doctype html><meta charset=utf-8><title>尺素全部图标 · 鸿蒙对照</title><style>body{font:14px/1.6 -apple-system,'PingFang SC',sans-serif;max-width:1100px;margin:24px auto;padding:0 16px;background:#F0EBE1;color:#3D3428}table{border-collapse:collapse;width:100%;background:#FAF7F2;margin:8px 0 20px}td,th{border:1px solid #E8E2D6;padding:6px 8px;vertical-align:middle;text-align:left}th{background:#F5F0E8}code{background:#EFE8DC;padding:1px 4px;border-radius:3px}pre{background:#EFE8DC;padding:10px}blockquote{color:#8B7E6A;margin:4px 0}p.li{margin:2px 0 2px 12px}</style>
+<h1>尺素全部图标 · 鸿蒙对照</h1>
+<blockquote>2026-11-07 iOS 侧出，对应更新包 <b>U19</b>（设置全部页面详解）。由 <code>Scripts/make_harmony_icon_catalog.py</code> 生成，<b>不要手改</b>（改脚本里的表再重跑）。</blockquote>
+<blockquote>设置各页每一行用哪个图标、放在哪，见同级目录 <code>../settings_pages/SETTINGS_PAGES.md</code>；这份按「图标」列全 App。</blockquote>
+<h2>先读这四条</h2>
+<p class=li>1. <b>App 里的图标分两种</b>：尺素<b>自己画的</b>（设置首页那套线条、火漆印、手写 m. …）→ 给图片，拿来就放；iOS 用苹果 <b>SF Symbols</b> 的 → 不给图片，用鸿蒙系统自带的 <b>HarmonyOS Symbol</b></p>
+<p class=li>2. 🔴 <b>SF Symbols 不许用到鸿蒙上</b>（苹果的授权只许用在苹果的平台）：不要截 iOS 的图标、不要描、不要找网上的 SF Symbols 素材</p>
+<p class=li>3. HarmonyOS Symbol 的名字取自华为官方图标库（<a href="https://developer.huawei.com/consumer/cn/design/harmonyos-symbol/">developer.huawei.com/consumer/cn/design/harmonyos-symbol</a>，名字表 v2.3）。用法：</p>
+<pre>
+   SymbolGlyph($r(&#x27;sys.symbol.bell&#x27;))
+     .fontSize(14)                       // 设置二级页行首 14vp（和 iOS 同号，占 20vp 宽）；别处照 iOS 那一处的大小
+     .fontColor([主题的图标线色])          // 单色，颜色跟主题（见 settings_icons/GUIDE.md 的颜色表）
+</pre>
+<p>   表里标「图标库网页没列，字体里有」的，是鸿蒙系统字体里有、但官方图标库网页没展示的名字 —— 在 DevEco 里输 <code>sys.symbol.</code> 看补全核对；真没有就用同一行「意思」找一个最接近的，并告诉 iOS 侧改表。一部分老图标在系统里是 <code>ohos_</code> 开头（如 <code>sys.symbol.ohos_trash</code>），两个都有时用不带前缀的</p>
+<p class=li>4. 表里的小图（<code>harmony_symbols/</code>）是拿官方字体画的<b>预览</b>，只给人看，<b>不要拷进工程</b> —— 工程里用 <code>sys.symbol.*</code>，系统会跟着字号、粗细、深浅色画</p>
+<hr>
+<h2>一、尺素自己画的（给图片）</h2>
+<h3>设置首页（U10 已交付，图在 <code>../settings_icons/</code>）</h3>
+<p>四套主题各一套、带好了圆框和颜色，怎么放见 <code>../settings_icons/GUIDE.md</code>。下面是素笺那套：</p>
+<table>
+<tr><th>图</th><th>文件名（<code>&lt;主题&gt;</code> 换成主题 id）</th><th>用在哪</th></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_appearance_bamboo.png" width="30" alt="外观"></td><td><code>ic_settings_appearance_&lt;主题&gt;</code></td><td>外观</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_journal_bamboo.png" width="30" alt="日记"></td><td><code>ic_settings_journal_&lt;主题&gt;</code></td><td>日记</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_penpal_bamboo.png" width="30" alt="笔友"></td><td><code>ic_settings_penpal_&lt;主题&gt;</code></td><td>笔友</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_location_bamboo.png" width="30" alt="位置与天气"></td><td><code>ic_settings_location_&lt;主题&gt;</code></td><td>位置与天气</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_language_bamboo.png" width="30" alt="语言"></td><td><code>ic_settings_language_&lt;主题&gt;</code></td><td>语言</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_data_bamboo.png" width="30" alt="数据与备份"></td><td><code>ic_settings_data_&lt;主题&gt;</code></td><td>数据与备份</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_stats_bamboo.png" width="30" alt="写作统计"></td><td><code>ic_settings_stats_&lt;主题&gt;</code></td><td>写作统计</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_rate_bamboo.png" width="30" alt="给我们评分（华为应用市场的购物袋）"></td><td><code>ic_settings_rate_&lt;主题&gt;</code></td><td>给我们评分（华为应用市场的购物袋）</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_feedback_bamboo.png" width="30" alt="反馈与建议"></td><td><code>ic_settings_feedback_&lt;主题&gt;</code></td><td>反馈与建议</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_settings_about_bamboo.png" width="30" alt="关于"></td><td><code>ic_settings_about_&lt;主题&gt;</code></td><td>关于</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_follow_xiaohongshu_bamboo.png" width="30" alt="关注我们 · 小红书"></td><td><code>ic_follow_xiaohongshu_&lt;主题&gt;</code></td><td>关注我们 · 小红书</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_follow_douyin_bamboo.png" width="30" alt="关注我们 · 抖音"></td><td><code>ic_follow_douyin_&lt;主题&gt;</code></td><td>关注我们 · 抖音</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/ic_follow_weibo_bamboo.png" width="30" alt="关注我们 · 微博"></td><td><code>ic_follow_weibo_&lt;主题&gt;</code></td><td>关注我们 · 微博</td></tr>
+<tr><td><img src="../settings_icons/png/bamboo/img_avatar_mark_bamboo.png" width="44" alt="账户卡头像（手写 m.）"></td><td><code>img_avatar_mark_&lt;主题&gt;</code></td><td>账户卡头像（手写 m.）</td></tr>
+</table>
+<h3>火漆印（尺素会员）—— 这次新出</h3>
+<p>一枚深红的蜡、边缘不规则地溢开一圈、中间压一个字。拿 iOS 的 <code>Views/Components/WaxSeal.swift</code> 原样画出来的。四套主题都是<b>同一个颜色</b>（蜡的颜色不跟主题）。</p>
+<table>
+<tr><th>图</th><th>文件</th><th>说明</th></tr>
+<tr><td><img src="wax_seal/img_wax_seal_blank.png" width="64" alt="空白印面（鸿蒙用这张，上面自己压字）"></td><td><code>wax_seal/img_wax_seal_blank.png</code></td><td>空白印面（鸿蒙用这张，上面自己压字）</td></tr>
+<tr><td><img src="wax_seal/sample_wax_seal_su.png" width="64" alt="样张：没有昵称时压「素」"></td><td><code>wax_seal/sample_wax_seal_su.png</code></td><td>样张：没有昵称时压「素」</td></tr>
+<tr><td><img src="wax_seal/sample_wax_seal_A.png" width="64" alt="样张：昵称 Alice → A"></td><td><code>wax_seal/sample_wax_seal_A.png</code></td><td>样张：昵称 Alice → A</td></tr>
+<tr><td><img src="wax_seal/sample_wax_seal_lin.png" width="64" alt="样张：昵称 林间 → 林"></td><td><code>wax_seal/sample_wax_seal_lin.png</code></td><td>样张：昵称 林间 → 林</td></tr>
+<tr><td><img src="wax_seal/sample_wax_seal_row_26pt.png" width="64" alt="样张：设置首页那行的大小（26pt）"></td><td><code>wax_seal/sample_wax_seal_row_26pt.png</code></td><td>样张：设置首页那行的大小（26pt）</td></tr>
+<tr><td><img src="wax_seal/img_member_badge.png" width="64" alt="会员款小标记（压「素」，16–18pt，固定的，直接用）"></td><td><code>wax_seal/img_member_badge.png</code></td><td>会员款小标记（压「素」，16–18pt，固定的，直接用）</td></tr>
+</table>
+<p><b>用在哪</b>（大小是印本身的直径）：</p>
+<table>
+<tr><th>位置</th><th>大小</th><th>压什么字</th></tr>
+<tr><td>设置首页「尺素会员」那一行的行首（不套框，占 30vp 宽，和下面各行的字对齐）</td><td>26vp</td><td>用户昵称的首字</td></tr>
+<tr><td>付费页顶上</td><td>68vp</td><td>用户昵称的首字</td></tr>
+<tr><td>会员页（已开通，设置 → 尺素会员）顶上</td><td>60vp</td><td>用户昵称的首字</td></tr>
+<tr><td>会员款旁边的小标记，<b>只给还不是会员的人看</b>：设置 → 日记 → 照片相纸样式（字后面）、尺素相机选相纸、日记本封面版式（右上角）</td><td>16vp</td><td>固定「素」→ 直接用 <code>img_member_badge.png</code></td></tr>
+<tr><td>同上：写日记插照片时选相纸（右上角）</td><td>18vp</td><td>同上</td></tr>
+<tr><td>写作统计「情绪小结」卡片标题后面（不是会员时）</td><td>15vp</td><td>同上</td></tr>
+<tr><td>读完一封来信，页底一行「想让笔友每篇都回？了解尺素会员」的行首（不是会员时，点了开付费页）</td><td>16vp</td><td>同上</td></tr>
+</table>
+<p>小标记的图四周也留了影子的边：<b>印的直径 = 图片边长 × 18 ⁄ 30</b>，要显示 S vp 的印，图片放 <code>S × 30 ⁄ 18</code> vp 见方。读屏念「尺素会员」。</p>
+<p><b>压什么字</b>（照 iOS <code>WaxSeal.initial(of:)</code>）：昵称去掉首尾空白后的第一个字；中文取第一个字，拉丁字母取首字母并大写；没昵称、或第一个字是表情 / 符号 / 数字 → 压「素」。</p>
+<p><b>鸿蒙怎么压字</b>：每个人的字不一样，做不成固定图 —— 放空白印面 <code>img_wax_seal_blank.png</code>，上面叠两层同样的字：</p>
+<p class=li>- 图片四周留了影子的边：<b>印本身的直径 = 图片边长 × 68 ⁄ 86</b>。所以要显示 S vp 的印，图片放 <code>S × 86 ⁄ 68</code> vp 见方，字的中心 = 图片中心</p>
+<p class=li>- 字号 <code>S × 0.32</code>，<b>衬线、半粗</b>（iOS 是系统衬线体 New York；鸿蒙用系统里有的衬线中文字体，没有就用 HarmonyOS Sans 半粗）</p>
+<p class=li>- 底层：黑色、不透明度 28%；上层：白色、不透明度 22%，往右下各偏 <code>S × 0.012</code> —— 压进蜡里、一边受光的样子</p>
+<p class=li>- 印面的字<b>不翻译、不跟语言变</b>；读屏念「尺素会员」，不念那个字</p>
+<p class=li>- 对照样张 <code>sample_wax_seal_*.png</code> 验收</p>
+<h3>其他自己画的部件（不是小图标，规格在各自的更新包里）</h3>
+<table>
+<tr><th>是什么</th><th>规格在哪</th><th>iOS 源码</th></tr>
+<tr><td>手写 m.（桌面图标、开场、账户卡头像、锁屏提醒）</td><td>U09（字形）、U17（矢量母版）</td><td><code>Views/Splash/HandwrittenMark.swift</code></td></tr>
+<tr><td>邮戳上的 Sinara 标、精装 PDF 版权页的标</td><td>U05、U08</td><td><code>Assets.xcassets/SinaraMark</code></td></tr>
+<tr><td>火漆信封口的火漆（压笔友名字的首字）</td><td>U01 / U05 草稿</td><td><code>Views/PostBox/Envelope/SealedEnvelope.swift</code>（同一个 <code>WaxSeal</code>）</td></tr>
+<tr><td>投信那叠信上的勾选小方框</td><td>U05 草稿</td><td><code>Views/PostBox/Posting/OutgoingPile.swift</code> 的 <code>CheckMark</code></td></tr>
+<tr><td>拆信 / 推信的手势示意（箭头）</td><td>U13 草稿</td><td><code>Views/PostBox/Envelope/SealedLetterOpener.swift</code> 的 <code>GestureCue</code></td></tr>
+<tr><td>世界地图上的「你」和笔友墨点</td><td>U01 草稿</td><td><code>Views/PostBox/WorldMap/PenPalMapMarks.swift</code></td></tr>
+<tr><td>心情标记前的小圆点（九档各一色）</td><td>U03</td><td><code>Views/Components/MoodBadge.swift</code></td></tr>
+<tr><td>心情页的线团爱心</td><td>U03</td><td><code>Views/Mood/ScribbleHeartDrawing.swift</code></td></tr>
+<tr><td>日记本封面、书脊、杂志封面</td><td>U07</td><td><code>Views/Home/BookCoverView.swift</code>、<code>Shelf/ShelfBookView.swift</code></td></tr>
+</table>
+<hr>
+<h2>二、iOS 用 SF Symbols 的每一处 → 鸿蒙系统图标</h2>
+<p>「iOS」一列只为说明是哪个图标、方便对照 iOS 源码，<b>鸿蒙不要找它的图</b>。同一个意思在不同页用同一个鸿蒙图标。</p>
+<h3>底栏、提示条、桌面快捷方式</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/book_pages_fill_1.png" width="24" alt="book_pages_fill_1"></td><td><code>book_pages_fill_1</code><br>小说</td><td>底栏「记录」</td><td>日记</td><td><code>book.fill</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/books_vertical_fill.png" width="24" alt="books_vertical_fill"></td><td><code>books_vertical_fill</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>底栏「日记本」</td><td>一排书</td><td><code>books.vertical.fill</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/envelope_fill.png" width="24" alt="envelope_fill"></td><td><code>envelope_fill</code><br>邮件/消息</td><td>底栏「邮筒」</td><td>信</td><td><code>envelope.fill</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/gearshape.png" width="24" alt="gearshape"></td><td><code>gearshape</code><br>设置</td><td>底栏「设置」</td><td>齿轮</td><td><code>gearshape</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/magnifyingglass.png" width="24" alt="magnifyingglass"></td><td><code>magnifyingglass</code><br>搜索/查询/查找/search</td><td>底栏最右的搜索（设置里打开才有，U12）</td><td>搜索</td><td><code>magnifyingglass</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/checkmark_circle.png" width="24" alt="checkmark_circle"></td><td><code>checkmark_circle</code><br>清单/钩/勾选</td><td>顶上提示条：成功</td><td>成功</td><td><code>checkmark.circle</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/exclamationmark_circle.png" width="24" alt="exclamationmark_circle"></td><td><code>exclamationmark_circle</code><br>异常、错误/感叹号</td><td>顶上提示条：失败</td><td>出错</td><td><code>exclamationmark.circle</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/info_circle.png" width="24" alt="info_circle"></td><td><code>info_circle</code><br>模式详情</td><td>顶上提示条：提醒</td><td>提示</td><td><code>info.circle</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/square_grid_2x2.png" width="24" alt="square_grid_2x2"></td><td><code>square_grid_2x2</code><br>检测项_应用</td><td>桌面长按图标的快捷菜单「应用图标」</td><td>应用</td><td><code>app.badge</code></td><td>鸿蒙仓库 7662e71 已用这个</td></tr>
+</table>
+<h3>设置首页（行首图标是自己画的，见第一节；这里是行尾）</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/chevron_right.png" width="24" alt="chevron_right"></td><td><code>chevron_right</code><br>下一步/向右</td><td>进下一页的行尾 &gt;</td><td>进入</td><td><code>chevron.right</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/arrow_right_up_and_square.png" width="24" alt="arrow_right_up_and_square"></td><td><code>arrow_right_up_and_square</code><br>新页签打开</td><td>外跳的行尾 ↗（给我们评分、反馈与建议、关注我们）</td><td>跳到别的 App</td><td><code>arrow.up.right</code></td><td>官方中文名「新页签打开」</td></tr>
+</table>
+<h3>设置 → 外观</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/paintbrush.png" width="24" alt="paintbrush"></td><td><code>paintbrush</code><br>画笔</td><td>「主题选择」行</td><td>画笔</td><td><code>paintbrush</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/square_grid_2x2.png" width="24" alt="square_grid_2x2"></td><td><code>square_grid_2x2</code><br>检测项_应用</td><td>「应用图标」行</td><td>应用</td><td><code>app.badge</code></td><td>同桌面快捷方式</td></tr>
+<tr><td><img src="harmony_symbols/wand_and_stars.png" width="24" alt="wand_and_stars"></td><td><code>wand_and_stars</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>「启动动画」行</td><td>闪光</td><td><code>sparkles</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/magnifyingglass.png" width="24" alt="magnifyingglass"></td><td><code>magnifyingglass</code><br>搜索/查询/查找/search</td><td>「搜索日记」行</td><td>搜索</td><td><code>magnifyingglass</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/rectangle_on_rectangle.png" width="24" alt="rectangle_on_rectangle"></td><td><code>rectangle_on_rectangle</code><br>相册</td><td>「手记页」行（当前是大屏时）</td><td>一张叠一张</td><td><code>rectangle.on.rectangle</code></td><td>图标跟着当前选的样式换</td></tr>
+<tr><td><img src="harmony_symbols/list_bullet.png" width="24" alt="list_bullet"></td><td><code>list_bullet</code><br>项目符号-圆点</td><td>「手记页」行（当前是列表时）</td><td>列表</td><td><code>list.bullet</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/checkmark_circle_fill.png" width="24" alt="checkmark_circle_fill"></td><td><code>checkmark_circle_fill</code><br>口算批改/钩/勾选</td><td>主题选择页：选中的那套主题右边</td><td>已选</td><td><code>checkmark.circle.fill</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/chevron_down.png" width="24" alt="chevron_down"></td><td><code>chevron_down</code><br>向下</td><td>主题介绍弹窗：「出处」收起时</td><td>展开</td><td><code>chevron.down</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/chevron_up.png" width="24" alt="chevron_up"></td><td><code>chevron_up</code><br>向上</td><td>主题介绍弹窗：「出处」展开时</td><td>收起</td><td><code>chevron.up</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/paintbrush.png" width="24" alt="paintbrush"></td><td><code>paintbrush</code><br>画笔</td><td>应用图标页：「跟随主题」那一格</td><td>画笔</td><td><code>paintbrush</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/checkmark.png" width="24" alt="checkmark"></td><td><code>checkmark</code><br>确认/钩/勾选</td><td>应用图标页：选中的那个右边</td><td>已选</td><td><code>checkmark</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/picture.png" width="24" alt="picture"></td><td><code>picture</code><br>图片</td><td>应用图标页：图标素材缺了时的占位</td><td>图片</td><td><code>photo</code></td><td>正常看不到</td></tr>
+</table>
+<h3>设置 → 日记</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/picture.png" width="24" alt="picture"></td><td><code>picture</code><br>图片</td><td>「照片相纸样式」行</td><td>照片</td><td><code>photo.on.rectangle</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/calendar.png" width="24" alt="calendar"></td><td><code>calendar</code><br>日历</td><td>「封条提醒天数」行</td><td>日历</td><td><code>calendar.badge.exclamationmark</code></td><td>这一行鸿蒙不做（v1 Q10），列出来备查</td></tr>
+<tr><td><img src="harmony_symbols/bell.png" width="24" alt="bell"></td><td><code>bell</code><br>响铃、通知/铃声/铃铛</td><td>「提醒写日记」行</td><td>铃铛</td><td><code>bell</code></td><td>U18</td></tr>
+<tr><td><img src="harmony_symbols/clock.png" width="24" alt="clock"></td><td><code>clock</code><br>时长</td><td>「时间」行</td><td>时钟</td><td><code>clock</code></td><td>U18</td></tr>
+<tr><td><img src="harmony_symbols/repeat.png" width="24" alt="repeat"></td><td><code>repeat</code><br>循环播放</td><td>「重复」行</td><td>重复</td><td><code>repeat</code></td><td>U18</td></tr>
+<tr><td><img src="harmony_symbols/checkmark.png" width="24" alt="checkmark"></td><td><code>checkmark</code><br>确认/钩/勾选</td><td>照片相纸样式页：选中的样式右边</td><td>已选</td><td><code>checkmark</code></td><td></td></tr>
+</table>
+<h3>设置 → 笔友 / 位置与天气 / 语言</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/person.png" width="24" alt="person"></td><td><code>person</code><br>账号</td><td>笔友：「笔友名」行</td><td>人</td><td><code>person.crop.circle</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/local.png" width="24" alt="local"></td><td><code>local</code><br>位置/定位</td><td>位置与天气：「记录位置」行</td><td>定位</td><td><code>location</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/scope.png" width="24" alt="scope"></td><td><code>scope</code><br>开启目标追踪</td><td>位置与天气：「位置精度」行</td><td>准星</td><td><code>scope</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/checkmark.png" width="24" alt="checkmark"></td><td><code>checkmark</code><br>确认/钩/勾选</td><td>语言页：当前语言右边</td><td>已选</td><td><code>checkmark</code></td><td></td></tr>
+</table>
+<h3>设置 → 数据与备份</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/icloud.png" width="24" alt="icloud"></td><td><code>icloud</code><br>云开启</td><td>「iCloud 同步」行：同步正常</td><td>云 + 勾</td><td><code>checkmark.icloud</code></td><td>官方中文名「云开启」；鸿蒙同步方案见 v1</td></tr>
+<tr><td><img src="harmony_symbols/exclamationmark_cloud_fill.png" width="24" alt="exclamationmark_cloud_fill"></td><td><code>exclamationmark_cloud_fill</code><br>异常</td><td>「iCloud 同步」行：没同步上</td><td>云 + 叹号</td><td><code>exclamationmark.icloud</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/livephoto.png" width="24" alt="livephoto"></td><td><code>livephoto</code><br>动态照片</td><td>「同步 Live Photo 视频」行</td><td>实况照片</td><td><code>livephoto</code></td><td>这一行鸿蒙不做（v1 Q10）</td></tr>
+<tr><td><img src="harmony_symbols/share.png" width="24" alt="share"></td><td><code>share</code><br>分享</td><td>「导出备份」行；导出页生成后的「分享」按钮</td><td>分享出去</td><td><code>square.and.arrow.up</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/download.png" width="24" alt="download"></td><td><code>download</code><br>附件下载</td><td>「导入备份」行</td><td>拿进来</td><td><code>square.and.arrow.down</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/externaldrive.png" width="24" alt="externaldrive"></td><td><code>externaldrive</code><br>移动存储设备</td><td>「照片与录音占用」行</td><td>存储</td><td><code>internaldrive</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/clean.png" width="24" alt="clean"></td><td><code>clean</code><br>清理加速</td><td>「清理 N 个残留文件」行</td><td>清理</td><td><code>sparkles</code></td><td>有残留文件才出现</td></tr>
+<tr><td><img src="harmony_symbols/exclamationmark_triangle.png" width="24" alt="exclamationmark_triangle"></td><td><code>exclamationmark_triangle</code><br>内容举报/感叹号</td><td>导出页 / 导入页里的警告</td><td>警告</td><td><code>exclamationmark.triangle</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/checkmark_square_fill.png" width="24" alt="checkmark_square_fill"></td><td><code>checkmark_square_fill</code><br>已选/钩/勾选</td><td>导出页「我已了解…」勾上</td><td>勾选</td><td><code>checkmark.square.fill</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/square.png" width="24" alt="square"></td><td><code>square</code><br>方形</td><td>导出页「我已了解…」没勾</td><td>未勾</td><td><code>square</code></td><td></td></tr>
+</table>
+<h3>设置 → 写作统计 / 关于</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/chevron_left.png" width="24" alt="chevron_left"></td><td><code>chevron_left</code><br>返回/向左</td><td>写作统计：日历往前翻一个月；左上角返回</td><td>往前</td><td><code>chevron.left</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/chevron_right.png" width="24" alt="chevron_right"></td><td><code>chevron_right</code><br>下一步/向右</td><td>写作统计：日历往后翻一个月；情绪小结「往期小结 &gt;」</td><td>往后</td><td><code>chevron.right</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/info_shield.png" width="24" alt="info_shield"></td><td><code>info_shield</code><br>隐私声明</td><td>关于：「隐私政策」行</td><td>隐私</td><td><code>lock.shield</code></td><td>官方中文名就叫「隐私声明」</td></tr>
+<tr><td><img src="harmony_symbols/doc_text.png" width="24" alt="doc_text"></td><td><code>doc_text</code><br>日志/文本/文件</td><td>关于：「用户协议」行</td><td>文档</td><td><code>doc.text</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/info_circle.png" width="24" alt="info_circle"></td><td><code>info_circle</code><br>模式详情</td><td>关于：「版本」行</td><td>信息</td><td><code>info.circle</code></td><td></td></tr>
+</table>
+<h3>设置 → 账户、注销账号</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/rename.png" width="24" alt="rename"></td><td><code>rename</code><br>重命名</td><td>「昵称」行</td><td>签名</td><td><code>signature</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/phone.png" width="24" alt="phone"></td><td><code>phone</code><br>通话音量/电话</td><td>「手机号」行（绑过）</td><td>手机</td><td><code>iphone</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/exclamationmark_triangle.png" width="24" alt="exclamationmark_triangle"></td><td><code>exclamationmark_triangle</code><br>内容举报/感叹号</td><td>「绑定手机号」行（没绑，红字「未绑定」）</td><td>警告</td><td><code>exclamationmark.triangle</code></td><td></td></tr>
+<tr><td>—</td><td>（鸿蒙没有这一处）</td><td>「Apple ID」/「绑定 Apple ID」行</td><td>苹果</td><td><code>applelogo</code></td><td>鸿蒙没有这两行；华为账号的行见 U02</td></tr>
+<tr><td><img src="harmony_symbols/arrow_right_to_line.png" width="24" alt="arrow_right_to_line"></td><td><code>arrow_right_to_line</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>「退出登录」行</td><td>离开</td><td><code>rectangle.portrait.and.arrow.right</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/person_xmark.png" width="24" alt="person_xmark"></td><td><code>person_xmark</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>「注销账号」行（红色）</td><td>删人</td><td><code>person.crop.circle.badge.xmark</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/trash.png" width="24" alt="trash"></td><td><code>trash</code><br>删除/垃圾箱/回收站</td><td>注销页第一步：会删掉什么</td><td>删除</td><td><code>trash</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/ebook.png" width="24" alt="ebook"></td><td><code>ebook</code><br>电子书</td><td>注销页第一步：日记不受影响</td><td>书</td><td><code>book.closed</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/arrowshape_turn_up_left.png" width="24" alt="arrowshape_turn_up_left"></td><td><code>arrowshape_turn_up_left</code><br>回复</td><td>注销页第一步：不能撤回</td><td>回头</td><td><code>arrow.uturn.backward</code></td><td></td></tr>
+</table>
+<h3>尺素会员（付费页、会员页）</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/xmark.png" width="24" alt="xmark"></td><td><code>xmark</code><br>退出/关闭/取消/colse</td><td>付费页左上角关闭</td><td>关闭</td><td><code>xmark</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/envelope_open.png" width="24" alt="envelope_open"></td><td><code>envelope_open</code><br>打开邮件</td><td>权益：每周 20 张邮票</td><td>拆开的信</td><td><code>envelope.open</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/seal.png" width="24" alt="seal"></td><td><code>seal</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>权益：火漆封口的信</td><td>印章</td><td><code>seal</code></td><td>图标本身不是火漆印；页顶那枚大火漆印是图片，见第一节</td></tr>
+<tr><td><img src="harmony_symbols/worldclock.png" width="24" alt="worldclock"></td><td><code>worldclock</code><br>语言切换</td><td>权益：今雨与雅故</td><td>地球</td><td><code>globe</code></td><td>官方中文名「语言切换」，画的是地球</td></tr>
+<tr><td><img src="harmony_symbols/point_bottomleft_forward_to_point_topright_scurvepath.png" width="24" alt="point_bottomleft_forward_to_point_topright_scurvepath"></td><td><code>point_bottomleft_forward_to_point_topright_scurvepath</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>权益：情绪小结</td><td>折线图</td><td><code>chart.xyaxis.line</code></td><td>一条起伏的走势线</td></tr>
+<tr><td><img src="harmony_symbols/picture.png" width="24" alt="picture"></td><td><code>picture</code><br>图片</td><td>权益：全部相纸与封面版式</td><td>照片</td><td><code>photo.on.rectangle</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/ebook.png" width="24" alt="ebook"></td><td><code>ebook</code><br>电子书</td><td>权益：印成一本书</td><td>书</td><td><code>book.closed</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/checkmark_circle_fill.png" width="24" alt="checkmark_circle_fill"></td><td><code>checkmark_circle_fill</code><br>口算批改/钩/勾选</td><td>方案（年付 / 月付）选中</td><td>已选</td><td><code>checkmark.circle.fill</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/circle.png" width="24" alt="circle"></td><td><code>circle</code><br>工具箱</td><td>方案没选中</td><td>空圈</td><td><code>circle</code></td><td></td></tr>
+</table>
+<h3>写日记、编辑、此时此地</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/chevron_left.png" width="24" alt="chevron_left"></td><td><code>chevron_left</code><br>返回/向左</td><td>写日记左上角返回（退出 ≠ 丢弃，见 v1）</td><td>返回</td><td><code>chevron.left</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/checkmark.png" width="24" alt="checkmark"></td><td><code>checkmark</code><br>确认/钩/勾选</td><td>写日记 / 编辑右上角完成</td><td>完成</td><td><code>checkmark</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/xmark.png" width="24" alt="xmark"></td><td><code>xmark</code><br>退出/关闭/取消/colse</td><td>编辑页关闭；选日记本页关闭</td><td>关闭</td><td><code>xmark</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/camera.png" width="24" alt="camera"></td><td><code>camera</code><br>拍照</td><td>工具栏：拍照</td><td>相机</td><td><code>camera</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/picture.png" width="24" alt="picture"></td><td><code>picture</code><br>图片</td><td>工具栏：从相册插照片</td><td>照片</td><td><code>photo</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/mic.png" width="24" alt="mic"></td><td><code>mic</code><br>语音/话筒/麦克风</td><td>工具栏：录音（一篇最多 3 段，满了变淡点不动）</td><td>麦克风</td><td><code>mic</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/pencil_line_1.png" width="24" alt="pencil_line_1"></td><td><code>pencil_line_1</code><br>高亮色</td><td>空白页的提示笔</td><td>笔</td><td><code>pencil.line</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/local.png" width="24" alt="local"></td><td><code>local</code><br>位置/定位</td><td>「此时此地」按钮（开着记录位置时）</td><td>定位</td><td><code>location</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/thermometer_medium.png" width="24" alt="thermometer_medium"></td><td><code>thermometer_medium</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>「此时此地」按钮（关了记录位置，只取天气）</td><td>温度计</td><td><code>thermometer.medium</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/local_slash_fill.png" width="24" alt="local_slash_fill"></td><td><code>local_slash_fill</code><br>禁用GPS/关闭</td><td>地点：不显示位置 / 没取到</td><td>不定位</td><td><code>location.slash</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/chevron_down.png" width="24" alt="chevron_down"></td><td><code>chevron_down</code><br>向下</td><td>地点右边：点开换地点</td><td>展开</td><td><code>chevron.down</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/arrow_clockwise.png" width="24" alt="arrow_clockwise"></td><td><code>arrow_clockwise</code><br>邮件刷新</td><td>天气没取到：重试</td><td>重试</td><td><code>arrow.clockwise</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/local_fill.png" width="24" alt="local_fill"></td><td><code>local_fill</code><br>定位/位置</td><td>此时此地标记里，地名前的小定位</td><td>定位</td><td><code>location.fill</code></td><td>日记卡片、详情页同一个标记</td></tr>
+<tr><td><img src="harmony_symbols/checkmark.png" width="24" alt="checkmark"></td><td><code>checkmark</code><br>确认/钩/勾选</td><td>换地点的弹窗：当前选中的地点</td><td>已选</td><td><code>checkmark</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/bold.png" width="24" alt="bold"></td><td><code>bold</code><br>加粗</td><td>正文工具条：加粗</td><td>加粗</td><td><code>bold</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/italic.png" width="24" alt="italic"></td><td><code>italic</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>正文工具条：斜体</td><td>斜体</td><td><code>italic</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/textformat_size_square.png" width="24" alt="textformat_size_square"></td><td><code>textformat_size_square</code><br>字体大小/识别文字</td><td>正文工具条：小标题</td><td>字号</td><td><code>textformat.size</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/pencil_line_1.png" width="24" alt="pencil_line_1"></td><td><code>pencil_line_1</code><br>高亮色</td><td>正文工具条 / 选中文字菜单：荧光笔</td><td>荧光笔</td><td><code>highlighter</code></td><td>官方中文名「高亮色」</td></tr>
+<tr><td><img src="harmony_symbols/strikethrough.png" width="24" alt="strikethrough"></td><td><code>strikethrough</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>选中文字菜单：删除线</td><td>删除线</td><td><code>strikethrough</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/arrow_left.png" width="24" alt="arrow_left"></td><td><code>arrow_left</code><br>返回</td><td>长按照片菜单：移到左边</td><td>往左</td><td><code>arrow.left</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/arrow_right.png" width="24" alt="arrow_right"></td><td><code>arrow_right</code><br>箭头/向右</td><td>长按照片菜单：移到右边</td><td>往右</td><td><code>arrow.right</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/star.png" width="24" alt="star"></td><td><code>star</code><br>获赞与收藏/五角</td><td>长按照片菜单：设为封面（大屏模式）</td><td>星</td><td><code>star</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/star_slash.png" width="24" alt="star_slash"></td><td><code>star_slash</code><br>取消收藏</td><td>长按照片菜单：取消封面</td><td>取消星</td><td><code>star.slash</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/picture_2.png" width="24" alt="picture_2"></td><td><code>picture_2</code><br>从图库中选择</td><td>长按照片菜单：换相纸</td><td>相框</td><td><code>photo.artframe</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/trash.png" width="24" alt="trash"></td><td><code>trash</code><br>删除/垃圾箱/回收站</td><td>长按照片菜单：删除</td><td>删除</td><td><code>trash</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/cut.png" width="24" alt="cut"></td><td><code>cut</code><br>截取/剪刀</td><td>正文里照片剪下来的小剪刀标</td><td>剪刀</td><td><code>scissors</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/play_fill.png" width="24" alt="play_fill"></td><td><code>play_fill</code><br>播放</td><td>录音卡片：播放</td><td>播放</td><td><code>play.fill</code></td><td>大屏卡片的录音也一样</td></tr>
+<tr><td><img src="harmony_symbols/pause.png" width="24" alt="pause"></td><td><code>pause</code><br>暂停</td><td>录音卡片：暂停</td><td>暂停</td><td><code>pause.fill</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/xmark_circle_fill.png" width="24" alt="xmark_circle_fill"></td><td><code>xmark_circle_fill</code><br>取消/关闭/退出/colse</td><td>录音卡片：去掉这段录音</td><td>去掉</td><td><code>xmark.circle.fill</code></td><td></td></tr>
+</table>
+<h3>尺素相机</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/xmark.png" width="24" alt="xmark"></td><td><code>xmark</code><br>退出/关闭/取消/colse</td><td>左上角关闭</td><td>关闭</td><td><code>xmark</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/arrow_2_circlepath.png" width="24" alt="arrow_2_circlepath"></td><td><code>arrow_2_circlepath</code><br>旋转、切换</td><td>切换前后镜头</td><td>翻转</td><td><code>arrow.triangle.2.circlepath</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/camera_flash_auto.png" width="24" alt="camera_flash_auto"></td><td><code>camera_flash_auto</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>闪光灯：自动</td><td>闪光自动</td><td><code>bolt.badge.a</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/camera_flash.png" width="24" alt="camera_flash"></td><td><code>camera_flash</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>闪光灯：开</td><td>闪光开</td><td><code>bolt.fill</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/camera_flash_slash.png" width="24" alt="camera_flash_slash"></td><td><code>camera_flash_slash</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>闪光灯：关</td><td>闪光关</td><td><code>bolt.slash</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/rectangle_on_rectangle.png" width="24" alt="rectangle_on_rectangle"></td><td><code>rectangle_on_rectangle</code><br>相册</td><td>选相纸</td><td>一叠</td><td><code>square.stack</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/chevron_up.png" width="24" alt="chevron_up"></td><td><code>chevron_up</code><br>向上</td><td>相纸列表展开</td><td>展开</td><td><code>chevron.up</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/camera.png" width="24" alt="camera"></td><td><code>camera</code><br>拍照</td><td>取景框没起来时的占位</td><td>相机</td><td><code>camera</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/camera_slash_fill.png" width="24" alt="camera_slash_fill"></td><td><code>camera_slash_fill</code><br>禁用相机/关闭</td><td>没有相机权限时</td><td>相机不可用</td><td><code>camera.badge.ellipsis</code></td><td></td></tr>
+</table>
+<h3>记录页、日记本、详情</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/plus.png" width="24" alt="plus"></td><td><code>plus</code><br>增加/添加</td><td>记录页右上角写日记；日记本页新建；选日记本时新建</td><td>加</td><td><code>plus</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/chevron_right.png" width="24" alt="chevron_right"></td><td><code>chevron_right</code><br>下一步/向右</td><td>列表「按月份」那张卡片</td><td>进入</td><td><code>chevron.right</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/more.png" width="24" alt="more"></td><td><code>more</code><br>更多</td><td>日记本右上角「…」；照片全屏右上角「…」</td><td>更多</td><td><code>ellipsis</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/paintbrush.png" width="24" alt="paintbrush"></td><td><code>paintbrush</code><br>画笔</td><td>日记本「…」：编辑封面</td><td>画笔</td><td><code>paintbrush</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/rename.png" width="24" alt="rename"></td><td><code>rename</code><br>重命名</td><td>日记本「…」：重命名；详情页编辑</td><td>笔</td><td><code>pencil</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/ebook.png" width="24" alt="ebook"></td><td><code>ebook</code><br>电子书</td><td>日记本「…」：精装 PDF</td><td>书</td><td><code>book.closed</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/trash.png" width="24" alt="trash"></td><td><code>trash</code><br>删除/垃圾箱/回收站</td><td>日记本「…」：删除；详情页删除</td><td>删除</td><td><code>trash</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/list_bullet.png" width="24" alt="list_bullet"></td><td><code>list_bullet</code><br>项目符号-圆点</td><td>日记本里：列表排法</td><td>列表</td><td><code>list.bullet</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/square_grid_2x2.png" width="24" alt="square_grid_2x2"></td><td><code>square_grid_2x2</code><br>检测项_应用</td><td>日记本里：格子排法</td><td>格子</td><td><code>square.grid.3x3</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/square_and_pencil.png" width="24" alt="square_and_pencil"></td><td><code>square_and_pencil</code><br>编辑</td><td>日记本里：在这本里写一篇</td><td>写</td><td><code>square.and.pencil</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/picture.png" width="24" alt="picture"></td><td><code>picture</code><br>图片</td><td>编辑封面：还没有照片时</td><td>照片</td><td><code>photo.on.rectangle.angled</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/picture.png" width="24" alt="picture"></td><td><code>picture</code><br>图片</td><td>编辑封面：更换照片</td><td>照片</td><td><code>photo</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/crop.png" width="24" alt="crop"></td><td><code>crop</code><br>裁剪</td><td>编辑封面：调整构图</td><td>裁切</td><td><code>crop</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/xmark_circle.png" width="24" alt="xmark_circle"></td><td><code>xmark_circle</code><br>关闭/退出/取消/colse</td><td>编辑封面：移除照片</td><td>去掉</td><td><code>xmark.circle</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/arrow_left_arrow_right.png" width="24" alt="arrow_left_arrow_right"></td><td><code>arrow_left_arrow_right</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>照片全屏「…」：移到左侧 / 右侧</td><td>左右换</td><td><code>arrow.left.arrow.right</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/rectangle_on_rectangle.png" width="24" alt="rectangle_on_rectangle"></td><td><code>rectangle_on_rectangle</code><br>相册</td><td>照片全屏「…」：更换相纸样式</td><td>换一张</td><td><code>square.on.square</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/chevron_left.png" width="24" alt="chevron_left"></td><td><code>chevron_left</code><br>返回/向左</td><td>阅读器、心情页左上角返回</td><td>返回</td><td><code>chevron.left</code></td><td></td></tr>
+</table>
+<h3>精装 PDF</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/xmark.png" width="24" alt="xmark"></td><td><code>xmark</code><br>退出/关闭/取消/colse</td><td>导出页关闭</td><td>关闭</td><td><code>xmark</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/share.png" width="24" alt="share"></td><td><code>share</code><br>分享</td><td>导出页：分享 PDF</td><td>分享</td><td><code>square.and.arrow.up</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/printer.png" width="24" alt="printer"></td><td><code>printer</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>导出页：怎么打印</td><td>打印机</td><td><code>printer</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/doc_text.png" width="24" alt="doc_text"></td><td><code>doc_text</code><br>日志/文本/文件</td><td>打印说明：A5 大小</td><td>文档</td><td><code>doc.text</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/rectangle_on_rectangle.png" width="24" alt="rectangle_on_rectangle"></td><td><code>rectangle_on_rectangle</code><br>相册</td><td>打印说明：单面也能装订</td><td>两张纸</td><td><code>doc.on.doc</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/books_vertical_fill.png" width="24" alt="books_vertical_fill"></td><td><code>books_vertical_fill</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>打印说明：做成一本真正的书</td><td>书</td><td><code>books.vertical</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/waveform.png" width="24" alt="waveform"></td><td><code>waveform</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>PDF 正文里「一段录音」的标记</td><td>声波</td><td><code>waveform</code></td><td>画在 PDF 里，鸿蒙自己的 PDF 用同一个意思</td></tr>
+</table>
+<h3>邮筒、信箱、世界笔友</h3>
+<table>
+<tr><th>预览</th><th>鸿蒙 <code>sys.symbol.</code></th><th>位置</th><th>意思</th><th>iOS</th><th>备注</th></tr>
+<tr><td><img src="harmony_symbols/inbox.png" width="24" alt="inbox"></td><td><code>inbox</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>邮筒页：信箱</td><td>收件匣</td><td><code>tray</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/worldclock.png" width="24" alt="worldclock"></td><td><code>worldclock</code><br>语言切换</td><td>邮筒页：按所在经度显示的地球（亚洲 / 大洋洲）</td><td>地球</td><td><code>globe.asia.australia</code></td><td>鸿蒙没有分区域的地球，一律用这个</td></tr>
+<tr><td><img src="harmony_symbols/worldclock.png" width="24" alt="worldclock"></td><td><code>worldclock</code><br>语言切换</td><td>同上（欧洲 / 非洲）</td><td>地球</td><td><code>globe.europe.africa</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/worldclock.png" width="24" alt="worldclock"></td><td><code>worldclock</code><br>语言切换</td><td>同上（美洲）</td><td>地球</td><td><code>globe.americas</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/plus_circle.png" width="24" alt="plus_circle"></td><td><code>plus_circle</code><br>附件区/添加/增加</td><td>投信那叠信：再加一封</td><td>加</td><td><code>plus.circle</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/arrow_left_arrow_right.png" width="24" alt="arrow_left_arrow_right"></td><td><code>arrow_left_arrow_right</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td><td>信件详情：翻面看译文 / 原文</td><td>翻面</td><td><code>arrow.left.arrow.right</code></td><td>和 iOS 一样用左右箭头</td></tr>
+<tr><td><img src="harmony_symbols/chevron_right.png" width="24" alt="chevron_right"></td><td><code>chevron_right</code><br>下一步/向右</td><td>信箱分组行、求助卡片</td><td>进入</td><td><code>chevron.right</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/envelope.png" width="24" alt="envelope"></td><td><code>envelope</code><br>消息/邮件</td><td>笔友名片：写信给 TA</td><td>信</td><td><code>envelope</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/sun_max.png" width="24" alt="sun_max"></td><td><code>sun_max</code><br>曝光/亮度</td><td>笔友名片：对方那边是白天</td><td>太阳</td><td><code>sun.max</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/moon.png" width="24" alt="moon"></td><td><code>moon</code><br>免打扰/月亮</td><td>笔友名片：对方那边是夜里</td><td>月亮</td><td><code>moon</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/checkmark.png" width="24" alt="checkmark"></td><td><code>checkmark</code><br>确认/钩/勾选</td><td>笔友名片：已选为收件人</td><td>已选</td><td><code>checkmark</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/location_up.png" width="24" alt="location_up"></td><td><code>location_up</code><br>导航</td><td>世界地图：回到我的位置</td><td>定位</td><td><code>location</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/envelope_fill.png" width="24" alt="envelope_fill"></td><td><code>envelope_fill</code><br>邮件/消息</td><td>世界地图：在路上的信</td><td>信</td><td><code>envelope.fill</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/worldclock.png" width="24" alt="worldclock"></td><td><code>worldclock</code><br>语言切换</td><td>求助卡片：网站</td><td>地球</td><td><code>globe</code></td><td></td></tr>
+<tr><td><img src="harmony_symbols/phone.png" width="24" alt="phone"></td><td><code>phone</code><br>通话音量/电话</td><td>求助卡片：电话</td><td>电话</td><td><code>phone</code></td><td></td></tr>
+</table>
+<hr>
+<h2>三、天气图标（此时此地、日记卡片、详情页）</h2>
+<p>日记里存的天气标识 <code>weatherCode</code> 是苹果天气给的 SF Symbols 名（<code>sun.max</code>、<code>cloud.sun.rain</code>、<code>moon.stars</code> …；旧日记是 <code>clear</code> / <code>rain</code> 这类代码）—— 见 v1 <code>05_DATA_MODEL.md</code>、Q7。</p>
+<p>鸿蒙<b>显示</b>时按下表：从上往下看名字里含不含左边的词，<b>先匹配的先用</b>（<code>cloud.bolt.rain</code> 先碰到 bolt → 雷阵雨）；一个都不含的显示 <code>cloud</code>。</p>
+<p>鸿蒙自己<b>写</b>天气时，写成 iOS 认得的名字（就用表里「意思」对应的那个 SF Symbols 名，如晴天白天写 <code>sun.max</code>、小雨写 <code>cloud.drizzle</code>）—— iOS 读到不认识的名字会退成一朵云，不会出错。</p>
+<table>
+<tr><th>预览</th><th>名字里含</th><th>意思</th><th>鸿蒙 <code>sys.symbol.</code></th></tr>
+<tr><td><img src="harmony_symbols/thunderstorm.png" width="24" alt="thunderstorm"></td><td><code>bolt / thunder</code></td><td>雷阵雨、雷暴</td><td><code>thunderstorm</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/tornado.png" width="24" alt="tornado"></td><td><code>tornado</code></td><td>龙卷风</td><td><code>tornado</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/typhoon.png" width="24" alt="typhoon"></td><td><code>hurricane / tropicalstorm</code></td><td>台风、热带风暴</td><td><code>typhoon</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/sleet.png" width="24" alt="sleet"></td><td><code>sleet</code></td><td>雨夹雪</td><td><code>sleet</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/hail.png" width="24" alt="hail"></td><td><code>hail</code></td><td>冰雹</td><td><code>hail</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/moderatesnow.png" width="24" alt="moderatesnow"></td><td><code>snow</code></td><td>雪</td><td><code>moderatesnow</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/heavy_rain.png" width="24" alt="heavy_rain"></td><td><code>heavyrain</code></td><td>大雨</td><td><code>heavy_rain</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/light_rain.png" width="24" alt="light_rain"></td><td><code>drizzle</code></td><td>毛毛雨</td><td><code>light_rain</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/moderate_rain.png" width="24" alt="moderate_rain"></td><td><code>rain</code></td><td>雨</td><td><code>moderate_rain</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/foggy.png" width="24" alt="foggy"></td><td><code>fog</code></td><td>雾</td><td><code>foggy</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/smoke_fill.png" width="24" alt="smoke_fill"></td><td><code>smoke</code></td><td>烟</td><td><code>smoke_fill</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/dust_storm.png" width="24" alt="dust_storm"></td><td><code>dust</code></td><td>浮尘、沙尘</td><td><code>dust_storm</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/haze.png" width="24" alt="haze"></td><td><code>haze</code></td><td>霾</td><td><code>haze</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/wind.png" width="24" alt="wind"></td><td><code>wind</code></td><td>大风</td><td><code>wind</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/thermometer_sun_fill.png" width="24" alt="thermometer_sun_fill"></td><td><code>thermometer.sun / hot</code></td><td>酷热</td><td><code>thermometer_sun_fill</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/thermometer_snowflake.png" width="24" alt="thermometer_snowflake"></td><td><code>thermometer.snowflake / frigid</code></td><td>严寒</td><td><code>thermometer_snowflake</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/cloud_sun_fill.png" width="24" alt="cloud_sun_fill"></td><td><code>cloud.sun</code></td><td>少云（白天）</td><td><code>cloud_sun_fill</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/cloud_moon_fill.png" width="24" alt="cloud_moon_fill"></td><td><code>cloud.moon</code></td><td>少云（夜里）</td><td><code>cloud_moon_fill</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/cloud.png" width="24" alt="cloud"></td><td><code>cloud</code></td><td>多云、阴</td><td><code>cloud</code><br>（图标库网页没列，字体里有，DevEco 里核对）</td></tr>
+<tr><td><img src="harmony_symbols/moon.png" width="24" alt="moon"></td><td><code>moon</code></td><td>晴（夜里）</td><td><code>moon</code><br>免打扰/月亮</td></tr>
+<tr><td><img src="harmony_symbols/sun_max.png" width="24" alt="sun_max"></td><td><code>sun / clear</code></td><td>晴（白天）</td><td><code>sun_max</code><br>曝光/亮度</td></tr>
+</table>
+<p>天气图标颜色跟着所在那一行字的颜色（iOS 是次要文字色），大小比那一行的字小一号；地名前的小定位比天气图标再小 1。</p>
+<hr>
+<h2>四、以后改了怎么办</h2>
+<p>iOS 侧改 <code>Scripts/make_harmony_icon_catalog.py</code> 里的表（或改了 <code>WaxSeal.swift</code>）后重跑，整个 <code>icons/</code> 目录重出；鸿蒙按新表换 <code>sys.symbol</code> 名、整批替换 <code>wax_seal/</code> 的图。<b>不要在鸿蒙这边手改图。</b></p>

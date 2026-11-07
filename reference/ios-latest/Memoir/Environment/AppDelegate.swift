@@ -7,7 +7,7 @@ import UserNotifications
 ///
 /// 1. **桌面长按图标的快捷操作** —— 这里只负责把场景交给 `QuickActionSceneDelegate`，
 ///    具体见 `QuickActions.swift`
-/// 2. **点击「回信到了」通知** —— 这里接住，挂在 `openLetterboxRequested` 上等界面来取
+/// 2. **点击通知** —— 这里接住，挂在 `openLetterboxRequested`（回信到了）/ `openComposeRequested`（提醒写日记）上等界面来取
 ///
 /// 遵守 `ObservableObject`：由 `@UIApplicationDelegateAdaptor` 创建的委托只要遵守它，
 /// SwiftUI 就会自动放进环境（`@EnvironmentObject` 取用）。这是 CLAUDE.md
@@ -16,6 +16,8 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
 
     /// 用户点了回信通知、还没被界面处理掉。界面处理完要置回 false
     @Published var openLetterboxRequested = false
+    /// 用户点了「提醒写日记」的通知、还没被界面处理掉。界面处理完要置回 false
+    @Published var openComposeRequested = false
 
     func application(
         _ application: UIApplication,
@@ -53,7 +55,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCent
         didReceive response: UNNotificationResponse
     ) async {
         let route = response.notification.request.content.userInfo[LetterNotifications.routeKey] as? String
-        guard route == LetterNotifications.letterboxRoute else { return }
-        await MainActor.run { openLetterboxRequested = true }
+        switch route {
+        case LetterNotifications.letterboxRoute: await MainActor.run { openLetterboxRequested = true }
+        case WritingReminder.composeRoute: await MainActor.run { openComposeRequested = true }
+        default: break
+        }
     }
 }

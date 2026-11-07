@@ -4364,6 +4364,100 @@
         }
       }
     },
+    "今天的那页还空着。" : {
+      "comment" : "提醒写日记：锁屏实况 / 通知里的一句话",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today’s page is still blank."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La página de hoy sigue en blanco."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La page d’aujourd’hui est encore blanche."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日のページは、まだ白いまま。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오늘의 페이지가 아직 비어 있어요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今天的那页还空着。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今天的那頁還空著。"
+          }
+        }
+      }
+    },
+    "今天过得怎么样？写两句也好。" : {
+      "comment" : "提醒写日记：锁屏实况 / 通知里的一句话",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How was today? A line or two is plenty."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Qué tal tu día? Con un par de líneas basta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment s’est passée ta journée ? Deux lignes suffisent."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日はどんな一日でしたか？ひとことでも。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오늘 하루 어땠어요? 두어 줄이면 충분해요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今天过得怎么样？写两句也好。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今天過得怎麼樣？寫兩句也好。"
+          }
+        }
+      }
+    },
     "今年" : {
       "localizations" : {
         "en" : {
@@ -5990,6 +6084,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "信紙附照"
+          }
+        }
+      }
+    },
+    "停一下，给今天写几行。" : {
+      "comment" : "提醒写日记：锁屏实况 / 通知里的一句话",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pause for a moment and give today a few lines."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haz una pausa y dedícale unas líneas al día de hoy."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prends un instant pour écrire quelques lignes sur aujourd’hui."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "少し手を止めて、今日のことを数行。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "잠깐 멈추고, 오늘에게 몇 줄 남겨 봐요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停一下，给今天写几行。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "停一下，給今天寫幾行。"
           }
         }
       }
@@ -9065,6 +9206,100 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "「別讓今天只是「又一天」」"
+          }
+        }
+      }
+    },
+    "到点发一条通知提醒一下；那天写过了就不打扰。" : {
+      "comment" : "设置 → 日记 → 提醒写日记的说明（iOS 18–25，只有普通通知）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At the time you choose, you’ll get a gentle notification. If you’ve already written that day, it stays quiet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A la hora que elijas, recibirás un aviso discreto. Si ese día ya escribiste, no te molestará."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À l’heure choisie, vous recevez une petite notification. Si vous avez déjà écrit ce jour-là, elle ne s’affiche pas."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定した時刻に、通知でそっとお知らせします。その日もう書いていれば、お知らせしません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "정한 시간에 알림으로 살며시 알려 드려요. 그날 이미 썼다면 알리지 않아요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "到点发一条通知提醒一下；那天写过了就不打扰。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "到點發一則通知提醒一下；那天寫過了就不打擾。"
+          }
+        }
+      }
+    },
+    "到点在锁屏和灵动岛上轻轻提醒一下；那天写过了就不打扰。" : {
+      "comment" : "设置 → 日记 → 提醒写日记的说明（iOS 26 起，用锁屏实况和灵动岛）",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At the time you choose, a gentle reminder appears on the Lock Screen and in the Dynamic Island. If you’ve already written that day, it stays quiet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A la hora que elijas, aparece un aviso discreto en la pantalla bloqueada y en la Dynamic Island. Si ese día ya escribiste, no te molestará."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À l’heure choisie, un petit rappel s’affiche sur l’écran verrouillé et dans la Dynamic Island. Si vous avez déjà écrit ce jour-là, il ne s’affiche pas."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定した時刻に、ロック画面とダイナミックアイランドでそっとお知らせします。その日もう書いていれば、お知らせしません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "정한 시간에 잠금 화면과 Dynamic Island에서 살며시 알려 드려요. 그날 이미 썼다면 알리지 않아요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "到点在锁屏和灵动岛上轻轻提醒一下；那天写过了就不打扰。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "到點在鎖定畫面和動態島上輕輕提醒一下；那天寫過了就不打擾。"
           }
         }
       }
@@ -20122,6 +20357,53 @@
         }
       }
     },
+    "提醒写日记" : {
+      "comment" : "设置 → 日记：提醒写日记的开关",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journaling Reminder"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordatorio para escribir"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rappel d’écriture"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日記のリマインダー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일기 쓰기 알림"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "提醒写日记"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "提醒寫日記"
+          }
+        }
+      }
+    },
     "插入" : {
       "localizations" : {
         "en" : {
@@ -22309,6 +22591,53 @@
         }
       }
     },
+    "时间" : {
+      "comment" : "设置 → 日记 → 提醒写日记：几点提醒",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hora"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heure"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時刻"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "시간"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "时间"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間"
+          }
+        }
+      }
+    },
     "时间不会等你，但文字会" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -23612,6 +23941,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "「有些風景只出現一次，記下來」"
+          }
+        }
+      }
+    },
+    "有什么想记下来的吗？" : {
+      "comment" : "提醒写日记：锁屏实况 / 通知里的一句话",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anything you’d like to remember?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Hay algo que quieras anotar?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelque chose que tu voudrais garder ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "書き留めておきたいこと、ありますか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록해 두고 싶은 일이 있나요?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有什么想记下来的吗？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "有什麼想記下來的嗎？"
           }
         }
       }
@@ -30840,6 +31216,53 @@
         }
       }
     },
+    "笔在桌上，纸也铺好了。" : {
+      "comment" : "提醒写日记：锁屏实况 / 通知里的一句话",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The pen’s on the desk, and the paper’s laid out."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La pluma está en la mesa y el papel, listo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le stylo est sur la table, la feuille est prête."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ペンは机の上に、紙も広げてあります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "펜은 책상 위에, 종이도 펼쳐 두었어요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "笔在桌上，纸也铺好了。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "筆在桌上，紙也鋪好了。"
+          }
+        }
+      }
+    },
     "等待生成…" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -33117,6 +33540,53 @@
         }
       }
     },
+    "记录一下" : {
+      "comment" : "提醒写日记：锁屏实况上的按钮，点了去写日记",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Write it down"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anotar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noter"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "書きとめる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록하기"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "记录一下"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記錄一下"
+          }
+        }
+      }
+    },
     "记录不需要完美，真实就够了" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -34702,6 +35172,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "趁世界還沒醒來，先寫几行字"
+          }
+        }
+      }
+    },
+    "趁今天还没过完，留一页给它。" : {
+      "comment" : "提醒写日记：锁屏实况 / 通知里的一句话",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Before today slips away, save it a page."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Antes de que se acabe el día, guárdale una página."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avant que la journée ne s’achève, garde-lui une page."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日が終わる前に、一ページ残しておきましょう。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오늘이 다 가기 전에, 한 페이지 남겨 두세요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "趁今天还没过完，留一页给它。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "趁今天還沒過完，留一頁給它。"
           }
         }
       }
@@ -37363,6 +37880,53 @@
         }
       }
     },
+    "通知没有打开，提醒发不出来。" : {
+      "comment" : "设置 → 日记 → 提醒写日记：系统设置里关了尺素的通知，后面跟一个「去设置」按钮",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Notifications are off, so reminders can’t be sent."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las notificaciones están desactivadas, así que no se pueden enviar recordatorios."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les notifications sont désactivées : le rappel ne peut pas être envoyé."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知がオフのため、リマインダーを送れません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "알림이 꺼져 있어 알림을 보낼 수 없어요."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知没有打开，提醒发不出来。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知沒有開啟，提醒發不出來。"
+          }
+        }
+      }
+    },
     "那些微小的时刻，构成了你的人生" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -37966,6 +38530,53 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重命名日記本"
+          }
+        }
+      }
+    },
+    "重复" : {
+      "comment" : "设置 → 日记 → 提醒写日记：一周里哪几天提醒",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeat"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repetir"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Répéter"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "繰り返し"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "반복"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重复"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重複"
           }
         }
       }

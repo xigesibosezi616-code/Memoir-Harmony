@@ -15,12 +15,14 @@
 产出：
 - `Memoir/AppIcons/<名字>.icon`：`AppIcon`（素笺，主图标）、`LeatherIcon`、`KentIcon`、`PolarIcon`，字层 `Assets/m.svg`
 - `Memoir/Assets.xcassets/AppIconPreview_<主题>.imageset/`：设置页里的预览（`AppIconOption.previewAsset`），SVG 保留矢量
+- `MemoirWidgets/Assets.xcassets/Mark.imageset/Mark.svg`：锁屏实况、灵动岛里的 m.（只有字、裁到字边，模板图，颜色由实况按主题上）
 - `Branding/AppIcon/`：四套的母版，`<主题>.svg` / `.pdf`（矢量）+ `<主题>_8192.png`，申请版权、印刷、给设计师用
 
 依赖 numpy、shapely 和 ImageMagick（`magick` 命令）。这台 Mac 上系统自带的 python3 没有 numpy，用 miniforge 的：
     ~/miniforge3/bin/python3 Scripts/make_app_icon.py                          重出四套图标、预览和母版
     ~/miniforge3/bin/python3 Scripts/make_app_icon.py --export 4096 <文件.png>   出一张素笺主图标的大图（方形、不带圆角，宣传 / 素材用）
     ~/miniforge3/bin/python3 Scripts/make_app_icon.py --avatar 4096 <文件.png>   官方账号头像：字居中、四周留宽边（会被裁成圆）
+    ~/miniforge3/bin/python3 Scripts/make_app_icon.py --mark                     只重出实况用的 m.
 """
 import json
 import os
@@ -37,6 +39,7 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "Memoir")
 ICON_DIR = os.path.join(ROOT, "AppIcons")
 ASSETS = os.path.join(ROOT, "Assets.xcassets")
 MASTERS = os.path.join(ROOT, "..", "Branding", "AppIcon")
+WIDGET_MARK = os.path.join(ROOT, "..", "MemoirWidgets", "Assets.xcassets", "Mark.imageset")
 
 # (图标名, 预览图名, 母版文件名, 底色, 字色)。新主题：照 ThemePickerView 的两个色块加一行，
 # 再按 AppIconOption 顶部的说明登记备用图标名
@@ -222,6 +225,30 @@ def write_preview(name, background, ink, outline):
         f.write("\n")
 
 
+def write_widget_mark(outline, pad=2.0, height=24):
+    """实况（锁屏卡片、灵动岛）里的 m.：没有底色、viewBox 裁到字和句点的边（四周留 pad 格），
+    标成 height pt 高；在 asset 里设成模板图，颜色由实况按主题上"""
+    dx, dy, dr = STROKE["dot"]
+    r = dr * WEIGHT
+    x0, y0 = min(outline[:, 0].min(), dx - r) - pad, min(outline[:, 1].min(), dy - r) - pad
+    x1, y1 = max(outline[:, 0].max(), dx + r) + pad, max(outline[:, 1].max(), dy + r) + pad
+    w, h = x1 - x0, y1 - y0
+    d = "M" + " L".join(f"{x:.4f},{y:.4f}" for x, y in outline) + " Z"
+    os.makedirs(WIDGET_MARK, exist_ok=True)
+    with open(os.path.join(WIDGET_MARK, "Mark.svg"), "w") as f:
+        f.write(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{x0:.4f} {y0:.4f} {w:.4f} {h:.4f}" '
+                f'width="{height * w / h:.2f}" height="{height}">\n'
+                f'  <path fill="#000000" d="{d}"/>\n'
+                f'  <circle fill="#000000" cx="{dx}" cy="{dy}" r="{r:.4f}"/>\n</svg>\n')
+    with open(os.path.join(WIDGET_MARK, "Contents.json"), "w") as f:
+        json.dump({"images": [{"filename": "Mark.svg", "idiom": "universal"}],
+                   "info": {"author": "xcode", "version": 1},
+                   "properties": {"preserves-vector-representation": True, "template-rendering-intent": "template"}},
+                  f, indent=2)
+        f.write("\n")
+    print(f"实况 m. → {os.path.normpath(WIDGET_MARK)}  {w:.1f}×{h:.1f} 格")
+
+
 def write_masters(outline):
     """Branding/AppIcon/ 下四套母版：SVG、PDF（矢量）+ 8192 方图（不带圆角 —— 圆角由系统 / 用的地方自己加）"""
     os.makedirs(MASTERS, exist_ok=True)
@@ -259,11 +286,15 @@ def main():
         export_avatar(int(sys.argv[2]), sys.argv[3])
         return
     outline = stroke_outline()
+    if len(sys.argv) == 2 and sys.argv[1] == "--mark":
+        write_widget_mark(outline)
+        return
     os.makedirs(ICON_DIR, exist_ok=True)
     for name, preview, file, background, ink in THEMES:
         write_icon(name, background, ink, outline)
         write_preview(preview, background, ink, outline)
         print(f"{name}.icon / {preview}  底 {background}  字 {ink}")
+    write_widget_mark(outline)
     write_masters(outline)
     print(f"母版 → {os.path.normpath(MASTERS)}")
 

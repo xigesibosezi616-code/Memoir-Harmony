@@ -478,6 +478,8 @@ struct ComposeView: View {
             modelContext.delete(draft)
         }
         try? modelContext.save()
+        // 提醒写日记：今天写过了 —— 锁屏上的实况收起来，今天不再提醒
+        Task { await WritingReminder.reschedule(context: modelContext) }
         removeUnusedMedia(keeping: finalBlocks)
     }
 

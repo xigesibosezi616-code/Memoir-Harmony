@@ -33,6 +33,8 @@ struct ContentView: View {
     @State private var settingsResetID = UUID()
     /// 点「回信到了」通知 → 让邮筒页直接推出信箱
     @State private var openLetterbox = false
+    /// 点「提醒写日记」的实况 / 通知 → 让记录页直接打开写日记
+    @State private var openCompose = false
     /// 从微信 /「文件」点开 `.memoir` 时待处理的备份包
     @State private var pendingBackup: BackupFileRef?
 
@@ -58,6 +60,11 @@ struct ContentView: View {
             // 不判 onboarding 有没有走完 —— 「换新机 → 装 App → 从微信点开备份」
             // 恰恰是最典型的路径，这时候拦住用户毫无道理。
             .onOpenURL { url in
+                // 点了锁屏 / 灵动岛上「提醒写日记」的实况
+                if url == .writingReminderCompose {
+                    requestCompose()
+                    return
+                }
                 guard url.pathExtension.lowercased() == BackupFormat.fileExtension else { return }
                 pendingBackup = BackupFileRef(url: url)
             }
@@ -76,6 +83,12 @@ struct ContentView: View {
                 guard hasCompletedOnboarding else { return }
                 selectedTab = 2
                 openLetterbox = true
+            }
+            // 点了「提醒写日记」的通知（iOS 18–25，以及 iOS 26 排在实况之后那几天）。`initial: true` 同上
+            .onChange(of: appDelegate.openComposeRequested, initial: true) { _, requested in
+                guard requested else { return }
+                appDelegate.openComposeRequested = false
+                requestCompose()
             }
             .onAppear { QuickAction.registerShortcutItems() }
             // 回到前台：补排在路上的信的到达通知（原因见 `LetterNotifications.rescheduleInTransit`）
@@ -120,10 +133,28 @@ struct ContentView: View {
                 guard phase == .active else { return }
                 themeManager.reconcileAppIcon()
             }
+            // 提醒写日记：回到前台就重排（今天写过没有、另一台设备同步来的日记都在这时候算进去）；
+            // 换了主题、语言也重排 —— 排好的实况带着当时的颜色和那句话
+            .onChange(of: scenePhase, initial: true) { _, phase in
+                guard phase == .active else { return }
+                Task { await WritingReminder.reschedule(context: modelContext) }
+            }
+            .onChange(of: themeManager.currentThemeID) {
+                Task { await WritingReminder.reschedule(context: modelContext) }
+            }
             // 换了语言要重新登记，不然长按菜单还是旧语言
             .onChange(of: languageManager.appLanguage) {
+                Task { await WritingReminder.reschedule(context: modelContext) }
                 QuickAction.registerShortcutItems()
             }
+    }
+
+    /// 去写日记：切到记录页，由它打开写日记（有草稿接着写，没有先选本子，和点加号一样）
+    private func requestCompose() {
+        // 引导还没走完时界面上根本没有 tab，没地方可跳
+        guard hasCompletedOnboarding else { return }
+        selectedTab = 0
+        openCompose = true
     }
 
     private func handleQuickAction(_ action: QuickAction?) {
@@ -143,7 +174,7 @@ struct ContentView: View {
         if hasCompletedOnboarding {
             TabView(selection: $selectedTab) {
                 Tab("记录", systemImage: "book.fill", value: 0) {
-                    HomeView()
+                    HomeView(openCompose: $openCompose)
                 }
                 Tab("日记本", systemImage: "books.vertical.fill", value: 1) {
                     BookshelfView()

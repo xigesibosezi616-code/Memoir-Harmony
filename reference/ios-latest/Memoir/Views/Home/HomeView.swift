@@ -6,6 +6,8 @@ struct HomeView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \JournalEntry.date, order: .reverse) private var entries: [JournalEntry]
     @State private var showCompose = false
+    /// 点了「提醒写日记」的实况 / 通知（`ContentView` 切到这一页后置上）：和点加号一样去写
+    @Binding var openCompose: Bool
     /// 新手指引走到哪一步（`FirstStep`）；「写」的入口在哪（全局坐标），指引的细线指过去
     @AppStorage(FirstStep.storageKey) private var firstStepRaw = 0
     @State private var writeButtonFrame: CGRect = .zero
@@ -254,6 +256,11 @@ struct HomeView: View {
                 ComposeFlow(hasDraft: composeHasDraft)
                     .navigationTransition(.zoom(sourceID: Self.composeSourceID, in: composeTransition))
             }
+            .onChange(of: openCompose, initial: true) { _, requested in
+                guard requested else { return }
+                openCompose = false
+                if !showCompose { startWriting() }
+            }
         }
         // 小彩蛋：攒到 8 篇，一屏一篇时提示双指捏合
         .overlay {
@@ -435,7 +442,7 @@ final class ShowcaseGeometry {
 }
 
 #Preview("Washi") {
-    HomeView()
+    HomeView(openCompose: .constant(false))
         .environment(ThemeManager())
         .modelContainer(for: [JournalEntry.self, Tag.self], inMemory: true)
 }
@@ -443,7 +450,7 @@ final class ShowcaseGeometry {
 #Preview("Leather") {
     let manager = ThemeManager()
     manager.currentThemeID = "leather"
-    return HomeView()
+    return HomeView(openCompose: .constant(false))
         .environment(manager)
         .modelContainer(for: [JournalEntry.self, Tag.self], inMemory: true)
 }
