@@ -15,7 +15,12 @@ import {
   dayString,
   weekdayString,
   dayTens,
-  dayOnes
+  dayOnes,
+  fullDate,
+  monthDayNumeric,
+  firstWeekdayIndex,
+  weekdayNarrowSymbols,
+  weekdayNarrow
 } from '../../main/ets/services/AppDateFormatters';
 
 /** 2026-09-27 是星期日（本地时区构造，字段取本地值，断言与跑测时区无关） */
@@ -105,6 +110,44 @@ export default function appDateFormattersTest() {
       expect(dayOnes(SEP27)).assertEqual('7');
       expect(dayTens(JAN5)).assertEqual('0');
       expect(dayOnes(JAN5)).assertEqual('5');
+    })
+
+    // ---- 6.3 写作统计 ----
+
+    it('fullDateFollowsLanguage', 0, () => {
+      expect(fullDate(SEP27, 'zh-Hans')).assertEqual('2026年9月27日');
+      expect(fullDate(SEP27, 'en')).assertEqual('September 27, 2026');
+    })
+
+    it('monthDayNumericForTrendAxis', 0, () => {
+      expect(monthDayNumeric(SEP27, 'zh-Hans')).assertEqual('9/27');
+      expect(monthDayNumeric(SEP27, 'en')).assertEqual('9/27');
+    })
+
+    it('firstWeekdayIndexFollowsCLDR', 0, () => {
+      expect(firstWeekdayIndex('zh-Hans')).assertEqual(0);
+      expect(firstWeekdayIndex('zh-Hant')).assertEqual(0);
+      expect(firstWeekdayIndex('en')).assertEqual(0);
+      expect(firstWeekdayIndex('ja')).assertEqual(0);
+      expect(firstWeekdayIndex('ko')).assertEqual(0);
+      expect(firstWeekdayIndex('fr')).assertEqual(1);
+      expect(firstWeekdayIndex('es')).assertEqual(1);
+    })
+
+    it('weekdayNarrowSymbolsStartFromFirstDay', 0, () => {
+      const zh = weekdayNarrowSymbols('zh-Hans');
+      expect(zh.length).assertEqual(7);
+      expect(zh.join('')).assertEqual('日一二三四五六');
+      const en = weekdayNarrowSymbols('en');
+      expect(en[0]).assertEqual('S'); // Sunday 起
+      const fr = weekdayNarrowSymbols('fr');
+      expect(fr[0]).assertEqual('L'); // Monday 起
+    })
+
+    it('weekdayNarrowByIndex', 0, () => {
+      expect(weekdayNarrow(0, 'zh-Hans')).assertEqual('日');
+      expect(weekdayNarrow(3, 'zh-Hans')).assertEqual('三');
+      expect(weekdayNarrow(6, 'zh-Hans')).assertEqual('六');
     })
   })
 }

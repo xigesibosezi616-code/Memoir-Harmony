@@ -3579,6 +3579,90 @@
     {
       "name": "s_02a00a2547",
       "value": "Se connecter avec un HUAWEI ID"
+    },
+    {
+      "name": "s_d6389cc426",
+      "value": "Plus longue série"
+    },
+    {
+      "name": "s_efce771fc5",
+      "value": "Aperçu de vos humeurs"
+    },
+    {
+      "name": "s_26825deedb",
+      "value": "Évolution de l’humeur"
+    },
+    {
+      "name": "s_3c76ec910a",
+      "value": "Émotions les plus fréquentes"
+    },
+    {
+      "name": "s_85a1088852",
+      "value": "Météo et humeur"
+    },
+    {
+      "name": "s_67ad407dba",
+      "value": "Lieux et humeur"
+    },
+    {
+      "name": "s_09f515b893",
+      "value": "Jours et moments"
+    },
+    {
+      "name": "s_05a978d5cb",
+      "value": "La météo, les lieux, les jours et les moments s’affichent dès qu’un groupe compte au moins 3 entrées avec une humeur. Continuez d’écrire : les tendances apparaîtront peu à peu."
+    },
+    {
+      "name": "s_791054f6b1",
+      "value": "Encore quelques entrées pour voir la tendance"
+    },
+    {
+      "name": "s_a6b3821680",
+      "value": "Agréable"
+    },
+    {
+      "name": "s_dab4f23d78",
+      "value": "Désagréable"
+    },
+    {
+      "name": "s_0d05046a43",
+      "value": "Dégagé"
+    },
+    {
+      "name": "s_39b6b4c787",
+      "value": "Nuageux"
+    },
+    {
+      "name": "s_8995b89799",
+      "value": "Pluie"
+    },
+    {
+      "name": "s_7d742a7f9f",
+      "value": "Neige"
+    },
+    {
+      "name": "s_b08cdeb8a7",
+      "value": "Brouillard"
+    },
+    {
+      "name": "s_f0b2b86513",
+      "value": "Vent fort"
+    },
+    {
+      "name": "s_172fb7196f",
+      "value": "Matin"
+    },
+    {
+      "name": "s_1dfaab6548",
+      "value": "Après-midi"
+    },
+    {
+      "name": "s_76a4159492",
+      "value": "Soir"
+    },
+    {
+      "name": "s_0e458fad76",
+      "value": "Nuit"
     }
   ]
 }

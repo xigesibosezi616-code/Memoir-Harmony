@@ -3579,6 +3579,90 @@
     {
       "name": "s_02a00a2547",
       "value": "Sign in with HUAWEI ID"
+    },
+    {
+      "name": "s_d6389cc426",
+      "value": "Longest streak"
+    },
+    {
+      "name": "s_efce771fc5",
+      "value": "Mood Insights"
+    },
+    {
+      "name": "s_26825deedb",
+      "value": "Mood over time"
+    },
+    {
+      "name": "s_3c76ec910a",
+      "value": "Most frequent feelings"
+    },
+    {
+      "name": "s_85a1088852",
+      "value": "Weather & mood"
+    },
+    {
+      "name": "s_67ad407dba",
+      "value": "Places & mood"
+    },
+    {
+      "name": "s_09f515b893",
+      "value": "Days & times"
+    },
+    {
+      "name": "s_05a978d5cb",
+      "value": "Weather, places, days and times appear once a group has at least 3 entries with a mood. Keep writing and the patterns will surface."
+    },
+    {
+      "name": "s_791054f6b1",
+      "value": "Write a few more entries to see the trend"
+    },
+    {
+      "name": "s_a6b3821680",
+      "value": "Pleasant"
+    },
+    {
+      "name": "s_dab4f23d78",
+      "value": "Unpleasant"
+    },
+    {
+      "name": "s_0d05046a43",
+      "value": "Clear"
+    },
+    {
+      "name": "s_39b6b4c787",
+      "value": "Cloudy"
+    },
+    {
+      "name": "s_8995b89799",
+      "value": "Rain"
+    },
+    {
+      "name": "s_7d742a7f9f",
+      "value": "Snow"
+    },
+    {
+      "name": "s_b08cdeb8a7",
+      "value": "Fog & haze"
+    },
+    {
+      "name": "s_f0b2b86513",
+      "value": "Windy"
+    },
+    {
+      "name": "s_172fb7196f",
+      "value": "Morning"
+    },
+    {
+      "name": "s_1dfaab6548",
+      "value": "Afternoon"
+    },
+    {
+      "name": "s_76a4159492",
+      "value": "Evening"
+    },
+    {
+      "name": "s_0e458fad76",
+      "value": "Late night"
     }
   ]
 }

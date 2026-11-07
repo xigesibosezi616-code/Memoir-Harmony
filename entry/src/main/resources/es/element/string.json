@@ -3579,6 +3579,90 @@
     {
       "name": "s_02a00a2547",
       "value": "Iniciar sesión con HUAWEI ID"
+    },
+    {
+      "name": "s_d6389cc426",
+      "value": "Racha más larga"
+    },
+    {
+      "name": "s_efce771fc5",
+      "value": "Resumen de tu ánimo"
+    },
+    {
+      "name": "s_26825deedb",
+      "value": "Evolución del ánimo"
+    },
+    {
+      "name": "s_3c76ec910a",
+      "value": "Emociones más frecuentes"
+    },
+    {
+      "name": "s_85a1088852",
+      "value": "Clima y ánimo"
+    },
+    {
+      "name": "s_67ad407dba",
+      "value": "Lugares y ánimo"
+    },
+    {
+      "name": "s_09f515b893",
+      "value": "Días y momentos"
+    },
+    {
+      "name": "s_05a978d5cb",
+      "value": "El clima, los lugares, los días y los momentos aparecen cuando un grupo tiene al menos 3 entradas con estado de ánimo. Sigue escribiendo y los patrones irán apareciendo."
+    },
+    {
+      "name": "s_791054f6b1",
+      "value": "Escribe unas entradas más para ver la tendencia"
+    },
+    {
+      "name": "s_a6b3821680",
+      "value": "Agradable"
+    },
+    {
+      "name": "s_dab4f23d78",
+      "value": "Desagradable"
+    },
+    {
+      "name": "s_0d05046a43",
+      "value": "Despejado"
+    },
+    {
+      "name": "s_39b6b4c787",
+      "value": "Nublado"
+    },
+    {
+      "name": "s_8995b89799",
+      "value": "Lluvia"
+    },
+    {
+      "name": "s_7d742a7f9f",
+      "value": "Nieve"
+    },
+    {
+      "name": "s_b08cdeb8a7",
+      "value": "Niebla"
+    },
+    {
+      "name": "s_f0b2b86513",
+      "value": "Viento"
+    },
+    {
+      "name": "s_172fb7196f",
+      "value": "Mañana"
+    },
+    {
+      "name": "s_1dfaab6548",
+      "value": "Tarde"
+    },
+    {
+      "name": "s_76a4159492",
+      "value": "Noche"
+    },
+    {
+      "name": "s_0e458fad76",
+      "value": "Madrugada"
     }
   ]
 }

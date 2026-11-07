@@ -39,6 +39,13 @@ export class JournalEntry {
   weatherCode?: string;
   weatherInfo?: string;
   locationInfo?: string;
+  /**
+   * 写完时的心情愉悦度 -1…1（U03 数据字段前置，6.3 写作统计只读）。
+   * undefined = 没记（U03 心情页上线之前写的都是 undefined）
+   */
+  moodValence?: number;
+  /** 情绪词英文 key（U03 R-MOOD-12 表；一篇一个，存数组留余地）。认不出的 key 显示时跳过 */
+  moodLabels?: string[];
   /** ContentBlock[] 的 JSON。为空时按 content 退化成单文本块（老数据兼容） */
   contentBlocksData?: string;
 

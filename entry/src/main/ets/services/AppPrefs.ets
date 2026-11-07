@@ -39,6 +39,8 @@ export const PREF_KEY_HOME_DISPLAY_MODE = 'homeDisplayMode';
 export const PREF_KEY_SHOWCASE_ZOOM = 'showcaseZoom';
 /** 回信加速（对应 iOS `debugFastLetterDelivery`，默认开；5.8 仅测试包生效/可见） */
 export const PREF_KEY_DEBUG_FAST_LETTER_DELIVERY = 'debugFastLetterDelivery';
+/** 记下的最长连续写作天数（U16，对应 iOS `writingStats.bestStreakDays`；只升不降） */
+export const PREF_KEY_BEST_STREAK_DAYS = 'writingStats.bestStreakDays';
 
 /** 目录版式取值（iOS `BookContentsView.Layout`） */
 export const BOOK_CONTENTS_LAYOUT_LIST = 'list';
@@ -220,5 +222,21 @@ export class AppPrefs {
 
   static setDebugFastLetterDelivery(on: boolean): void {
     AppPrefs.putBool(PREF_KEY_DEBUG_FAST_LETTER_DELIVERY, on);
+  }
+
+  // ---- 6.3 写作统计（U16 最长连续） ----
+
+  /** 记下的最长连续写作天数（没记过是 0）。只升不降由 WritingStreak 保证，这里只存取 */
+  static recordedBestStreakDays(): number {
+    const raw = Number(AppPrefs.getString(PREF_KEY_BEST_STREAK_DAYS, '0'));
+    if (Number.isNaN(raw) || raw < 0 || !Number.isInteger(raw)) {
+      return 0;
+    }
+    return raw;
+  }
+
+  static setRecordedBestStreakDays(days: number): void {
+    const safe = Math.max(0, Math.round(days));
+    AppPrefs.putString(PREF_KEY_BEST_STREAK_DAYS, `${safe}`);
   }
 }

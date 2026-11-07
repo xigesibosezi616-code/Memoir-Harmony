@@ -28,7 +28,9 @@ export class EntryRepository {
       'weather_code': entry.weatherCode ?? null,
       'weather_info': entry.weatherInfo ?? null,
       'location_info': entry.locationInfo ?? null,
-      'content_blocks': entry.contentBlocksData ?? null
+      'content_blocks': entry.contentBlocksData ?? null,
+      'mood_valence': entry.moodValence ?? null,
+      'mood_labels': entry.moodLabels !== undefined ? JSON.stringify(entry.moodLabels) : null
     };
     try {
       await store.insert('journal_entry', values);
@@ -48,7 +50,8 @@ export class EntryRepository {
     try {
       result = await store.querySql(
         `SELECT id, title, content, date, mood, mood_color_hex, tags, is_favorite, word_count,
-          created_at, updated_at, audio_urls, weather_code, weather_info, location_info, content_blocks
+          created_at, updated_at, audio_urls, weather_code, weather_info, location_info, content_blocks,
+          mood_valence, mood_labels
          FROM journal_entry ORDER BY date DESC, created_at DESC`);
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'query entries failed: %{public}s', JSON.stringify(err));
@@ -78,7 +81,8 @@ export class EntryRepository {
     try {
       result = await store.querySql(
         `SELECT id, title, content, date, mood, mood_color_hex, tags, is_favorite, word_count,
-          created_at, updated_at, audio_urls, weather_code, weather_info, location_info, content_blocks
+          created_at, updated_at, audio_urls, weather_code, weather_info, location_info, content_blocks,
+          mood_valence, mood_labels
          FROM journal_entry WHERE id = ?`, [id]);
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'query entry failed id=%{public}s: %{public}s', id, JSON.stringify(err));
@@ -119,7 +123,9 @@ export class EntryRepository {
       'weather_code': entry.weatherCode ?? null,
       'weather_info': entry.weatherInfo ?? null,
       'location_info': entry.locationInfo ?? null,
-      'content_blocks': entry.contentBlocksData ?? null
+      'content_blocks': entry.contentBlocksData ?? null,
+      'mood_valence': entry.moodValence ?? null,
+      'mood_labels': entry.moodLabels !== undefined ? JSON.stringify(entry.moodLabels) : null
     };
     const predicates = new relationalStore.RdbPredicates('journal_entry');
     predicates.equalTo('id', entry.id);
@@ -179,6 +185,12 @@ export class EntryRepository {
     }
     if (!row.isColumnNull(row.getColumnIndex('content_blocks'))) {
       entry.contentBlocksData = row.getString(row.getColumnIndex('content_blocks'));
+    }
+    if (!row.isColumnNull(row.getColumnIndex('mood_valence'))) {
+      entry.moodValence = row.getDouble(row.getColumnIndex('mood_valence'));
+    }
+    if (!row.isColumnNull(row.getColumnIndex('mood_labels'))) {
+      entry.moodLabels = EntryRepository.decodeStringArray(row.getString(row.getColumnIndex('mood_labels')));
     }
     return entry;
   }

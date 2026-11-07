@@ -131,3 +131,73 @@ export function dayTens(date: Date): string {
 export function dayOnes(date: Date): string {
   return `${date.getDate() % 10}`;
 }
+
+// ---- 6.3 写作统计（日历、走势横轴、当天列表标题） ----
+
+/**
+ * 「2026年9月27日」/「September 27, 2026」——点日历某天弹出的当天列表标题
+ * （iOS `yMMMMd` 模板，顺序跟语言走）。
+ */
+export function fullDate(date: Date, appLanguage: string): string {
+  if (isChineseLanguage(appLanguage)) {
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  }
+  return `${monthLong(date, appLanguage)} ${date.getDate()}, ${date.getFullYear()}`;
+}
+
+/**
+ * 走势横轴「10/4」——按 App 语言格式化的月/日（中文不补零，同 iOS
+ * `.dateTime.month(.defaultDigits).day()` 的中文形态）。
+ */
+export function monthDayNumeric(date: Date, appLanguage: string): string {
+  if (isChineseLanguage(appLanguage)) {
+    return `${date.getMonth() + 1}/${date.getDate()}`;
+  }
+  return new Intl.DateTimeFormat(appLanguage, { month: 'numeric', day: 'numeric' }).format(date);
+}
+
+/** 这门语言的一周从星期几开始（0 = 周日、1 = 周一；iOS `Calendar.firstWeekday` 同源 CLDR）。
+ * App 支持的七种语言里 fr / es 周一起，其余周日起 */
+export function firstWeekdayIndex(appLanguage: string): number {
+  if (appLanguage === 'fr' || appLanguage === 'es') {
+    return 1;
+  }
+  return 0;
+}
+
+/**
+ * 写作日历的星期表头：7 个窄缩写（zh「日一二三四五六」/ en「S M T W T F S」/
+ * fr「L M M J V S D」），**从这门语言一周的第一天开始轮转**
+ * （与 iOS `veryShortStandaloneWeekdaySymbols` + `firstWeekday` 平移一致）。
+ */
+export function weekdayNarrowSymbols(appLanguage: string): string[] {
+  const first = firstWeekdayIndex(appLanguage);
+  // 2023-01-01 是周日：拿这一周取 7 个窄缩写，再从 first 轮转
+  const symbols: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(2023, 0, 1 + i);
+    if (isChineseLanguage(appLanguage)) {
+      symbols.push(chineseWeekdayChar(d));
+    } else {
+      symbols.push(new Intl.DateTimeFormat(appLanguage, { weekday: 'narrow' }).format(d));
+    }
+  }
+  const result: string[] = [];
+  for (let i = 0; i < 7; i++) {
+    result.push(symbols[(first + i) % 7]);
+  }
+  return result;
+}
+
+/**
+ * 星期窄缩写（写「星期与时段」行首）：weekday 0 = 周日 … 6 = 周六。
+ * 与 weekdayNarrowSymbols 同一套窄缩写，单个取。
+ */
+export function weekdayNarrow(weekday: number, appLanguage: string): string {
+  const safe = ((weekday % 7) + 7) % 7;
+  const d = new Date(2023, 0, 1 + safe);
+  if (isChineseLanguage(appLanguage)) {
+    return chineseWeekdayChar(d);
+  }
+  return new Intl.DateTimeFormat(appLanguage, { weekday: 'narrow' }).format(d);
+}

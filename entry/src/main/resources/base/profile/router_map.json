@@ -104,6 +104,11 @@
       "name": "AppIconPicker",
       "pageSourceFile": "src/main/ets/views/settings/AppIconPickerView.ets",
       "buildFunction": "AppIconPickerBuilder"
+    },
+    {
+      "name": "Stats",
+      "pageSourceFile": "src/main/ets/views/settings/StatsView.ets",
+      "buildFunction": "StatsBuilder"
     }
   ]
 }

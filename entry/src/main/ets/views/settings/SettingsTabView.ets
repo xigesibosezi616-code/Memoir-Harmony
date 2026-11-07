@@ -443,7 +443,7 @@ export struct SettingsTabView {
       this.entryRow('stats',
         $r('app.string.s_9392c3c977'),
         (): void => {
-          // 6.3：this.navPathStack.pushPathByName('Stats', '');
+          this.navPathStack.pushPathByName('Stats', '');
         })
     }
     .borderRadius(CARD_RADIUS_VP)

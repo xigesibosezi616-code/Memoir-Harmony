@@ -52,6 +52,8 @@ import letterPostingFlightGeometryTest from './test/LetterPostingFlightGeometry.
 import postingHapticPatternTest from './test/PostingHapticPattern.test'
 import letterOpeningTimelineTest from './test/LetterOpeningTimeline.test'
 import letterOpeningHapticPatternTest from './test/LetterOpeningHapticPattern.test'
+import statsCalculatorBundle from './test/StatsCalculator.test'
+import moodInsightsBundle from './test/MoodInsights.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -108,4 +110,6 @@ export default function testsuite() {
   postingHapticPatternTest()
   letterOpeningTimelineTest()
   letterOpeningHapticPatternTest()
+  statsCalculatorBundle()
+  moodInsightsBundle()
 }

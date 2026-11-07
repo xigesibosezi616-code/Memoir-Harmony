@@ -43,7 +43,7 @@ export default function databaseTest() {
       expect(plan.targetVersion).assertEqual(DATABASE_VERSION + 1);
     })
 
-    it('migrationStepsEmptyWhileOnlyOneSchemaVersion', 0, () => {
+    it('migrationStepsEmptyForCurrentVersion', 0, () => {
       expect(migrationSteps(DATABASE_VERSION).length).assertEqual(0);
     })
 
@@ -55,7 +55,25 @@ export default function databaseTest() {
 
     it('databaseNameAndVersionPinned', 0, () => {
       expect(DATABASE_NAME).assertEqual('memoir.db');
-      expect(DATABASE_VERSION).assertEqual(1);
+      expect(DATABASE_VERSION).assertEqual(2);
+    })
+
+    // ---- v2（6.3 写作统计）：U03 数据字段前置 ----
+
+    it('freshSchemaCarriesMoodValenceColumns', 0, () => {
+      const sql = schemaStatements()[0];
+      expect(sql.includes('mood_valence REAL')).assertTrue();
+      expect(sql.includes('mood_labels TEXT')).assertTrue();
+    })
+
+    it('upgradeFromV1AddsTwoColumnsOnly', 0, () => {
+      const steps = migrationSteps(1);
+      expect(steps.length).assertEqual(2);
+      expect(steps[0]).assertEqual('ALTER TABLE journal_entry ADD COLUMN mood_valence REAL');
+      expect(steps[1]).assertEqual('ALTER TABLE journal_entry ADD COLUMN mood_labels TEXT');
+      const plan = planUpgrade(1);
+      expect(plan.kind).assertEqual('upgrade');
+      expect(plan.targetVersion).assertEqual(DATABASE_VERSION);
     })
   })
 }

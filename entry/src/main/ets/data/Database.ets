@@ -15,12 +15,12 @@ import { common } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 
 /** 当前库结构版本 */
-export const DATABASE_VERSION: number = 1;
+export const DATABASE_VERSION: number = 2;
 
 /** 库文件名（应用沙箱 database/rdb/ 下） */
 export const DATABASE_NAME: string = 'memoir.db';
 
-/** v1 全量建表（05_DATA_MODEL.md §10） */
+/** 全量建表（最新版结构 = v2；05_DATA_MODEL.md §10 + U03 数据字段前置） */
 const SCHEMA_V1: string[] = [
   `CREATE TABLE IF NOT EXISTS journal_entry (
   id TEXT PRIMARY KEY,
@@ -36,7 +36,8 @@ const SCHEMA_V1: string[] = [
   updated_at INTEGER NOT NULL,
   audio_urls TEXT NOT NULL DEFAULT '[]',
   weather_code TEXT, weather_info TEXT, location_info TEXT,
-  content_blocks TEXT
+  content_blocks TEXT,
+  mood_valence REAL, mood_labels TEXT
 )`,
   `CREATE TABLE IF NOT EXISTS notebook (
   id TEXT PRIMARY KEY,
@@ -101,9 +102,15 @@ export class SchemaMigration {
 
 /**
  * 版本迁移表。每项把库升一级，必须按 fromVersion 升序且自 1 起连续。
- * 当前只有 v1，尚无迁移；DATABASE_VERSION 升级时在此追加。
+ * v2（6.3）：journal_entry 加两列可空字段（U03 数据字段前置，写作统计的
+ * 心情图只读它们；旧心情 mood / mood_color_hex 保留不动，U03 本体移植时再清理）。
  */
-const MIGRATIONS: SchemaMigration[] = [];
+const MIGRATIONS: SchemaMigration[] = [
+  new SchemaMigration(1, [
+    'ALTER TABLE journal_entry ADD COLUMN mood_valence REAL',
+    'ALTER TABLE journal_entry ADD COLUMN mood_labels TEXT'
+  ])
+];
 
 /** 新库建表语句（副本，防调用方改内部表） */
 export function schemaStatements(): string[] {
