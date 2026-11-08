@@ -9,9 +9,9 @@
  * 版本号，版本一变，老用户下次启动会重新看到告知与同意页（R-APP-02）。
  * 不改的话，等于用户从没同意过新版本，而你以为他同意了。
  *
- * ⚠️ **占位说明（Q12）**：当前 rawfile 里是 iOS 版骨架的逐字拷贝
- * （含 Apple / iCloud / Apple 支付等表述，公司注册地址仍是「待填」占位）。
- * 鸿蒙版必须由法务改成鸿蒙实际情况再用，agent 不改写法律文本。
+ * ℹ️ rawfile 里的两份正文已按鸿蒙实际平台化（华为账号 / 华为云空间 / 华为应用市场 /
+ * 彩云天气 / 花瓣地图等），并按 PIPL 与应用市场审核要求重写过结构与措辞。
+ * 改内容后记得 bump LEGAL_CURRENT_VERSION（见下）。
  */
 import { util } from '@kit.ArkTS';
 import { hilog } from '@kit.PerformanceAnalysisKit';
@@ -23,9 +23,10 @@ export enum LegalDocument {
 
 /**
  * 当前生效的政策版本，与两份 md 顶部的「更新日期」一致（R-APP-02）。
- * iOS 当前版本 2026-10-09（隐私政策第七节注销账号改为 App 内自助）。
+ * 2026-11-08：两份文档按 PIPL 与应用市场审核要求深度重写（结构、措辞与排版），
+ * 第三方清单更正彩云天气主体为「北京彩彻区明科技有限公司」。
  */
-export const LEGAL_CURRENT_VERSION = '2026-10-09';
+export const LEGAL_CURRENT_VERSION = '2026-11-08';
 
 /**
  * 是否需要重新征求同意：没同意过（空串）、或政策已更新（存的版本号 ≠ 当前版本）。

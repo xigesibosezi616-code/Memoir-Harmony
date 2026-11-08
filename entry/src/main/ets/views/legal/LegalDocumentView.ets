@@ -6,8 +6,12 @@
  * 审核时网络不通也一定打得开（R-APP-04）。
  *
  * iOS 用 sheet + NavigationStack 展示（导航栏标题 + 工具栏关闭按钮）；
- * 鸿蒙版没有导航容器可用，作为全屏覆盖层嵌入 LegalConsentView 的 Stack，
- * 自带顶栏：居中标题 + 左上角关闭。
+ * 鸿蒙版两个宿主：LegalConsentView 的全屏覆盖层（关闭 ✕）和
+ * LegalDocumentPage 的 NavDestination 路由页（返回 chevron）。
+ * 自带顶栏：状态栏让位（safeAreaTopVp，沉浸式全屏下页面自 y0 起，
+ * 2026-11-08 真机反馈标题和返回键钻进状态栏后加）+ 居中标题 +
+ * 官方图标钮（CircleIconButton：Button + SymbolGlyph，textPrimary
+ * 主题色，各主题实测对比度达标）。
  *
  * 解析结果缓存在 @State：正文数千字，每帧重新解析会掉帧（iOS 同款优化）。
  * 文档或语言变化时整体替换一次。
@@ -17,6 +21,11 @@ import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
 import { STORAGE_KEY_APP_LANGUAGE } from '../../services/LanguageManager';
+import {
+  STORAGE_KEY_SAFE_AREA_BOTTOM_VP,
+  STORAGE_KEY_SAFE_AREA_TOP_VP
+} from '../../services/ImmersiveChrome';
+import { CircleIconButton } from '../compose/CircleIconButton';
 import { LegalDocument, legalNavigationTitleRes, loadLegalMarkdown } from './LegalDocument';
 import { LegalBlock, LegalBlockKind, LegalInlineSpan, parseLegalMarkdown } from './LegalMarkdown';
 
@@ -24,8 +33,12 @@ import { LegalBlock, LegalBlockKind, LegalInlineSpan, parseLegalMarkdown } from 
 export struct LegalDocumentView {
   document: LegalDocument = LegalDocument.Privacy;
   onClose: () => void = () => {};
+  /** 顶栏返回图标（官方 sys.symbol）：路由页传返回箭头，覆盖层默认关闭 ✕ */
+  closeIconRes: Resource = $r('sys.symbol.xmark');
 
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
+  @StorageProp(STORAGE_KEY_SAFE_AREA_TOP_VP) safeAreaTopVp: number = 0;
+  @StorageProp(STORAGE_KEY_SAFE_AREA_BOTTOM_VP) safeAreaBottomVp: number = 0;
   // 开着阅读页切语言（1.2 的语言调试页可达）→ 立即按新语言重载
   @StorageProp(STORAGE_KEY_APP_LANGUAGE) @Watch('onLanguageChanged') appLanguage: string = 'en';
   @State blocks: LegalBlock[] = [];
@@ -122,7 +135,7 @@ export struct LegalDocumentView {
         }
         .alignItems(HorizontalAlign.Start)
         .width('100%')
-        .padding({ left: 20, right: 20, top: 16, bottom: 16 })
+        .padding({ left: 20, right: 20, top: 16, bottom: this.safeAreaBottomVp + 16 })
       }
       .align(Alignment.Top)
       .scrollBar(BarState.Off)
@@ -133,7 +146,9 @@ export struct LegalDocumentView {
     .backgroundColor(this.theme.background)
   }
 
-  /** 顶栏：居中标题（系统字体，对齐 iOS 导航栏样式）+ 左上角关闭 */
+  /** 顶栏：居中标题（系统字体，对齐 iOS 导航栏样式）+ 官方图标钮
+   *  （CircleIconButton：Button + SymbolGlyph，textPrimary 主题色）。
+   *  顶部让位 safeAreaTopVp（沉浸式全屏下页面自 y0 起，不让位会钻进状态栏） */
   @Builder
   private titleBarBuilder() {
     Stack({ alignContent: Alignment.Center }) {
@@ -143,20 +158,20 @@ export struct LegalDocumentView {
         .fontColor(this.theme.textPrimary)
         .maxLines(1)
       Row() {
-        Text('✕')
-          .fontSize(16)
-          .fontColor(this.theme.textPrimary)
-          .width(44)
-          .height(44)
-          .textAlign(TextAlign.Center)
-          .onClick(() => {
+        CircleIconButton({
+          iconRes: this.closeIconRes,
+          iconSize: 16,
+          onTap: (): void => {
             this.onClose();
-          })
+          }
+        })
       }
       .width('100%')
       .justifyContent(FlexAlign.Start)
+      .padding({ left: 6 })
     }
     .width('100%')
-    .height(44)
+    .height(this.safeAreaTopVp + 44)
+    .padding({ top: this.safeAreaTopVp })
   }
 }

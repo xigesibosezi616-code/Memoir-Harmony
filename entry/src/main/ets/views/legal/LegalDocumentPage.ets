@@ -5,13 +5,16 @@
  * 鸿蒙把 1.5 已有的覆盖层 `LegalDocumentView` 包进 NavDestination；
  * 两条路由各在 Builder 创建期**固定一个文档**（不依赖 onReady 晚于首帧的时序
  * 再传参——普通成员变量创建后不随状态更新，创建期定死才可靠）。
- * 顶栏（居中标题 + 左上角关闭）由 LegalDocumentView 自带，关闭 = 出栈。
+ * 顶栏由 LegalDocumentView 自带（返回 chevron = 出栈）；进页藏起悬浮胶囊
+ * Tab 栏（barOverlap 层在 NavDestination 之上，正文底部会被胶囊盖住，
+ * DiaryReaderView 同款先例）。
  *
  * 路由：系统路由表（router_map.json → name `Privacy` / `Terms`）。
  */
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
+import { STORAGE_KEY_HIDE_TAB_BAR } from '../../services/ImmersiveChrome';
 import { LegalDocument } from './LegalDocument';
 import { LegalDocumentView } from './LegalDocumentView';
 
@@ -34,10 +37,21 @@ export struct LegalDocumentPage {
 
   private navPathStack: NavPathStack = new NavPathStack();
 
+  aboutToAppear(): void {
+    // 阅读页是沉浸整页：藏起悬浮胶囊 Tab 栏（barOverlap 层在
+    // NavDestination 之上，正文底部会被胶囊盖住；DiaryReaderView 同款先例）
+    AppStorage.setOrCreate(STORAGE_KEY_HIDE_TAB_BAR, true);
+  }
+
+  aboutToDisappear(): void {
+    AppStorage.setOrCreate(STORAGE_KEY_HIDE_TAB_BAR, false);
+  }
+
   build() {
     NavDestination() {
       LegalDocumentView({
         document: this.fixedDoc,
+        closeIconRes: $r('sys.symbol.chevron_left'),
         onClose: (): void => {
           this.navPathStack.pop();
         }
