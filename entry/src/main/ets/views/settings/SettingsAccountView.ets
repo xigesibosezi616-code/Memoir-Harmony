@@ -98,7 +98,7 @@ export struct SettingsAccountView {
 
               // 退出登录（单独一组；确认走官方 AlertDialog）
               Row({ space: 10 }) {
-                SymbolGlyph($r('sys.symbol.power'))
+                SymbolGlyph($r('sys.symbol.arrow_right_to_line'))
                   .fontSize(14)
                   .fontWeight(FontWeight.Medium)
                   .fontColor([this.theme.textSecondary])
@@ -120,7 +120,7 @@ export struct SettingsAccountView {
               // 注销账号：红色 + 放最底，与退出登录区分开（暂时离开 vs 永久删除）
               Column({ space: 8 }) {
                 Row({ space: 10 }) {
-                  SymbolGlyph($r('sys.symbol.person_crop_circle_dashed'))
+                  SymbolGlyph($r('sys.symbol.person_xmark'))
                     .fontSize(14)
                     .fontWeight(FontWeight.Medium)
                     .fontColor([this.theme.destructive])
@@ -237,7 +237,7 @@ export struct SettingsAccountView {
   @Builder
   private nicknameRow() {
     Row({ space: 10 }) {
-      SymbolGlyph($r('sys.symbol.pencil_line'))
+      SymbolGlyph($r('sys.symbol.rename'))
         .fontSize(14)
         .fontWeight(FontWeight.Medium)
         .fontColor([this.theme.textSecondary])
@@ -306,7 +306,7 @@ export struct SettingsAccountView {
         })
       } else {
         Row({ space: 10 }) {
-          SymbolGlyph($r('sys.symbol.exclamationmark_triangle_fill'))
+          SymbolGlyph($r('sys.symbol.exclamationmark_triangle'))
             .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor([this.theme.destructive])

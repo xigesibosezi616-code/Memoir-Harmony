@@ -131,7 +131,7 @@ export struct SettingsPenPalView {
   @Builder
   private penPalNameRow() {
     Row({ space: 10 }) {
-      SymbolGlyph($r('sys.symbol.person_2'))
+      SymbolGlyph($r('sys.symbol.person'))
         .fontSize(14)
         .fontWeight(FontWeight.Medium)
         .fontColor([this.theme.textSecondary])

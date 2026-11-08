@@ -429,7 +429,7 @@ export struct BackupImportView {
         if (this.summary.missingMedia > 0) {
           this.rowDivider()
           Row({ space: 8 }) {
-            SymbolGlyph($r('sys.symbol.exclamationmark_triangle_fill'))
+            SymbolGlyph($r('sys.symbol.exclamationmark_triangle'))
               .fontSize(14)
               .fontWeight(FontWeight.Medium)
               .fontColor([this.theme.textSecondary])

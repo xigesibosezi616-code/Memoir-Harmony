@@ -176,7 +176,7 @@ export struct SettingsLocationView {
   @Builder
   private recordingRow() {
     Row({ space: 10 }) {
-      SymbolGlyph($r('sys.symbol.compass'))
+      SymbolGlyph($r('sys.symbol.local'))
         .fontSize(14)
         .fontWeight(FontWeight.Medium)
         .fontColor([this.theme.textSecondary])

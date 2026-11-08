@@ -189,7 +189,7 @@ export struct SettingsDataView {
   @Builder
   private syncRow() {
     Row({ space: 10 }) {
-      SymbolGlyph($r('sys.symbol.cloud'))
+      SymbolGlyph($r('sys.symbol.exclamationmark_cloud_fill'))
         .fontSize(14)
         .fontWeight(FontWeight.Medium)
         .fontColor([this.theme.textSecondary])
@@ -243,7 +243,7 @@ export struct SettingsDataView {
   @Builder
   private importRow() {
     Row({ space: 10 }) {
-      SymbolGlyph($r('sys.symbol.square_and_arrow_down'))
+      SymbolGlyph($r('sys.symbol.download'))
         .fontSize(14)
         .fontWeight(FontWeight.Medium)
         .fontColor([this.theme.textSecondary])
@@ -307,7 +307,7 @@ export struct SettingsDataView {
   @Builder
   private reclaimRow() {
     Row({ space: 10 }) {
-      SymbolGlyph($r('sys.symbol.wand_and_stars'))
+      SymbolGlyph($r('sys.symbol.clean'))
         .fontSize(14)
         .fontWeight(FontWeight.Medium)
         .fontColor([this.theme.textSecondary])

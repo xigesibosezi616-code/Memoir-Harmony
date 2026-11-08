@@ -240,7 +240,7 @@ export struct BackupExportView {
       if (this.includesMedia && this.mediaBytes() > WECHAT_LIMIT_BYTES) {
         this.rowDivider()
         Row({ space: 8 }) {
-          SymbolGlyph($r('sys.symbol.exclamationmark_triangle_fill'))
+          SymbolGlyph($r('sys.symbol.exclamationmark_triangle'))
             .fontSize(14)
             .fontWeight(FontWeight.Medium)
             .fontColor([this.theme.textSecondary])
