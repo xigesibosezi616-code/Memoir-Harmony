@@ -85,6 +85,8 @@ iOS 用 CloudKit 私有库（数据在用户自己的 iCloud，我们看不到�
 - 可选保底：BackupExtensionAbility（换机克隆 / 系统云备份带走应用数据，半小时级小卡，与云同步互补）
 - 6.6 落地前，数据与备份页仍按 R-DATA-05 如实展示「日记只在这台设备上」
 
+**✅ 保底件已落地（2026-11-08，用户拍板范围=只做接入、设置页文案不动）**：BackupExtensionAbility 三件套接入——`entryability/BackupAbility.ets`（onBackup/onRestore 空实现+hilog，无数据加工需求，恢复走框架默认以 / 为根解压覆盖）+ `resources/base/profile/backup_config.json`（allowToBackupRestore=true，includes/excludes 不配走默认清单：el2/database（memoir.db）、el2/base/preferences（memoir_prefs）、el2/base/files（journal_photos、audio）全覆盖；cacheDir 不在默认清单，导出 staging/小图缓存天然不进备份）+ module.json5 extensionAbilities 注册（type backup、metadata ohos.extension.backup、exported false）。验证：arkts_check 0 错 + build exit 0 + 真机装机 `bm dump` 实证扩展注册（extensionTypeName=backup/enabled=true/metadata 正确）+ 应用启动无回归（Mate 80 Pro Max）。**隐私承诺闭环**：隐私政策「可随系统云备份保存于您本人华为云空间」由此成立（未接入时系统云备份不带应用数据，承诺落空）。真正的备份/恢复链路（两台设备克隆 / 系统云备份整包）需用户侧触发验证。主线端云协同仍 ⛔（AGC 云侧容器是前置），本件与云同步互补不冲突。
+
 ### Q4 🟡 到达时刻 / 已读只在客户端
 
 后端 `letters` 表没有到达时刻列，`GET /letters` 会返回还在路上的信；已读也只记本地（iOS 不调 `POST /letters/:id/read`）。影响：

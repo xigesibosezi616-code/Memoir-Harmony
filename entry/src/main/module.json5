@@ -70,6 +70,20 @@
         "name": "ohos.permission.PUBLISH_AGENT_REMINDER"
       }
     ],
+    "extensionAbilities": [
+      {
+        "name": "BackupAbility",
+        "srcEntry": "./ets/entryability/BackupAbility.ets",
+        "type": "backup",
+        "exported": false,
+        "metadata": [
+          {
+            "name": "ohos.extension.backup",
+            "resource": "$profile:backup_config"
+          }
+        ]
+      }
+    ],
     "abilities": [
       {
         "name": "EntryAbility",
