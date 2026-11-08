@@ -14,6 +14,7 @@
  *
  * 路由：系统路由表（router_map.json → name `Appearance`）。
  */
+import { SymbolGlyphModifier } from '@kit.ArkUI';
 import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
@@ -336,7 +337,11 @@ export struct SettingsAppearanceView {
       .bindMenu(this.homeModeMenu, {
         placement: Placement.BottomLeft,
         backgroundColor: this.theme.settingsCardBackground,
-        borderRadius: 14
+        borderRadius: 14,
+        // 出场淡入+微放大、离场反向收起（bindMenu 的 MenuOptions 继承 ContextMenuOptions.transition）
+        transition: TransitionEffect.OPACITY
+          .combine(TransitionEffect.scale({ x: 0.9, y: 0.9 }))
+          .animation({ duration: 160, curve: Curve.FastOutSlowIn })
       })
     }
     .width('100%')
@@ -352,33 +357,40 @@ export struct SettingsAppearanceView {
     return $r('sys.symbol.rectangle_on_rectangle');
   }
 
-  /** 行尾小菜单（值下方弹出）：当前项前面打勾；点菜单内选项 / 点菜单外都收起（bindMenu 内建） */
+  /** 行尾小菜单（官方 Menu+MenuItem）：每项 symbolStartIcon 都占同一符号槽，文本天然对齐；
+   *  当前项 accent 勾、未选项透明勾（U19 R-SETTINGS-13：当前项前面打勾；点菜单内外收起 bindMenu 内建） */
   @Builder
   private homeModeMenu() {
-    Column() {
+    Menu() {
       ForEach(this.homeModes, (mode: HomeModeSpec) => {
-        Row({ space: 10 }) {
-          SymbolGlyph($r('sys.symbol.checkmark'))
-            .fontSize(14)
-            .fontWeight(FontWeight.Medium)
-            .fontColor([this.theme.accent])
-            .width(16)
-            .visibility(mode.value === this.currentHomeMode().value ?
-              Visibility.Visible : Visibility.Hidden)
-          Text(mode.nameRes)
-            .fontSize(15)
-            .fontColor(this.theme.textPrimary)
-            .maxLines(1)
-        }
-        .padding({ left: 14, right: 20, top: 12, bottom: 12 })
-        .width('100%')
-        .onClick((): void => {
-          this.setHomeMode(mode.value);
+        MenuItem({
+          content: mode.nameRes,
+          symbolStartIcon: this.homeModeCheckSymbol(mode.value === this.homeMode)
         })
+          .contentFont({
+            size: 15,
+            weight: this.theme.bodyFont.weight,
+            family: this.theme.bodyFont.family
+          })
+          .contentFontColor(this.theme.textPrimary)
+          .onClick((): void => {
+            this.setHomeMode(mode.value);
+          })
       }, (mode: HomeModeSpec) => mode.value)
     }
     .width(150)
-    .alignItems(HorizontalAlign.Start)
+    .backgroundColor(this.theme.settingsCardBackground)
+    .radius(14)
+  }
+
+  /** 菜单项勾符号修饰器：当前项 accent 色、未选项透明色占位（保持文本对齐）。
+   *  SymbolGlyphModifier 的链式方法返回基类 SymbolGlyphAttribute，须逐步设置后再整体返回 */
+  private homeModeCheckSymbol(isCurrent: boolean): SymbolGlyphModifier {
+    const modifier: SymbolGlyphModifier = new SymbolGlyphModifier($r('sys.symbol.checkmark'));
+    modifier.fontSize(14);
+    modifier.fontWeight(FontWeight.Medium);
+    modifier.fontColor([isCurrent ? this.theme.accent : Color.Transparent]);
+    return modifier;
   }
 
   /** 落偏好并刷新行值（ActionSheet 各项 action 里各自调用） */
