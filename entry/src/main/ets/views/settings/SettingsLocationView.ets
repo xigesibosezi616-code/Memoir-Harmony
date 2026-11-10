@@ -5,12 +5,14 @@
  * - 记录位置：开关（`locationRecordingEnabled`，默认开；关掉只影响日记记不记地点，
  *   **天气照常获取**——iOS 注释同款）
  * - 位置精度：市 / 区县 / 街道三档（`locationPrecision`，默认 city），
- *   行尾值 + 上下小箭头，点击弹行尾小菜单（bindMenu，U19 R-SETTINGS-13：
- *   当前项前面打勾、点菜单内外收起）；当前档的说明文案跟在行下；开关关了整行收起
+ *   行尾值 + 上下小箭头，点值弹行尾小菜单（bindMenu 自定义内容，U19 R-SETTINGS-13：
+ *   当前项前面打勾；2026-11-08 用户要求选项能划动选择——官方 Array<MenuElement>
+ *   与系统菜单实测都只支持点击，改自绘菜单内容实现 iOS 式按住拖划选择）；
+ *   当前档的说明文案跟在行下；开关关了整行收起
  *
  * 路由：系统路由表（router_map.json → name `LocationSettings`）。
  */
-import { SymbolGlyphModifier } from '@kit.ArkUI';
+import { uiMaterial } from '@kit.ArkUI';
 import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
@@ -50,6 +52,14 @@ export struct SettingsLocationView {
   @State private recordingOn: boolean = true;
   /** 位置精度三档（city / district / street；非法值按 city 兜底） */
   @State private precision: string = LOCATION_PRECISION_CITY;
+  /** 位置精度值切换按钮按压态（按压变淡反馈用） */
+  @State private precisionValuePressed: boolean = false;
+  /** 位置精度行尾小菜单显隐（bindMenu isShow，!! 双向：系统收起也回写 false） */
+  @State private locationMenuShown: boolean = false;
+  /** 位置精度菜单拖划高亮行下标（-1 无高亮；按下/拖动实时跟手指） */
+  @State private locationMenuPressedIndex: number = -1;
+  /** 位置精度菜单内容全局 top（vp，onAreaChange 缓存，拖划行定位用） */
+  private locationMenuTopVp: number = 0;
 
   private navPathStack: NavPathStack = new NavPathStack();
 
@@ -216,32 +226,50 @@ export struct SettingsLocationView {
         .fontFamily(this.theme.bodyFont.family)
         .fontColor(this.theme.textPrimary)
         .layoutWeight(1)
+      // 值切换按钮：玻璃小胶囊（settings 各页返回钮同款配方：glassBackground 底 +
+      //  0.5vp glassBorder + textPrimary 文字，2026-11-08 用户反馈按钮看不清后逐主题拉明度差）
+      //  + 按压变淡反馈，让用户一眼看出可以点这里切换
       Row({ space: 4 }) {
         Text(this.currentPrecision().nameRes)
           .fontSize(this.theme.captionFont.size)
           .fontWeight(this.theme.captionFont.weight)
           .fontFamily(this.theme.captionFont.family)
-          .fontColor(this.theme.textTertiary)
+          .fontColor(this.theme.textPrimary)
         Column() {
           SymbolGlyph($r('sys.symbol.chevron_up'))
-            .fontSize(7)
+            .fontSize(8)
             .fontWeight(FontWeight.Medium)
-            .fontColor([this.theme.textTertiary])
+            .fontColor([this.theme.textPrimary])
           SymbolGlyph($r('sys.symbol.chevron_down'))
-            .fontSize(7)
+            .fontSize(8)
             .fontWeight(FontWeight.Medium)
-            .fontColor([this.theme.textTertiary])
+            .fontColor([this.theme.textPrimary])
         }
       }
       .alignItems(VerticalAlign.Center)
-      .bindMenu(this.precisionMenu, {
-        placement: Placement.BottomLeft,
-        backgroundColor: this.theme.settingsCardBackground,
-        borderRadius: 14,
-        // 出场淡入+微放大、离场反向收起（bindMenu 的 MenuOptions 继承 ContextMenuOptions.transition）
-        transition: TransitionEffect.OPACITY
-          .combine(TransitionEffect.scale({ x: 0.9, y: 0.9 }))
-          .animation({ duration: 160, curve: Curve.FastOutSlowIn })
+      .padding({ left: 10, right: 8, top: 5, bottom: 5 })
+      .borderRadius(13)
+      .backgroundColor(this.theme.glassBackground)
+      .border({ width: 0.5, color: this.theme.glassBorder })
+      .opacity(this.precisionValuePressed ? 0.6 : 1)
+      .animation({ duration: 100, curve: Curve.FastOutSlowIn })
+      .onTouch((event: TouchEvent): void => {
+        if (event.type === TouchType.Down) {
+          this.precisionValuePressed = true;
+        } else if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          this.precisionValuePressed = false;
+        }
+      })
+      .onClick((): void => {
+        this.locationMenuShown = true;
+      })
+      // 行尾小菜单（U19 R-SETTINGS-13）：bindMenu 自定义内容受控弹出（isShow 自
+      // API 18 支持 !! 双向绑定），容器仍是系统 Menu——定位/收起/THIN 沉浸光感
+      // 全官方（MenuOptions 继承 ContextMenuOptions，systemMaterial 可用）
+      .bindMenu(!!this.locationMenuShown, this.locationMenuBuilder, {
+        systemMaterial: new uiMaterial.ImmersiveMaterial({
+          style: uiMaterial.ImmersiveStyle.THIN
+        })
       })
     }
     .width('100%')
@@ -249,43 +277,83 @@ export struct SettingsLocationView {
     .alignItems(VerticalAlign.Center)
   }
 
-  /** 行尾小菜单（官方 Menu+MenuItem）：每项 symbolStartIcon 都占同一符号槽，文本天然对齐；
-   *  当前项 accent 勾、未选项透明勾（U19 R-SETTINGS-13：当前项前面打勾；点菜单内外收起 bindMenu 内建） */
+  // ---- 行尾小菜单内容：iOS 式按住拖划选择（2026-11-08 用户要求「能划动选择」；
+  //  官方 Array<MenuElement> 菜单与系统菜单实测都只支持点击选择，自绘内容补齐） ----
+
   @Builder
-  private precisionMenu() {
-    Menu() {
-      ForEach(this.precisions, (spec: PrecisionSpec) => {
-        MenuItem({
-          content: spec.nameRes,
-          symbolStartIcon: this.precisionCheckSymbol(spec.value === this.precision)
-        })
-          .contentFont({
-            size: 15,
-            weight: this.theme.bodyFont.weight,
-            family: this.theme.bodyFont.family
-          })
-          .contentFontColor(this.theme.textPrimary)
-          .onClick((): void => {
-            this.setPrecision(spec.value);
-          })
+  private locationMenuBuilder() {
+    Column() {
+      ForEach(this.precisions, (spec: PrecisionSpec, index: number) => {
+        Column() {
+          Row({ space: 8 }) {
+            SymbolGlyph($r('sys.symbol.checkmark'))
+              .fontSize(16)
+              .fontWeight(FontWeight.Medium)
+              .fontColor([spec.value === this.precision ?
+                this.theme.textPrimary : Color.Transparent])
+              .width(20)
+            Text(spec.nameRes)
+              .fontSize(16)
+              .fontColor(this.theme.textPrimary)
+          }
+          .width('100%')
+          .height(40)
+          .padding({ left: 14 })
+          .alignItems(VerticalAlign.Center)
+          .borderRadius(12)
+          .backgroundColor(this.locationMenuPressedIndex === index ?
+            this.theme.menuPressedBackground : Color.Transparent)
+        }
+        .width('100%')
+        .height(48)
+        .padding({ left: 4, right: 4 })
+        .justifyContent(FlexAlign.Center)
       }, (spec: PrecisionSpec) => spec.value)
     }
-    .width(150)
-    .backgroundColor(this.theme.settingsCardBackground)
-    .radius(14)
+    .width(188)
+    .onAreaChange((oldArea: Area, newArea: Area): void => {
+      const y = newArea.globalPosition.y;
+      if (typeof y === 'number') {
+        this.locationMenuTopVp = y;
+      }
+    })
+    .onTouch((event: TouchEvent): void => {
+      this.locationMenuTouch(event);
+    })
   }
 
-  /** 菜单项勾符号修饰器：当前项 accent 色、未选项透明色占位（保持文本对齐）。
-   *  SymbolGlyphModifier 的链式方法返回基类 SymbolGlyphAttribute，须逐步设置后再整体返回 */
-  private precisionCheckSymbol(isCurrent: boolean): SymbolGlyphModifier {
-    const modifier: SymbolGlyphModifier = new SymbolGlyphModifier($r('sys.symbol.checkmark'));
-    modifier.fontSize(14);
-    modifier.fontWeight(FontWeight.Medium);
-    modifier.fontColor([isCurrent ? this.theme.accent : Color.Transparent]);
-    return modifier;
+  /** 拖划选择：按下/拖动时高亮手指所在行，抬手选中该行并收起（iOS 菜单同款交互；
+   *  划出菜单抬手不选中，菜单由系统保持/点外收起） */
+  private locationMenuTouch(event: TouchEvent): void {
+    if (event.changedTouches.length === 0) {
+      return;
+    }
+    const touch = event.changedTouches[0];
+    if (event.type === TouchType.Down || event.type === TouchType.Move) {
+      this.locationMenuPressedIndex = this.locationMenuRowIndexAt(touch.windowY);
+    } else if (event.type === TouchType.Up) {
+      const index = this.locationMenuRowIndexAt(touch.windowY);
+      if (index >= 0) {
+        this.setPrecision(this.precisions[index].value);
+      }
+      this.locationMenuPressedIndex = -1;
+      this.locationMenuShown = false;
+    } else if (event.type === TouchType.Cancel) {
+      this.locationMenuPressedIndex = -1;
+      this.locationMenuShown = false;
+    }
   }
 
-  /** 落偏好并刷新行值（ActionSheet 各项 action 里各自调用） */
+  /** 手指全局 y → 菜单行下标（48vp 定高行；不在行区返回 -1） */
+  private locationMenuRowIndexAt(windowY: number): number {
+    const index = Math.floor((windowY - this.locationMenuTopVp) / 48);
+    if (index >= 0 && index < this.precisions.length) {
+      return index;
+    }
+    return -1;
+  }
+
+  /** 落偏好并刷新行值（菜单抬手选中时调用） */
   private setPrecision(precision: string): void {
     this.precision = precision;
     AppPrefs.setLocationPrecision(precision);

@@ -6,11 +6,11 @@
  * - `spans`：按格式切开的连续区间，相邻区间格式必不同（平文区间也在内，
  *   覆盖满全篇 —— 编辑器装载时逐 span 注入样式，全靠它连续）
  *
- * **规则**（与 iOS 完全一致）：
+ * **规则**：
  * - 相邻两个文本块是两段（中间补一个换行）
- * - 照片锚点（RICH_ANCHOR，U+FFFC）放在它后面那段文字的开头，文字与锚点同段；
- *   拆回去时照片前那个换行是拼接时补的，去掉
- * - 录音 / 痕迹锚点**自成一段**：前后各一个换行。拆回去时它前后那两个换行都是补的，去掉
+ * - 照片 / 录音 / 痕迹锚点（RICH_ANCHOR，U+FFFC）后随一个换行：整行高的锚点卡
+ *   必须和后续文字 / 光标隔行，否则光标按卡片行高画、文末锚点后的字会画到卡上方
+ *   （2026-11-10 真机实锤）。拆回去时锚点前后那两个换行都是拼接时补的，去掉
  * - 找不到本体（anchored 里没有）的锚点不拆，锚点字符留在文字里（iOS 同款）
  *
  * 墨迹字段（writtenAt / struckAt，2.8 墨迹会干用）在模型层全程保留；
@@ -97,12 +97,6 @@ function docEndsWithNewline(doc: RichEditorDocument): boolean {
   return doc.text.length > 0 && doc.text.charCodeAt(doc.text.length - 1) === 0x0A;
 }
 
-/** 末尾是不是照片锚点：照片后面的文字与锚点同段，不再补换行（iOS `endsWithPhotoAnchor`） */
-function docEndsWithPhotoAnchor(doc: RichEditorDocument): boolean {
-  const last: RichSpan | undefined = doc.spans.length > 0 ? doc.spans[doc.spans.length - 1] : undefined;
-  return last !== undefined && last.anchorType === ContentBlockType.Photo;
-}
-
 function appendSpanToDoc(doc: RichEditorDocument, text: string, flags: RichFormatFlags): void {
   if (text.length === 0) {
     return;
@@ -186,19 +180,18 @@ export class TextBlockRange {
 
 /**
  * 与 `editorDocumentFromBlocks` 同步推演的文本块区间表（只算偏移，不建文档）。
- * 规则逐条对应：文本块前按需补 `\n`（段间 / 不以换行结尾且不在照片锚点后）、
- * 锚点块前补 `\n`、录音 / 痕迹锚点后补 `\n`。单测对二者做一致性校验。
+ * 规则逐条对应：文本块前按需补 `\n`（段间 / 不以换行结尾）、
+ * 锚点块前补 `\n`、锚点块后补 `\n`。单测对二者做一致性校验。
  */
 export function textBlockRangesOfBlocks(blocks: ContentBlock[]): TextBlockRange[] {
   const ranges: TextBlockRange[] = [];
   let cursor = 0; // 镜像 doc.text.length
   let endsWithNewline = false;
-  let endsWithPhotoAnchor = false;
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i];
     if (block.type === ContentBlockType.Text) {
       const text = block.text ?? '';
-      if (cursor > 0 && !endsWithNewline && !endsWithPhotoAnchor && text.length > 0) {
+      if (cursor > 0 && !endsWithNewline && text.length > 0) {
         cursor += 1; // 补段间 \n
       }
       ranges.push(new TextBlockRange(i, cursor, text.length));
@@ -207,20 +200,14 @@ export function textBlockRangesOfBlocks(blocks: ContentBlock[]): TextBlockRange[
       if (text.length > 0) {
         endsWithNewline = text.charCodeAt(text.length - 1) === 0x0A;
       }
-      endsWithPhotoAnchor = false;
       continue;
     }
     if (cursor > 0 && !endsWithNewline) {
       cursor += 1; // 锚点前补 \n
     }
     cursor += 1; // RICH_ANCHOR
-    if (block.type === ContentBlockType.Audio || block.type === ContentBlockType.Trace) {
-      cursor += 1; // 录音 / 痕迹后补 \n
-      endsWithNewline = true;
-    } else {
-      endsWithNewline = false;
-    }
-    endsWithPhotoAnchor = block.type === ContentBlockType.Photo;
+    cursor += 1; // 锚点后随 \n（与 editorDocumentFromBlocks 同步）
+    endsWithNewline = true;
   }
   return ranges;
 }
@@ -234,9 +221,8 @@ export function editorDocumentFromBlocks(blocks: ContentBlock[]): RichEditorDocu
   for (const block of blocks) {
     if (block.type === ContentBlockType.Text) {
       const text = block.text ?? '';
-      // 两个文本块之间是分段；照片后面紧跟的文字与锚点同段，不补
-      if (doc.text.length > 0 && !docEndsWithNewline(doc) && !docEndsWithPhotoAnchor(doc) &&
-        text.length > 0) {
+      // 两个文本块之间是分段（锚点后随换行已把行隔开，不再多补）
+      if (doc.text.length > 0 && !docEndsWithNewline(doc) && text.length > 0) {
         appendSpanToDoc(doc, '\n', new RichFormatFlags());
       }
       appendTextBlockToDoc(doc, text, block.styles);
@@ -247,10 +233,8 @@ export function editorDocumentFromBlocks(blocks: ContentBlock[]): RichEditorDocu
     }
     doc.spans.push(new RichSpan(RICH_ANCHOR, new RichFormatFlags(), block.id, block.type));
     doc.text += RICH_ANCHOR;
-    // 录音 / 痕迹自成一段：后面总跟一个换行，下面永远有一行能接着写
-    if (block.type === ContentBlockType.Audio || block.type === ContentBlockType.Trace) {
-      appendSpanToDoc(doc, '\n', new RichFormatFlags());
-    }
+    // 锚点后随换行：整行高的锚点卡与后续文字 / 光标隔行（保存时拆回去）
+    appendSpanToDoc(doc, '\n', new RichFormatFlags());
   }
   return doc;
 }
@@ -352,11 +336,9 @@ export function blocksWithEditorDocument(doc: RichEditorDocument,
     appendTextBlockForRange(doc, blocks, segmentStart, textEnd, makeId);
     blocks.push(anchoredBlock);
     segmentStart = anchorOffset + span.text.length;
-    // 录音 / 痕迹后面那个换行也是补的，去掉
-    if (anchoredBlock.type === ContentBlockType.Audio || anchoredBlock.type === ContentBlockType.Trace) {
-      if (segmentStart < doc.text.length && doc.text.charCodeAt(segmentStart) === 0x0A) {
-        segmentStart += 1;
-      }
+    // 锚点后随那个换行也是补的，去掉（照片 / 录音 / 痕迹同款）
+    if (segmentStart < doc.text.length && doc.text.charCodeAt(segmentStart) === 0x0A) {
+      segmentStart += 1;
     }
   }
   appendTextBlockForRange(doc, blocks, segmentStart, doc.text.length, makeId);
@@ -370,38 +352,48 @@ export function blocksWithEditorDocument(doc: RichEditorDocument,
  * R-RICH-03 在光标处插照片的落点计划。
  * `text` 是编辑器活文本（照片锚点各占 1 个 RICH_ANCHOR 字符），`caret` 先夹到 [0, len]：
  * - 光标在段尾（光标右一字符是换行）→ 锚点插到下一段开头，光标不动 —— 不凭空多出空行
- * - 光标在段首（文档开头 / 左一字符是换行）→ 挂这一段开头，光标落到照片后
+ * - 光标在段首（文档开头 / 左一字符是换行）→ 挂这一段开头，光标落到照片下一行
  * - 段中 / 全文末尾 → 先断成两段（needsNewlineBefore），照片挂后一段开头
+ * - 锚点落点后随不是换行（含文末）→ 补一个后随换行（needsNewlineAfter）：
+ *   整行高的照片卡必须和后续文字 / 光标隔行，否则光标按卡片行高画、
+ *   文末锚点后的字会画到卡上方（2026-11-10 真机实锤）
  */
 export class PhotoInsertionPlan {
   /** 锚点插入处（相对活文本的 UTF-16 偏移；前置换行（若有）也从这里开始 */
   readonly insertOffset: number;
   /** 段中插入时先补一个换行把这段话断开 */
   readonly needsNewlineBefore: boolean;
-  /** 插入完成后的光标落点（照片后接着写） */
+  /** 锚点后随字符不是换行（含文末）时，插入后补一个换行隔开后续文字 / 光标 */
+  readonly needsNewlineAfter: boolean;
+  /** 插入完成后的光标落点（照片下一行，接着写） */
   readonly caretAfter: number;
 
-  constructor(insertOffset: number, needsNewlineBefore: boolean, caretAfter: number) {
+  constructor(insertOffset: number, needsNewlineBefore: boolean, needsNewlineAfter: boolean,
+    caretAfter: number) {
     this.insertOffset = insertOffset;
     this.needsNewlineBefore = needsNewlineBefore;
+    this.needsNewlineAfter = needsNewlineAfter;
     this.caretAfter = caretAfter;
   }
 }
 
-/** R-RICH-03 三分支的纯函数实现（iOS `RichTextView.insertPhoto` 同款规则） */
+/** R-RICH-03 三分支的纯函数实现（iOS `RichTextView.insertPhoto` 同款规则 + 后随换行） */
 export function photoInsertionPlan(text: string, caretRaw: number): PhotoInsertionPlan {
   const len = text.length;
   const caret = Math.min(Math.max(caretRaw, 0), len);
   if (caret < len && text.charCodeAt(caret) === 0x0A) {
-    // 段尾：挂在下一段开头（换行后），光标不动
-    return new PhotoInsertionPlan(caret + 1, false, caret);
+    // 段尾：挂在下一段开头（换行后），光标不动；落点后随不是换行（含文末）就补一个
+    const at = caret + 1;
+    return new PhotoInsertionPlan(at, false, at >= len || text.charCodeAt(at) !== 0x0A, caret);
   }
   if (caret === 0 || text.charCodeAt(caret - 1) === 0x0A) {
-    // 段首（含文档开头）：挂这一段开头，光标落到照片后面
-    return new PhotoInsertionPlan(caret, false, caret + 1);
+    // 段首（含文档开头）：挂这一段开头。后随换行必补 —— 到这的落点
+    // 要么在文末、要么右一字符不是换行（是换行已被段尾分支拦走），
+    // 光标落到照片下一行（锚点 + 后随换行之后）
+    return new PhotoInsertionPlan(caret, false, true, caret + 2);
   }
-  // 段中 / 全文末尾：断成两段，照片挂后一段开头，光标跟在照片后
-  return new PhotoInsertionPlan(caret, true, caret + 2);
+  // 段中 / 全文末尾：断成两段，照片挂后一段开头，后随换行必补，光标跟在照片下一行
+  return new PhotoInsertionPlan(caret, true, true, caret + 3);
 }
 
 /**

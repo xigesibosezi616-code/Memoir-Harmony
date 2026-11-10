@@ -3999,6 +3999,22 @@
     {
       "name": "s_e15f73bdc6",
       "value": "memoir uses the camera to add photos to your entries."
+    },
+    {
+      "name": "s_45bf60a6c6",
+      "value": "Camera"
+    },
+    {
+      "name": "s_7caa485caf",
+      "value": "Memoir Camera"
+    },
+    {
+      "name": "s_7c9eb079ae",
+      "value": "Huawei Camera"
+    },
+    {
+      "name": "s_07bbd7147c",
+      "value": "Choose which camera opens when you tap the camera button while writing."
     }
   ]
 }

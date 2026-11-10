@@ -32,6 +32,7 @@ export class PolarTheme implements AppTheme {
   // 玻璃按钮：纯黑底上 30% 蓝调微亮玻璃 + 45% 蓝边（对齐皮革深色范式的金调提亮做法）
   readonly glassBackground: ResourceColor = 0x4D8FA8BF;
   readonly glassBorder: ResourceColor = 0x738FA8BF;
+  readonly menuPressedBackground: ResourceColor = 0x2EE5E5EA;
 
   // 列表卡：贴 cardBackground（0E0E10，只比纯黑底抬一点）；
   // 深色下投影不可见，无影，靠明度微差 + EntryRowView 的 0.5 描边成型（同皮革）

@@ -6,15 +6,16 @@
  * 卡片宽 46% 按位置（position 左 / 右）对齐（对齐 iOS `RichTextView.photoWidthRatio`
  * = 0.46，正文照片的视觉大小一致），上下是独立文字段；倾斜角照常渲染。
  *
- * 手势（2026-10-17 产品拍板）：
- * - 轻点 → 弹「功能条」（放左 / 右侧、设为封面、换相纸、删除；bindPopup 光感条）
+ * 手势（2026-10-17 产品拍板；2026-11-10 问题三 B 功能条改小菜单，同日改横条）：
+ * - 轻点 → 弹「横条小菜单」（放左 / 右侧、设为封面、换相纸、删除；bindMenu 自绘
+ *   横向光感条 + THIN 沉浸光感，iOS 式按住拖划选择，单元 = 图标上文字下）
  * - 双击 → 秒换边（卡片内弹簧动画滑到对侧，动画结束才提交数据重插）
  * - 长按 → 全屏查看
- * - 详情页（四个编辑回调都不给）：轻点 / 长按都开全屏纯预览，不弹功能条
+ * - 详情页（四个编辑回调都不给）：轻点 / 长按都开全屏纯预览，不弹小菜单
  * 相纸样式经会员降级（`effectivePaperStyle`，2.6 全放开，7.2 接判定）。
  */
 import { image } from '@kit.ImageKit';
-import { curves } from '@kit.ArkUI';
+import { curves, uiMaterial } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { AppTheme } from '../../../theme/AppTheme';
@@ -26,13 +27,33 @@ import { FALLBACK_PHOTO_ASPECT, PhotoPaperCard } from './PhotoPapers';
 
 /** 卡片宽 = 正文编辑区宽的 46%（iOS `RichTextView.photoWidthRatio` 同款，视觉大小对齐） */
 const CARD_WIDTH_RATIO: string = '46%';
-/** 双击判定窗口（ms）：窗口内第二击 = 双击，超时 = 单击弹功能条 */
+/** 双击判定窗口（ms）：窗口内第二击 = 双击，单击弹小菜单 */
 const DOUBLE_TAP_WINDOW_MS: number = 280;
 /** 换边动画时长（ms）：弹簧滑到对侧后提交数据（updatePhoto 重插新卡） */
 const FLIP_COMMIT_MS: number = 320;
+/** 小菜单单元圆角（vp）；U19 缩小版 */
+const MENU_CELL_RADIUS: number = 10;
 
 const DOMAIN = 0x0000;
 const TAG = 'PhotoAnchorCard';
+
+/** 小菜单一项：键 + 图标 + 文案 + destructive 红 + 动作（键供 ForEach 稳定标识） */
+class AnchorActionItem {
+  readonly key: string;
+  readonly icon: Resource;
+  readonly label: Resource;
+  readonly destructive: boolean;
+  readonly run: () => void;
+
+  constructor(key: string, icon: Resource, label: Resource,
+    destructive: boolean, run: () => void) {
+    this.key = key;
+    this.icon = icon;
+    this.label = label;
+    this.destructive = destructive;
+    this.run = run;
+  }
+}
 
 @Component
 export struct PhotoAnchorCard {
@@ -57,8 +78,13 @@ export struct PhotoAnchorCard {
 
   @State private pixelMap: image.PixelMap | undefined = undefined;
   @State private photoAspect: number = FALLBACK_PHOTO_ASPECT;
-  /** 功能条显隐（bindPopup） */
-  @State private showBar: boolean = false;
+  /** 小菜单显隐（bindMenu isShow，!! 双向：系统收起也回写 false） */
+  @State private menuShown: boolean = false;
+  /** 小菜单拖划高亮单元下标（-1 无高亮；按下/拖动实时跟手指） */
+  @State private menuPressedIndex: number = -1;
+  /** 小菜单各单元全局 x / 宽（vp，onAreaChange 缓存，拖划列定位用；宽随文案变） */
+  private cellLeftsVp: number[] = [];
+  private cellWidthsVp: number[] = [];
   /** 双击换边的横向位移（vp）：0 = 原位，正 = 向右滑，负 = 向左滑 */
   @State private slideX: number = 0;
   /** 单击延迟开条 / 双击判定的计时器句柄 */
@@ -127,21 +153,20 @@ export struct PhotoAnchorCard {
         LongPressGesture({ repeat: false, duration: 350 })
           .onAction((): void => {
             this.clearTapTimer();
-            this.showBar = false;
+            this.menuShown = false;
             this.onOpen(this.block.id);
           })
       )
-      // 功能条（bindPopup 光感浮条）：autoCancel 点外部自动收
-      .bindPopup(this.showBar, {
-        builder: this.functionBarBuilder,
-        placement: Placement.Bottom,
-        popupColor: Color.Transparent,
-        enableArrow: false,
-        autoCancel: true,
-        onStateChange: (state: PopupStateChangeParam): void => {
-          if (!state.isVisible) {
-            this.showBar = false;
-          }
+      // 横条小菜单（bindMenu 自绘横向光感条，2026-11-10 问题三 B）：容器系统 Menu，
+      // THIN 沉浸光感；点外自动收，菜单操作完成 / 拖划抬手都回写 false
+      .bindMenu(!!this.menuShown, this.anchorMenuBuilder, {
+        systemMaterial: new uiMaterial.ImmersiveMaterial({
+          style: uiMaterial.ImmersiveStyle.THIN
+        }),
+        // 点外系统收起时 !! 回写偶发失效（真机实测 menuShown 卡 true，再点卡无
+        // false→true 跳变，菜单永不重开）—— onDisappear 强制归零兜底
+        onDisappear: (): void => {
+          this.menuShown = false;
         }
       })
     }
@@ -153,7 +178,7 @@ export struct PhotoAnchorCard {
     })
   }
 
-  /** 轻点 / 双击统一入口：窗口内第二击 = 换边；否则 280ms 后弹功能条（或纯预览开全屏） */
+  /** 轻点 / 双击统一入口：窗口内第二击 = 换边；否则 280ms 后弹小菜单（或纯预览开全屏） */
   private handleTap(): void {
     const now = Date.now();
     if (now - this.lastTapMs < DOUBLE_TAP_WINDOW_MS) {
@@ -166,16 +191,16 @@ export struct PhotoAnchorCard {
     this.clearTapTimer();
     this.tapTimerId = setTimeout((): void => {
       this.tapTimerId = -1;
-      if (this.hasBarActions()) {
-        this.showBar = true;
+      if (this.hasMenuActions()) {
+        this.menuShown = true;
       } else {
         this.onOpen(this.block.id);
       }
     }, DOUBLE_TAP_WINDOW_MS);
   }
 
-  /** 详情页纯预览（四个动作都不给）时不弹条 */
-  private hasBarActions(): boolean {
+  /** 详情页纯预览（四个动作都不给）时不弹菜单 */
+  private hasMenuActions(): boolean {
     return this.onTogglePosition !== undefined || this.onToggleCover !== undefined ||
       this.onRestyle !== undefined || this.onDelete !== undefined;
   }
@@ -217,77 +242,131 @@ export struct PhotoAnchorCard {
     }
   }
 
-  /** 功能条：光感深色浮条（放左 / 右侧 · 设为封面 · 换相纸 · 删除） */
-  @Builder
-  functionBarBuilder() {
-    Row({ space: 2 }) {
-      if (this.onTogglePosition !== undefined) {
-        this.barButton($r('sys.symbol.arrow_left_arrow_right'),
-          this.block.position === PhotoPosition.Left ? $r('app.string.s_613b4f74e0') : $r('app.string.s_9eda140339'),
-          (): void => {
-            this.runBarAction((): void => {
-              this.onTogglePosition?.(this.block.id);
-            });
-          }, false)
-      }
-      if (this.onToggleCover !== undefined) {
-        this.barButton($r('sys.symbol.star'),
-          this.block.isCover === true ? $r('app.string.s_5f9ab839a4') : $r('app.string.s_b7607a6106'),
-          (): void => {
-            this.runBarAction((): void => {
-              this.onToggleCover?.(this.block.id);
-            });
-          }, false)
-      }
-      if (this.onRestyle !== undefined) {
-        this.barButton($r('sys.symbol.picture_on_square'),
-          $r('app.string.s_047472a1db'),
-          (): void => {
-            this.runBarAction((): void => {
-              this.onRestyle?.(this.block.id);
-            });
-          }, false)
-      }
-      if (this.onDelete !== undefined) {
-        this.barButton($r('sys.symbol.trash'),
-          $r('app.string.s_c488684daf'),
-          (): void => {
-            this.runBarAction((): void => {
-              this.onDelete?.(this.block.id);
-            });
-          }, true)
-      }
+  /**
+   * 横条小菜单四项：放左 / 右侧、设为 / 取消封面、换相纸、删除。
+   * 图标 15 / 字号 11 缩小版，删除项 destructive 红。
+   */
+  private anchorActionItems(): Array<AnchorActionItem> {
+    const items: Array<AnchorActionItem> = [];
+    if (this.onTogglePosition !== undefined) {
+      items.push(new AnchorActionItem('toggle',
+        $r('sys.symbol.arrow_left_arrow_right'),
+        this.block.position === PhotoPosition.Left ? $r('app.string.s_613b4f74e0') : $r('app.string.s_9eda140339'),
+        false, (): void => {
+          this.runMenuAction((): void => {
+            this.onTogglePosition?.(this.block.id);
+          });
+        }));
     }
-    .padding({ left: 6, right: 6, top: 6, bottom: 6 })
-    .borderRadius(24)
-    .backgroundColor('#E61C1C1E')
-    .border({ width: 0.5, color: '#33FFFFFF' })
-    .shadow({ radius: 18, color: '#33000000', offsetY: 6 })
+    if (this.onToggleCover !== undefined) {
+      items.push(new AnchorActionItem('cover',
+        $r('sys.symbol.star'),
+        this.block.isCover === true ? $r('app.string.s_5f9ab839a4') : $r('app.string.s_b7607a6106'),
+        false, (): void => {
+          this.runMenuAction((): void => {
+            this.onToggleCover?.(this.block.id);
+          });
+        }));
+    }
+    if (this.onRestyle !== undefined) {
+      items.push(new AnchorActionItem('restyle',
+        $r('sys.symbol.picture_on_square'),
+        $r('app.string.s_047472a1db'),
+        false, (): void => {
+          this.runMenuAction((): void => {
+            this.onRestyle?.(this.block.id);
+          });
+        }));
+    }
+    if (this.onDelete !== undefined) {
+      items.push(new AnchorActionItem('delete',
+        $r('sys.symbol.trash'),
+        $r('app.string.s_c488684daf'),
+        true, (): void => {
+          this.runMenuAction((): void => {
+            this.onDelete?.(this.block.id);
+          });
+        }));
+    }
+    return items;
   }
 
-  /** 先收条再执行动作（动作里的 updatePhoto 会重插卡片，条随旧卡销毁） */
-  private runBarAction(action: () => void): void {
-    this.showBar = false;
+  /** 先收菜单再执行动作（动作里的 updatePhoto 会重插卡片，菜单随旧卡销毁） */
+  private runMenuAction(action: () => void): void {
+    this.menuShown = false;
     action();
   }
 
   @Builder
-  private barButton(icon: Resource, label: Resource, onTap: () => void, destructive: boolean) {
-    Column({ space: 3 }) {
-      SymbolGlyph(icon)
-        .fontSize(17)
-        .fontColor([destructive ? '#FFB5473A' : '#F2FFFFFF'])
-      Text(label)
-        .fontSize(10)
-        .fontColor(destructive ? '#FFB5473A' : '#E6FFFFFF')
-        .maxLines(1)
+  private anchorMenuBuilder() {
+    Row({ space: 2 }) {
+      ForEach(this.anchorActionItems(), (item: AnchorActionItem, index: number) => {
+        Column({ space: 2 }) {
+          SymbolGlyph(item.icon)
+            .fontSize(15)
+            .fontWeight(FontWeight.Medium)
+            .fontColor([item.destructive ? '#FFB5473A' : this.theme.textPrimary])
+          Text(item.label)
+            .fontSize(11)
+            .fontColor(item.destructive ? '#FFB5473A' : this.theme.textPrimary)
+            .maxLines(1)
+        }
+        .justifyContent(FlexAlign.Center)
+        .alignItems(HorizontalAlign.Center)
+        .padding({ left: 10, right: 10, top: 7, bottom: 7 })
+        .borderRadius(MENU_CELL_RADIUS)
+        .backgroundColor(this.menuPressedIndex === index ?
+          this.theme.menuPressedBackground : Color.Transparent)
+        .onAreaChange((_oldArea: Area, newArea: Area): void => {
+          const x = newArea.globalPosition.x;
+          const w = newArea.width;
+          if (typeof x === 'number' && typeof w === 'number') {
+            this.cellLeftsVp[index] = x;
+            this.cellWidthsVp[index] = w;
+          }
+        })
+      }, (item: AnchorActionItem) => item.key)
     }
-    .constraintSize({ minWidth: 64 })
-    .padding({ top: 8, bottom: 6, left: 6, right: 6 })
-    .borderRadius(16)
-    .onClick((): void => {
-      onTap();
+    .padding(3)
+    .onTouch((event: TouchEvent): void => {
+      this.menuTouch(event);
     })
+  }
+
+  /** 拖划选择：按下/拖动时高亮手指所在单元，抬手选中该单元并收起（iOS 菜单同款
+   *  交互；划出菜单抬手不选中，只收菜单） */
+  private menuTouch(event: TouchEvent): void {
+    if (event.changedTouches.length === 0) {
+      return;
+    }
+    const touch = event.changedTouches[0];
+    if (event.type === TouchType.Down || event.type === TouchType.Move) {
+      this.menuPressedIndex = this.menuColumnIndexAt(touch.windowX);
+    } else if (event.type === TouchType.Up) {
+      const index = this.menuColumnIndexAt(touch.windowX);
+      this.menuPressedIndex = -1;
+      this.menuShown = false;
+      if (index >= 0) {
+        this.anchorActionItems()[index].run();
+      }
+    } else if (event.type === TouchType.Cancel) {
+      this.menuPressedIndex = -1;
+      this.menuShown = false;
+    }
+  }
+
+  /** 手指全局 x → 菜单单元下标（各单元宽随文案不同，逐单元区间命中；未命中返回 -1） */
+  private menuColumnIndexAt(windowX: number): number {
+    const items = this.anchorActionItems();
+    for (let index = 0; index < items.length; index++) {
+      const left = this.cellLeftsVp[index];
+      const width = this.cellWidthsVp[index];
+      if (typeof left === 'number' && typeof width === 'number' &&
+        windowX >= left && windowX < left + width) {
+        return index;
+      }
+    }
+    return -1;
   }
 
   /** 实际渲染样式：会员款 + 非会员 → 宝丽来（存值不改，`effectivePaperStyle`） */

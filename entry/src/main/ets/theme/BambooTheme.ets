@@ -33,6 +33,7 @@ export class BambooTheme implements AppTheme {
   // ΔRGB ~9-17 → ~17-29，按钮成型更清楚（图标色见 CircleIconButton）
   readonly glassBackground: ResourceColor = 0xA8E0D8C6;
   readonly glassBorder: ResourceColor = 0xE6D4C9B8;
+  readonly menuPressedBackground: ResourceColor = 0x143D3428;
 
   // 列表卡：与页面同纸色（融入一体，2026-10-19 用户拍板：不用色差浮卡，
   // 卡即纸面一部分，靠 EntryRowView 的 0.5 描边 + 暖墨柔影成型）

@@ -1,10 +1,17 @@
 /**
  * 设置 →「数据与备份」二级页（10_BUILD_MANUAL.md 6.1）。对应 iOS `SettingsDataView.swift`。
  *
- * - 云同步行：🔴 R-DATA-05——**不许拿「系统登了云账号」当「数据已同步」**。
- *   端云同步是 6.6 的事（Q3 结论：华为端云数据同步，AGC 云侧容器是前置），
- *   落地前这里**如实**展示「未开启」+ 红字警告「日记只在这台设备上」并引导导出备份；
- *   6.6 接上后同步状态只认真实的同步成功事件
+ * - 云同步行已删（2026-11-08 用户拍板：华为云备份已接入，占位行撤掉）；
+ *   🔴 R-DATA-05 仍有效——6.6 端云同步（AGC 云侧为前置）落地时以真实
+ *   同步成功事件为准恢复该行，不许拿「系统登了云账号」当「数据已同步」
+ * - 华为云备份行（2026-11-08 云备份卡）：系统侧 BackupExtensionAbility 已接入
+ *   （数据进用户自己的华为云空间，与我们的服务器无关），本行是跳系统
+ *   「云备份」页的入口——实测深链 clouddrive MainAbility + page=BackupMainPage
+ *   直达「备份此设备」页，失败退到系统「云空间」页。开关只记本地意图
+ *   （系统真实开关状态三方应用读不到，R-DATA-05 口径不谎报，以系统页为准）
+ * - 红字提醒随云备份行：只写有把握的「换新手机时可从云备份恢复」——
+ *   同机卸载重装可恢复是端云同步（6.6）的能力，系统云备份没有按应用
+ *   单独恢复的流程，不冒领
  * - 导出 / 导入备份：行先立（6.5 / 6.4 接路由），分组结构与文案一次到位
  * - 同步 Live Photo 视频不做（Q10 死设置）
  * - 照片与录音占用（R-DATA-08）：扫盘统计（usage()），值未回来显示「统计中…」
@@ -14,6 +21,7 @@
  * 路由：系统路由表（router_map.json → name `Data`）。
  */
 import { picker } from '@kit.CoreFileKit';
+import { common } from '@kit.AbilityKit';
 import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
@@ -27,6 +35,7 @@ import { MediaStorageService } from '../../services/MediaStorageService';
 import { MediaUsage } from '../../services/MediaStorage';
 import { AppDatabase } from '../../data/Database';
 import { BackupFormat } from '../../services/backup/BackupFormat';
+import { AppPrefs, PREF_KEY_HUAWEI_CLOUD_BACKUP_ON } from '../../services/AppPrefs';
 
 const DOMAIN = 0x0000;
 const TAG = 'SettingsDataView';
@@ -46,7 +55,14 @@ export struct SettingsDataView {
   /** 媒体占用统计（null = 还没扫完；扫盘要遍历目录，不放在 build 里同步做） */
   @State private mediaUsage: MediaUsage | null = null;
 
+  /** 华为云备份入口开关（本地记用户意图；系统真实开关三方读不到，以系统页为准） */
+  @State private cloudBackupOn: boolean = false;
+
   private navPathStack: NavPathStack = new NavPathStack();
+
+  aboutToAppear(): void {
+    this.cloudBackupOn = AppPrefs.getBool(PREF_KEY_HUAWEI_CLOUD_BACKUP_ON, false);
+  }
 
   build() {
     NavDestination() {
@@ -57,9 +73,9 @@ export struct SettingsDataView {
           Column({ space: 20 }) {
             // 云同步 + 导出 / 导入 + 占用 / 清理（华为设置分组卡）
             Column() {
-              this.syncRow()
-              // 🔴 未同步成功必须说清后果（R-DATA-05 华为版，红字）
-              Text($r('app.string.s_f71802e114'))
+              this.cloudBackupRow()
+              // 🔴 R-DATA-05：未开启备份的后果说清（红字，随云备份行）
+              Text($r('app.string.s_669abe2f94'))
                 .fontSize(this.theme.labelFont.size)
                 .fontWeight(this.theme.labelFont.weight)
                 .fontFamily(this.theme.labelFont.family)
@@ -93,8 +109,13 @@ export struct SettingsDataView {
             .backgroundColor(this.theme.settingsCardBackground)
             .width('100%')
 
-            // footer：导入语义 + 残留文件说明（iOS footer 同款两条）
+            // footer：云备份口径说明 + 导入语义 + 残留文件说明
             Column({ space: 6 }) {
+              Text($r('app.string.s_05d0319b2b'))
+                .fontSize(this.theme.labelFont.size)
+                .fontWeight(this.theme.labelFont.weight)
+                .fontFamily(this.theme.labelFont.family)
+                .fontColor(this.theme.textTertiary)
               Text($r('app.string.s_06829794c0'))
                 .fontSize(this.theme.labelFont.size)
                 .fontWeight(this.theme.labelFont.weight)
@@ -184,31 +205,61 @@ export struct SettingsDataView {
     .margin({ bottom: TOP_BAR_CONTENT_GAP_VP })
   }
 
-  // ---- 云同步（R-DATA-05：如实展示；6.6 接真状态） ----
+  // ---- 华为云备份（2026-11-08 云备份卡：跳系统「云备份」页的入口） ----
 
   @Builder
-  private syncRow() {
+  private cloudBackupRow() {
     Row({ space: 10 }) {
-      SymbolGlyph($r('sys.symbol.exclamationmark_cloud_fill'))
-        .fontSize(14)
-        .fontWeight(FontWeight.Medium)
-        .fontColor([this.theme.textSecondary])
+      Image($r('app.media.icon_huawei_cloud_backup'))
         .width(20)
-      Text($r('app.string.s_6ed1b2bd01'))
+        .height(20)
+      Text($r('app.string.s_6a1195c7b2'))
         .fontSize(this.theme.bodyFont.size)
         .fontWeight(this.theme.bodyFont.weight)
         .fontFamily(this.theme.bodyFont.family)
         .fontColor(this.theme.textPrimary)
         .layoutWeight(1)
-      Text($r('app.string.s_b9004e6f7b'))
-        .fontSize(this.theme.captionFont.size)
-        .fontWeight(this.theme.captionFont.weight)
-        .fontFamily(this.theme.captionFont.family)
-        .fontColor(this.theme.textTertiary)
+      Toggle({ type: ToggleType.Switch, isOn: this.cloudBackupOn })
+        .selectedColor(this.theme.accent)
+        .onChange((isOn: boolean) => {
+          this.cloudBackupOn = isOn;
+          AppPrefs.putBool(PREF_KEY_HUAWEI_CLOUD_BACKUP_ON, isOn);
+          if (isOn) {
+            this.openHuaweiCloudBackup();
+          }
+        })
     }
     .width('100%')
-    .padding({ top: 15, left: 20, right: 20 })
+    .padding({ top: 15, bottom: 15, left: 20, right: 20 })
     .alignItems(VerticalAlign.Center)
+    .onClick((): void => {
+      this.openHuaweiCloudBackup();
+    })
+  }
+
+  /**
+   * 跳系统「云备份」页（实测：clouddrive MainAbility + page=BackupMainPage
+   * 直达「备份此设备」页）；失败退到系统「云空间」页。
+   */
+  private openHuaweiCloudBackup(): void {
+    const context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    if (context === undefined) {
+      return;
+    }
+    context.startAbility({
+      bundleName: 'com.huawei.hmos.clouddrive',
+      abilityName: 'MainAbility',
+      parameters: { 'page': 'BackupMainPage' }
+    }).catch((): void => {
+      context.startAbility({
+        bundleName: 'com.huawei.hmos.settings',
+        abilityName: 'com.huawei.hmos.settings.MainAbility',
+        uri: 'cloud_space'
+      }).catch((err: BusinessError): void => {
+        hilog.warn(DOMAIN, TAG, 'open huawei cloud backup failed: %{public}d %{public}s',
+          err.code, err.message);
+      });
+    });
   }
 
   // ---- 导出 / 导入备份（6.5 / 6.4 接路由） ----

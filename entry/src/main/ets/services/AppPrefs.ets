@@ -41,6 +41,10 @@ export const PREF_KEY_SHOWCASE_ZOOM = 'showcaseZoom';
 export const PREF_KEY_DEBUG_FAST_LETTER_DELIVERY = 'debugFastLetterDelivery';
 /** 记下的最长连续写作天数（U16，对应 iOS `writingStats.bestStreakDays`；只升不降） */
 export const PREF_KEY_BEST_STREAK_DAYS = 'writingStats.bestStreakDays';
+/** 华为云备份入口开关（2026-11-08 云备份卡：本地记忆用户意图，系统真实状态三方读不到） */
+export const PREF_KEY_HUAWEI_CLOUD_BACKUP_ON = 'huaweiCloudBackupOn';
+/** 拍照方式（问题四：app=尺素相机 / system=华为系统相机；Harmony 专属，iOS 无此键） */
+export const PREF_KEY_CAMERA_MODE = 'cameraMode';
 
 /** 目录版式取值（iOS `BookContentsView.Layout`） */
 export const BOOK_CONTENTS_LAYOUT_LIST = 'list';
@@ -49,6 +53,10 @@ export const BOOK_CONTENTS_LAYOUT_GRID = 'grid';
 /** 手记页展示方式取值（iOS `HomeDisplayMode`） */
 export const HOME_DISPLAY_MODE_SHOWCASE = 'showcase';
 export const HOME_DISPLAY_MODE_LIST = 'list';
+
+/** 拍照方式取值（问题四）：尺素相机（应用内） / 华为系统相机（cameraPicker） */
+export const CAMERA_MODE_APP = 'app';
+export const CAMERA_MODE_SYSTEM = 'system';
 
 // ---- AppStorage 镜像 key（EntryAbility 启动时由偏好算好写入，UI 用 @StorageLink/@StorageProp 观察）----
 
@@ -211,6 +219,23 @@ export class AppPrefs {
   static setShowcaseZoom(zoom: number): void {
     const clamped = Math.min(3, Math.max(0, Math.round(zoom)));
     AppPrefs.putString(PREF_KEY_SHOWCASE_ZOOM, `${clamped}`);
+  }
+
+  // ---- 问题四 拍照方式（写/编辑日记相机键分流：尺素相机 or 华为系统相机） ----
+
+  /** 拍照方式（默认尺素相机——保留既有行为）；非法值按尺素相机兜底（旧数据 / 手改坏了不崩） */
+  static currentCameraMode(): string {
+    return AppPrefs.normalizedCameraMode(
+      AppPrefs.getString(PREF_KEY_CAMERA_MODE, CAMERA_MODE_APP));
+  }
+
+  static setCameraMode(mode: string): void {
+    AppPrefs.putString(PREF_KEY_CAMERA_MODE, AppPrefs.normalizedCameraMode(mode));
+  }
+
+  /** 拍照方式归一化：认识 app / system，其余一律按 app */
+  static normalizedCameraMode(raw: string): string {
+    return raw === CAMERA_MODE_SYSTEM ? CAMERA_MODE_SYSTEM : CAMERA_MODE_APP;
   }
 
   // ---- 5.8 回信加速（仅测试包；正式包读出来也不生效，见 LetterDelivery.debugTimeScale） ----

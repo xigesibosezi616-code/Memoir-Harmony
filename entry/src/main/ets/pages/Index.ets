@@ -3,12 +3,18 @@
  * （主界面常驻 + SplashView 盖顶）+ `ContentView.swift`（主界面 / 引导切换 +
  * 同意页 fullScreenCover）。
  *
- * 层叠顺序（自下而上，与 iOS 一致）：
+ * 层叠顺序（自下而上）：
  * 1. 主界面（1.6 前是占位空状态）或引导页 —— 主界面**常驻在底层**，
  *    开场结束只是把上面那层淡掉，底下是现成的画面，不会有构建卡顿（iOS 注释同款）
- * 2. 开场封面（EntryAbility 已算好本次启动放不放，本页不再判断）
- * 3. 隐私同意页 —— 盖在最上层（iOS fullScreenCover 是窗口级展示，天然在最上）。
- *    首启时它会先盖住开场：用户同意之前一切数据处理都免谈（R-APP-01）
+ * 2. 隐私同意页 —— **开场完全收干净后隔一拍才登场**（LEGAL_DELAY_AFTER_SPLASH_MS，
+ *    再淡入 LEGAL_FADE_IN_MS）：开场淡出的 0.25s 里同意页正在底下浮现，
+ *    观感上像被弹窗截断（用户反馈），所以改成等动画彻底结束、空一拍、
+ *    再淡入同意页。用户同意之前一切数据处理都免谈（R-APP-01）依旧成立
+ *    ——开场只是本地动画+本地音效，不发请求不申请权限
+ *    🔴 与 iOS 有意偏差（2026-11-08 用户指令「问题二」）：iOS 的 fullScreenCover
+ *    是窗口级展示、首启会盖住开场，用户看不到开机动画；这里改为先播完开场
+ *    再走同意流程
+ * 3. 开场封面（EntryAbility 已算好本次启动放不放，本页不再判断）—— 最上层
  *
  * 三个状态都由 EntryAbility 启动时写进 AppStorage，本页只观察：
  * - needsLegalConsent：同意后本页写回 false（偏好 + 镜像）
@@ -35,6 +41,11 @@ import { STORAGE_KEY_THEME } from '../theme/ThemeManager';
 import { AppEnvironment, STORAGE_KEY_APP_ENVIRONMENT } from '../environment/AppEnvironment';
 import { createDefaultErrorPresenter } from '../environment/ErrorPresenter';
 
+/** 开场彻底结束后同意页再等这一拍才登场（问题二：弹窗不压着淡出的尾巴） */
+const LEGAL_DELAY_AFTER_SPLASH_MS = 300;
+/** 同意页淡入时长 */
+const LEGAL_FADE_IN_MS = 250;
+
 @Entry
 @Component
 struct Index {
@@ -50,10 +61,25 @@ struct Index {
   @StorageProp(STORAGE_KEY_HAS_COMPLETED_ONBOARDING) hasCompletedOnboarding: boolean = false;
   @StorageLink(STORAGE_KEY_NEEDS_LEGAL_CONSENT) needsLegalConsent: boolean = true;
   @StorageLink(STORAGE_KEY_SHOW_SPLASH) showSplash: boolean = false;
+  /**
+   * 同意页是否已到登场时刻：有开场时 = 开场摘除后再等 LEGAL_DELAY_AFTER_SPLASH_MS；
+   * 没开场 = aboutToAppear 直接置 true（同意页立即出现，不空等）。
+   * 只在 needsLegalConsent 为真时有意义。
+   */
+  @State private legalShown: boolean = false;
+  private legalDelayTimerId: number = -1;
 
   aboutToAppear(): void {
     // @Watch 首值不保证触发：挂载后手动同步一次系统栏配色（沉浸式下内容色随主题）
     this.onThemeChanged();
+    this.legalShown = !this.showSplash;
+  }
+
+  aboutToDisappear(): void {
+    if (this.legalDelayTimerId !== -1) {
+      clearTimeout(this.legalDelayTimerId);
+      this.legalDelayTimerId = -1;
+    }
   }
 
   /**
@@ -87,23 +113,36 @@ struct Index {
         OnboardingView()
       }
 
-      if (this.showSplash) {
-        // 不需要再包过渡：淡出是 SplashView 自己做的，
-        // 回调进来时它已完全透明，这一步只是摘掉一层看不见的东西（iOS 同款）
-        SplashView({
-          onFinish: () => {
-            this.showSplash = false;
-          }
-        })
-      }
-
-      if (this.needsLegalConsent) {
+      if (this.needsLegalConsent && this.legalShown) {
+        // 开场收干净后隔一拍才淡入登场（见文件头层叠说明，问题二）；
+        // 淡入由 onFinish 里包着 legalShown 置位的 animateTo 驱动
         LegalConsentView({
           onAccept: () => {
             // 🔴 存版本号而不是布尔值（R-APP-02）：政策更新（改
             // LEGAL_CURRENT_VERSION）后老用户会重新看到这一页
             AppPrefs.putString(PREF_KEY_ACCEPTED_LEGAL_VERSION, LEGAL_CURRENT_VERSION);
             this.needsLegalConsent = false;
+          }
+        })
+          .transition(TransitionEffect.OPACITY)
+      }
+
+      if (this.showSplash) {
+        // 不需要再包过渡：淡出是 SplashView 自己做的，
+        // 回调进来时它已完全透明，这一步只是摘掉一层看不见的东西（iOS 同款）
+        SplashView({
+          onFinish: () => {
+            this.showSplash = false;
+            // 有同意页要弹时：等一拍再淡入，别压着开场淡出的尾巴（问题二）
+            if (this.needsLegalConsent) {
+              this.legalDelayTimerId = setTimeout(() => {
+                this.getUIContext().animateTo(
+                  { duration: LEGAL_FADE_IN_MS, curve: Curve.EaseOut },
+                  () => {
+                    this.legalShown = true;
+                  });
+              }, LEGAL_DELAY_AFTER_SPLASH_MS);
+            }
           }
         })
       }

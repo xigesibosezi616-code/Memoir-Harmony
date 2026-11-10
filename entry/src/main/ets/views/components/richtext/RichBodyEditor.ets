@@ -84,9 +84,23 @@ const HIGHLIGHT_MENU_ID: TextMenuItemId = TextMenuItemId.of('memoir.highlight');
 /** 「取消划掉」菜单项 id（R-INK-03） */
 const UNSTRIKE_MENU_ID: TextMenuItemId = TextMenuItemId.of('memoir.unstrike');
 
-/** 加粗判据：字重 ≥600（FontWeight.Bold = 700） */
+/**
+ * 加粗判据。真机实测（Mate 80 Pro Max / API 20 镜像）RichEditor.getSpans 读回的
+ * fontWeight 是设备内部字重档位：FontWeight.Normal→10、FontWeight.Bold→9，
+ * 既不是 100-900 刻度也不是编译期枚举值（Bold=4）。三种形态都认；
+ * 本项目正文只写 Normal/Bold 两档（textStyleFor），不存在灰区值。
+ */
 function fontWeightIsBold(weight: number | string | FontWeight | undefined): boolean {
-  return typeof weight === 'number' && weight >= 600;
+  if (weight === undefined) {
+    return false;
+  }
+  if (typeof weight === 'string') {
+    return weight === 'bold' || weight === '700';
+  }
+  if (typeof weight === 'number' && weight >= 100) {
+    return weight >= 600;
+  }
+  return weight === 9 || weight === FontWeight.Bold;
 }
 
 /** 从编辑器读回的文字样式还原格式组（字号判小标题、背景色判荧光笔） */
@@ -355,6 +369,13 @@ export class RichBodyController {
     this.photoBlocks.set(block.id, block);
     this.anchorOrder.splice(this.anchorIndexAt(anchorOffset), 0, block.id);
     this.editor.addBuilderSpan(this.anchorCardBuilderFactory(block, false), { offset: anchorOffset });
+    if (plan.needsNewlineAfter) {
+      // 锚点后随换行：整行高的照片卡与后续文字 / 光标隔行（渲染需要，保存时去掉）
+      this.editor.addTextSpan('\n', {
+        offset: anchorOffset + 1,
+        style: this.appearance.baseTextStyle()
+      });
+    }
     this.editor.setCaretOffset(plan.caretAfter);
     this.batching = false;
     this.inkLedger.syncText(prevLive, this.liveText(), this.sessionSec);
@@ -429,6 +450,7 @@ export class RichBodyController {
 
   /**
    * 从正文删除指定照片（全屏菜单「删除照片」），出表 + 通知页面清文件。
+   * 连锚点后随的换行一起删（照片卡独占一行，同录音）。
    * 墨迹干了的照片不删，取下换痕迹（R-INK-05，iOS `removePhoto` 同款）。
    */
   deletePhoto(blockId: string): void {
@@ -445,7 +467,8 @@ export class RichBodyController {
       hilog.warn(DOMAIN, TAG, 'deletePhoto offset missing, id=%{public}s', blockId);
       return;
     }
-    this.removeAnchorAt(index, offsets[index] + 1);
+    const end = this.anchorDeleteEnd(this.liveText(), offsets[index]);
+    this.removeAnchorAt(index, end);
   }
 
   /**
@@ -467,7 +490,7 @@ export class RichBodyController {
       hilog.warn(DOMAIN, TAG, 'deleteAudio offset missing, id=%{public}s', blockId);
       return;
     }
-    const end = this.audioDeleteEnd(this.liveText(), offsets[index]);
+    const end = this.anchorDeleteEnd(this.liveText(), offsets[index]);
     this.removeAnchorAt(index, end);
   }
 
@@ -497,8 +520,8 @@ export class RichBodyController {
    * 退格 / 删除拦截（R-RICH-05 两段式 + R-INK-02 删除转划掉）：
    * - 删除范围恰好盖住一个锚点：第一次选中（重建该卡带高亮）并拦下，第二次才删
    *   —— 痕迹锚点例外（iOS 无两段式，单击照删）；干的照片 / 录音不删，取下换痕迹
-   * - 退到录音后随的换行也归录音管（iOS `shouldChangeTextIn` 同款）：进两段式，
-   *   第二下连锚点带换行删 2 字符（干的换痕迹，换行留下）
+   * - 退到照片 / 录音锚点后随的换行也归锚点块管（iOS `shouldChangeTextIn` 同款）：
+   *   进两段式，第二下连锚点带换行删 2 字符（干的换痕迹，换行留下）
    * - 删 / 改的范围里有干了的字（`containsDryText`）：不能悄悄删，转划掉
    *   （`strikeDryRange`：干字划掉变淡加线、湿字照删、换行 / 锚点 / 已划过的留，
    *   光标停在划掉的字前面）
@@ -534,8 +557,7 @@ export class RichBodyController {
         } else {
           const text = this.liveText();
           const anchorOffset = this.anchorOffsets()[armedIndex];
-          this.removeAnchorAt(armedIndex, this.audioBlocks.has(this.armedAnchorId)
-            ? this.audioDeleteEnd(text, anchorOffset) : anchorOffset + 1);
+          this.removeAnchorAt(armedIndex, this.anchorDeleteEnd(text, anchorOffset));
         }
         return false;
       }
@@ -554,7 +576,6 @@ export class RichBodyController {
         this.pendingRemovedIds.push(blockId);
         return true; // 痕迹行：放行直删，完成回调出表（无文件要清）
       }
-      const isAudio = this.audioBlocks.has(blockId);
       if (this.armedAnchorId !== blockId) {
         this.armAnchorAt(hits[0], offsets[hits[0]]);
         return false; // 第一次：选中，拦下
@@ -565,15 +586,15 @@ export class RichBodyController {
         return false;
       }
       const text = this.liveText();
-      this.removeAnchorAt(hits[0], isAudio
-        ? this.audioDeleteEnd(text, offsets[hits[0]]) : offsets[hits[0]] + 1);
+      this.removeAnchorAt(hits[0], this.anchorDeleteEnd(text, offsets[hits[0]]));
       return false;
     }
-    // 退格删的恰好是录音锚点后随的换行：整个录音块进两段式
+    // 退格删的恰好是照片 / 录音锚点后随的换行：整个锚点块进两段式
+    // （痕迹例外：换行直删，不拦）
     if (hits.length === 0 && value.direction === RichEditorDeleteDirection.BACKWARD &&
       value.length === 1) {
       for (let i = 0; i < offsets.length; i++) {
-        if (start === offsets[i] + 1 && this.audioBlocks.has(this.anchorOrder[i])) {
+        if (start === offsets[i] + 1 && !this.traceBlocks.has(this.anchorOrder[i])) {
           const text = this.liveText();
           if (start < text.length && text.charCodeAt(start) === 0x0A) {
             const blockId = this.anchorOrder[i];
@@ -582,10 +603,10 @@ export class RichBodyController {
               return false; // 第一次：选中，拦下
             }
             if (this.isAnchorDry(blockId)) {
-              this.retireAnchorAt(i); // 干录音：锚点换痕迹，换行留下
+              this.retireAnchorAt(i); // 干照片 / 干录音：锚点换痕迹，换行留下
               return false;
             }
-            this.removeAnchorAt(i, this.audioDeleteEnd(text, offsets[i]));
+            this.removeAnchorAt(i, this.anchorDeleteEnd(text, offsets[i]));
             return false; // 第二下：连锚点带换行删
           }
         }
@@ -655,8 +676,8 @@ export class RichBodyController {
     // 的第二次退格（真机 2026-10-18 三轮实测 + AceRichText RecordOperation 证实）。
   }
 
-  /** 录音的删除终点：锚点 + 后随换行（有就）一起删 */
-  private audioDeleteEnd(text: string, anchorOffset: number): number {
+  /** 锚点（照片 / 录音）的删除终点：锚点 + 后随换行（有就）一起删 */
+  private anchorDeleteEnd(text: string, anchorOffset: number): number {
     return text.length > anchorOffset + 1 && text.charCodeAt(anchorOffset + 1) === 0x0A
       ? anchorOffset + 2 : anchorOffset + 1;
   }
@@ -774,8 +795,8 @@ export class RichBodyController {
 
   /**
    * 干照片 / 干录音不删：取下换痕迹（R-INK-05，iOS `retire`）。
-   * 锚点原位换成痕迹块（同样占 1 字符，台账不用动），照片后随不是换行就补一个
-   * （痕迹独占一行；录音天然有后随换行），文件照旧通知页面清。
+   * 锚点原位换成痕迹块（同样占 1 字符，台账不用动），锚点后随不是换行就补一个
+   * （痕迹独占一行；照片 / 录音天然有后随换行，此分支是兜底），文件照旧通知页面清。
    */
   private retireAnchorAt(index: number): void {
     const blockId = this.anchorOrder[index];

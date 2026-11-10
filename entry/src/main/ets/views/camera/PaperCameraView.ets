@@ -16,7 +16,7 @@
  *   外层裁成方形 = 所见即裁切范围
  * - 排版（iOS 新版参考 + 华为相机式变焦条）：品牌「尺素」居页面中部；
  *   变焦条是磨砂胶囊（系统磨砂材质 + 黑色透明罩），档位华为式自适应
- *   （超广角 0.5× / 1× / 3.5× / 5× / 10×，设备范围够才给），点档位芯片
+ *   （超广角=设备实际最小倍率 / 1× / 3.5× / 5× / 10×，设备范围够才给），点档位芯片
  *   立即点亮、画面走官方 setSmoothZoom 平滑过渡（贝塞尔曲线，不支持时退
  *   setZoomRatio），整条横向拖动自由变焦（最近档高亮实时倍率，跨档轻震）。
  *   连续变焦走官方手势模式（Scan Kit 官方示例同款）：范围查一次缓存、
@@ -62,6 +62,7 @@ import {
   CameraSession,
   CameraShot,
   FlashSetting,
+  clampZoomRatio,
   nearestZoomPreset,
   formatZoomLabel,
   zoomPresetsForRange
@@ -181,7 +182,7 @@ export struct PaperCameraView {
   @State private flashTrayOpen: boolean = false;
   /** 当前倍率（非渲染态：全精度记账，UI 只看下面两个渲染态，避免逐 0.1 重渲染整条） */
   private zoomRatio: number = 1;
-  /** 落位档（±0.05 内算落位；高亮对应档位圆钮）；自由倍率（如 2.4×）为 -1，由数字泡显示 */
+  /** 落位档（±0.06 内算落位；高亮对应档位圆钮）；自由倍率（如 2.4×）为 -1，由数字泡显示 */
   @State private zoomSettledPreset: number = 1;
   /** 变焦数字泡文案（拖动 / 捏合 / 平滑变焦中的实时倍率；空串 = 隐藏） */
   @State private zoomBubbleLabel: string = '';
@@ -566,7 +567,7 @@ export struct PaperCameraView {
         if (this.shotPixelMap === undefined && this.previewFramePixelMap === undefined) {
           // 白纸先行：解码未完成时照片位是空白相纸（与显影蒙层同色，到位无感替换）
           Column()
-            .width(this.frameSide() - 24)
+            .width((this.frameSide() - 24) * 0.82)
             .height((this.frameSide() - 24) * 0.82)
             .borderRadius(2)
             .backgroundColor('#F7F6F2')
@@ -574,7 +575,7 @@ export struct PaperCameraView {
           // 快照垫层：吐纸途中即显影可见，真片交叉淡入后收走
           Image(this.previewFramePixelMap)
             .objectFit(ImageFit.Cover)
-            .width(this.frameSide() - 24)
+            .width((this.frameSide() - 24) * 0.82)
             .height((this.frameSide() - 24) * 0.82)
             .borderRadius(2)
             .draggable(false)
@@ -583,7 +584,7 @@ export struct PaperCameraView {
           // 真片层：交叉淡入盖过快照（同景同框，观感是显影变清晰）
           Image(this.shotPixelMap)
             .objectFit(ImageFit.Cover)
-            .width(this.frameSide() - 24)
+            .width((this.frameSide() - 24) * 0.82)
             .height((this.frameSide() - 24) * 0.82)
             .borderRadius(2)
             .draggable(false)
@@ -591,7 +592,7 @@ export struct PaperCameraView {
         }
         // 显影白蒙层：出纸时盖着影像，吐纸到位后渐褪（拍立得显影感）
         Column()
-          .width(this.frameSide() - 24)
+          .width((this.frameSide() - 24) * 0.82)
           .height((this.frameSide() - 24) * 0.82)
           .borderRadius(2)
           .backgroundColor('#F7F6F2')
@@ -635,6 +636,8 @@ export struct PaperCameraView {
     this.zoomMaxCached = Math.min(Math.max(1, range[1]), ZOOM_UI_MAX_RATIO);
     const presets = zoomPresetsForRange(this.zoomMinCached, this.zoomMaxCached);
     this.zoomPresetList = presets.length > 0 ? presets : [1];
+    hilog.info(DOMAIN, TAG, 'zoom model min=%{public}s max=%{public}s presets=%{public}s',
+      this.zoomMinCached.toFixed(2), this.zoomMaxCached.toFixed(2), this.zoomPresetList.join(','));
   }
 
   /** 预设档位文案：整数不带小数（1 / 3 / 5），半档保留一位（1.5） */
@@ -643,19 +646,23 @@ export struct PaperCameraView {
   }
 
   private selectZoomPreset(preset: number): void {
-    if (Math.abs(this.zoomRatio - preset) < 0.05) {
+    // 已落位在本档（含 0.5 档语义值 0.5 vs 设备实际 0.55 的档差）再点 = 重复点击
+    if (this.settledZoomPreset(this.zoomRatio) === preset) {
       return;
     }
     this.haptic('haptic.effect.soft');
     this.lastNearestPreset = preset;
+    // 实际目标 = 档位语义值夹到设备真实范围（0.5× 档在 Mate 80 实际下发 0.55）：
+    // 到位判定 / 收口都用实际值，泡不陪跑到超时；显示 / 高亮仍按档位语义值
+    const actual: number = clampZoomRatio(preset, this.session.zoomRange());
     // 华为相机同款：画面走官方平滑变焦（setSmoothZoom 贝塞尔曲线）缓过去，
     // 数字泡轮询真值跟着走（1×→5× 中间的 1.2× / 4.7×…全有）；不支持才同步跳
-    const smooth: boolean = this.session.smoothZoomTo(preset);
+    const smooth: boolean = this.session.smoothZoomTo(actual);
     if (smooth) {
-      this.startSmoothZoomCount(preset);
+      this.startSmoothZoomCount(actual);
     } else {
       this.cancelSmoothZoomCount();
-      this.setZoomUiValue(preset);
+      this.setZoomUiValue(actual);
     }
   }
 
@@ -695,7 +702,7 @@ export struct PaperCameraView {
   }
 
   /**
-   * 变焦 UI 单一写口：倍率落位（±0.05）点亮对应档位圆钮、收起数字泡；
+   * 变焦 UI 单一写口：倍率落位（±0.06）点亮对应档位圆钮、收起数字泡；
    * 自由倍率（2.4×）圆钮全灰、数字泡显示实时值——两个渲染态都只在变化时写，
    * 拖动 / 走数的高频更新不再逐 0.1 重渲染整条磨砂胶囊。
    */
@@ -711,11 +718,13 @@ export struct PaperCameraView {
     }
   }
 
-  /** 落位档（±0.05 内算落位）；自由倍率返回 -1 */
+  /** 落位档（±0.06 内算落位）；自由倍率返回 -1。
+   *  窗口 0.06 > 常规 0.05：覆盖 0.5 档语义值与设备实际下限的档差
+   *  （Mate 80 = 0.55，差 0.05——窗口 0.05 会永不落位、泡常驻） */
   private settledZoomPreset(ratio: number): number {
     const presets: number[] = this.zoomPresetList;
     for (let i = 0; i < presets.length; i++) {
-      if (Math.abs(presets[i] - ratio) < 0.05) {
+      if (Math.abs(presets[i] - ratio) <= 0.06) {
         return presets[i];
       }
     }
@@ -808,7 +817,7 @@ export struct PaperCameraView {
    * 连续变焦（拖条 / 捏合共用，官方手势模式）：手势更新合并下发——
    * ① JNI 节流：120Hz 事件只在 ≥16ms 窗口下发一次（HAL 1-2 帧生效自动收敛到最新值，
    *    高频 setZoomRatio 只会积压相机服务拖卡预览）；② 数字泡 ~30Hz 节流写 @State；
-   * ③ 拖动途中圆钮不随途闪换（落位窗 ±0.05 进进出出 = pill↔纯文本互换重排 Row，
+   * ③ 拖动途中圆钮不随途闪换（落位窗 ±0.06 进进出出 = pill↔纯文本互换重排 Row，
    *    快速滑动的卡顿根因），收尾 endContinuousZoom 才落位；跨档轻震保留。
    */
   private applyContinuousZoom(target: number): void {
@@ -838,7 +847,7 @@ export struct PaperCameraView {
 
   /**
    * 途中走数（拖动 / 捏合 / 平滑变焦飞行共用单口）：圆钮收起不随途闪换
-   * （落位窗 ±0.05 进进出出 = pill↔纯文本互换重排 Row，快速滑动卡顿根因），
+   * （落位窗 ±0.06 进进出出 = pill↔纯文本互换重排 Row，快速滑动卡顿根因），
    * 数字泡 ~30Hz 节流写；落位收口走 setZoomUiValue。
    */
   private updateFlightZoomUi(ratio: number): void {
@@ -853,7 +862,7 @@ export struct PaperCameraView {
     }
   }
 
-  /** 连续变焦收尾：精确终值下发 + UI 落位（在档位 ±0.05 内点圆钮、否则数字泡常驻） */
+  /** 连续变焦收尾：精确终值下发 + UI 落位（在档位 ±0.06 内点圆钮、否则数字泡常驻） */
   private endContinuousZoom(): void {
     if (!this.dragZoomActive) {
       return;
@@ -1253,7 +1262,11 @@ export struct PaperCameraView {
     }
     try {
       const full = await image.createPixelMapFromSurface(this.surfaceId);
-      const size = full.getImageInfoSync().size;
+      // 预览 surface 抓帧取的是未应用显示旋转的原始像素（本机 1:1 方 buffer 内容恒横躺）：
+      // 无条件按摄像头方向转正（后摄 90°/前置 270°）再中心裁方，否则垫层横躺、
+      // 真片交叉淡入出现「先横后竖」
+      await full.rotate(this.session.isFrontCamera() ? 270 : 90);
+      let size = full.getImageInfoSync().size;
       const side = Math.min(size.width, size.height);
       await full.crop({
         size: { width: side, height: side },
@@ -1262,6 +1275,7 @@ export struct PaperCameraView {
       } as image.Region);
       return full;
     } catch (err) {
+      hilog.error(DOMAIN, TAG, 'grabPreviewFrame failed: %{public}s', JSON.stringify(err));
       // 快照失败（机型 / 时机不支持）不算拍照失败：白纸先行兜底
       return undefined;
     }

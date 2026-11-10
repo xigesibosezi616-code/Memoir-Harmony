@@ -114,44 +114,81 @@ export async function decodeCenterSquare(buffer: ArrayBuffer): Promise<image.Pix
   }
 }
 
+/** 动态照片配对文件（异步落盘完成后交回页面补块） */
+export class CameraMovingPair {
+  /** 动态照片原图 photo_&lt;uuid8&gt;_full.jpg */
+  readonly fullStillFilename: string;
+  /** 动态照片视频 photo_&lt;uuid8&gt;.mp4 */
+  readonly videoFilename: string;
+
+  constructor(fullStillFilename: string, videoFilename: string) {
+    this.fullStillFilename = fullStillFilename;
+    this.videoFilename = videoFilename;
+  }
+}
+
 /**
  * 相机落盘链（iOS `PhotoInsertFlow.insert` 相机分支）：
- * 显示图（裁过的方图）重编码落盘；动态照片的原图 + 视频原样落盘配对。
- * 显示图落盘失败 → undefined（整体算失败）；配对失败 → 退化普通照片。
+ * 显示图（裁过的方图）**同步**重编码落盘（插入正文等它）；动态照片的
+ * 原图 + 视频配对**后台异步**落盘（videoReady 提取要几秒，不能挡插入），
+ * 就绪后经 onPairReady 交回页面补块——正文照片先以普通形态出现，
+ * 配对到位后升级动态照片；提取 / 落盘失败回 undefined（保持普通照片，iOS 同款）。
+ * 显示图落盘失败 → undefined（整体算失败）。
  */
 export async function saveCameraShot(io: PhotoPaperIO, shot: CameraShot,
-  squarePixelMap: image.PixelMap): Promise<CameraPhotoFiles | undefined> {
+  squarePixelMap: image.PixelMap,
+  onPairReady?: (pair: CameraMovingPair | undefined) => void): Promise<CameraPhotoFiles | undefined> {
   const base = generateUuid().substring(0, 8);
   const displayFilename = `photo_${base}.jpg`;
   if (!await io.saveImage(squarePixelMap, displayFilename)) {
     hilog.error(DOMAIN, TAG, 'display save failed %{public}s', displayFilename);
     return undefined;
   }
-  let fullStillFilename: string | undefined = undefined;
-  let videoFilename: string | undefined = undefined;
-  let videoBuffer: ArrayBuffer | undefined = undefined;
-  if (shot.videoReady !== undefined) {
-    // 动态视频后台提取在此接上（通常审阅期间已就绪；失败 resolve undefined）
-    videoBuffer = await shot.videoReady;
+  if (shot.videoReady === undefined) {
+    return new CameraPhotoFiles(displayFilename, undefined, undefined);
   }
-  if (videoBuffer !== undefined) {
+  // 配对后台补齐：videoReady 提取（数秒）不挡正文插入
+  saveMovingPairAsync(io, shot, base, onPairReady);
+  return new CameraPhotoFiles(displayFilename, undefined, undefined);
+}
+
+/** 动态配对后台落盘：提取 → 原图 + 视频原样字节落盘 → 回调交文件名；失败删半成品回 undefined */
+function saveMovingPairAsync(io: PhotoPaperIO, shot: CameraShot, base: string,
+  onPairReady?: (pair: CameraMovingPair | undefined) => void): void {
+  (async (): Promise<void> => {
+    let videoBuffer: ArrayBuffer | undefined = undefined;
+    try {
+      // 动态视频后台提取在此接上（通常审阅期间已就绪；失败 resolve undefined）
+      videoBuffer = await shot.videoReady;
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'video extract failed: %{public}s', JSON.stringify(err));
+    }
+    if (videoBuffer === undefined) {
+      if (onPairReady !== undefined) {
+        onPairReady(undefined);
+      }
+      return;
+    }
     const stillName = `photo_${base}_full.jpg`;
     const movieName = `photo_${base}.mp4`;
     const stillOk = await io.saveData(shot.stillBuffer, stillName);
     const videoOk = await io.saveData(videoBuffer, movieName);
     if (stillOk && videoOk) {
-      fullStillFilename = stillName;
-      videoFilename = movieName;
-    } else {
-      // 配对文件缺一份就配不起来：删掉半成品，按普通照片处理（iOS 同款）
-      hilog.error(DOMAIN, TAG, 'moving pair save failed, fallback to still %{public}s', base);
-      if (stillOk) {
-        io.deleteImage(stillName);
+      if (onPairReady !== undefined) {
+        onPairReady(new CameraMovingPair(stillName, movieName));
       }
-      if (videoOk) {
-        io.deleteImage(movieName);
-      }
+      return;
     }
-  }
-  return new CameraPhotoFiles(displayFilename, fullStillFilename, videoFilename);
+    // 配对文件缺一份就配不起来：删掉半成品，按普通照片处理（iOS 同款）
+    hilog.error(DOMAIN, TAG, 'moving pair save failed, fallback to still %{public}s', base);
+    if (stillOk) {
+      io.deleteImage(stillName);
+    }
+    if (videoOk) {
+      io.deleteImage(movieName);
+    }
+    if (onPairReady !== undefined) {
+      onPairReady(undefined);
+    }
+  })();
 }

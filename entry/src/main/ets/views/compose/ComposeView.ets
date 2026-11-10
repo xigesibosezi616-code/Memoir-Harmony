@@ -59,7 +59,7 @@ import {
 import { PhotoLibraryPicker, PickedLibraryPhoto } from '../../services/PhotoLibraryPicker';
 import { PhotoPaperIO } from '../../services/PhotoPaperIO';
 import { CameraShot } from '../../services/CameraSession';
-import { saveCameraShot } from '../../services/CameraPhotoFiles';
+import { saveCameraShot, CameraMovingPair } from '../../services/CameraPhotoFiles';
 import { deleteAudioFile } from '../../services/AudioRecorderManager';
 import { PaperStylePickerSheet } from '../components/photo/PaperStylePickerSheet';
 import { PhotoFullScreenCover } from '../components/photo/PhotoFullScreenCover';
@@ -71,7 +71,8 @@ import { Notebook, cleanedName, nameKey, nextSortOrder, quietestColor } from '..
 import { DraftEntry, PlaceMode } from '../../models/Draft';
 import { generateUuid } from '../../models/Uuid';
 import { MediaStorageService } from '../../services/MediaStorageService';
-import { AppPrefs } from '../../services/AppPrefs';
+import { AppPrefs, CAMERA_MODE_SYSTEM } from '../../services/AppPrefs';
+import { SystemCameraPicker } from '../../services/SystemCameraPicker';
 import {
   STORAGE_KEY_LIVE_DRAFT_JSON,
   encodeDraftForContinuation
@@ -183,7 +184,11 @@ export struct ComposeView {
   /** 实时草稿快照防抖定时器句柄（-1 = 没排着；应用接续 onContinue 取快照） */
   private liveSnapshotTimer: number = -1;
 
+  /** 页面存活标志：动态配对后台落盘回调跨页面生命周期，离页后不再补块（防孤儿引用） */
+  private viewAlive: boolean = true;
+
   aboutToDisappear(): void {
+    this.viewAlive = false;
     // 全屏浮层没关就被路由弹走（边滑返回）时，别把主框架 Tab 栏一直藏着
     AppStorage.setOrCreate(STORAGE_KEY_HIDE_TAB_BAR, false);
     if (this.liveSnapshotTimer >= 0) {
@@ -897,12 +902,35 @@ export struct ComposeView {
 
   // ---- 2.9 尺素相机：拍照 → 落盘链 → 光标处插入（R-PHOTO-01/03/04） ----
 
-  /** 工具条拍照键：满 5 张不开（键已置灰，兜底）；权限申请在相机浮层内（被拒有引导态） */
+  /** 工具条拍照键：满 5 张不开（键已置灰，兜底）；按「拍照方式」分流——
+   *  尺素相机开页内浮层（权限申请在浮层内，被拒有引导态），
+   *  华为相机走系统 cameraPicker（免权限，问题四） */
   private startCameraFlow(): void {
     if (this.bodyController.photoCount() >= 5) {
       return;
     }
+    if (AppPrefs.currentCameraMode() === CAMERA_MODE_SYSTEM) {
+      this.startSystemCameraPick();
+      return;
+    }
     this.showCamera = true;
+  }
+
+  /** 华为系统相机分支（问题四）：拍完按相册选图同款走相纸 sheet
+   *  （照片由系统相机存入图库，动态照片按原样字节提取，取消 / 失败静默收场） */
+  private async startSystemCameraPick(): Promise<void> {
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return;
+    }
+    const picked = await SystemCameraPicker.pick(context);
+    if (picked === undefined) {
+      return;
+    }
+    this.pendingPickedPhoto = picked;
+    this.restylePhotoId = undefined;
+    this.paperSheetPixelMap = picked.pixelMap;
+    this.showPaperSheet = true;
   }
 
   /** 相机浮层开/关 → 联动藏/显主框架浮动 Tab 栏（全屏照片同款） */
@@ -925,8 +953,9 @@ export struct ComposeView {
   }
 
   /**
-   * 相机拍完「写下这一刻」：落盘链（显示图重编码 q85 + 动态配对原样字节，
-   * R-PHOTO-03）→ 光标处插入（iOS `PhotoInsertFlow.insert` 相机分支同款）。
+   * 相机拍完「写下这一刻」：落盘链（显示图重编码 q85 同步 + 动态配对原样字节
+   * 后台异步，R-PHOTO-03）→ 光标处插入（iOS `PhotoInsertFlow.insert` 相机分支同款；
+   * 配对提取要数秒不挡插入——正文先出普通照片，配对到位回调补块升级动态照片）。
    * 配对落盘失败自动退化普通照片（saveCameraShot 内处理）。
    */
   private async onCameraCaptured(shot: CameraShot, squarePixelMap: image.PixelMap,
@@ -936,7 +965,11 @@ export struct ComposeView {
       return;
     }
     const io = PhotoPaperIO.forFilesDir(context.filesDir);
-    const files = await saveCameraShot(io, shot, squarePixelMap);
+    const blockId = generateUuid();
+    const files = await saveCameraShot(io, shot, squarePixelMap,
+      (pair: CameraMovingPair | undefined): void => {
+        this.attachMovingPair(io, blockId, pair);
+      });
     if (files === undefined) {
       // iOS failed() 同款：落盘失败静默收场（不打断书写）
       hilog.error(DOMAIN, TAG, 'camera shot save failed');
@@ -946,7 +979,7 @@ export struct ComposeView {
     for (const name of names) {
       this.insertedMediaNames.add(name);
     }
-    const block = ContentBlock.makePhoto(generateUuid(), files.displayFilename,
+    const block = ContentBlock.makePhoto(blockId, files.displayFilename,
       files.videoFilename, PhotoPosition.Right, style);
     block.livePhotoStillFilename = files.fullStillFilename;
     if (!this.bodyController.insertPhoto(block)) {
@@ -957,6 +990,31 @@ export struct ComposeView {
       return;
     }
     this.bodyPhotoCount = this.bodyController.photoCount();
+  }
+
+  /**
+   * 动态配对后台落盘完成回调：补块升级动态照片（视频 + 原图文件名记账 +
+   * 草稿快照）；照片已被删 / 页面已离场 → 配对无人引用，清文件防孤儿。
+   */
+  private attachMovingPair(io: PhotoPaperIO, blockId: string,
+    pair: CameraMovingPair | undefined): void {
+    if (pair === undefined) {
+      return; // 提取 / 落盘失败：保持普通照片
+    }
+    const block = this.bodyController.photoBlocks.get(blockId);
+    if (!this.viewAlive || block === undefined) {
+      io.deleteImage(pair.fullStillFilename);
+      io.deleteImage(pair.videoFilename);
+      return;
+    }
+    block.livePhotoVideoFilename = pair.videoFilename;
+    block.livePhotoStillFilename = pair.fullStillFilename;
+    hilog.info(DOMAIN, TAG, 'attachMovingPair block=%{public}s video=%{public}s alive=%{public}s',
+      blockId, pair.videoFilename, this.viewAlive.toString());
+    this.insertedMediaNames.add(pair.fullStillFilename);
+    this.insertedMediaNames.add(pair.videoFilename);
+    this.bodyController.updatePhoto(block);
+    this.scheduleLiveDraftSnapshot();
   }
 
   /** 靠左 / 靠右互换（功能条 / 双击秒换边 / 全屏菜单同路；blockId 定位） */

@@ -33,6 +33,7 @@ export class KentTheme implements AppTheme {
   // ΔRGB ~14 → ~24，按钮成型更清楚（图标色见 CircleIconButton）
   readonly glassBackground: ResourceColor = 0xA8DCDCDC;
   readonly glassBorder: ResourceColor = 0xB3999999;
+  readonly menuPressedBackground: ResourceColor = 0x141A1A1A;
 
   // 列表卡：与页面同纸色（融入一体，2026-10-19 用户拍板：纯白底上
   // 白卡靠 EntryRowView 的 0.5 描边 + 中性柔影成型，不用色差浮卡）

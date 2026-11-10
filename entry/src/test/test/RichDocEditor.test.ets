@@ -54,12 +54,14 @@ export default function richDocEditorTest(): void {
       expect(editor.flagsAt(4).italic).assertTrue();
     });
 
-    it('insert_after_anchor_is_plain_and_same_paragraph', 0, () => {
+    it('insert_after_anchor_trailing_newline_is_plain', 0, () => {
       const photo = ContentBlock.makePhoto('P1', 'p.jpg', undefined, PhotoPosition.Left, PaperStyle.Polaroid);
       const editor = new RichDocEditor(editorDocumentFromBlocks([photo, ContentBlock.makeText('t', '后文')]));
-      editor.insert(1, '新'); // 锚点后插入：与锚点同段、平文
-      expect(editor.text.startsWith(RICH_ANCHOR + '新后文')).assertTrue();
-      expect(editor.flagsAt(1).sameAs(new RichFormatFlags())).assertTrue();
+      const anchorOffset = editor.text.indexOf(RICH_ANCHOR);
+      expect(editor.text).assertEqual(RICH_ANCHOR + '\n后文');
+      editor.insert(anchorOffset + 2, '新'); // 锚点后随换行之后插入：平文
+      expect(editor.text).assertEqual(RICH_ANCHOR + '\n新后文');
+      expect(editor.flagsAt(anchorOffset + 2).sameAs(new RichFormatFlags())).assertTrue();
     });
 
     it('delete_single_span', 0, () => {
@@ -183,12 +185,18 @@ export default function richDocEditorTest(): void {
       const editor = new RichDocEditor(editorDocumentFromBlocks([ContentBlock.makeText('a', '一二三四五六')]));
       const plan = photoInsertionPlan(editor.text, 3); // 段中：先断段再插锚点
       expect(plan.needsNewlineBefore).assertTrue();
+      expect(plan.needsNewlineAfter).assertTrue();
       if (plan.needsNewlineBefore) {
         editor.insert(plan.insertOffset, '\n');
       }
-      editor.insertAnchor(plan.insertOffset + (plan.needsNewlineBefore ? 1 : 0), 'P1', ContentBlockType.Photo);
-      expect(editor.text).assertEqual('一二三\n' + RICH_ANCHOR + '四五六');
+      const anchorOffset = plan.insertOffset + (plan.needsNewlineBefore ? 1 : 0);
+      editor.insertAnchor(anchorOffset, 'P1', ContentBlockType.Photo);
+      if (plan.needsNewlineAfter) {
+        editor.insert(anchorOffset + 1, '\n');
+      }
+      expect(editor.text).assertEqual('一二三\n' + RICH_ANCHOR + '\n四五六');
       expect(editor.text.indexOf(RICH_ANCHOR)).assertEqual(4);
+      expect(plan.caretAfter).assertEqual(6);
     });
   });
 

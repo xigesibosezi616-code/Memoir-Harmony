@@ -7,12 +7,15 @@
  *   （相机 _full / 相册原图）+ 视频构造 `MovingPhoto`，`MovingPhotoView` 长按播放；
  *   加载 / 播放出错退静态图（R-PHOTO-04 兜底）
  * - 右上「⋯」编辑菜单（R-PHOTO-01 / 2.6 卡片）：靠左 / 靠右、设为封面、换相纸、删除
- *   —— 回调全可选：详情页进全屏是纯预览，不给编辑入口（iOS 同款 `hasEditActions`）
+ *   —— 回调全可选：详情页进全屏是纯预览，不给编辑入口（iOS 同款 `hasEditActions`）；
+ *   菜单与设置行尾小菜单同款（bindMenu 自绘内容 + THIN 沉浸光感，2026-11-09 用户
+ *   要求统一）：iOS 式按住拖划选择——官方 Array<MenuElement> 只支持点击，自绘补齐；
+ *   浮在照片/黑底上，文字用白（编辑器内照片功能条同口径），删除行 destructive 红
  * - 删除先确认（「删除这张照片？」，R-ENTRY-13 之外唯一的整块照片删除路径）
  * - 静态全屏也用 600px 正文缩略图（iOS 同款 `loadImage`；600px 在手机屏上足够）
  */
 import { image } from '@kit.ImageKit';
-import { curves, SymbolGlyphModifier } from '@kit.ArkUI';
+import { curves, uiMaterial } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { photoAccessHelper, MovingPhotoView, MovingPhotoViewController } from '@kit.MediaLibraryKit';
 import { fileUri } from '@kit.CoreFileKit';
@@ -37,6 +40,24 @@ const RESET_CURVE = curves.springCurve(0, 1, 320, 30);
 
 const DOMAIN = 0x0000;
 const TAG = 'PhotoFullScreenCover';
+
+/** 「⋯」菜单一项：键 + 图标 + 文案 + destructive 红 + 动作（键供 ForEach 稳定标识） */
+class PhotoActionItem {
+  readonly key: string;
+  readonly icon: Resource;
+  readonly label: Resource;
+  readonly destructive: boolean;
+  readonly run: () => void;
+
+  constructor(key: string, icon: Resource, label: Resource,
+    destructive: boolean, run: () => void) {
+    this.key = key;
+    this.icon = icon;
+    this.label = label;
+    this.destructive = destructive;
+    this.run = run;
+  }
+}
 
 @Component
 export struct PhotoFullScreenCover {
@@ -66,6 +87,12 @@ export struct PhotoFullScreenCover {
   @State private zoomScale: number = 1.0;
   @State private lastZoom: number = 1.0;
   @State private dragOffsetY: number = 0;
+  /** 「⋯」菜单显隐（bindMenu isShow，!! 双向：系统收起也回写 false） */
+  @State private menuShown: boolean = false;
+  /** 「⋯」菜单拖划高亮行下标（-1 无高亮；按下/拖动实时跟手指） */
+  @State private menuPressedIndex: number = -1;
+  /** 「⋯」菜单内容全局 top（vp，onAreaChange 缓存，拖划行定位用） */
+  @State private menuTopVp: number = 0;
   /** 动态照片播放控制器（MovingPhotoView 长按播放用） */
   private movingPhotoController: MovingPhotoViewController = new MovingPhotoViewController();
   /** 打开时刻（ms）：dismiss 日志计时用 */
@@ -140,7 +167,16 @@ export struct PhotoFullScreenCover {
         .backgroundColor('#59000000')
         .justifyContent(FlexAlign.Center)
         .margin({ top: this.safeAreaTopVp + 16, right: 16 })
-        .bindMenu(this.editMenuItems())
+        .onClick((): void => {
+          this.menuShown = true;
+        })
+        // 与设置行尾小菜单同款（U19 R-SETTINGS-13 模式）：bindMenu 自绘内容受控弹出
+        // （isShow 自 API 18 支持 !! 双向绑定），THIN 沉浸光感浮在照片/黑底上
+        .bindMenu(!!this.menuShown, this.photoMenuBuilder, {
+          systemMaterial: new uiMaterial.ImmersiveMaterial({
+            style: uiMaterial.ImmersiveStyle.THIN
+          })
+        })
       }
     }
     .width('100%')
@@ -196,57 +232,123 @@ export struct PhotoFullScreenCover {
 
   /**
    * 右上「⋯」菜单：靠左 / 靠右、设为 / 取消封面、换相纸、删除（iOS 2026-08 后唯一编辑入口）。
-   * 官方数组形式 bindMenu(Array<MenuElement>)，系统默认菜单样式，等价 iOS `Menu { Button }`；
-   * 各项 symbolIcon 走 MenuElement 官方符号位（API 12+）。
+   * 与设置行尾小菜单同款自绘内容（2026-11-09 用户要求统一）：iOS 式按住拖划选择
+   * （官方 Array<MenuElement> 与系统菜单实测都只支持点击，自绘补齐）；浮在照片/黑底
+   * 上文字用白（编辑器内照片功能条同口径），删除行 destructive 红。
    */
-  private editMenuItems(): Array<MenuElement> {
-    const items: Array<MenuElement> = [];
+  private photoActionItems(): Array<PhotoActionItem> {
+    const items: Array<PhotoActionItem> = [];
     if (this.onTogglePosition !== undefined) {
-      const toggleItem: MenuElement = {
-        value: this.photo.position === PhotoPosition.Right ?
+      items.push(new PhotoActionItem('toggle',
+        $r('sys.symbol.arrow_left_arrow_right'),
+        this.photo.position === PhotoPosition.Right ?
           $r('app.string.s_9eda140339') : $r('app.string.s_613b4f74e0'),
-        symbolIcon: new SymbolGlyphModifier($r('sys.symbol.arrow_left_arrow_right')),
-        action: (): void => {
+        false, (): void => {
           this.onTogglePosition?.();
           this.onDismiss();
-        }
-      };
-      items.push(toggleItem);
+        }));
     }
     if (this.onToggleCover !== undefined) {
-      const coverItem: MenuElement = {
-        value: this.photo.isCover === true ?
+      items.push(new PhotoActionItem('cover',
+        $r('sys.symbol.star'),
+        this.photo.isCover === true ?
           $r('app.string.s_5f9ab839a4') : $r('app.string.s_b7607a6106'),
-        symbolIcon: new SymbolGlyphModifier($r('sys.symbol.star')),
-        action: (): void => {
+        false, (): void => {
           this.onToggleCover?.();
           this.onDismiss();
-        }
-      };
-      items.push(coverItem);
+        }));
     }
     if (this.onRestyle !== undefined) {
-      const restyleItem: MenuElement = {
-        value: $r('app.string.s_047472a1db'),
-        symbolIcon: new SymbolGlyphModifier($r('sys.symbol.picture_on_square')),
-        action: (): void => {
+      items.push(new PhotoActionItem('restyle',
+        $r('sys.symbol.picture_on_square'),
+        $r('app.string.s_047472a1db'),
+        false, (): void => {
           this.onRestyle?.();
           this.onDismiss();
-        }
-      };
-      items.push(restyleItem);
+        }));
     }
     if (this.onDelete !== undefined) {
-      const deleteItem: MenuElement = {
-        value: $r('app.string.s_c488684daf'),
-        symbolIcon: new SymbolGlyphModifier($r('sys.symbol.trash')),
-        action: (): void => {
+      items.push(new PhotoActionItem('delete',
+        $r('sys.symbol.trash'),
+        $r('app.string.s_c488684daf'),
+        true, (): void => {
           this.confirmDelete();
-        }
-      };
-      items.push(deleteItem);
+        }));
     }
     return items;
+  }
+
+  @Builder
+  private photoMenuBuilder() {
+    Column() {
+      ForEach(this.photoActionItems(), (item: PhotoActionItem, index: number) => {
+        Column() {
+          Row({ space: 8 }) {
+            SymbolGlyph(item.icon)
+              .fontSize(16)
+              .fontWeight(FontWeight.Medium)
+              .fontColor([item.destructive ? '#FFB5473A' : '#F2FFFFFF'])
+              .width(20)
+            Text(item.label)
+              .fontSize(16)
+              .fontColor(item.destructive ? '#FFB5473A' : '#F2FFFFFF')
+              .maxLines(1)
+          }
+          .width('100%')
+          .height(40)
+          .padding({ left: 14 })
+          .alignItems(VerticalAlign.Center)
+          .borderRadius(12)
+          .backgroundColor(this.menuPressedIndex === index ?
+            '#1AFFFFFF' : Color.Transparent)
+        }
+        .width('100%')
+        .height(48)
+        .padding({ left: 4, right: 4 })
+        .justifyContent(FlexAlign.Center)
+      }, (item: PhotoActionItem) => item.key)
+    }
+    .width(188)
+    .onAreaChange((oldArea: Area, newArea: Area): void => {
+      const y = newArea.globalPosition.y;
+      if (typeof y === 'number') {
+        this.menuTopVp = y;
+      }
+    })
+    .onTouch((event: TouchEvent): void => {
+      this.photoMenuTouch(event);
+    })
+  }
+
+  /** 拖划选择：按下/拖动时高亮手指所在行，抬手选中该行并收起（iOS 菜单同款交互；
+   *  划出菜单抬手不选中，只收菜单） */
+  private photoMenuTouch(event: TouchEvent): void {
+    if (event.changedTouches.length === 0) {
+      return;
+    }
+    const touch = event.changedTouches[0];
+    if (event.type === TouchType.Down || event.type === TouchType.Move) {
+      this.menuPressedIndex = this.menuRowIndexAt(touch.windowY);
+    } else if (event.type === TouchType.Up) {
+      const index = this.menuRowIndexAt(touch.windowY);
+      this.menuPressedIndex = -1;
+      this.menuShown = false;
+      if (index >= 0) {
+        this.photoActionItems()[index].run();
+      }
+    } else if (event.type === TouchType.Cancel) {
+      this.menuPressedIndex = -1;
+      this.menuShown = false;
+    }
+  }
+
+  /** 手指全局 y → 菜单行下标（48vp 定高行；不在行区返回 -1） */
+  private menuRowIndexAt(windowY: number): number {
+    const index = Math.floor((windowY - this.menuTopVp) / 48);
+    if (index >= 0 && index < this.photoActionItems().length) {
+      return index;
+    }
+    return -1;
   }
 
   /** 删除前确认（AlertDialog，destructive 语义） */

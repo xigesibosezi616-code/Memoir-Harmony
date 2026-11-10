@@ -87,6 +87,9 @@ export function formatZoomLabel(ratio: number): string {
 /**
  * 华为相机式档位（自适应设备范围）：超广角 0.5×（下限够低才给）+ 1× +
  * 3.5× / 5× / 10×（上限够才给）；设备弱（前摄）退到只剩 1×。
+ * 注意：0.5 是 **UI 档位语义值**（华为相机同款显示 .5×，Mate 80 传感器实际
+ * 下限 0.55 也显示 .5×）——实际下发经 `clampZoomRatio` 夹到设备真实范围；
+ * 落位 / 高亮窗口（settledZoomPreset）须覆盖 0.5↔0.55 的档差。
  */
 export function zoomPresetsForRange(min: number, max: number): Array<number> {
   const presets: Array<number> = [];

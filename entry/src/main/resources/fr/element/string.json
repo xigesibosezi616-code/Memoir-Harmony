@@ -3999,6 +3999,22 @@
     {
       "name": "s_e15f73bdc6",
       "value": "Déjà Vu utilise l’appareil photo pour ajouter des photos à vos entrées."
+    },
+    {
+      "name": "s_45bf60a6c6",
+      "value": "Appareil photo"
+    },
+    {
+      "name": "s_7caa485caf",
+      "value": "Appareil Déjà Vu"
+    },
+    {
+      "name": "s_7c9eb079ae",
+      "value": "Appareil Huawei"
+    },
+    {
+      "name": "s_07bbd7147c",
+      "value": "Choisissez l'appareil photo qui s'ouvre via le bouton appareil photo pendant l'écriture."
     }
   ]
 }

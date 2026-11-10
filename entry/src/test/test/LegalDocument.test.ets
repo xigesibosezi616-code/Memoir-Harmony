@@ -37,9 +37,9 @@ export default function legalDocumentTest() {
     })
 
     it('currentVersionTracksIos', 0, () => {
-      // iOS `LegalDocument.currentVersion` = 2026-10-09
-      // （隐私政策第七节注销账号改为 App 内自助）。两边改政策要一起改
-      expect(LEGAL_CURRENT_VERSION).assertEqual('2026-10-09');
+      // iOS `LegalDocument.currentVersion` = 2026-11-08
+      // （2026-11-08 隐私政策更新）。两边改政策要一起改
+      expect(LEGAL_CURRENT_VERSION).assertEqual('2026-11-08');
     })
 
     // ---- 文件名前缀 ----

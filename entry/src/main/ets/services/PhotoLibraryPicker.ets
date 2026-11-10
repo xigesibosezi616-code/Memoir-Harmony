@@ -161,7 +161,16 @@ export class PhotoLibraryPicker {
     if (uris.length === 0) {
       return undefined;
     }
-    const uri = uris[0];
+    return PhotoLibraryPicker.pickedFromUri(context, uris[0]);
+  }
+
+  /**
+   * 临时授权 URI → 照片产物（相册选图 / 华为系统相机拍完共用，问题四）：
+   * 动态照片（PHOTO_SUBTYPE）走原样提取链（失败退静态图）；
+   * 普通照片解码 ≤2048。全链失败 → undefined（调用方静默收场）。
+   */
+  static async pickedFromUri(context: common.Context,
+    uri: string): Promise<PickedLibraryPhoto | undefined> {
     // 动态照片：URI → PhotoAsset 查子类型，是动态照片走原样提取链
     if (await PhotoLibraryPicker.isMovingPhotoUri(context, uri)) {
       const picked = await PhotoLibraryPicker.pickMovingPhoto(context, uri);

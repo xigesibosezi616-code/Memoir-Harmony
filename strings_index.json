@@ -4330,6 +4330,22 @@
     "s_820929d497": {
       "zh": "%d 个",
       "source": "Hand"
+    },
+    "s_45bf60a6c6": {
+      "zh": "拍照方式",
+      "source": "Hand"
+    },
+    "s_7caa485caf": {
+      "zh": "尺素相机",
+      "source": "Hand"
+    },
+    "s_7c9eb079ae": {
+      "zh": "华为相机",
+      "source": "Hand"
+    },
+    "s_07bbd7147c": {
+      "zh": "写日记时点拍照键用哪个相机拍摄",
+      "source": "Hand"
     }
   }
 }

@@ -30,6 +30,7 @@ export class LeatherTheme implements AppTheme {
   // 玻璃按钮：深棕底上 30% 金色微亮玻璃 + 45% 金边（深色下用金调提亮，对齐 iOS 深色 .glass）
   readonly glassBackground: ResourceColor = 0x4DC8A87C;
   readonly glassBorder: ResourceColor = 0x73C8A87C;
+  readonly menuPressedBackground: ResourceColor = 0x2ED4C4A8;
 
   // 列表卡：贴主题 cardBackground（241C16，比 2A2019 更贴底色——
   // 融入一体，2026-10-19 用户拍板；深色投影不可见，靠明度微差 +

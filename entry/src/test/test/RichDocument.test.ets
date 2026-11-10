@@ -209,11 +209,11 @@ export default function richDocumentTest() {
 
     // ---- 锚点拼接 ----
 
-    it('photoAnchorFollowsTextWithoutNewline', 0, () => {
-      // 照片锚点独占一行（前补换行），后面紧跟的文字与锚点同段（不再补换行）
+    it('photoAnchorHasTrailingNewline', 0, () => {
+      // 照片锚点独占一行（前补换行），后随换行把整行高的卡与后续文字隔开
       const blocks = [textBlock('ab'), photoBlock(), textBlock('cd')];
       const doc = editorDocumentFromBlocks(blocks);
-      expect(doc.text).assertEqual(`ab\n${RICH_ANCHOR}cd`);
+      expect(doc.text).assertEqual(`ab\n${RICH_ANCHOR}\ncd`);
       expectSpansCoverText(doc.text, doc.spans);
       const anchorSpan = doc.spans.find(span => span.anchorBlockId !== undefined);
       expect(anchorSpan !== undefined).assertTrue();
@@ -223,7 +223,24 @@ export default function richDocumentTest() {
     it('photoAtStartHasNoLeadingNewline', 0, () => {
       const blocks = [photoBlock(), textBlock('x')];
       const doc = editorDocumentFromBlocks(blocks);
-      expect(doc.text).assertEqual(`${RICH_ANCHOR}x`);
+      expect(doc.text).assertEqual(`${RICH_ANCHOR}\nx`);
+    })
+
+    it('photoAtDocumentEndKeepsTrailingNewline', 0, () => {
+      const blocks = [textBlock('a'), photoBlock()];
+      const doc = editorDocumentFromBlocks(blocks);
+      expect(doc.text).assertEqual(`a\n${RICH_ANCHOR}\n`);
+    })
+
+    it('photoOnlyDocumentIsAnchorPlusNewline', 0, () => {
+      const doc = editorDocumentFromBlocks([photoBlock()]);
+      expect(doc.text).assertEqual(`${RICH_ANCHOR}\n`);
+    })
+
+    it('adjacentPhotosStackWithoutBlankLine', 0, () => {
+      const blocks = [photoBlock(), photoBlock()];
+      const doc = editorDocumentFromBlocks(blocks);
+      expect(doc.text).assertEqual(`${RICH_ANCHOR}\n${RICH_ANCHOR}\n`);
     })
 
     it('audioAnchorIsOwnParagraph', 0, () => {
@@ -354,7 +371,7 @@ export default function richDocumentTest() {
       const back = blocksWithEditorDocument(doc, new Map<string, ContentBlock>(), makeId);
       expect(back.length).assertEqual(1);
       expect(back[0].type).assertEqual(ContentBlockType.Text);
-      expect(back[0].text).assertEqual(`ab\n${RICH_ANCHOR}cd`);
+      expect(back[0].text).assertEqual(`ab\n${RICH_ANCHOR}\ncd`);
     })
 
     it('styleRangeSpansAcrossAnchorBoundary', 0, () => {
@@ -449,21 +466,24 @@ export default function richDocumentTest() {
     // ---- R-RICH-03 插照落点（photoInsertionPlan） ----
 
     it('insertAtParagraphEndHangsOnNextParagraph', 0, () => {
-      // 光标在段尾（右一字符是换行）：挂到下一段开头，光标不动
+      // 光标在段尾（右一字符是换行）：挂到下一段开头，光标不动；
+      // 落点后随是文字 → 补后随换行把它隔到照片下面
       const text = '第一段\n第二段';
       const plan = photoInsertionPlan(text, 3);
       expect(plan.insertOffset).assertEqual(4);
       expect(plan.needsNewlineBefore).assertFalse();
+      expect(plan.needsNewlineAfter).assertTrue();
       expect(plan.caretAfter).assertEqual(3);
     })
 
     it('insertAtParagraphStartHangsOnThisParagraph', 0, () => {
-      // 光标在段首（左一字符是换行）：挂这一段开头，光标落到照片后
+      // 光标在段首（左一字符是换行）：挂这一段开头，光标落到照片下一行
       const text = '第一段\n第二段';
       const plan = photoInsertionPlan(text, 4);
       expect(plan.insertOffset).assertEqual(4);
       expect(plan.needsNewlineBefore).assertFalse();
-      expect(plan.caretAfter).assertEqual(5);
+      expect(plan.needsNewlineAfter).assertTrue();
+      expect(plan.caretAfter).assertEqual(6);
     })
 
     it('insertAtDocumentStartHangsOnFirstParagraph', 0, () => {
@@ -471,16 +491,18 @@ export default function richDocumentTest() {
       const plan = photoInsertionPlan('正文', 0);
       expect(plan.insertOffset).assertEqual(0);
       expect(plan.needsNewlineBefore).assertFalse();
-      expect(plan.caretAfter).assertEqual(1);
+      expect(plan.needsNewlineAfter).assertTrue();
+      expect(plan.caretAfter).assertEqual(2);
     })
 
     it('insertMidParagraphSplitsIntoTwo', 0, () => {
-      // 段中：断成两段，照片挂后一段开头，光标跟在照片后
+      // 段中：断成两段，照片挂后一段开头，光标跟在照片下一行
       const text = 'abcdef';
       const plan = photoInsertionPlan(text, 3);
       expect(plan.insertOffset).assertEqual(3);
       expect(plan.needsNewlineBefore).assertTrue();
-      expect(plan.caretAfter).assertEqual(5);
+      expect(plan.needsNewlineAfter).assertTrue();
+      expect(plan.caretAfter).assertEqual(6);
     })
 
     it('insertAtDocumentEndAppendsAfterSplit', 0, () => {
@@ -488,7 +510,26 @@ export default function richDocumentTest() {
       const plan = photoInsertionPlan('abcdef', 6);
       expect(plan.insertOffset).assertEqual(6);
       expect(plan.needsNewlineBefore).assertTrue();
-      expect(plan.caretAfter).assertEqual(8);
+      expect(plan.needsNewlineAfter).assertTrue();
+      expect(plan.caretAfter).assertEqual(9);
+    })
+
+    it('insertOnEmptyLineReusesExistingNewline', 0, () => {
+      // 段尾分支、落点是空行：锚点占住这行，行尾已有的换行就是后随换行，不再补
+      const plan = photoInsertionPlan('a\n\nb', 1);
+      expect(plan.insertOffset).assertEqual(2);
+      expect(plan.needsNewlineBefore).assertFalse();
+      expect(plan.needsNewlineAfter).assertFalse();
+      expect(plan.caretAfter).assertEqual(1);
+    })
+
+    it('insertAtParagraphEndAtEodAppendsAfterSplit', 0, () => {
+      // 段尾恰在文末（右一字符是最后的换行）：挂文末，光标不动
+      const plan = photoInsertionPlan('para\n', 4);
+      expect(plan.insertOffset).assertEqual(5);
+      expect(plan.needsNewlineBefore).assertFalse();
+      expect(plan.needsNewlineAfter).assertTrue();
+      expect(plan.caretAfter).assertEqual(4);
     })
 
     it('insertCaretIsClamped', 0, () => {
@@ -505,6 +546,8 @@ export default function richDocumentTest() {
       const plan = photoInsertionPlan(text, text.length);
       expect(plan.insertOffset).assertEqual(text.length);
       expect(plan.needsNewlineBefore).assertTrue();
+      expect(plan.needsNewlineAfter).assertTrue();
+      expect(plan.caretAfter).assertEqual(text.length + 3);
     })
 
     it('insertWhenNextCharIsAnchorFollowsParagraphRule', 0, () => {
@@ -514,6 +557,8 @@ export default function richDocumentTest() {
       // 段首分支：左一字符是换行 → 挂这段开头（锚点前面）
       expect(planAtAnchorStart.insertOffset).assertEqual(3);
       expect(planAtAnchorStart.needsNewlineBefore).assertFalse();
+      expect(planAtAnchorStart.needsNewlineAfter).assertTrue();
+      expect(planAtAnchorStart.caretAfter).assertEqual(5);
     })
 
     // ---- R-RICH-04 录音落点（audioInsertionPlan，iOS insertAudio 同款规则） ----

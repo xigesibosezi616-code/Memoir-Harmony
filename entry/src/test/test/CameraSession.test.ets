@@ -84,6 +84,17 @@ export default function cameraSessionTest() {
       expect(zoomPresetsForRange(0.5, 1)).assertDeepEquals([0.5, 1]);
     })
 
+    it('ultraWidePresetIsSemanticClampedToDevice', 0, () => {
+      // Mate 80 实际下限 0.55：档位仍是华为相机同款 0.5×（UI 语义值），
+      // 实际下发经 clampZoomRatio 夹到 0.55（档位值与实际值分离）
+      expect(zoomPresetsForRange(0.55, 10)).assertDeepEquals([0.5, 1, 3.5, 5, 10]);
+      expect(clampZoomRatio(0.5, [0.55, 10])).assertEqual(0.55);
+      // 落位/高亮链：0.55 的最近档是 0.5（显示归档，泡收 0.5 芯片亮）
+      expect(nearestZoomPreset(0.55, zoomPresetsForRange(0.55, 10))).assertEqual(0.5);
+      // 走数显示：0.55 四舍五入显示 "0.6"（途经真值），落位后按档位 0.5 显示
+      expect(formatZoomLabel(0.55)).assertEqual('0.6');
+    })
+
     it('cameraShotIsMovingPhotoOnlyWithVideo', 0, () => {
       const still = new CameraShot(new ArrayBuffer(8), undefined);
       expect(still.isMovingPhoto).assertFalse();

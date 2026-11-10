@@ -3999,6 +3999,22 @@
     {
       "name": "s_e15f73bdc6",
       "value": "Añoranza usa la cámara para añadir fotos a tus entradas."
+    },
+    {
+      "name": "s_45bf60a6c6",
+      "value": "Cámara"
+    },
+    {
+      "name": "s_7caa485caf",
+      "value": "Cámara Añoranza"
+    },
+    {
+      "name": "s_7c9eb079ae",
+      "value": "Cámara Huawei"
+    },
+    {
+      "name": "s_07bbd7147c",
+      "value": "Elige qué cámara se abre al tocar el botón de cámara mientras escribes."
     }
   ]
 }
