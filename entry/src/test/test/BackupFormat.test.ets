@@ -4,12 +4,17 @@
  * 覆盖：ISO8601 日期往返（无毫秒、带毫秒、坏串）、manifest 全字段与缺省兜底、
  * entries 逐条容错（坏条目只丢那一条）、letters / taxonomy 解析。
  * manifest 夹具取自 iOS 真机导出的样本包（2026-08-12），跨端字段名以此为准。
+ * letters 覆盖世界笔友四字段的解析 + 导出 wire round-trip（U01）；
+ * penPalNotes（笔友手记）覆盖解析容错 + 导出 wire round-trip（U01 B3）。
  */
 import { describe, it, expect } from '@ohos/hypium';
 import { toBackupIso8601, parseBackupIso8601,
-  BackupManifest, BackupEntriesFile, BackupLetterDto, BackupTagDto,
+  BackupManifest, BackupEntriesFile, BackupLetterDto, BackupTagDto, LettersWire,
   parseBackupManifest, parseBackupEntries, parseBackupLetters,
-  parseBackupTaxonomy } from '../../main/ets/services/backup/BackupFormat';
+  parseBackupTaxonomy, parseBackupPenPalNotes } from '../../main/ets/services/backup/BackupFormat';
+import { BackupExportService } from '../../main/ets/services/backup/BackupExportService';
+import { Letter } from '../../main/ets/models/Letter';
+import { PenPalNote } from '../../main/ets/models/PenPalNote';
 
 export default function backupFormatTest() {
   describe('BackupFormatTest', () => {
@@ -178,6 +183,114 @@ export default function backupFormatTest() {
       expect(letter.deliveredAtMs).assertEqual(Date.UTC(2026, 7, 3, 8, 0, 0));
       expect(letter.readAtMs).assertEqual(Date.UTC(2026, 7, 3, 9, 0, 0));
       expect(letter.relatedEntryIDs.length).assertEqual(2);
+    })
+
+    it('parseLettersReadsWorldPenPalFields', 0, () => {
+      // U01 世界笔友四字段（可选；老包没有 = 自己起名的那位的信）
+      const json = '{"letters":['
+        + '{"id":"W1","body":"Hello there","fromCharacter":"Aki","status":"delivered",'
+        + '"triggerKind":"weekly","generatedAt":"2026-11-01T08:00:00Z",'
+        + '"penPalID":"aki","translatedBody":"你好呀","danger":true,"postage":2}]}';
+      const parsed = parseBackupLetters(json);
+      expect(parsed === undefined).assertFalse();
+      const letters = parsed as BackupLetterDto[];
+      expect(letters.length).assertEqual(1);
+      const letter = letters[0];
+      expect(letter.penPalId).assertEqual('aki');
+      expect(letter.translatedBody).assertEqual('你好呀');
+      expect(letter.danger).assertTrue();
+      expect(letter.postage).assertEqual(2);
+      // 老包（四字段全缺）照常导入：undefined = 自己起名的那位
+      const legacy = parseBackupLetters('{"letters":['
+        + '{"id":"W2","body":"见信好","generatedAt":"2026-11-01T08:00:00Z"}]}');
+      expect(legacy === undefined).assertFalse();
+      const legacyLetter = (legacy as BackupLetterDto[])[0];
+      expect(legacyLetter.penPalId).assertUndefined();
+      expect(legacyLetter.translatedBody).assertUndefined();
+      expect(legacyLetter.danger).assertUndefined();
+      expect(legacyLetter.postage).assertUndefined();
+    })
+
+    it('makeWireLetterRoundTripsWorldPenPalFields', 0, () => {
+      // 导出 wire → JSON.stringify → 再解析，四字段原样回来（penPalID 大写 ID 是 iOS Codable 同名）
+      const letter = new Letter('W3', Date.UTC(2026, 10, 1, 8, 0, 0), Date.UTC(2026, 10, 1, 8, 0, 0));
+      letter.body = 'Hello!';
+      letter.penPalId = 'aki';
+      letter.translatedBody = '你好！';
+      letter.danger = true;
+      letter.postage = 2;
+      const wire = BackupExportService.makeWireLetter(letter, ['E1']);
+      const file = new LettersWire();
+      file.letters.push(wire);
+      const parsed = parseBackupLetters(JSON.stringify(file));
+      expect(parsed === undefined).assertFalse();
+      const back = (parsed as BackupLetterDto[])[0];
+      expect(back.id).assertEqual('W3');
+      expect(back.penPalId).assertEqual('aki');
+      expect(back.translatedBody).assertEqual('你好！');
+      expect(back.danger).assertTrue();
+      expect(back.postage).assertEqual(2);
+      // 普通信（四字段 undefined）序列化时整个键不写——老包导入 iOS 也不认多余键
+      const plain = new Letter('W4', 1000, 2000);
+      const plainJson = JSON.stringify(BackupExportService.makeWireLetter(plain, []));
+      expect(plainJson.includes('penPalID')).assertFalse();
+      expect(plainJson.includes('danger')).assertFalse();
+    })
+
+    // ---- letters.json 里的 penPalNotes（U01 B3 笔友手记） ----
+
+    it('parsePenPalNotesReadsFullNote', 0, () => {
+      const json = '{"letters":[],"penPalNotes":['
+        + '{"id":"N1","penPalID":"own","text":"画像","kind":"profile",'
+        + '"notedAt":"2026-11-01T08:00:00Z","createdAt":"2026-11-01T08:00:00Z",'
+        + '"updatedAt":"2026-11-05T08:00:00Z"},'
+        + '{"id":"N2","text":"缺 penPalID 的丢"},'
+        + '{"id":"N3","penPalID":"aki","text":"坏日期","notedAt":"oops",'
+        + '"createdAt":"2026-11-01T08:00:00Z"},'
+        + '{"id":"N4","penPalID":"aki","text":"没有 kind 的按缺省",'
+        + '"notedAt":"2026-11-02T08:00:00Z","createdAt":"2026-11-02T08:00:00Z"}]}';
+      const notes = parseBackupPenPalNotes(json);
+      expect(notes.length).assertEqual(2);
+      expect(notes[0].id).assertEqual('N1');
+      expect(notes[0].penPalID).assertEqual('own');
+      expect(notes[0].text).assertEqual('画像');
+      expect(notes[0].kind).assertEqual('profile');
+      expect(notes[0].notedAtMs).assertEqual(Date.UTC(2026, 10, 1, 8, 0, 0));
+      expect(notes[0].createdAtMs).assertEqual(Date.UTC(2026, 10, 1, 8, 0, 0));
+      expect(notes[0].updatedAtMs).assertEqual(Date.UTC(2026, 10, 5, 8, 0, 0));
+      expect(notes[1].id).assertEqual('N4');
+      expect(notes[1].kind).assertUndefined();
+      expect(notes[1].updatedAtMs).assertUndefined();
+    })
+
+    it('parsePenPalNotesToleratesMissingPieces', 0, () => {
+      // 文件没有 / 字段缺 / 坏 JSON / 字段类型坏：都当没有，不影响信的导入
+      expect(parseBackupPenPalNotes(undefined).length).assertEqual(0);
+      expect(parseBackupPenPalNotes('{"letters":[]}').length).assertEqual(0);
+      expect(parseBackupPenPalNotes('{oops').length).assertEqual(0);
+      expect(parseBackupPenPalNotes('{"penPalNotes":"nope"}').length).assertEqual(0);
+    })
+
+    it('makeWirePenPalNoteRoundTrips', 0, () => {
+      const note = new PenPalNote('aki', '记下的大事', Date.UTC(2026, 10, 2, 8, 0, 0));
+      note.id = 'N5';
+      note.createdAtMs = Date.UTC(2026, 10, 2, 8, 0, 0);
+      note.updatedAtMs = Date.UTC(2026, 10, 6, 8, 0, 0);
+      const wire = BackupExportService.makeWirePenPalNote(note);
+      const file = new LettersWire();
+      file.penPalNotes = [wire];
+      const notes = parseBackupPenPalNotes(JSON.stringify(file));
+      expect(notes.length).assertEqual(1);
+      expect(notes[0].id).assertEqual('N5');
+      expect(notes[0].penPalID).assertEqual('aki');
+      expect(notes[0].text).assertEqual('记下的大事');
+      expect(notes[0].kind).assertEqual('recent');
+      expect(notes[0].notedAtMs).assertEqual(Date.UTC(2026, 10, 2, 8, 0, 0));
+      expect(notes[0].updatedAtMs).assertEqual(Date.UTC(2026, 10, 6, 8, 0, 0));
+      // 没改过的（updatedAtMs undefined）序列化不写 updatedAt 键
+      const fresh = new PenPalNote('own', '新记的', 1000);
+      expect(JSON.stringify(BackupExportService.makeWirePenPalNote(fresh)).includes('updatedAt'))
+        .assertFalse();
     })
 
     // ---- taxonomy.json：只取 tags（moods 已作废） ----

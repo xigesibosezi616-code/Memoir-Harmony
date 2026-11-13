@@ -3,16 +3,18 @@
  * 以 sheet 弹出，横向滚动六张实际预览，点任意一张选定并回调（点完即插，无二次确认）。
  *
  * - 预览用的是**用户刚选的照片**（iOS 同款），所见即所得
- * - 会员款 2.6 全放开（用户拍板）：不显示锁标、不弹付费页；
- *   `isMember` 参数留给 7.2——接上判定后，会员款点按走 `onLockedPick` 弹付费页
+ * - 会员锁（7.2 点亮，R-MEMBER-08 本机判定）：四款会员款（和风贴纸 / 极简卡片 /
+ *   胶片帧 / 信纸附照）右上角挂小火漆印（iOS MemberBadge），非会员点按走
+ *   `onLockedPick` 弹付费页；原图 / 宝丽来永不拦
  * - 选中的样式由调用方写 `PREF_KEY_DEFAULT_PAPER_STYLE`（下次预选，05 §3.5）
  */
 import { image } from '@kit.ImageKit';
 import { AppTheme } from '../../../theme/AppTheme';
 import { BambooTheme } from '../../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../../theme/ThemeManager';
-import { PaperStyle, PhotoPosition } from '../../../models/ContentBlock';
+import { PaperStyle, PhotoPosition, isMemberPaperStyle } from '../../../models/ContentBlock';
 import { PaperPreviewCard } from './PhotoPapers';
+import { WaxSeal } from '../../postbox/WaxSeal';
 
 /** 六种相纸的展示顺序（iOS `PaperStyle.allCases` 同序） */
 const PICKER_STYLES: PaperStyle[] = [
@@ -23,6 +25,9 @@ const PICKER_STYLES: PaperStyle[] = [
   PaperStyle.FilmFrame,
   PaperStyle.LetterAttached
 ];
+
+/** 会员款角标火漆印直径（iOS MemberBadge 默认 18） */
+const MEMBER_BADGE_SIZE_VP: number = 18;
 
 @Component
 export struct PaperStylePickerSheet {
@@ -38,9 +43,9 @@ export struct PaperStylePickerSheet {
     (_style: PaperStyle, _position: PhotoPosition): void => {};
   /** 取消 */
   onCancel: () => void = (): void => {};
-  /** 会员判定（7.2 接上；2.6 恒 true 全放开） */
+  /** 会员判定（R-MEMBER-08：调用方传本机 IAP 解码 + GET /me 快照的 isMember） */
   isMember: boolean = true;
-  /** 点中会员款但非会员（7.2 弹付费页；2.6 不会触发） */
+  /** 点中会员款但非会员（调用方弹付费页） */
   onLockedPick: (() => void) | undefined = undefined;
 
   build() {
@@ -106,16 +111,23 @@ export struct PaperStylePickerSheet {
     .backgroundColor(this.theme.background)
   }
 
-  /** 单张样式卡：预览 + 名称，点按即选定（会员锁 7.2 前不生效） */
+  /** 单张样式卡：预览 + 名称；会员款非会员挂小火漆、点按走 onLockedPick */
   @Builder
   private styleButton(style: PaperStyle) {
     Column({ space: 10 }) {
-      PaperPreviewCard({
-        style: style,
-        pixelMap: this.pixelMap,
-        sampleRes: $r('app.media.paper_sample_sinara'),
-        cardWidth: 132
-      })
+      Stack({ alignContent: Alignment.TopEnd }) {
+        PaperPreviewCard({
+          style: style,
+          pixelMap: this.pixelMap,
+          sampleRes: $r('app.media.paper_sample_sinara'),
+          cardWidth: 132
+        })
+        // 会员款角标：小火漆印（iOS MemberBadge；仅非会员 + 会员款出现）
+        if (this.lockedStyle(style)) {
+          WaxSeal({ sizeVp: MEMBER_BADGE_SIZE_VP })
+            .offset({ x: 6, y: -6 })
+        }
+      }
       Text(this.styleName(style))
         .fontSize(12)
         .fontColor(this.theme.textSecondary)
@@ -126,12 +138,17 @@ export struct PaperStylePickerSheet {
     .border({ width: 0.8, color: this.theme.border })
     .shadow({ radius: 4, color: '#14000000', offsetY: 2 })
     .onClick((): void => {
-      if (!this.isMember && this.onLockedPick !== undefined) {
+      if (this.lockedStyle(style) && this.onLockedPick !== undefined) {
         this.onLockedPick();
         return;
       }
       this.onSelect(style, this.photoSide);
     })
+  }
+
+  /** 这款相纸此刻对用户上不上锁：会员款 && 非会员（原图 / 宝丽来恒 false） */
+  private lockedStyle(style: PaperStyle): boolean {
+    return isMemberPaperStyle(style) && !this.isMember;
   }
 
   /** 「左边 / 右边」分段选项（胶囊分段，选中态浅底高亮） */

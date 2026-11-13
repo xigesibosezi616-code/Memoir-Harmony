@@ -51,3 +51,26 @@ export function uuidEquals(a: string, b: string): boolean {
 export function uuidKey(u: string): string {
   return u.toUpperCase();
 }
+
+/** 是不是合法 UUID 字符串（8-4-4-4-12 位十六进制，大小写都认）。
+ *  回执里的手记改法只认 UUID：id 不是 UUID 的 update / remove 丢掉（R-NOTEBOOK-04，
+ *  iOS `UUID(uuidString:)` 同款判断） */
+export function isUuidString(u: string): boolean {
+  if (u.length !== 36) {
+    return false;
+  }
+  for (let i = 0; i < 36; i++) {
+    const c = u.charAt(i);
+    if (i === 8 || i === 13 || i === 18 || i === 23) {
+      if (c !== '-') {
+        return false;
+      }
+    } else {
+      const isHex = (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+      if (!isHex) {
+        return false;
+      }
+    }
+  }
+  return true;
+}

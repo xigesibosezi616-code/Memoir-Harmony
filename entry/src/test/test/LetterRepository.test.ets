@@ -23,6 +23,11 @@ export default function letterRepositoryTest() {
       letter.errorMessage = 'err';
       letter.deliveredAt = 1500;
       letter.readAt = 1800;
+      // 世界笔友四列（U01，v3 迁移加的）
+      letter.penPalId = 'aki';
+      letter.translatedBody = '你好呀';
+      letter.danger = true;
+      letter.postage = 2;
       const values = letterToValues(letter);
       expect(values['id']).assertEqual('l1');
       expect(values['status']).assertEqual('read');
@@ -32,6 +37,10 @@ export default function letterRepositoryTest() {
       expect(values['stationery']).assertEqual('sealed');
       expect(values['trigger_kind']).assertEqual('weekly');
       expect(values['error_message']).assertEqual('err');
+      expect(values['pen_pal_id']).assertEqual('aki');
+      expect(values['translated_body']).assertEqual('你好呀');
+      expect(values['danger']).assertEqual(1);
+      expect(values['postage']).assertEqual(2);
       expect(values['generated_at']).assertEqual(1000);
       expect(values['delivered_at']).assertEqual(1500);
       expect(values['read_at']).assertEqual(1800);
@@ -44,6 +53,10 @@ export default function letterRepositoryTest() {
       expect(values['to_name']).assertNull();
       expect(values['stationery']).assertNull();
       expect(values['error_message']).assertNull();
+      expect(values['pen_pal_id']).assertNull();
+      expect(values['translated_body']).assertNull();
+      expect(values['danger']).assertNull();
+      expect(values['postage']).assertNull();
       expect(values['delivered_at']).assertNull();
       expect(values['read_at']).assertNull();
     })
@@ -51,9 +64,9 @@ export default function letterRepositoryTest() {
     it('letterToValuesKeepsDefaults', 0, () => {
       const letter = new Letter('l3', 1000, 2000);
       const values = letterToValues(letter);
-      // 默认值（05 §6）：status pending、笔友青鸟、triggerKind weekly、正文空串
+      // 默认值（05 §6；fromCharacter 对齐 iOS Letter 默认空串——没起名快照前不署名）
       expect(values['status']).assertEqual('pending');
-      expect(values['from_character']).assertEqual('青鸟');
+      expect(values['from_character']).assertEqual('');
       expect(values['trigger_kind']).assertEqual('weekly');
       expect(values['body']).assertEqual('');
     })

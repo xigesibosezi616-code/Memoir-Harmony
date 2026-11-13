@@ -19,16 +19,17 @@
  */
 import { faceDetector } from '@kit.CoreVisionKit';
 
-/** 标定样本数（~350ms 一帧 ≈ 2s 出基线） */
+/** 标定样本数（~250ms 一帧 ≈ 1.5s 出基线） */
 export const EYE_CALIBRATION_SAMPLES: number = 6;
-/** 抬头触发阈值：pitch 相对基线抬高这么多度（华为同款量级，实测可调） */
-export const EYE_RAISE_THRESHOLD_DEG: number = 9;
+/** 抬头触发阈值：pitch 相对基线抬高这么多度（2026-11-13 用户反馈
+ *  「眼动翻书不好用」：9° 太难触发，降到 7°，实测可再调） */
+export const EYE_RAISE_THRESHOLD_DEG: number = 7;
 /** 抬头迟滞带：回落到阈值以下这么多度才算抬头结束 */
-export const EYE_RAISE_HYSTERESIS_DEG: number = 5;
-/** 抬头需持续的时长（ms）：防低头瞄一眼 / 打哈欠误翻 */
-export const EYE_RAISE_HOLD_MS: number = 500;
-/** 触发后冷却（ms）：盖过翻页动画，也吸收触发后的残余抬头 */
-export const EYE_FLIP_COOLDOWN_MS: number = 1200;
+export const EYE_RAISE_HYSTERESIS_DEG: number = 4;
+/** 抬头需持续的时长（ms）：防低头瞄一眼 / 打哈欠误翻（500→400 更跟手） */
+export const EYE_RAISE_HOLD_MS: number = 400;
+/** 触发后冷却（ms）：盖过翻页动画（~0.6s），也吸收触发后的残余抬头 */
+export const EYE_FLIP_COOLDOWN_MS: number = 900;
 
 /** 机器所处阶段（UI 可据此换提示文案） */
 export enum EyeFlipPhase {

@@ -28,6 +28,11 @@ export function ThemePickerBuilder() {
   ThemePickerView()
 }
 
+class ThemeIntroSheetArgs {
+  paperId: string = '';
+  onChoose: (alsoIcon: boolean) => void = (_alsoIcon: boolean) => {};
+}
+
 @Component
 export struct ThemePickerView {
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
@@ -86,7 +91,14 @@ export struct ThemePickerView {
       // 介绍弹窗：确认先记下、关掉弹窗再切（iOS applyPendingChoice 同款时序）。
       // 🔴 backgroundColor 必须显式设成目标主题底色：sheet 容器默认白底，
       // 深色主题弹窗顶部会露出一块系统默认色（真机反馈，问题三）
-      .bindSheet(this.introShow, this.introSheetBuilder(), {
+      .bindSheet(this.introShow, this.introSheetBuilder({
+        paperId: this.introPaper.id,
+        onChoose: (alsoIcon: boolean): void => {
+          this.pendingThemeId = this.introPaper.id;
+          this.pendingAlsoIcon = alsoIcon;
+          this.introShow = false;
+        }
+      }), {
         detents: [SheetSize.MEDIUM, SheetSize.LARGE],
         showClose: false,
         backgroundColor: ThemeManager.themeFor(this.introPaper.id).background,
@@ -217,14 +229,10 @@ export struct ThemePickerView {
   // ---- 介绍弹窗 ----
 
   @Builder
-  private introSheetBuilder() {
+  private introSheetBuilder($$: ThemeIntroSheetArgs) {
     ThemeIntroSheet({
-      paperId: this.introPaper.id,
-      onChoose: (alsoIcon: boolean): void => {
-        this.pendingThemeId = this.introPaper.id;
-        this.pendingAlsoIcon = alsoIcon;
-        this.introShow = false;
-      }
+      paperId: $$.paperId,
+      onChoose: $$.onChoose
     })
   }
 

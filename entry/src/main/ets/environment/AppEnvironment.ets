@@ -14,6 +14,7 @@ import { UserSession } from '../services/auth/UserSession';
 import { AuthService } from '../services/auth/AuthService';
 import { LetterOutboxService } from '../services/LetterOutboxService';
 import { LetterNotifications } from '../services/LetterNotifications';
+import { MembershipManager } from '../services/membership/MembershipManager';
 
 /** AppStorage key：AppEnvironment 实例（EntryAbility 创建，Index 取出 @Provide） */
 export const STORAGE_KEY_APP_ENVIRONMENT = 'appEnvironment';
@@ -36,17 +37,21 @@ export class AppEnvironment {
   /** 到达通知（5.4：定时提醒预约 / 授权申请 / 点通知路由信号） */
   readonly notifications?: LetterNotifications;
 
+  /** 会员（7.1：华为 IAP 商品 / 购买 / 本机会员判定；U02 R-MEMBER-09/10） */
+  readonly membership?: MembershipManager;
+
   private readonly foregroundHooks: Array<() => void> = [];
 
   constructor(errors: ErrorPresenter, chrome?: ImmersiveChrome,
     session?: UserSession, auth?: AuthService, outbox?: LetterOutboxService,
-    notifications?: LetterNotifications) {
+    notifications?: LetterNotifications, membership?: MembershipManager) {
     this.errors = errors;
     this.chrome = chrome;
     this.session = session;
     this.auth = auth;
     this.outbox = outbox;
     this.notifications = notifications;
+    this.membership = membership;
   }
 
   /** 注册回到前台钩子（后续挂通知重排、寄信队列、同名合并等） */

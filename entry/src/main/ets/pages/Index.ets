@@ -26,11 +26,14 @@ import {
   PREF_KEY_ACCEPTED_LEGAL_VERSION,
   STORAGE_KEY_NEEDS_LEGAL_CONSENT,
   STORAGE_KEY_HAS_COMPLETED_ONBOARDING,
+  STORAGE_KEY_PEN_PAL_NAME,
   STORAGE_KEY_SHOW_SPLASH
 } from '../services/AppPrefs';
 import { LEGAL_CURRENT_VERSION } from '../views/legal/LegalDocument';
 import { LegalConsentView } from '../views/legal/LegalConsentView';
 import { OnboardingView } from '../views/onboarding/OnboardingView';
+import { PenPalNamingSheet } from '../views/onboarding/PenPalNamingSheet';
+import { PenPalName } from '../models/PenPalName';
 import { SplashView } from '../views/splash/SplashView';
 import { MainTabsView } from '../views/main/MainTabsView';
 import { STORAGE_KEY_HOME_RELOAD_TICK } from '../data/HomeLogic';
@@ -59,6 +62,8 @@ struct Index {
       ?? new AppEnvironment(createDefaultErrorPresenter());
   @StorageProp(STORAGE_KEY_THEME) @Watch('onThemeChanged') theme: AppTheme = new BambooTheme();
   @StorageProp(STORAGE_KEY_HAS_COMPLETED_ONBOARDING) hasCompletedOnboarding: boolean = false;
+  /** 笔友名镜像（EntryAbility 启动写初值；PenPalNamingSheet 起好名写回，层随条件摘除） */
+  @StorageProp(STORAGE_KEY_PEN_PAL_NAME) penPalName: string = '';
   @StorageLink(STORAGE_KEY_NEEDS_LEGAL_CONSENT) needsLegalConsent: boolean = true;
   @StorageLink(STORAGE_KEY_SHOW_SPLASH) showSplash: boolean = false;
   /**
@@ -111,6 +116,15 @@ struct Index {
         MainTabsView()
       } else {
         OnboardingView()
+      }
+
+      // 老用户补起名（对应 iOS ContentView 挂在 TabView 上的 PenPalNamingSheet）：
+      // 首启起名还能跳过的那批，等隐私同意之后弹这一层请他起一次；
+      // 起好名字（PenPalNamingSheet 写镜像）needsNaming 变 false，这层自动收起
+      if (this.hasCompletedOnboarding && !this.needsLegalConsent
+        && PenPalName.needsNaming(this.penPalName)) {
+        PenPalNamingSheet()
+          .transition(TransitionEffect.OPACITY)
       }
 
       if (this.needsLegalConsent && this.legalShown) {

@@ -40,6 +40,8 @@ import { PhotoPaperIO } from '../../services/PhotoPaperIO';import { ReaderTextAd
 import { DiaryPageHeaderView } from './DiaryPageHeaderView';
 import { PhotoPaperCard } from '../components/photo/PhotoPapers';
 import { AudioPlayerCard } from '../components/audio/AudioPlayerCard';
+import { AppEnvironment, STORAGE_KEY_APP_ENVIRONMENT } from '../../environment/AppEnvironment';
+import { STORAGE_KEY_MEMBERSHIP_TICK } from '../../services/membership/MembershipManager';
 
 const DOMAIN = 0x0000;
 const TAG = 'ReaderPageView';
@@ -119,6 +121,8 @@ struct ReaderPhotoView {
   photoWidthVp: number = 0;
   @State private pixelMap: image.PixelMap | undefined = undefined;
   @State private photoAspect: number = 4 / 3;
+  /** 会员状态变化（7.2：会员款相纸的渲染回退随 tick 重算） */
+  @StorageProp(STORAGE_KEY_MEMBERSHIP_TICK) membershipTick: number = 0;
 
   aboutToAppear(): void {
     const context = this.getUIContext().getHostContext();
@@ -141,10 +145,18 @@ struct ReaderPhotoView {
     });
   }
 
+  /** 会员判定（R-MEMBER-08：AppStorage 里的本机快照） */
+  private isMemberNow(): boolean {
+    const env = AppStorage.get<AppEnvironment>(STORAGE_KEY_APP_ENVIRONMENT);
+    const membership = env !== undefined ? env.membership : undefined;
+    return membership !== undefined && membership.isMember;
+  }
+
   build() {
     Column() {
       PhotoPaperCard({
-        style: effectivePaperStyle(this.block.paperStyle ?? PaperStyle.Polaroid, true),
+        // 会员到期：旧日记里的会员款相纸渲染退回宝丽来（R-MEMBER-08 本机判定）
+        style: effectivePaperStyle(this.block.paperStyle ?? PaperStyle.Polaroid, this.isMemberNow()),
         pixelMap: this.pixelMap,
         photoAspect: this.photoAspect
       })

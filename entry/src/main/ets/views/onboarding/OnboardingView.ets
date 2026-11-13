@@ -1,13 +1,15 @@
 /**
  * 首启引导页（10_BUILD_MANUAL.md 1.5）。对应 iOS `Views/Onboarding/OnboardingView.swift`。
  *
- * 选纸张 → 给笔友起名（可跳过，默认「青鸟」）→「开始书写」进主界面。
+ * 选纸张 → 给笔友起名（必填，不能跳过）→「开始书写」进主界面。
  *
  * - 引导只在首启出现一次：`hasCompletedOnboarding` 落盘后不再来。
  *   协议版本更新只重弹同意页、**不重弹引导** —— 两页生命周期不同，别合并。
  * - 纸卡颜色取主题实例的 background / accent：三套主题的这两枚 token
  *   恰好等于 iOS 纸卡写死的六组色值，不重复抄数字，改主题这里自动跟上。
- * - 「开始书写」才落盘（iOS 同款）：笔友名 trim、空恢复「青鸟」、
+ * - 2026-10-24 产品定：名字只能由用户自己起，不再有默认名（见 `PenPalName`）。
+ *   「开始书写」没起名点不了（iOS CTA disabled + 0.4 透明度同款）。
+ * - 「开始书写」才落盘（iOS 同款）：笔友名 `PenPalName.normalized`、
  *   切主题、置完成标记。中途杀进程什么都没写，下次启动从头再来，无脏状态。
  */
 import { LengthMetrics } from '@kit.ArkUI';
@@ -22,11 +24,10 @@ import {
   AppPrefs,
   PREF_KEY_HAS_COMPLETED_ONBOARDING,
   PREF_KEY_PEN_PAL_NAME,
-  STORAGE_KEY_HAS_COMPLETED_ONBOARDING
+  STORAGE_KEY_HAS_COMPLETED_ONBOARDING,
+  STORAGE_KEY_PEN_PAL_NAME
 } from '../../services/AppPrefs';
-
-/** 笔友名兜底（iOS `penPalName` 默认值「青鸟」） */
-const DEFAULT_PEN_PAL_NAME = '青鸟';
+import { PenPalName } from '../../models/PenPalName';
 
 @Component
 export struct OnboardingView {
@@ -34,7 +35,8 @@ export struct OnboardingView {
 
   /** 选中态从「素笺」起（iOS 同款 @State 初值；引导是首启，本就没有已存主题可预选） */
   @State selectedTheme: string = 'bamboo';
-  @State penPalName: string = DEFAULT_PEN_PAL_NAME;
+  /** 没有默认名：首启必须起名才能进（iOS @AppStorage 默认空串同款） */
+  @State penPalName: string = '';
   /** 走完引导写 true：偏好落盘 + AppStorage 镜像，Index 观察镜像切走本页 */
   @StorageLink(STORAGE_KEY_HAS_COMPLETED_ONBOARDING) hasCompleted: boolean = false;
   /** 三张纸卡对应的主题实例（aboutToAppear 算一次，build 里不再 new） */
@@ -43,7 +45,7 @@ export struct OnboardingView {
   private themeManager: ThemeManager | undefined = undefined;
 
   aboutToAppear(): void {
-    this.penPalName = AppPrefs.getString(PREF_KEY_PEN_PAL_NAME, DEFAULT_PEN_PAL_NAME);
+    this.penPalName = AppPrefs.getString(PREF_KEY_PEN_PAL_NAME, '');
     this.optionThemes = [
       ThemeManager.themeFor('bamboo'),
       ThemeManager.themeFor('leather'),
@@ -56,11 +58,11 @@ export struct OnboardingView {
     }
   }
 
-  /** 「开始书写」：trim、空恢复默认、切主题、落盘完成标记（iOS CTA 同款顺序） */
+  /** 「开始书写」：整理名字、切主题、落盘完成标记（iOS CTA 同款顺序） */
   private completeOnboarding(): void {
-    const trimmed: string = this.penPalName.trim();
-    const finalName: string = trimmed.length === 0 ? DEFAULT_PEN_PAL_NAME : trimmed;
-    AppPrefs.putString(PREF_KEY_PEN_PAL_NAME, finalName);
+    const name = PenPalName.normalized(this.penPalName);
+    AppPrefs.putString(PREF_KEY_PEN_PAL_NAME, name);
+    AppStorage.setOrCreate(STORAGE_KEY_PEN_PAL_NAME, name);
     if (this.themeManager !== undefined) {
       this.themeManager.setTheme(this.selectedTheme);
     }
@@ -113,7 +115,7 @@ export struct OnboardingView {
 
       Blank().height(40)
 
-      // 笔友起名（可跳过 → 默认「青鸟」）
+      // 笔友起名（必填，不能跳过）
       Column({ space: 10 }) {
         Text($r('app.string.s_c36573f3f7'))
           .fontSize(this.theme.captionFont.size)
@@ -124,7 +126,7 @@ export struct OnboardingView {
 
         TextInput({
           text: this.penPalName,
-          placeholder: $r('app.string.s_db0abd6cdb')
+          placeholder: $r('app.string.s_960e2f7361')
         })
           .fontSize(this.theme.bodyFont.size)
           .fontWeight(this.theme.bodyFont.weight)
@@ -136,16 +138,17 @@ export struct OnboardingView {
           .borderRadius(10)
           .border({ width: 0.5, color: this.theme.border })
           .margin({ left: 60, right: 60 })
+          .maxLength(PenPalName.MAX_LENGTH)
           .enterKeyType(EnterKeyType.Done)
           .onChange((value: string) => {
-            this.penPalName = value;
+            this.penPalName = PenPalName.truncated(value);
           })
           .onSubmit(() => {
             // 回车收起键盘（iOS `submitLabel(.done)` + `onSubmit` 收焦点）
             this.getUIContext().getFocusController().clearFocus();
           })
 
-        Text($r('app.string.s_36179dc44d'))
+        Text($r('app.string.s_14f2f7ca94'))
           .fontSize(this.theme.labelFont.size)
           .fontWeight(this.theme.labelFont.weight)
           .fontFamily(this.theme.labelFont.family)
@@ -154,7 +157,7 @@ export struct OnboardingView {
 
       Blank()
 
-      // CTA
+      // CTA：没起名点不了（iOS disabled + 0.4 透明度同款）
       Text($r('app.string.s_80a37cf380'))
         .fontSize(this.theme.headingFont.size)
         .fontWeight(this.theme.headingFont.weight)
@@ -166,6 +169,8 @@ export struct OnboardingView {
         .backgroundColor(this.theme.accent)
         .borderRadius(12)
         .margin({ left: 40, right: 40, bottom: 48 })
+        .opacity(PenPalName.needsNaming(this.penPalName) ? 0.4 : 1)
+        .enabled(!PenPalName.needsNaming(this.penPalName))
         .onClick(() => {
           this.completeOnboarding();
         })

@@ -43,14 +43,18 @@ export class PostingRun {
   readonly items: OutgoingItem[];
   /** 收拢时取消勾选的那几篇（快照，投出后 excluded 清空，动画里还要画灰） */
   readonly excludedIds: string[];
+  /** 信纸抬头写的「寄给谁」（「阿远、天野和 McRae」；点邮筒那一刻的快照，动画里要画） */
+  readonly recipients: string;
   /** 会员才盖火漆，印面是自己昵称的首字 */
   readonly hasSeal: boolean;
   /** 火漆上压的字（「素」兜底） */
   readonly sealMark: string;
 
-  constructor(items: OutgoingItem[], excludedIds: string[], hasSeal: boolean, sealMark: string) {
+  constructor(items: OutgoingItem[], excludedIds: string[], recipients: string,
+    hasSeal: boolean, sealMark: string) {
     this.items = items;
     this.excludedIds = excludedIds;
+    this.recipients = recipients;
     this.hasSeal = hasSeal;
     this.sealMark = sealMark;
   }

@@ -389,6 +389,89 @@ const HAND_STRINGS = {
   s_820929d497: { // %d 个（照片与录音计数）
     'zh-Hans': '%d 个', 'zh-Hant': '%d 個', 'en': '%d files', 'ja': '%d個',
     'ko': '%d개', 'fr': '%d fichiers', 'es': '%d archivos' },
+  // ---- 7.1 华为 IAP 会员（U02 R-MEMBER-11 华为版文案；续费三句与「没有找到」
+  //      译文取自 U02「七种语言的新文案」表，勿机翻——外语统一写 HUAWEI ID。
+  //      注意：xcstrings 里的 Apple 措辞版（App Store / Apple 账户）鸿蒙一句不能用）----
+  s_e02cabdf13: { // 每年 %s。到期前 24 小时内自动续费，可随时在华为账号的订阅管理中取消。
+    'zh-Hans': '每年 %s。到期前 24 小时内自动续费，可随时在华为账号的订阅管理中取消。',
+    'zh-Hant': '每年 %s。到期前 24 小時內自動續費，可隨時在華為帳號的訂閱管理中取消。',
+    'en': '%s per year. Renews automatically within 24 hours before it ends. Cancel anytime in your HUAWEI ID subscription settings.',
+    'ja': '年額 %s。期間終了前の 24 時間以内に自動更新されます。HUAWEI ID のサブスクリプション管理でいつでも解約できます。',
+    'ko': '연 %s. 만료 전 24시간 이내에 자동 갱신되며, HUAWEI ID 구독 관리에서 언제든지 해지할 수 있어요.',
+    'fr': '%s par an. Renouvellement automatique dans les 24 heures précédant l\'échéance. Résiliable à tout moment dans la gestion des abonnements de votre HUAWEI ID.',
+    'es': '%s al año. Se renueva automáticamente en las 24 horas previas al vencimiento. Cancela cuando quieras en la gestión de suscripciones de tu HUAWEI ID.' },
+  s_27293849b2: { // 每月 %s。到期前 24 小时内自动续费，可随时在华为账号的订阅管理中取消。
+    'zh-Hans': '每月 %s。到期前 24 小时内自动续费，可随时在华为账号的订阅管理中取消。',
+    'zh-Hant': '每月 %s。到期前 24 小時內自動續費，可隨時在華為帳號的訂閱管理中取消。',
+    'en': '%s per month. Renews automatically within 24 hours before it ends. Cancel anytime in your HUAWEI ID subscription settings.',
+    'ja': '月額 %s。期間終了前の 24 時間以内に自動更新されます。HUAWEI ID のサブスクリプション管理でいつでも解約できます。',
+    'ko': '월 %s. 만료 전 24시간 이내에 자동 갱신되며, HUAWEI ID 구독 관리에서 언제든지 해지할 수 있어요.',
+    'fr': '%s par mois. Renouvellement automatique dans les 24 heures précédant l\'échéance. Résiliable à tout moment dans la gestion des abonnements de votre HUAWEI ID.',
+    'es': '%s al mes. Se renueva automáticamente en las 24 horas previas al vencimiento. Cancela cuando quieras en la gestión de suscripciones de tu HUAWEI ID.' },
+  s_704db62f7a: { // 首年 %1$s，之后每年 %2$s。到期前 24 小时内自动续费，可随时在华为账号的订阅管理中取消。
+    'zh-Hans': '首年 %1$s，之后每年 %2$s。到期前 24 小时内自动续费，可随时在华为账号的订阅管理中取消。',
+    'zh-Hant': '首年 %1$s，之後每年 %2$s。到期前 24 小時內自動續費，可隨時在華為帳號的訂閱管理中取消。',
+    'en': '%1$s for the first year, then %2$s per year. Renews automatically within 24 hours before it ends. Cancel anytime in your HUAWEI ID subscription settings.',
+    'ja': '初年度 %1$s、以降は年額 %2$s。期間終了前の 24 時間以内に自動更新されます。HUAWEI ID のサブスクリプション管理でいつでも解約できます。',
+    'ko': '첫해 %1$s, 이후 연 %2$s. 만료 전 24시간 이내에 자동 갱신되며, HUAWEI ID 구독 관리에서 언제든지 해지할 수 있어요.',
+    'fr': '%1$s la première année, puis %2$s par an. Renouvellement automatique dans les 24 heures précédant l\'échéance. Résiliable à tout moment dans la gestion des abonnements de votre HUAWEI ID.',
+    'es': '%1$s el primer año y después %2$s al año. Se renueva automáticamente en las 24 horas previas al vencimiento. Cancela cuando quieras en la gestión de suscripciones de tu HUAWEI ID.' },
+  s_0bf835768f: { // 这个华为账号下没有找到尺素会员
+    'zh-Hans': '这个华为账号下没有找到尺素会员',
+    'zh-Hant': '這個華為帳號下沒有找到尺素會員',
+    'en': 'No Memoir Plus membership found for this HUAWEI ID.',
+    'ja': 'この HUAWEI ID には Memoir Plus の購入がありません。',
+    'ko': '이 HUAWEI ID에서 Memoir Plus 멤버십을 찾지 못했어요.',
+    'fr': 'Aucun abonnement Memoir Plus trouvé pour ce HUAWEI ID.',
+    'es': 'No se encontró ninguna membresía de Memoir Plus en este HUAWEI ID.' },
+  s_d005946611: { // 暂时无法连接，请稍后再试（付费页：IAP 环境/商品拿不到，U02 R-MEMBER-09 第 1 步）
+    'zh-Hans': '暂时无法连接，请稍后再试', 'zh-Hant': '暫時無法連線，請稍後再試',
+    'en': 'Can\'t connect right now. Please try again later',
+    'ja': '現在接続できません。しばらくしてからもう一度お試しください',
+    'ko': '지금 연결할 수 없어요. 잠시 후 다시 시도해 주세요',
+    'fr': 'Impossible de se connecter pour le moment. Veuillez réessayer plus tard',
+    'es': 'No se puede conectar ahora mismo. Inténtalo de nuevo más tarde' },
+  s_761f4e7e7d: { // 已与华为账号同步（会员页：恢复购买完成；iOS 版「已与 App Store 同步」不可用）
+    'zh-Hans': '已与华为账号同步', 'zh-Hant': '已與華為帳號同步',
+    'en': 'Synced with your HUAWEI ID', 'ja': 'HUAWEI ID と同期しました',
+    'ko': 'HUAWEI ID와 동기화되었어요',
+    'fr': 'Synchronisé avec votre HUAWEI ID',
+    'es': 'Sincronizado con tu HUAWEI ID' },
+  // ---- 历代直写 string.json 的词条回迁（当时绕过管线直接写资源文件，2026-11-10
+  //      管线重跑被冲掉、build 断，回迁进 HAND_STRINGS 随脚本强制写入不丢。
+  //      键名沿用代码里已烧录的历史名（当时未按 sha1(简中) 取名，勿改名——改名须同步改代码引用）----
+  s_45bf60a6c6: { // 相机切换（2026-11-12 工单四：设置→日记本相机行更名，旧名「拍照方式」；键名沿用历史名勿改）
+    'zh-Hans': '相机切换', 'zh-Hant': '相機切換', 'en': 'Switch Camera',
+    'ja': 'カメラ切替', 'ko': '카메라 전환', 'fr': 'Changer d\'appareil photo',
+    'es': 'Cambiar de cámara' },
+  s_7caa485caf: { // 尺素相机（阶段六：拍照方式两档之一）
+    'zh-Hans': '尺素相机', 'zh-Hant': '尺素相機', 'en': 'Memoir Camera',
+    'ja': '尺素カメラ', 'ko': '그리움 카메라', 'fr': 'Appareil Déjà Vu',
+    'es': 'Cámara Añoranza' },
+  s_7c9eb079ae: { // 华为相机（阶段六：拍照方式两档之一）
+    'zh-Hans': '华为相机', 'zh-Hant': '華為相機', 'en': 'Huawei Camera',
+    'ja': 'ファーウェイカメラ', 'ko': '화웨이 카메라', 'fr': 'Appareil Huawei',
+    'es': 'Cámara Huawei' },
+  s_07bbd7147c: { // 写日记时点拍照键用哪个相机拍摄（阶段六：拍照方式行说明）
+    'zh-Hans': '写日记时点拍照键用哪个相机拍摄', 'zh-Hant': '寫日記時點拍照鍵用哪個相機拍攝',
+    'en': 'Choose which camera opens when you tap the camera button while writing.',
+    'ja': '日記を書くときにカメラボタンで開くカメラを選びます。',
+    'ko': '일기를 쓸 때 카메라 버튼으로 열 카메라를 선택합니다.',
+    'fr': 'Choisissez l\'appareil photo qui s\'ouvre via le bouton appareil photo pendant l\'écriture.',
+    'es': 'Elige qué cámara se abre al tocar el botón de cámara mientras escribes.' },
+  s_6a1195c7b2: { // 华为云备份（2026-11-08 云备份卡：跳系统「云备份」页入口的行标题）
+    'zh-Hans': '华为云备份', 'zh-Hant': '華為雲備份', 'en': 'Huawei Cloud backup',
+    'ja': 'Huawei Cloud バックアップ', 'ko': '화웨이 클라우드 백업',
+    'fr': 'Sauvegarde Huawei Cloud', 'es': 'Copia de seguridad en Huawei Cloud' },
+  s_669abe2f94: { // 开启后……实际备份状态以系统「华为云备份」设置为准（R-DATA-05 红字：不谎报；
+    //      2026-11-12 工单五：footer 口径句并入红字，名字统一「华为云备份」）
+    'zh-Hans': '开启后，日记会连同照片、录音一起备份到你的华为云空间，换新手机时可从云备份恢复；未开启时，日记仅保存在这台设备上，建议定期「导出备份」。实际备份状态以系统「华为云备份」设置为准。',
+    'zh-Hant': '開啟後，日記會連同照片、錄音一起備份到你的華為雲空間，換新手機時可從雲備份恢復；未開啟時，日記僅保存在這台裝置上，建議定期「匯出備份」。實際備份狀態以系統「華為雲備份」設定為準。',
+    'en': 'When on, your diary is backed up with its photos and recordings to your Huawei Cloud space, so a new phone can restore it from the cloud backup. When off, your diary lives only on this device — exporting a backup regularly is recommended. The actual backup state follows the system Huawei Cloud backup settings.',
+    'ja': 'オンにすると、日記は写真や録音とともに Huawei Cloud の空間にバックアップされ、新しいスマホへの引っ越し時にクラウドバックアップから復元できます。オフの場合、日記はこの端末にしか残りません。定期的な「バックアップの書き出し」をおすすめします。実際のバックアップ状態は、システムの「Huawei Cloud バックアップ」設定に従います。',
+    'ko': '켜면 일기가 사진·녹음과 함께 화웨이 클라우드 공간에 백업되어 새 휴대폰에서 클라우드 백업으로 복원할 수 있어요. 꺼 두면 일기는 이 기기에만 저장되니 정기적인 「백업 내보내기」를 권해요. 실제 백업 상태는 시스템 「화웨이 클라우드 백업」 설정을 따라요.',
+    'fr': 'Activée, la sauvegarde envoie votre journal, ses photos et ses enregistrements dans votre espace Huawei Cloud : un nouveau téléphone peut alors le restaurer depuis cette sauvegarde. Désactivée, votre journal ne vit que sur cet appareil — exporter une sauvegarde régulièrement est recommandé. L\'état réel de la sauvegarde suit les réglages « Sauvegarde Huawei Cloud » du système.',
+    'es': 'Activada, la copia de seguridad guarda tu diario con sus fotos y grabaciones en tu espacio de Huawei Cloud, y un teléfono nuevo puede restaurarlo desde ella. Desactivada, tu diario vive solo en este dispositivo: se recomienda exportar una copia de seguridad con regularidad. El estado real de la copia sigue los ajustes de «Copia de seguridad en Huawei Cloud» del sistema.' },
 };
 
 /** 把 LANGS 之外的固定条目（keepOriginals）按语言拼出来；appName 来自 xcstrings */
@@ -475,13 +558,22 @@ function assertNoCollisions(entries) {
   }
 }
 
-/** 图片映射：[iOS 相对 Memoir 的源路径, base/media 下的目标名] */
+/** 图片映射：[iOS 相对 Memoir 的源路径, base/media 下的目标名, 源库?]
+ * 第三列源库（缺省 = 'ios' 老快照 reference/ios）：
+ * - 'ios-latest'：从 reference/ios-latest 拷。splash_* 走这里——latest 的
+ *   M 标封面与鸿蒙成品 md5 全等（79bce10 回滚背书），老快照里的是老标设计。
+ * - 'protected'：**不拷贝**，只断言成品在库。M 标资产（图标预览/邮筒插画）
+ *   的权威版在鸿蒙仓库（7662e71 交付、79bce10 回滚），iOS 物料是老标设计，
+ *   拷了就是「图标回退事故」复发——2026-11-12 已实发一次（用户工单
+ *   「开屏动画老图标又出现了」：dc85981 版被重跑脚本整批写回工作区）。
+ */
 const IMAGE_MAP = [
   // App 图标预览（主题选择；U09 R-THEME-13 换手写 m.，192×192 方图不带圆角）
-  ['Assets.xcassets/AppIconPreview_Bamboo.imageset/AppIconPreview_Bamboo.png', 'app_icon_preview_bamboo.png'],
-  ['Assets.xcassets/AppIconPreview_Leather.imageset/AppIconPreview_Leather.png', 'app_icon_preview_leather.png'],
-  ['Assets.xcassets/AppIconPreview_Kent.imageset/AppIconPreview_Kent.png', 'app_icon_preview_kent.png'],
-  ['Assets.xcassets/AppIconPreview_Polar.imageset/AppIconPreview_Polar.png', 'app_icon_preview_polar.png'],
+  // ⚠️ M 标资产：iOS 侧已换 SVG，老快照里是老标 PNG，禁止拷贝（见头注释）
+  ['Assets.xcassets/AppIconPreview_Bamboo.imageset/AppIconPreview_Bamboo.png', 'app_icon_preview_bamboo.png', 'protected'],
+  ['Assets.xcassets/AppIconPreview_Leather.imageset/AppIconPreview_Leather.png', 'app_icon_preview_leather.png', 'protected'],
+  ['Assets.xcassets/AppIconPreview_Kent.imageset/AppIconPreview_Kent.png', 'app_icon_preview_kent.png', 'protected'],
+  ['Assets.xcassets/AppIconPreview_Polar.imageset/AppIconPreview_Polar.png', 'app_icon_preview_polar.png', 'protected'],
   // 桌面主图标前景（分层图标 layered_image 的 foreground；U09：透明底 m. 字形 #8B7E6A）
   ['AppIcons/AppIcon.icon/Assets/m.png', 'foreground.png'],
   // 书打开的插画
@@ -502,10 +594,10 @@ const IMAGE_MAP = [
   ['Assets.xcassets/Cover_RustRed_Linen.imageset/Cover_RustRed_Linen.png', 'cover_rust_red_linen.png'],
   ['Assets.xcassets/Cover_Slate_Linen.imageset/Cover_Slate_Linen.png', 'cover_slate_linen.png'],
   ['Assets.xcassets/Cover_WineRed_Linen.imageset/Cover_WineRed_Linen.png', 'cover_wine_red_linen.png'],
-  // 邮筒插画（三主题）
-  ['Assets.xcassets/Mailbox_Bamboo.imageset/mailbox-bamboo.png', 'mailbox_bamboo.png'],
-  ['Assets.xcassets/Mailbox_Leather.imageset/mailbox-leather.png', 'mailbox_leather.png'],
-  ['Assets.xcassets/Mailbox_Kent.imageset/mailbox-kent.png', 'mailbox_kent.png'],
+  // 邮筒插画（⚠️ M 标资产：权威版在鸿蒙仓库 7662e71，iOS 物料是老标设计，禁止拷贝）
+  ['Assets.xcassets/Mailbox_Bamboo.imageset/mailbox-bamboo.png', 'mailbox_bamboo.png', 'protected'],
+  ['Assets.xcassets/Mailbox_Leather.imageset/mailbox-leather.png', 'mailbox_leather.png', 'protected'],
+  ['Assets.xcassets/Mailbox_Kent.imageset/mailbox-kent.png', 'mailbox_kent.png', 'protected'],
   // 纸纹（主题系统）
   ['Assets.xcassets/Texture_Canvas.imageset/Texture_Canvas.png', 'texture_canvas.png'],
   ['Assets.xcassets/Texture_Denim.imageset/Texture_Denim.png', 'texture_denim.png'],
@@ -513,10 +605,11 @@ const IMAGE_MAP = [
   ['Assets.xcassets/Texture_Linen.imageset/Texture_Linen.png', 'texture_linen.png'],
   ['Assets.xcassets/Texture_Paper.imageset/Texture_Paper.png', 'texture_paper.png'],
   // 启动封面（1290×2796，U09 R-APP-10：中间留空，写字由 HandwrittenMark 运行时画）
-  ['Resources/SplashCovers/splash_bamboo.png', 'splash_bamboo.png'],
-  ['Resources/SplashCovers/splash_leather.png', 'splash_leather.png'],
-  ['Resources/SplashCovers/splash_kent.png', 'splash_kent.png'],
-  ['Resources/SplashCovers/splash_polar.png', 'splash_polar.png'],
+  // ⚠️ 源在 ios-latest（与 M 标成品 md5 全等）；老快照里是老标封面，不能拷
+  ['Resources/SplashCovers/splash_bamboo.png', 'splash_bamboo.png', 'ios-latest'],
+  ['Resources/SplashCovers/splash_leather.png', 'splash_leather.png', 'ios-latest'],
+  ['Resources/SplashCovers/splash_kent.png', 'splash_kent.png', 'ios-latest'],
+  ['Resources/SplashCovers/splash_polar.png', 'splash_polar.png', 'ios-latest'],
 ];
 
 /** 声音：[iOS 相对 Memoir 的源路径, rawfile/sounds 下的目标名]（原样拷贝） */
@@ -657,20 +750,28 @@ function main() {
 
   // ---------- 2. 图片 ----------
   let images = 0;
-  for (const [src, dst] of IMAGE_MAP) {
-    const from = path.join(IOS_MEMOIR, src);
+  for (const [src, dst, sourceLib] of IMAGE_MAP) {
+    const to = path.join(ENTRY_RES, 'base', 'media', dst);
+    if (sourceLib === 'protected') {
+      // M 标资产（IMAGE_MAP 头注释）：权威版在鸿蒙仓库，禁止从 iOS 物料拷贝
+      if (!fs.existsSync(to)) {
+        throw new Error(`受保护 M 标资产缺失（禁止从 iOS 物料拷贝，须从 git 历史 7662e71 恢复）: ${dst}`);
+      }
+      console.warn(`🛡 受保护 M 标资产，跳过拷贝: ${dst}`);
+      continue;
+    }
+    const baseDir = sourceLib === 'ios-latest' ? IOS_MEMOIR_LATEST : IOS_MEMOIR;
+    const from = path.join(baseDir, src);
     if (!fs.existsSync(from)) {
       // iOS 侧把图标物料换成了 SVG（AppIcon .icon / AppIconPreview_Polar），
       // 老副本里没有 PNG。鸿蒙侧已有上一次拷好的成品时不挡流程，只告警；
       // 真缺（目标也不存在）才抛错
-      const to = path.join(ENTRY_RES, 'base', 'media', dst);
       if (fs.existsSync(to)) {
         console.warn(`⚠️ 图片源缺失（保留现有成品）: ${src}`);
         continue;
       }
       throw new Error(`图片源缺失: ${src}`);
     }
-    const to = path.join(ENTRY_RES, 'base', 'media', dst);
     fs.mkdirSync(path.dirname(to), { recursive: true });
     fs.copyFileSync(from, to);
     images++;
@@ -716,4 +817,5 @@ module.exports = {
   IMAGE_MAP,
   SOUND_FILES,
   IOS_MEMOIR,
+  IOS_MEMOIR_LATEST,
 };

@@ -15,7 +15,7 @@
  *   栅格化，被内容盖住的节点才不栅格化
  */
 import { hilog } from '@kit.PerformanceAnalysisKit';
-import { matrix4 } from '@kit.ArkUI';
+import { display, matrix4 } from '@kit.ArkUI';
 import { BookColor, CoverLayout, bookColorHex } from '../../models/Notebook';
 import {
   BookBoxFace,
@@ -26,6 +26,9 @@ import { ShelfBookView } from './BookCoverView';
 
 /** 书的厚度（vp）。iOS `ShelfBook3D.depth` = 14 */
 const BOOK_DEPTH: number = 14;
+
+/** 书脊向封面平面探出的重叠量（vp）：压死封面/书脊各自栅格化留下的 1px 拼缝（Q32② 红线） */
+const SPINE_SEAM_OVERLAP: number = 0.8;
 
 /** 白框的书脊：纸面精装，书脊也是纸（iOS #DCD3C2） */
 const FRAMED_SPINE_COLOR: string = '#DCD3C2';
@@ -50,6 +53,12 @@ export struct ShelfBook3DView {
   @Prop bookWidthVp: number = 0;
   /** 绕竖轴的转角（弧度）。0 = 正面 */
   @Prop angleRad: number = 0;
+  /** 屏幕密度缓存：转角逐帧重算矩阵，不能每帧都同步查询 display */
+  private densityPx: number = 3;
+
+  aboutToAppear(): void {
+    this.densityPx = this.screenDensity();
+  }
 
   build() {
     // 两个面都锚在容器左上角（TopStart），矩阵里的 faceCenter / boxCenter 与之配套
@@ -75,7 +84,8 @@ export struct ShelfBook3DView {
     .height(this.coverHeight())
   }
 
-  /** 书脊：封面色压一层圆脊的明暗（中间略亮、两边暗），上下各一道烫线（iOS `BookSpine`） */
+  /** 书脊：封面色压一层圆脊的明暗（中间略亮、两边暗），上下各一道烫线（iOS `BookSpine`）。
+   *  宽度 = 厚度 + 拼缝重叠（投影矩阵同步探出，拼缝不露底） */
   @Builder
   private spineFace() {
     Stack() {
@@ -107,7 +117,7 @@ export struct ShelfBook3DView {
       .height('100%')
       .padding({ top: 16, bottom: 16 })
     }
-    .width(BOOK_DEPTH)
+    .width(BOOK_DEPTH + SPINE_SEAM_OVERLAP)
     .height(this.coverHeight())
     .transform3D(this.faceTransform(BookBoxFace.Spine))
   }
@@ -120,18 +130,27 @@ export struct ShelfBook3DView {
     return this.coverWidth() / COVER_ASPECT;
   }
 
-  /** 面的投影矩阵：这里算出的是行主序行向量 16 数，`matrix4.init` 按列主序读
-   * 恰好等于它的转置（列向量约定），直接喂即可 */
+  /** 面的投影矩阵：matrix4 工作在 **px 坐标系**（官方文档口径），封面尺寸、厚度、
+   *  视距全部按屏幕密度放大成 px，透视强度才与 iOS（520pt）一致；
+   *  这里算出行主序行向量 16 数，`matrix4.init` 按列主序读恰好等于它的转置，直接喂 */
   private faceTransform(face: BookBoxFace): matrix4.Matrix4Transit {
-    const m = bookBoxFaceMatrix(face, this.angleRad, this.coverWidth(), this.coverHeight(), BOOK_DEPTH);
-    hilog.debug(0x0000, 'ShelfBook3D',
-      'DBG face=%{public}d angle=%{public}s m=%{public}s',
-      face, String(Math.round(this.angleRad * 1000) / 1000),
-      JSON.stringify([m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7],
-        m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15]]
-        .map((v: number): number => Math.round(v * 10000) / 10000)));
+    const density = this.densityPx;
+    const m = bookBoxFaceMatrix(face, this.angleRad,
+      this.coverWidth() * density, this.coverHeight() * density,
+      BOOK_DEPTH * density, density, SPINE_SEAM_OVERLAP * density);
     return matrix4.init([m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7],
       m[8], m[9], m[10], m[11], m[12], m[13], m[14], m[15]]);
+  }
+
+  /** 屏幕密度（px/vp）；取不到按 3 兜底（常见密度，透视略有出入但不破坏几何） */
+  private screenDensity(): number {
+    try {
+      const d = display.getDefaultDisplaySync().densityPixels;
+      return d > 0 ? d : 3;
+    } catch (err) {
+      hilog.warn(0x0000, 'ShelfBook3D', 'get density failed: %{public}s', JSON.stringify(err));
+      return 3;
+    }
   }
 
   /** 书脊颜色跟着封面走（R-BOOK-07 / iOS `spineColor`） */

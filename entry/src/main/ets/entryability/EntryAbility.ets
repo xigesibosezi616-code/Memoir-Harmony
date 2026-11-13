@@ -1,11 +1,13 @@
 import { AbilityConstant, UIAbility, Want, wantConstant } from '@kit.AbilityKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { window } from '@kit.ArkUI';
 import { ThemeManager, STORAGE_KEY_THEME_ID, STORAGE_KEY_THEME_MANAGER } from '../theme/ThemeManager';
 import { LanguageManager } from '../services/LanguageManager';
 import { AppPrefs, PREF_KEY_ACCEPTED_LEGAL_VERSION, PREF_KEY_HAS_COMPLETED_ONBOARDING,
-  PREF_KEY_SHOW_SPLASH_ANIMATION, STORAGE_KEY_NEEDS_LEGAL_CONSENT,
-  STORAGE_KEY_HAS_COMPLETED_ONBOARDING, STORAGE_KEY_SHOW_SPLASH } from '../services/AppPrefs';
+  PREF_KEY_PEN_PAL_NAME, PREF_KEY_SHOW_SPLASH_ANIMATION, STORAGE_KEY_NEEDS_LEGAL_CONSENT,
+  STORAGE_KEY_HAS_COMPLETED_ONBOARDING, STORAGE_KEY_SHOW_SPLASH,
+  STORAGE_KEY_PEN_PAL_NAME } from '../services/AppPrefs';
 import { needsLegalConsent } from '../views/legal/LegalDocument';
 import { splashImageFor } from '../views/splash/SplashCoverPool';
 import { MigrationRunner } from '../services/MigrationRunner';
@@ -32,6 +34,7 @@ import {
 import { BackupFormat } from '../services/backup/BackupFormat';
 import { BackupImportService, STORAGE_KEY_OPEN_BACKUP_IMPORT_TICK,
   STORAGE_KEY_BACKUP_IMPORT_SOURCE } from '../services/backup/BackupImportService';
+import { MembershipManager } from '../services/membership/MembershipManager';
 
 const DOMAIN = 0x0000;
 const TAG = 'EntryAbility';
@@ -222,8 +225,17 @@ export default class EntryAbility extends UIAbility {
     // 5.3 寄信队列：构造只存依赖不读偏好（AppPrefs.load 在 initThenLoad 才跑，
     // 负责表首次访问才从偏好懒加载）；30s 轮询 / 回前台由 MainTabsView 挂
     const outbox = new LetterOutboxService(this.context, session, auth, notifications);
+    // 7.1 会员：华为 IAP 查权益 / 交 jws / 确认发货（U02 R-MEMBER-09/10）
+    const membership = new MembershipManager(this.context, session, auth);
     const env = new AppEnvironment(createDefaultErrorPresenter(), chrome, session, auth,
-      outbox, notifications);
+      outbox, notifications, membership);
+    // 回前台：重查华为权益（续费的那几期、上回同步 503 的都靠这条兜底；
+    // 确认发货幂等，多试一次没关系——U02 R-MEMBER-10 回前台时机）
+    env.registerForegroundHook((): void => {
+      membership.syncPurchases().catch((err: BusinessError): void => {
+        hilog.error(DOMAIN, TAG, 'foreground membership sync failed: %{public}s', JSON.stringify(err));
+      });
+    });
     this.environment = env;
     AppStorage.setOrCreate(STORAGE_KEY_APP_ENVIRONMENT, env);
   }
@@ -261,10 +273,12 @@ export default class EntryAbility extends UIAbility {
     let needsConsent = true;
     let hasCompletedOnboarding = false;
     let showSplash = false;
+    let penPalName = '';
     try {
       await AppPrefs.load(this.context);
       needsConsent = needsLegalConsent(AppPrefs.getString(PREF_KEY_ACCEPTED_LEGAL_VERSION, ''));
       hasCompletedOnboarding = AppPrefs.getBool(PREF_KEY_HAS_COMPLETED_ONBOARDING, false);
+      penPalName = AppPrefs.getString(PREF_KEY_PEN_PAL_NAME, '');
       // 开场封面在这里就判断掉（iOS 在 MemoirApp @State 初值里做同样的事）：
       // 当前主题没配封面图时，连一帧封面背景都不该闪
       const themeId: string = AppStorage.get<string>(STORAGE_KEY_THEME_ID) ?? 'bamboo';
@@ -279,6 +293,8 @@ export default class EntryAbility extends UIAbility {
     AppStorage.setOrCreate(STORAGE_KEY_NEEDS_LEGAL_CONSENT, needsConsent);
     AppStorage.setOrCreate(STORAGE_KEY_HAS_COMPLETED_ONBOARDING, hasCompletedOnboarding);
     AppStorage.setOrCreate(STORAGE_KEY_SHOW_SPLASH, showSplash);
+    // 笔友名镜像（iOS @AppStorage 同款观察语义）：偏好打不开时按没起名处理
+    AppStorage.setOrCreate(STORAGE_KEY_PEN_PAL_NAME, penPalName);
 
     windowStage.loadContent('pages/Index', (err) => {
       if (err.code) {
@@ -300,6 +316,15 @@ export default class EntryAbility extends UIAbility {
     MigrationRunner.runPendingMigrations(this.context).catch((err: Object) => {
       hilog.error(DOMAIN, TAG, 'runPendingMigrations failed: %{public}s', JSON.stringify(err));
     });
+
+    // 7.1 会员启动同步（U02 R-MEMBER-10）：查华为权益（交 jws + 确认发货）+ 拉商品；
+    // 不挡首帧，内部失败自兜底（本机假会员 / 预设价照常可用）
+    const membership = this.environment?.membership;
+    if (membership !== undefined) {
+      membership.start().catch((err: BusinessError): void => {
+        hilog.error(DOMAIN, TAG, 'membership start failed: %{public}s', JSON.stringify(err));
+      });
+    }
   }
 
   onWindowStageDestroy(): void {

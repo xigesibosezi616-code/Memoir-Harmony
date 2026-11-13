@@ -68,6 +68,8 @@ import { PhotoFullScreenCover } from '../components/photo/PhotoFullScreenCover';
 import { MoodBadge, moodLabelRes } from '../components/MoodBadge';
 import { TagPill } from '../components/TagPill';
 import { StampView } from '../components/StampView';
+import { AppEnvironment, STORAGE_KEY_APP_ENVIRONMENT } from '../../environment/AppEnvironment';
+import { STORAGE_KEY_MEMBERSHIP_TICK } from '../../services/membership/MembershipManager';
 import {
   WeatherLocationBadge,
   weatherBadgeHasContent
@@ -90,6 +92,8 @@ export struct EntryDetailView {
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
   @StorageProp(STORAGE_KEY_APP_LANGUAGE) appLanguage: string = 'zh-Hans';
   @StorageProp(STORAGE_KEY_SAFE_AREA_BOTTOM_VP) safeAreaBottomVp: number = 0;
+  /** 会员状态变化（7.2：相纸选择器的会员锁随 tick 重算；env 取 AppStorage） */
+  @StorageProp(STORAGE_KEY_MEMBERSHIP_TICK) membershipTick: number = 0;
   @StorageProp(STORAGE_KEY_DETAIL_RELOAD_TICK) @Watch('onReloadTick')
   reloadTick: number = 0;
 
@@ -506,6 +510,10 @@ export struct EntryDetailView {
       PaperStylePickerSheet({
         pixelMap: this.paperSheetPixelMap,
         showPositionPicker: false,
+        isMember: this.isMember(),
+        onLockedPick: (): void => {
+          this.navPathStack.pushPathByName('Paywall', '');
+        },
         onSelect: (style: PaperStyle, _position: PhotoPosition): void => {
           this.applyFullscreenRestyle(style);
         },
@@ -584,6 +592,13 @@ export struct EntryDetailView {
   }
 
   /** 相纸选定：改 paperStyle → 落库 → 正文重装（文件不动） */
+  /** 会员判定（R-MEMBER-08：本机快照，相纸选择器的会员锁用） */
+  private isMember(): boolean {
+    const env = AppStorage.get<AppEnvironment>(STORAGE_KEY_APP_ENVIRONMENT);
+    const membership = env !== undefined ? env.membership : undefined;
+    return membership !== undefined && membership.isMember;
+  }
+
   private async applyFullscreenRestyle(style: PaperStyle): Promise<void> {
     this.showPaperSheet = false;
     const entry = this.entry;

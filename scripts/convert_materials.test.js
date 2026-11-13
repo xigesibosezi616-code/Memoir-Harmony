@@ -133,11 +133,39 @@ test('真实 xcstrings 可解析、条数 > 600、无碰撞', () => {
 });
 
 test('图片 / 声音清单的源文件都存在', () => {
-  for (const [src] of cm.IMAGE_MAP) {
-    assert.ok(fs.existsSync(path.join(cm.IOS_MEMOIR, src)), `缺 ${src}`);
+  // 源缺失是允许的：iOS 侧部分物料换成了 SVG（AppIcon .icon / AppIconPreview_Polar），
+  // 脚本按「保留已有成品、只告警」容错（convert_materials.js main 同规则）；
+  // 源与成品都缺才是真断料
+  const producedDir = path.join(__dirname, '..', 'entry', 'src', 'main', 'resources', 'base', 'media');
+  for (const [src, dst, sourceLib] of cm.IMAGE_MAP) {
+    if (sourceLib === 'protected') {
+      // M 标资产不拷贝，成品必须在库（2026-11-12 图标回退事故防护，见 IMAGE_MAP 头注释）
+      assert.ok(fs.existsSync(path.join(producedDir, dst)), `受保护 M 标资产缺失: ${dst}`);
+      continue;
+    }
+    const baseDir = sourceLib === 'ios-latest' ? cm.IOS_MEMOIR_LATEST : cm.IOS_MEMOIR;
+    if (fs.existsSync(path.join(baseDir, src))) {
+      continue;
+    }
+    assert.ok(fs.existsSync(path.join(producedDir, dst)), `缺源也缺成品: ${src}`);
   }
   for (const [src] of cm.SOUND_FILES) {
     assert.ok(fs.existsSync(path.join(cm.IOS_MEMOIR, src)), `缺 ${src}`);
+  }
+});
+
+// ---------- 2026-11-12 图标回退事故防护 ----------
+// 事故：老快照 reference/ios 的老标 M 图（app_icon_preview / mailbox / splash）
+// 被 convert_materials.js 整批拷回工作区，开屏出现老图标（dc85981 → 79bce10
+// 回滚 → 19:47 重跑脚本复发）。防护：脚本侧标注源库，测试侧断言标注与资产一致。
+test('M 标资产防护：app_icon_preview/mailbox 标 protected、splash 标 ios-latest', () => {
+  for (const [src, dst, sourceLib] of cm.IMAGE_MAP) {
+    if (dst.startsWith('app_icon_preview_') || dst.startsWith('mailbox_')) {
+      assert.strictEqual(sourceLib, 'protected', `${dst} 必须标 protected（拷自 iOS 即老标回退事故复发）`);
+    }
+    if (dst.startsWith('splash_')) {
+      assert.strictEqual(sourceLib, 'ios-latest', `${dst} 必须标 ios-latest（老快照是老标封面）`);
+    }
   }
 });
 

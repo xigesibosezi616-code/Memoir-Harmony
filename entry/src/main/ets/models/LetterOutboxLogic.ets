@@ -149,16 +149,28 @@ export function dominantMoodOf(moods: string[]): string {
   return best;
 }
 
-/** 补领视角的一条服务端信（GET /letters 元素，只留补领要用的三样） */
+/** 补领视角的一条服务端信（GET /letters 元素）。U01 起每封多 clientLetterId /
+ *  penPalId / translation / danger（老信为 '' / false） */
 export class RemoteLetter {
   readonly body: string;
   readonly fromCharacter: string;
   readonly generatedAtMs: number;
+  /** 写这封回信对应的本机信件 id；'' = 老信没有 */
+  readonly clientLetterId: string;
+  /** '' = 自己起名的那位 */
+  readonly penPalId: string;
+  readonly translation: string;
+  readonly danger: boolean;
 
-  constructor(body: string, fromCharacter: string, generatedAtMs: number) {
+  constructor(body: string, fromCharacter: string, generatedAtMs: number,
+    clientLetterId: string, penPalId: string, translation: string, danger: boolean) {
     this.body = body;
     this.fromCharacter = fromCharacter;
     this.generatedAtMs = generatedAtMs;
+    this.clientLetterId = clientLetterId;
+    this.penPalId = penPalId;
+    this.translation = translation;
+    this.danger = danger;
   }
 }
 
@@ -166,10 +178,13 @@ export class RemoteLetter {
 export class WaitingLetter {
   readonly id: string;
   readonly generatedAtMs: number;
+  /** 世界笔友 id；'' = 自己起名的那位（只有它参与老信的时间猜） */
+  readonly penPalId: string;
 
-  constructor(id: string, generatedAtMs: number) {
+  constructor(id: string, generatedAtMs: number, penPalId: string) {
     this.id = id;
     this.generatedAtMs = generatedAtMs;
+    this.penPalId = penPalId;
   }
 }
 
@@ -179,7 +194,7 @@ export enum ReconcileActionKind {
   Adopt = 'adopt',
   /** 对不上任何写信中的信 → 新落一封（R-OUTBOX-09） */
   Create = 'create',
-  /** 正文本机已有（按正文去重），跳过 */
+  /** 正文本机已有（按正文去重）/ clientLetterId 对上的是一封不在写信中的信，跳过 */
   Skip = 'skip'
 }
 
@@ -198,34 +213,63 @@ export class ReconcileAction {
 }
 
 /**
- * 补领匹配（R-OUTBOX-07/09；iOS reconcile 内层逻辑逐字对齐，单测覆盖）：
- * - 服务端信按写信时刻升序逐条认领；某条能认领 waiting 里**第一封**
- *   generatedAt ≤ 这条 generatedAt + 5 分钟 的信，认领掉的信不再参与后续匹配
- * - 正文已在本机的跳过（**按正文去重**：本机没有删信入口，不会复活用户删掉的）
+ * 补领匹配（R-OUTBOX-07/09 + U01 clientLetterId 语义；iOS reconcile 逐字对齐，单测覆盖）：
+ * - 服务端信按写信时刻升序逐条认领，认领掉的信不再参与后续匹配
+ * - ① clientLetterId 对得上本机一封写信中的信 → 就是它的回信，认领
+ *   （对得上的是一封**不在写信中**的本机信 → 跳过，不复活已收下 / 已退回的）
+ * - ② 正文本机已有的跳过（**按正文去重**：本机没有删信入口，不会复活用户删掉的）
+ * - ③ 老的信没有 id：clientLetterId、penPalId 都为空（只猜自己起名的那位）→
+ *   写信时刻在某封「写信中」的**自起名**信寄出之后的（− 5 分钟容差），就算那封的
+ * - ④ 其余（含对不上任何本机信的世界笔友信）→ 新落一封（到达时刻由调用方按服务端时间重算）
  * - waiting 由调用方按 generatedAt 升序、只放「写信中且本机负责」的
  */
 export function reconcilePlan(remote: RemoteLetter[], waiting: WaitingLetter[],
-  existingBodies: Set<string>): ReconcileAction[] {
+  existingBodies: Set<string>, knownLetterIds: Set<string>): ReconcileAction[] {
   const ordered = remote.slice().sort((a: RemoteLetter, b: RemoteLetter): number =>
     a.generatedAtMs - b.generatedAtMs);
   const available = waiting.slice();
+  const waitingById = new Map<string, WaitingLetter>();
+  for (const w of available) {
+    waitingById.set(w.id, w);
+  }
   const actions: ReconcileAction[] = [];
   for (const item of ordered) {
+    // ① 本机信件 id 认领：2026-10-16 起每封信都带着，对得上就是那一封的回信，不用猜
+    if (item.clientLetterId.length > 0) {
+      const match = waitingById.get(item.clientLetterId);
+      if (match !== undefined) {
+        available.splice(available.indexOf(match), 1);
+        waitingById.delete(match.id);
+        actions.push(new ReconcileAction(ReconcileActionKind.Adopt, match.id, item));
+        continue;
+      }
+      // 对得上的是一封不在写信中的本机信：已收下 / 已退回，不复活，也不重复落
+      if (knownLetterIds.has(item.clientLetterId)) {
+        actions.push(new ReconcileAction(ReconcileActionKind.Skip, '', item));
+        continue;
+      }
+    }
+    // ② 按正文去重
     if (existingBodies.has(item.body)) {
       actions.push(new ReconcileAction(ReconcileActionKind.Skip, '', item));
       continue;
     }
+    // ③ 老信时间猜：只猜自己起名的那位（clientLetterId、penPalId 都为空）
     let adoptedId = '';
-    for (const w of available) {
-      if (w.generatedAtMs <= item.generatedAtMs + OUTBOX_CLOCK_SKEW_MS) {
-        adoptedId = w.id;
-        available.splice(available.indexOf(w), 1);
-        break;
+    if (item.clientLetterId.length === 0 && item.penPalId.length === 0) {
+      for (const w of available) {
+        if (w.penPalId.length === 0 && w.generatedAtMs <= item.generatedAtMs + OUTBOX_CLOCK_SKEW_MS) {
+          adoptedId = w.id;
+          available.splice(available.indexOf(w), 1);
+          waitingById.delete(w.id);
+          break;
+        }
       }
     }
     if (adoptedId.length > 0) {
       actions.push(new ReconcileAction(ReconcileActionKind.Adopt, adoptedId, item));
     } else {
+      // ④ 新落一封
       actions.push(new ReconcileAction(ReconcileActionKind.Create, '', item));
     }
   }

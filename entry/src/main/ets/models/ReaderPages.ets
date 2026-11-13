@@ -241,8 +241,6 @@ export class ReaderHeaderMetrics {
   static readonly dayTensFontSize: number = 36;
   static readonly dayOnesFontSize: number = 56;
   static readonly dayTopGap: number = 2;
-  /** 印章是固定 56vp 的圆（见 StampView），与日期数字并排 */
-  static readonly stampSize: number = 56;
   static readonly weekdayFontSize: number = 13;
   static readonly weekdayTopGap: number = 2;
   static readonly weekdayBottomGap: number = 16;
@@ -262,7 +260,7 @@ export function estimateHeaderHeight(entry: JournalEntry, width: number,
   const m = ReaderHeaderMetrics;
   let h = 0;
   h += measurer.lineHeightOf(m.monthFontSize, 0) + m.monthBottomGap;
-  h += m.dayTopGap + Math.max(measurer.lineHeightOf(m.dayOnesFontSize, 0), m.stampSize);
+  h += m.dayTopGap + measurer.lineHeightOf(m.dayOnesFontSize, 0);
   h += m.weekdayTopGap + measurer.lineHeightOf(m.weekdayFontSize, 0) + m.weekdayBottomGap;
   h += 1 + m.dividerBottomGap;
   if (entry.title.length > 0) {

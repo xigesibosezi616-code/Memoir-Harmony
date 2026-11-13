@@ -201,3 +201,37 @@ export function weekdayNarrow(weekday: number, appLanguage: string): string {
   }
   return new Intl.DateTimeFormat(appLanguage, { weekday: 'narrow' }).format(d);
 }
+
+// ---- U01 邮票（下一包几时到的相对时间） ----
+
+/**
+ * 「明天」「3 天后」「in 3 hours」（U01：邮票用完了，新的一包{这个}送到）。
+ * 对齐 iOS `Date.formatted(.relative(presentation: .named))` 的语感：
+ * 单位能叫出名字就叫名字（明天 / 后天 / tomorrow），CLDR 出词——
+ * `Intl.RelativeTimeFormat` numeric:'auto' 七种语言都给现成的（en「tomorrow」、
+ * zh「明天/后天」、ja「明日」、ko「내일」、fr「demain」、es「mañana」）。
+ * 单位怎么挑：跨到别的日历日（≤6 天）用「天」（明晚到也说「明天」）；当天用
+ * 分钟（<1h）/ 小时。已经到了 / 快到了（≤1 分钟）返回 ''——调用方换
+ * 「新的一包很快就到」那句（iOS guard nextPackAt 同款兜底）。
+ */
+export function relativeNamed(targetMs: number, appLanguage: string): string {
+  const now = new Date();
+  const target = new Date(targetMs);
+  const deltaMs = targetMs - now.getTime();
+  if (deltaMs <= 60_000) {
+    return '';
+  }
+  const rtf = new Intl.RelativeTimeFormat(appLanguage, { numeric: 'auto' });
+  // 日历日差（本地时区）：明晚 8 点对今晚 11 点是 1（「明天」），不是 0.46 天
+  const dayDiff = Math.round(
+    (Date.UTC(target.getFullYear(), target.getMonth(), target.getDate()) -
+      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())) / 86_400_000);
+  if (dayDiff >= 1) {
+    // 明天 / 后天 / N 天后（≤6 天有名字的叫名字，再往后 CLDR 自动退「7 天后」）
+    return rtf.format(dayDiff, 'day');
+  }
+  if (deltaMs < 3_600_000) {
+    return rtf.format(Math.max(1, Math.round(deltaMs / 60_000)), 'minute');
+  }
+  return rtf.format(Math.max(1, Math.round(deltaMs / 3_600_000)), 'hour');
+}

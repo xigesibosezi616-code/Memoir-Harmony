@@ -55,6 +55,7 @@ import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
 import { BookCoverView } from './BookCoverView';
 import { CoverCropOverlay } from './CoverCropOverlay';
+import { STORAGE_KEY_MEMBERSHIP_TICK } from '../../services/membership/MembershipManager';
 
 const DOMAIN = 0x0000;
 const TAG = 'CoverEditorView';
@@ -87,6 +88,8 @@ export struct CoverEditorView {
   @StorageProp(STORAGE_KEY_SAFE_AREA_TOP_VP) safeAreaTopVp: number = 0;
   @StorageProp(STORAGE_KEY_SAFE_AREA_BOTTOM_VP) safeAreaBottomVp: number = 0;
   @StorageProp(STORAGE_KEY_HOME_RELOAD_TICK) homeReloadTick: number = 0;
+  /** 会员状态变化（7.2：会员版式角标与保存拦截随 tick 重算） */
+  @StorageProp(STORAGE_KEY_MEMBERSHIP_TICK) membershipTick: number = 0;
 
   /** 新建模式？否则编辑模式（notebook 必有） */
   @State private isCreate: boolean = true;
@@ -610,9 +613,10 @@ export struct CoverEditorView {
     return true;
   }
 
-  /** 会员状态占位：7.2 接真状态（R-MEMBER-06 的角标与保存前 paywall 都看它） */
+  /** 会员判定（7.2 点亮，R-MEMBER-06：角标与保存前 paywall 都看它；R-MEMBER-08 本机快照） */
   private isMember(): boolean {
-    return true;
+    const membership = this.env.membership;
+    return membership !== undefined && membership.isMember;
   }
 
   private setDraftLayout(layout: CoverLayout): void {
@@ -765,13 +769,14 @@ export struct CoverEditorView {
     if (context === undefined) {
       return;
     }
-    // 会员钩子（R-MEMBER-06）：新选了会员版式且保存后有照片才拦；
-    // isMember 占位 true，7.2 接真状态后在这里拉 paywall
+    // 会员钩子（R-MEMBER-06，7.2 点亮）：新选了会员版式且保存后有照片才拦——
+    // 弹付费页、不保存；已是会员放行
     const originalLayout: CoverLayout | undefined = this.originalLayoutForMembership();
     const hasExistingPhoto = this.existingPhotoFilename().length > 0;
     if (needsMembershipCoverLayout(this.draftLayout, originalLayout, this.photoKind,
       hasExistingPhoto) && !this.isMember()) {
-      // TODO 7.2：paywall
+      this.navPathStack.pushPathByName('Paywall', '');
+      return;
     }
     if (this.isCreate) {
       await this.applyCreate(context);

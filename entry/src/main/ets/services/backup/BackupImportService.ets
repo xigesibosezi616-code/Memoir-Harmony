@@ -8,8 +8,9 @@
  * 不提供「替换全部」—— 一次误操作就能清空用户所有日记，收益远小于风险。
  * 导入在任何情况下都只会让库里的东西变多，不会变少。
  *
- * moodSummaries（会员情绪小结）与 penPalNotes（笔友手记）鸿蒙侧没有对应模型，**静默跳过**
- * （格式解析层就没解，见 BackupFormat.ets）。
+ * moodSummaries（会员情绪小结）鸿蒙侧没有对应模型，**静默跳过**（格式解析层就没解）。
+ * penPalNotes（笔友手记，U01 B3）：按 id 去重合并进库，本机同 id 的不动；
+ * 手记坏条只丢那一条，不影响信的导入（iOS BackupImporter 同款）。
  */
 import { relationalStore } from '@kit.ArkData';
 import { common } from '@kit.AbilityKit';
@@ -23,16 +24,19 @@ import { Notebook, BookTexture, nameKey, uniqueName, singleNotebook, nextSortOrd
   retiredColorReplacement, cleanedName } from '../../models/Notebook';
 import { Letter } from '../../models/Letter';
 import { WritingStreak } from '../../models/WritingStreak';
+import { PenPalNote } from '../../models/PenPalNote';
+import { PenPalNoteKind } from '../../models/PenPalNote';
 import { generateUuid, uuidKey } from '../../models/Uuid';
 import { SUBTITLE_MAX_LENGTH } from '../../models/CoverEdit';
 import { AppPrefs } from '../AppPrefs';
 import { EntryRepository } from '../../data/EntryRepository';
 import { NotebookRepository } from '../../data/NotebookRepository';
 import { LetterRepository } from '../../data/LetterRepository';
+import { PenPalNoteRepository } from '../../data/PenPalNoteRepository';
 import { AUDIO_DIR_NAME, PHOTO_DIR_NAME, AUDIO_PREFIX } from '../MediaStorage';
 import { BackupFormat, BackupManifest, BackupEntryDto, BackupLetterDto, BackupTagDto,
-  BackupEntriesFile, parseBackupManifest, parseBackupEntries, parseBackupLetters,
-  parseBackupTaxonomy } from './BackupFormat';
+  BackupEntriesFile, BackupPenPalNoteDto, parseBackupManifest, parseBackupEntries,
+  parseBackupLetters, parseBackupTaxonomy, parseBackupPenPalNotes } from './BackupFormat';
 import { BackupCrypto, BackupCryptoFailure, BackupCryptoError } from './BackupCrypto';
 import { readHeadBytes, readBytes, writeBytes, readTextFile, removeTree, ensureDir,
   fileExists, fileSizeOf, lastPathComponent } from './BackupFs';
@@ -361,6 +365,11 @@ function decodeLetters(pkg: BackupPackage): BackupLetterDto[] {
     return [];
   }
   return parseBackupLetters(text) ?? [];
+}
+
+/** letters.json 里的 penPalNotes（U01 B3）：单独解，坏文件 / 坏条只丢，不影响信 */
+function decodePenPalNotes(pkg: BackupPackage): BackupPenPalNoteDto[] {
+  return parseBackupPenPalNotes(readTextFile(`${pkg.rootDir}/${BackupFormat.lettersFile}`));
 }
 
 export class BackupImportService {
@@ -754,6 +763,11 @@ export class BackupImportService {
       if (bl.readAtMs !== undefined) {
         letter.readAt = bl.readAtMs;
       }
+      // 世界笔友四字段（可选；老包没有就不写，undefined = 自己起名的那位）
+      letter.penPalId = bl.penPalId;
+      letter.translatedBody = bl.translatedBody;
+      letter.danger = bl.danger;
+      letter.postage = bl.postage;
       await LetterRepository.saveLetter(store, letter);
       // 关联日记：只连库里有的（含刚导入的）；找不到的忽略，不阻断导入
       const linkedIds: string[] = [];
@@ -768,6 +782,26 @@ export class BackupImportService {
       }
       letterIds.add(idKey);
       summary.lettersImported++;
+    }
+
+    // 3.5 笔友手记（U01 B3）：按 id 去重合并，本机同 id 的不动。
+    // 同一笔友画像导进来两份也不要紧：寄信只带最新的那份，下次回执重写时并掉
+    const existingNotes = await BackupImportService.fetchLocalPenPalNotes(store);
+    const noteIds = new Set<string>();
+    for (const note of existingNotes) {
+      noteIds.add(uuidKey(note.id));
+    }
+    for (const bn of decodePenPalNotes(pkg)) {
+      if (bn.penPalID.length === 0 || noteIds.has(uuidKey(bn.id))) {
+        continue;
+      }
+      const note = new PenPalNote(bn.penPalID, bn.text, bn.notedAtMs);
+      note.id = bn.id;
+      note.createdAtMs = bn.createdAtMs;
+      note.kind = bn.kind !== undefined ? bn.kind : PenPalNoteKind.Recent;
+      note.updatedAtMs = bn.updatedAtMs;
+      await PenPalNoteRepository.saveNote(store, note);
+      noteIds.add(uuidKey(note.id));
     }
 
     // 4. 最长连续写作：包里的和本机的取大的（只升不降），再用合并后的全部日记算一次
@@ -862,6 +896,15 @@ export class BackupImportService {
       return await LetterRepository.listLetters(store);
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'fetch local letters failed: %{public}s', JSON.stringify(err));
+      return [];
+    }
+  }
+
+  private static async fetchLocalPenPalNotes(store: relationalStore.RdbStore): Promise<PenPalNote[]> {
+    try {
+      return await PenPalNoteRepository.listNotes(store);
+    } catch (err) {
+      hilog.error(DOMAIN, TAG, 'fetch local pen pal notes failed: %{public}s', JSON.stringify(err));
       return [];
     }
   }

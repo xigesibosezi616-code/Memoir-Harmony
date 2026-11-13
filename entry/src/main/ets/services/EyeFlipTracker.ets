@@ -6,8 +6,8 @@
  * - 会话：前摄（CameraSession 同款 CameraKit 装配，只要预览流不要拍照流）
  * - 帧源：`image.createPixelMapFromSurface`（PaperCameraView 抓取景帧同款，
  *   相纸盖住取景器时仍可抓帧 —— 预览 surface 被页面盖住不影响）
- * - 节奏：`EYE_POLL_INTERVAL_MS` 轮询一帧检一次（~3fps，600ms 抬头判定够用，
- *   省电）；上一帧没检完跳过本帧（detect 串行，不堆积）
+ * - 节奏：`EYE_POLL_INTERVAL_MS` 轮询一帧检一次（4fps，400ms 抬头判定
+ *   有一两个采样点，省电）；上一帧没检完跳过本帧（detect 串行，不堆积）
  * - 失败即静默：没脸 / 超时 / 抓帧失败 → 回调 undefined（机器按「无脸」处理），
  *   不重试不报错
  * - 生命周期：`start(surfaceId)` 装配 + 起轮询；`stop()` 停轮询 + 释放会话；
@@ -25,8 +25,9 @@ import { pitchOfLargestFace } from '../models/EyeFlipMachine';
 const DOMAIN = 0x0000;
 const TAG = 'EyeFlipTracker';
 
-/** 轮询间隔（ms）：faceDetector ~3fps，600ms 抬头判定够用 */
-export const EYE_POLL_INTERVAL_MS: number = 350;
+/** 轮询间隔（ms）：250ms 一帧（4fps，2026-11-13 调敏：350ms 抬头采样太疏，
+ *  400ms 持续判定只有一两个样本点）；detect 慢时自动跳帧不堆积 */
+export const EYE_POLL_INTERVAL_MS: number = 250;
 /** 预览目标短边（px）：脸占满画面的小档即可，省电（bestPreviewProfile 就近匹配） */
 const EYE_PREVIEW_SHORT_SIDE_PX: number = 240;
 

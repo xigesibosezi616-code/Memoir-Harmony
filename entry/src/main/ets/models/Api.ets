@@ -11,6 +11,7 @@
  * - `bindings` 只留 provider 名单（'phone' / 'apple' / …），账号页显示绑定项够用
  */
 import { ApiDates } from '../services/http/ApiDates';
+import { isUuidString } from './Uuid';
 
 /** 单个第三方绑定的原样形状 */
 interface BindingRaw {
@@ -68,12 +69,14 @@ interface DeleteAccountResponseRaw {
   appleRevoked?: boolean;
 }
 
-/** GET /me/rhythm 响应的原样形状（types.ts RhythmResponse） */
-interface RhythmResponseRaw {
-  tier?: string;
-  canRequestNow?: boolean;
-  reason?: string;
-  nextLetterAt?: string | null;
+/** GET /me/stamps、POST /me/stamps/claim 响应的原样形状（U01 `StampsResponse`） */
+interface StampsResponseRaw {
+  balance?: number;
+  cap?: number;
+  /** 下一包什么时候到（ISO 串） */
+  nextPackAt?: string;
+  packReady?: boolean;
+  isMember?: boolean;
 }
 
 /** 只回 {ok:true} 的轻响应（PATCH /me 等）的原始形状 */
@@ -182,24 +185,27 @@ export class DeleteAccountResponse {
 }
 
 /**
- * GET /me/rhythm 成功响应（5.2 邮筒页进页面就问，提前说明「这周已经寄过了」）。
- * 判定权只在服务端，客户端不算额度（02_BACKEND_API.md；R-POST-05）。
+ * 邮票夹（`GET /me/stamps`，U01 2026-10-16 起取代来信节奏；iOS `StampWallet`）。
+ * **余额只认服务端**，客户端拿它提前告诉用户「邮票用完了、下一包几时到」，
+ * 最终由服务端扣、由服务端拦。
  */
-export class RhythmResponse {
-  /** 服务端认的档位：'free' / 'subscribed' */
-  readonly tier: string;
-  /** 现在能不能寄 */
-  readonly canRequestNow: boolean;
-  /** 'ok' / 'weekly_pending' / 'daily_cap' / 'monthly_cap' / 'welcome_pending'（R-POST-12 文案键） */
-  readonly reason: string;
-  /** 下一封最早什么时候能寄（ISO 串）；现在就能寄时为 '' */
-  readonly nextLetterAt: string;
+export class StampWallet {
+  readonly balance: number;
+  /** 邮票夹最多放几张（不清空、一直攒；服务端固定给 999，只是防呆） */
+  readonly cap: number;
+  /** 下一包什么时候到（毫秒） */
+  readonly nextPackAtMs: number;
+  /** 现在就能领一包 */
+  readonly packReady: boolean;
+  readonly isMember: boolean;
 
-  constructor(tier: string, canRequestNow: boolean, reason: string, nextLetterAt: string) {
-    this.tier = tier;
-    this.canRequestNow = canRequestNow;
-    this.reason = reason;
-    this.nextLetterAt = nextLetterAt;
+  constructor(balance: number, cap: number, nextPackAtMs: number,
+    packReady: boolean, isMember: boolean) {
+    this.balance = balance;
+    this.cap = cap;
+    this.nextPackAtMs = nextPackAtMs;
+    this.packReady = packReady;
+    this.isMember = isMember;
   }
 }
 
@@ -315,13 +321,180 @@ export function parseDeleteAccountResponse(raw: string): DeleteAccountResponse {
   return new DeleteAccountResponse(true);
 }
 
-export function parseRhythmResponse(raw: string): RhythmResponse {
-  const r = requireObject<RhythmResponseRaw>(raw);
-  if (typeof r.canRequestNow !== 'boolean') {
-    throw new Error('rhythm.canRequestNow missing');
+export function parseStampsResponse(raw: string): StampWallet {
+  const r = requireObject<StampsResponseRaw>(raw);
+  if (typeof r.balance !== 'number') {
+    throw new Error('stamps.balance missing');
   }
-  return new RhythmResponse(optionalString(r.tier), r.canRequestNow,
-    optionalString(r.reason), optionalString(r.nextLetterAt ?? undefined));
+  if (typeof r.cap !== 'number') {
+    throw new Error('stamps.cap missing');
+  }
+  const nextPackAt = ApiDates.parse(requireString(r.nextPackAt, 'stamps.nextPackAt'));
+  if (nextPackAt === null) {
+    throw new Error('stamps.nextPackAt is not ISO8601');
+  }
+  return new StampWallet(r.balance, r.cap, nextPackAt.getTime(),
+    r.packReady === true, r.isMember === true);
+}
+
+// ---- 7.1 华为支付（U02 `POST /subscription/sync-huawei`）----
+
+interface SubscriptionSyncResponseRaw {
+  ok?: boolean;
+  subscription?: SubscriptionRaw;
+  finished?: boolean;
+}
+
+/**
+ * POST /subscription/sync-huawei 成功响应（U02 R-MEMBER-09 第 5–6 步）：
+ * 服务端验华为签名后回写会员状态。`finished == false` → 客户端自己调
+ * `iap.finishPurchase` 确认发货（缺省按 false，宁多确认一次）。
+ */
+export class SubscriptionSyncResponse {
+  readonly subscription: SubscriptionStatusDTO;
+  readonly finished: boolean;
+
+  constructor(subscription: SubscriptionStatusDTO, finished: boolean) {
+    this.subscription = subscription;
+    this.finished = finished;
+  }
+}
+
+export function parseSubscriptionSyncResponse(raw: string): SubscriptionSyncResponse {
+  const r = requireObject<SubscriptionSyncResponseRaw>(raw);
+  if (r.ok !== true) {
+    throw new Error('subscriptionSync.ok missing');
+  }
+  if (r.subscription === undefined) {
+    throw new Error('subscriptionSync.subscription missing');
+  }
+  if (typeof r.subscription.isActive !== 'boolean') {
+    throw new Error('subscriptionSync.subscription.isActive missing');
+  }
+  const sub = new SubscriptionStatusDTO(r.subscription.isActive,
+    optionalString(r.subscription.productId), optionalString(r.subscription.platform),
+    optionalString(r.subscription.expiresAt));
+  return new SubscriptionSyncResponse(sub, r.finished === true);
+}
+
+// ---- U01 B3 笔友手记（寄信随带 notebook、回执 NotebookEdits；R-NOTEBOOK-03/04）----
+
+/** 寄信时带的一条手记（线格式 NotebookItem）。date = updatedAt ?? notedAt（ISO 串） */
+export class NotebookItem {
+  readonly id: string;
+  readonly kind: string;
+  readonly text: string;
+  readonly dateMs: number;
+
+  constructor(id: string, kind: string, text: string, dateMs: number) {
+    this.id = id;
+    this.kind = kind;
+    this.text = text;
+    this.dateMs = dateMs;
+  }
+}
+
+/** 回执里「这条大事改写成什么」（只认最近 30 条大事的 id） */
+export class NotebookRewrite {
+  readonly id: string;
+  readonly text: string;
+
+  constructor(id: string, text: string) {
+    this.id = id;
+    this.text = text;
+  }
+}
+
+/** 回执里这本手记怎么改（R-NOTEBOOK-04）。字段全可选 = 不改；
+ *  profile 为 undefined = 画像不动；apply 的顺序 remove → update → add 由模型层保证 */
+export class NotebookEdits {
+  /** 画像改写后的整份文本；undefined = 不动 */
+  readonly profile?: string;
+  readonly add: string[];
+  readonly update: NotebookRewrite[];
+  readonly remove: string[];
+
+  constructor(profile: string | undefined, add: string[], update: NotebookRewrite[],
+    remove: string[]) {
+    this.profile = profile;
+    this.add = add;
+    this.update = update;
+    this.remove = remove;
+  }
+
+  isEmpty(): boolean {
+    return this.profile === undefined && this.add.length === 0 &&
+      this.update.length === 0 && this.remove.length === 0;
+  }
+}
+
+interface NotebookRewriteRaw {
+  id?: string;
+  text?: string;
+}
+
+interface NotebookEditsRaw {
+  profile?: string;
+  add?: string[];
+  update?: NotebookRewriteRaw[];
+  remove?: string[];
+}
+
+/**
+ * 回执 notebook → NotebookEdits。容错从宽（iOS compactMap 同款）：
+ * profile 空串 → undefined；update / remove 里 id 非 UUID 的丢掉；
+ * 字段缺 / 类型不对当空改法。响应里没有 notebook 字段 → null（老回执）。
+ */
+export function parseNotebookEdits(raw: NotebookEditsRaw | undefined): NotebookEdits | null {
+  if (raw === null || typeof raw !== 'object') {
+    return null;
+  }
+  let profile: string | undefined = undefined;
+  if (typeof raw.profile === 'string' && raw.profile.length > 0) {
+    profile = raw.profile;
+  }
+  const add: string[] = [];
+  if (Array.isArray(raw.add)) {
+    for (const text of raw.add) {
+      if (typeof text === 'string' && text.length > 0) {
+        add.push(text);
+      }
+    }
+  }
+  const update: NotebookRewrite[] = [];
+  if (Array.isArray(raw.update)) {
+    for (const item of raw.update) {
+      if (item === null || typeof item !== 'object') {
+        continue;
+      }
+      if (typeof item.id === 'string' && isUuidString(item.id) && typeof item.text === 'string') {
+        update.push(new NotebookRewrite(item.id, item.text));
+      }
+    }
+  }
+  const remove: string[] = [];
+  if (Array.isArray(raw.remove)) {
+    for (const id of raw.remove) {
+      if (typeof id === 'string' && isUuidString(id)) {
+        remove.push(id);
+      }
+    }
+  }
+  return new NotebookEdits(profile, add, update, remove);
+}
+
+/** NotebookItem[] → 请求体里的 notebook 数组（date 毫秒 → ISO8601） */
+function notebookBody(items: NotebookItem[]): Record<string, Object>[] {
+  const out: Record<string, Object>[] = [];
+  for (const n of items) {
+    out.push({
+      'id': n.id,
+      'kind': n.kind,
+      'text': n.text,
+      'date': new Date(n.dateMs).toISOString()
+    });
+  }
+  return out;
 }
 
 // ---- 5.3 寄信 / 补领（02_BACKEND_API.md POST /letter、GET /letters）----
@@ -355,50 +528,79 @@ export class LetterRequest {
   readonly penPalName: string;
   /** 回信语言跟日记写的语言走（R-LETTERLANG）：LetterOutboxService 用 LetterLanguage 识别填入，认不出退 App 语言 */
   readonly language: string;
+  /** = Letter.id（大写 UUID）。**同一个 id 服务端只写一封、只扣一次票**（重发不重复扣；
+   *  U01 2026-10-27 起 POST /letter 可带；'' = 不发（老后端兼容）） */
+  readonly clientLetterId: string;
+  /** 这位笔友的手记随信带上（R-NOTEBOOK-03）：画像在前大事在后；
+   *  **没有手记也要带空数组**（不带字段 = 老客户端，服务端就不改手记） */
+  readonly notebook: NotebookItem[];
 
   constructor(entries: LetterRequestEntry[], triggerKind: string, dominantMood: string,
-    penPalName: string, language: string) {
+    penPalName: string, language: string, clientLetterId: string, notebook: NotebookItem[]) {
     this.entries = entries;
     this.triggerKind = triggerKind;
     this.dominantMood = dominantMood;
     this.penPalName = penPalName;
     this.language = language;
+    this.clientLetterId = clientLetterId;
+    this.notebook = notebook;
   }
 }
 
-/** POST /letter 成功响应（回信草稿）。id / generatedAt 本端落库用不上，不收 */
+/** POST /letter 成功响应（回信草稿）。id / generatedAt 本端落库用不上，不收。
+ *  notebook = 回执里手记的改法（R-NOTEBOOK-04）；null = 回执没带（老回执） */
 export class LetterResponse {
   readonly body: string;
   readonly fromCharacter: string;
+  readonly notebook: NotebookEdits | null;
 
-  constructor(body: string, fromCharacter: string) {
+  constructor(body: string, fromCharacter: string, notebook: NotebookEdits | null) {
     this.body = body;
     this.fromCharacter = fromCharacter;
+    this.notebook = notebook;
   }
 }
 
-/** GET /letters 的一条（补领只认这三样；generatedAt 归一成毫秒，±5 分钟匹配用） */
+/** GET /letters 的一条（补领用；generatedAt 归一成毫秒，±5 分钟匹配用）。
+ *  U01 起每封多 clientLetterId / penPalId / translation / danger（老信为 null / false）：
+ *  - clientLetterId 等于本机某封「写信中」的信的 id 就是它的回信（补领先按它对上）
+ *  - penPalId '' = 自己起名的那位
+ *  - translation '' = 没有译文；danger 只对世界笔友的信有意义 */
 export class LetterSummaryDTO {
   readonly body: string;
   readonly fromCharacter: string;
   readonly generatedAtMs: number;
+  readonly clientLetterId: string;
+  readonly penPalId: string;
+  readonly translation: string;
+  readonly danger: boolean;
 
-  constructor(body: string, fromCharacter: string, generatedAtMs: number) {
+  constructor(body: string, fromCharacter: string, generatedAtMs: number,
+    clientLetterId: string, penPalId: string, translation: string, danger: boolean) {
     this.body = body;
     this.fromCharacter = fromCharacter;
     this.generatedAtMs = generatedAtMs;
+    this.clientLetterId = clientLetterId;
+    this.penPalId = penPalId;
+    this.translation = translation;
+    this.danger = danger;
   }
 }
 
 interface LetterResponseRaw {
   body?: string;
   fromCharacter?: string;
+  notebook?: NotebookEditsRaw;
 }
 
 interface LetterSummaryRaw {
   body?: string;
   fromCharacter?: string;
   generatedAt?: string;
+  clientLetterId?: string;
+  penPalId?: string;
+  translation?: string;
+  danger?: boolean;
 }
 
 interface LetterListResponseRaw {
@@ -408,7 +610,7 @@ interface LetterListResponseRaw {
 export function parseLetterResponse(raw: string): LetterResponse {
   const r = requireObject<LetterResponseRaw>(raw);
   return new LetterResponse(requireString(r.body, 'letter.body'),
-    requireString(r.fromCharacter, 'letter.fromCharacter'));
+    requireString(r.fromCharacter, 'letter.fromCharacter'), parseNotebookEdits(r.notebook));
 }
 
 export function parseLetterListResponse(raw: string): LetterSummaryDTO[] {
@@ -426,14 +628,17 @@ export function parseLetterListResponse(raw: string): LetterSummaryDTO[] {
       throw new Error('letters.generatedAt is not ISO8601');
     }
     out.push(new LetterSummaryDTO(requireString(item.body, 'letters.body'),
-      requireString(item.fromCharacter, 'letters.fromCharacter'), generatedAt.getTime()));
+      requireString(item.fromCharacter, 'letters.fromCharacter'), generatedAt.getTime(),
+      optionalString(item.clientLetterId), optionalString(item.penPalId),
+      optionalString(item.translation), item.danger === true));
   }
   return out;
 }
 
 /**
  * LetterRequest → POST /letter 请求体（纯序列化，单测覆盖）：
- * mood / dominantMood / language 为空串时省略不发；date 毫秒 → ISO8601（服务端 toISOString 同款）。
+ * mood / dominantMood / language / clientLetterId 为空串时省略不发；
+ * date 毫秒 → ISO8601（服务端 toISOString 同款）。
  */
 export function letterRequestBody(request: LetterRequest): Record<string, Object> {
   const entries: Record<string, Object>[] = [];
@@ -459,6 +664,11 @@ export function letterRequestBody(request: LetterRequest): Record<string, Object
   if (request.language.length > 0) {
     body['language'] = request.language;
   }
+  if (request.clientLetterId.length > 0) {
+    body['clientLetterId'] = request.clientLetterId;
+  }
+  // R-NOTEBOOK-03：没有手记也带空数组（不带 = 老客户端，服务端不改手记）
+  body['notebook'] = notebookBody(request.notebook);
   return body;
 }
 
@@ -468,4 +678,136 @@ export function parseOkResponse(raw: string): void {
   if (r.ok !== true) {
     throw new Error('ok missing');
   }
+}
+
+// ---- U01 世界笔友（GET /penpals、POST /penpal-letter）----
+
+interface AvailablePenPalsRaw {
+  available?: string[];
+}
+
+/** GET /penpals → 现在能寄的世界笔友 id 列表（服务端已经备好人设） */
+export function parsePenPalsResponse(raw: string): string[] {
+  const r = requireObject<AvailablePenPalsRaw>(raw);
+  if (!Array.isArray(r.available)) {
+    throw new Error('penpals.available missing or not an array');
+  }
+  const out: string[] = [];
+  for (const id of r.available) {
+    if (typeof id === 'string' && id.length > 0) {
+      out.push(id);
+    }
+  }
+  return out;
+}
+
+/**
+ * POST /penpal-letter 请求（iOS PenPalLetterRequestDTO 对齐）：
+ * - entries 与 POST /letter 同款（勾上的日记，date 毫秒 → ISO8601，mood 空省略）
+ * - readerLanguage：译文语言跟日记写的语言走（R-LETTERLANG；认不出退 App 语言）
+ * - notebook：这位笔友的手记随信带上（B3 接真手记；没有也带空数组）
+ * - clientLetterId：同一个 id 再请求服务端原样返回、不再写、不再扣票（重发安全）
+ */
+export class PenPalLetterRequest {
+  readonly clientLetterId: string;
+  readonly penPalId: string;
+  readonly entries: LetterRequestEntry[];
+  readonly dominantMood: string;
+  readonly readerLanguage: string;
+  readonly notebook: NotebookItem[];
+
+  constructor(clientLetterId: string, penPalId: string, entries: LetterRequestEntry[],
+    dominantMood: string, readerLanguage: string, notebook: NotebookItem[]) {
+    this.clientLetterId = clientLetterId;
+    this.penPalId = penPalId;
+    this.entries = entries;
+    this.dominantMood = dominantMood;
+    this.readerLanguage = readerLanguage;
+    this.notebook = notebook;
+  }
+}
+
+interface PenPalLetterResponseRaw {
+  letter?: string;
+  translation?: string;
+  danger?: boolean;
+  postage?: number;
+  generatedAt?: string;
+  balance?: number;
+  notebook?: NotebookEditsRaw;
+}
+
+/** POST /penpal-letter 成功响应（世界笔友的回信草稿）。
+ *  notebook = 回执里手记的改法（R-NOTEBOOK-04）；null = 回执没带（老回执）。
+ *  remember 只给老客户端兜底，鸿蒙不读 */
+export class PenPalLetterResponse {
+  /** 笔友母语写的原文（进 letter.body） */
+  readonly letter: string;
+  /** 译文（进 letter.translatedBody） */
+  readonly translation: string;
+  /** 危险的那封：读信页正面放译文 */
+  readonly danger: boolean;
+  /** 实际扣的邮资 */
+  readonly postage: number;
+  readonly generatedAtMs: number;
+  /** 寄完的邮票余额（刷新邮票夹用；老后端可能没有） */
+  readonly balance: number;
+  readonly notebook: NotebookEdits | null;
+
+  constructor(letter: string, translation: string, danger: boolean, postage: number,
+    generatedAtMs: number, balance: number, notebook: NotebookEdits | null) {
+    this.letter = letter;
+    this.translation = translation;
+    this.danger = danger;
+    this.postage = postage;
+    this.generatedAtMs = generatedAtMs;
+    this.balance = balance;
+    this.notebook = notebook;
+  }
+}
+
+/** PenPalLetterRequest → POST /penpal-letter 请求体（纯序列化，单测覆盖）：
+ *  dominantMood 空串省略；notebook 恒带（没有手记带空数组，R-NOTEBOOK-03）；
+ *  date 毫秒 → ISO8601 */
+export function penPalLetterRequestBody(request: PenPalLetterRequest): Record<string, Object> {
+  const entries: Record<string, Object>[] = [];
+  for (const e of request.entries) {
+    const item: Record<string, Object> = {
+      'title': e.title,
+      'textContent': e.textContent,
+      'date': new Date(e.dateMs).toISOString()
+    };
+    if (e.mood.length > 0) {
+      item['mood'] = e.mood;
+    }
+    entries.push(item);
+  }
+  const body: Record<string, Object> = {
+    'clientLetterId': request.clientLetterId,
+    'penPalId': request.penPalId,
+    'entries': entries,
+    'readerLanguage': request.readerLanguage,
+    'notebook': notebookBody(request.notebook)
+  };
+  if (request.dominantMood.length > 0) {
+    body['dominantMood'] = request.dominantMood;
+  }
+  return body;
+}
+
+export function parsePenPalLetterResponse(raw: string): PenPalLetterResponse {
+  const r = requireObject<PenPalLetterResponseRaw>(raw);
+  const generatedAt = ApiDates.parse(requireString(r.generatedAt, 'penpalLetter.generatedAt'));
+  if (generatedAt === null) {
+    throw new Error('penpalLetter.generatedAt is not ISO8601');
+  }
+  if (typeof r.postage !== 'number') {
+    throw new Error('penpalLetter.postage missing');
+  }
+  if (typeof r.balance !== 'number') {
+    throw new Error('penpalLetter.balance missing');
+  }
+  return new PenPalLetterResponse(requireString(r.letter, 'penpalLetter.letter'),
+    requireString(r.translation, 'penpalLetter.translation'), r.danger === true,
+    r.postage, generatedAt.getTime(), r.balance, parseNotebookEdits(r.notebook));
 }

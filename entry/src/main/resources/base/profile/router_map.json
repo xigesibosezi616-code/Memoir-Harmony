@@ -71,6 +71,11 @@
       "buildFunction": "LetterDetailBuilder"
     },
     {
+      "name": "WorldMap",
+      "pageSourceFile": "src/main/ets/views/postbox/worldmap/WorldMapPage.ets",
+      "buildFunction": "WorldMapBuilder"
+    },
+    {
       "name": "Appearance",
       "pageSourceFile": "src/main/ets/views/settings/SettingsAppearanceView.ets",
       "buildFunction": "SettingsAppearanceBuilder"
@@ -129,6 +134,11 @@
       "name": "BackupExport",
       "pageSourceFile": "src/main/ets/views/settings/BackupExportView.ets",
       "buildFunction": "BackupExportBuilder"
+    },
+    {
+      "name": "Paywall",
+      "pageSourceFile": "src/main/ets/views/settings/PaywallView.ets",
+      "buildFunction": "PaywallBuilder"
     }
   ]
 }

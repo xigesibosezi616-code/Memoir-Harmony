@@ -22,15 +22,16 @@ import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppDatabase } from '../data/Database';
 import { LetterRepository } from '../data/LetterRepository';
 import { EntryRepository } from '../data/EntryRepository';
+import { PenPalNoteRepository } from '../data/PenPalNoteRepository';
 import { Letter, LetterStatus, LetterTriggerKind, letterStationery } from '../models/Letter';
 import { LetterDelivery } from '../models/LetterDelivery';
 import { JournalEntry } from '../models/JournalEntry';
 import { generateUuid } from '../models/Uuid';
-import {
-  LetterRequest,
-  LetterRequestEntry,
-  LetterSummaryDTO
-} from '../models/Api';
+import { PenPalNote } from '../models/PenPalNote';
+import { PenPalNotebook } from '../models/PenPalNotebook';
+import { LetterRequest, LetterRequestEntry, LetterSummaryDTO, NotebookEdits,
+  NotebookItem, PenPalLetterRequest, PenPalLetterResponse } from '../models/Api';
+import { ApiDates } from './http/ApiDates';
 import {
   OutboxItem,
   RemoteLetter,
@@ -49,10 +50,11 @@ import {
 import { LetterLanguage } from '../models/LetterLanguage';
 import { AppPrefs } from './AppPrefs';
 import { LanguageManager } from './LanguageManager';
+import { relativeNamed } from './AppDateFormatters';
 import { LetterNotifications } from './LetterNotifications';
 import { UserSession } from './auth/UserSession';
 import { AuthService } from './auth/AuthService';
-import { HttpError } from './http/HttpError';
+import { HttpError, HttpErrorKind } from './http/HttpError';
 
 const DOMAIN = 0x0000;
 const TAG = 'LetterOutboxService';
@@ -263,7 +265,8 @@ export class LetterOutboxService {
         entry.date, entry.mood));
     }
     // 回信语言跟这次寄出的日记走（R-LETTERLANG-01）：标题 + 正文本机识别，
-    // 认不出退 App 语言（偏好里的 appLanguage，iOS 读 UserDefaults 同款）
+    // 认不出退 App 语言（偏好里的 appLanguage，iOS 读 UserDefaults 同款）；
+    // 世界笔友的原文语言跟人设走，这个只决定**译文**用什么语言（readerLanguage）
     const texts: string[] = [];
     for (const requestEntry of requestEntries) {
       texts.push(requestEntry.title);
@@ -273,9 +276,18 @@ export class LetterOutboxService {
     const letterLanguage = LetterLanguage.forLetter(texts, appLanguage);
     hilog.info(DOMAIN, TAG, 'letter language=%{public}s (app=%{public}s) id=%{public}s',
       letterLanguage, appLanguage, letter.id);
+    const dominantMood = dominantMoodOf(entries.map((entry: JournalEntry): string => entry.mood));
+
+    // 世界笔友走另一个接口（原文 + 译文 + 危险标记 + 邮资；U01），见 sendToWorldPenPal
+    if (letter.penPalId !== undefined && letter.penPalId.length > 0) {
+      await this.sendToWorldPenPal(store, letter, requestEntries, dominantMood, letterLanguage);
+      return;
+    }
+
+    // 这一本手记随信带上（R-NOTEBOOK-03）：读不出来当空本（字段照发，信不能不寄）
+    const ownNotebook = await this.notebookSnapshot(store, PenPalNote.ownID);
     const request = new LetterRequest(requestEntries, LetterTriggerKind.Weekly,
-      dominantMoodOf(entries.map((entry: JournalEntry): string => entry.mood)),
-      letter.fromCharacter, letterLanguage);
+      dominantMood, letter.fromCharacter, letterLanguage, letter.id, ownNotebook);
 
     this.mutateItem(letter.id, (current: OutboxItem): OutboxItem =>
       new OutboxItem(current.attempts + 1, current.failures, current.nextAttemptAt));
@@ -312,6 +324,9 @@ export class LetterOutboxService {
         hilog.error(DOMAIN, TAG, 'save sent letter failed: %{public}s', JSON.stringify(err));
         return;
       }
+      // 回执里手记的改法落库（R-NOTEBOOK-04）：own 的改的时刻 = 收到回执的此刻
+      // （/letter 回执没有 generatedAt，iOS 用 .now 同款）。改不动不影响收信
+      await this.applyNotebook(store, PenPalNote.ownID, response.notebook, Date.now());
       this.forget(letter.id);
       this.bumpTick();
       hilog.info(DOMAIN, TAG, 'sent letter id=%{public}s', letter.id);
@@ -320,6 +335,81 @@ export class LetterOutboxService {
       this.notifyArrival(fresh, false);
     } catch (err) {
       hilog.warn(DOMAIN, TAG, 'send letter failed id=%{public}s: %{public}s',
+        letter.id, JSON.stringify(err));
+      await this.handleError(store, letter, err);
+    } finally {
+      if (suspendRequestId >= 0) {
+        this.cancelSuspendDelay(suspendRequestId);
+      }
+    }
+  }
+
+  /**
+   * 寄给一位世界笔友（U01）：走 POST /penpal-letter，服务端按人设写母语原文 + 译文。
+   * 回信写好了把原文（body）、译文（translatedBody）、危险标记、实际邮资填进这封信。
+   * 同一封信服务端只写一次、只扣一次票（clientLetterId 幂等），重发安全。
+   */
+  private async sendToWorldPenPal(store: relationalStore.RdbStore, letter: Letter,
+    requestEntries: LetterRequestEntry[], dominantMood: string,
+    readerLanguage: string): Promise<void> {
+    // 独立函数里重新过一遍登录闸门（send 查过，这里拿到收窄后的 token 类型）
+    if (!this.session.isLoggedIn() || this.session.token === null) {
+      await this.giveBack(store, letter, this.str($r('app.string.s_2bbc8185e3')));
+      return;
+    }
+    const penPalId = letter.penPalId ?? '';
+    // 这位笔友的手记随信带上（R-NOTEBOOK-03）：读不出来当空本（字段照发，信不能不寄）
+    const penPalNotebook = await this.notebookSnapshot(store, penPalId);
+    const request = new PenPalLetterRequest(letter.id, penPalId, requestEntries,
+      dominantMood, readerLanguage, penPalNotebook);
+
+    this.mutateItem(letter.id, (current: OutboxItem): OutboxItem =>
+      new OutboxItem(current.attempts + 1, current.failures, current.nextAttemptAt));
+    const token = this.session.token;
+
+    // 投完信马上切走 App 也来得及：向系统多要一点后台时间把这一封寄完
+    let suspendRequestId = -1;
+    try {
+      suspendRequestId = this.beginSuspendDelay();
+    } catch (err) {
+      hilog.warn(DOMAIN, TAG, 'requestSuspendDelay failed: %{public}s', JSON.stringify(err));
+    }
+    try {
+      const response = await this.auth.sendPenPalLetter(request, token);
+      // 补领可能抢先一步填好了（同一封回信），就不用再填
+      const fresh = await LetterRepository.findLetter(store, letter.id);
+      if (fresh === null || !LetterDelivery.isWriting(fresh)) {
+        return;
+      }
+      // 空原文按服务端异常走重试（iOS generationFailed 同款场景，
+      // 鸿蒙不抛专用错误：重试满 3 次退回时用通用原因，外语用户不见中文）
+      if (response.letter.trim().length === 0) {
+        await this.failedOnce(store, fresh, '');
+        return;
+      }
+      fresh.body = response.letter;
+      fresh.translatedBody = response.translation.length > 0 ? response.translation : undefined;
+      fresh.danger = response.danger;
+      fresh.postage = response.postage;
+      fresh.status = LetterStatus.Pending;
+      fresh.errorMessage = undefined;
+      fresh.updatedAt = Date.now();
+      try {
+        await LetterRepository.saveLetter(store, fresh);
+      } catch (err) {
+        hilog.error(DOMAIN, TAG, 'save sent penpal letter failed: %{public}s', JSON.stringify(err));
+        return;
+      }
+      // 回执里手记的改法落库（R-NOTEBOOK-04）：世界笔友的改的时刻 = 回执的写信时刻
+      // （generatedAt，iOS 用 draft.generatedAt 同款）。改不动不影响收信
+      await this.applyNotebook(store, penPalId, response.notebook, response.generatedAtMs);
+      this.forget(letter.id);
+      this.bumpTick();
+      hilog.info(DOMAIN, TAG, 'sent letter to pen pal %{public}s id=%{public}s', penPalId, letter.id);
+      // 5.4：寄成功那一刻预约定时到达提醒
+      this.notifyArrival(fresh, false);
+    } catch (err) {
+      hilog.warn(DOMAIN, TAG, 'send penpal letter failed id=%{public}s: %{public}s',
         letter.id, JSON.stringify(err));
       await this.handleError(store, letter, err);
     } finally {
@@ -342,6 +432,43 @@ export class LetterOutboxService {
       backgroundTaskManager.cancelSuspendDelay(requestId);
     } catch (err) {
       hilog.warn(DOMAIN, TAG, 'cancelSuspendDelay failed: %{public}s', JSON.stringify(err));
+    }
+  }
+
+  // ---- 笔友手记（U01 B3，R-NOTEBOOK-03/04）----
+
+  /** 寄信时随带的这本手记（R-NOTEBOOK-03）：画像在前大事在后。
+   *  读不出来当空本带上——字段不能缺（缺 = 老客户端，服务端不改手记），信不能不寄 */
+  private async notebookSnapshot(store: relationalStore.RdbStore,
+    penPalID: string): Promise<NotebookItem[]> {
+    try {
+      const notes = await PenPalNoteRepository.listForPenPal(store, penPalID);
+      return PenPalNotebook.snapshot(notes);
+    } catch (err) {
+      hilog.warn(DOMAIN, TAG, 'snapshot notebook failed penPal=%{public}s: %{public}s',
+        penPalID, JSON.stringify(err));
+      return [];
+    }
+  }
+
+  /** 回执的改法落到这本上（R-NOTEBOOK-04）。信已存好，改不动不影响收信 */
+  private async applyNotebook(store: relationalStore.RdbStore, penPalID: string,
+    edits: NotebookEdits | null, atMs: number): Promise<void> {
+    if (edits === null || edits.isEmpty()) {
+      return;
+    }
+    try {
+      const notes = await PenPalNoteRepository.listForPenPal(store, penPalID);
+      const plan = PenPalNotebook.apply(notes, penPalID, edits, atMs);
+      for (const note of plan.toUpsert) {
+        await PenPalNoteRepository.saveNote(store, note);
+      }
+      await PenPalNoteRepository.deleteNotes(store, plan.toDeleteIds);
+      hilog.info(DOMAIN, TAG, 'applied notebook penPal=%{public}s upsert=%{public}d delete=%{public}d',
+        penPalID, plan.toUpsert.length, plan.toDeleteIds.length);
+    } catch (err) {
+      hilog.warn(DOMAIN, TAG, 'apply notebook failed penPal=%{public}s: %{public}s',
+        penPalID, JSON.stringify(err));
     }
   }
 
@@ -382,6 +509,16 @@ export class LetterOutboxService {
         await this.giveBack(store, letter, this.str($r('app.string.s_2bbc8185e3')));
         return;
       }
+      // 会员专属（403 member_required）：重试也没用，直退（U01；2026-10-27 文案）
+      if (this.isMemberRequired(err)) {
+        await this.giveBack(store, letter, this.str($r('app.string.s_bdba2be68c')));
+        return;
+      }
+      // 这位笔友还没准备好（404 unknown_pen_pal）：直退，不打扰重试（U01）
+      if (this.isUnknownPenPal(err)) {
+        await this.giveBack(store, letter, this.str($r('app.string.s_935aabaeb1')));
+        return;
+      }
       // 其余服务端错（含 502 ai_failed / empty_response 的服务端文案透传）
       await this.failedOnce(store, letter,
         err.envelope !== null ? err.envelope.message : '');
@@ -389,6 +526,18 @@ export class LetterOutboxService {
     }
     // 非 HTTP 档（解码失败等）也按服务端出错计
     await this.failedOnce(store, letter, '');
+  }
+
+  /** 403 reason=member_required：给各地的笔友写信是尺素会员的（U01） */
+  private isMemberRequired(err: HttpError): boolean {
+    return err.kind === HttpErrorKind.Status && err.statusCode === 403 &&
+      err.envelope !== null && err.envelope.reason === 'member_required';
+  }
+
+  /** 404 reason=unknown_pen_pal：这位笔友服务端还没备好（U01） */
+  private isUnknownPenPal(err: HttpError): boolean {
+    return err.kind === HttpErrorKind.Status && err.statusCode === 404 &&
+      err.envelope !== null && err.envelope.reason === 'unknown_pen_pal';
   }
 
   /** 服务端出错一次：没到次数就隔一阵再试，到了就退回（R-OUTBOX-05） */
@@ -427,11 +576,27 @@ export class LetterOutboxService {
   /**
    * 429 的退回原因（R-OUTBOX-08 + R-POST-12 语气）。**不用「额度 / 剩余 N 封」
    * 这类计量词**（定价文档 §5.1）：后端 message 只有中文，按 reason 本地渲染。
+   * 2026-10-16 起 reason 是 `no_stamps`（邮票用完了，带 nextPackAt）；老的
+   * `weekly_pending` 等只在旧服务端出现，留着兼容。
    */
   private rateLimitReason(err: HttpError, penPalName: string): string {
     const reason = err.envelope !== null && err.envelope.reason !== undefined
       ? err.envelope.reason : '';
     switch (reason) {
+      case 'no_stamps': {
+        // 下一包几时到（ISO 串）：解析成相对时间快照存下（iOS nextPackAt.formatted 同款）
+        const iso = err.envelope !== null ? err.envelope.nextPackAt : undefined;
+        const parsed = iso !== undefined ? ApiDates.parse(iso) : null;
+        if (parsed === null) {
+          return this.str($r('app.string.s_7d07a38a9f'));
+        }
+        const relative = relativeNamed(parsed.getTime(),
+          AppPrefs.getString(LanguageManager.PREF_KEY, ''));
+        if (relative.length === 0) {
+          return this.str($r('app.string.s_7d07a38a9f'));
+        }
+        return this.strWith($r('app.string.s_8921bcd103'), relative);
+      }
       case 'weekly_pending':
         return this.strWith($r('app.string.s_c0fc825651'), penPalName);
       case 'daily_cap':
@@ -472,21 +637,24 @@ export class LetterOutboxService {
     const store = await AppDatabase.open(this.context);
     const all = await LetterRepository.listLetters(store);
     const existingBodies = new Set<string>();
+    const knownLetterIds = new Set<string>();
     const owned = this.ownedLetterIds();
     const waiting: WaitingLetter[] = [];
     for (const letter of all) {
       existingBodies.add(letter.body);
+      knownLetterIds.add(letter.id);
       if (LetterDelivery.isWriting(letter) && owned.has(letter.id)) {
-        waiting.push(new WaitingLetter(letter.id, letter.generatedAt));
+        waiting.push(new WaitingLetter(letter.id, letter.generatedAt, letter.penPalId ?? ''));
       }
     }
     // 等待的按寄出先后排（reconcilePlan 从最早的认领起）
     waiting.sort((a: WaitingLetter, b: WaitingLetter): number => a.generatedAtMs - b.generatedAtMs);
     const remoteLetters: RemoteLetter[] = [];
     for (const item of remote) {
-      remoteLetters.push(new RemoteLetter(item.body, item.fromCharacter, item.generatedAtMs));
+      remoteLetters.push(new RemoteLetter(item.body, item.fromCharacter, item.generatedAtMs,
+        item.clientLetterId, item.penPalId, item.translation, item.danger));
     }
-    const actions = reconcilePlan(remoteLetters, waiting, existingBodies);
+    const actions = reconcilePlan(remoteLetters, waiting, existingBodies, knownLetterIds);
     let adoptedCount = 0;
     for (const action of actions) {
       const item = action.remote;
@@ -497,6 +665,11 @@ export class LetterOutboxService {
         }
         letter.body = item.body;
         letter.fromCharacter = item.fromCharacter;
+        // 世界笔友的回信带译文和危险标记（iOS fill 同款：自起名的不动这两样）
+        if (item.penPalId.length > 0) {
+          letter.translatedBody = item.translation.length > 0 ? item.translation : undefined;
+          letter.danger = item.danger;
+        }
         letter.status = LetterStatus.Pending;
         letter.errorMessage = undefined;
         letter.updatedAt = Date.now();
@@ -520,12 +693,18 @@ export class LetterOutboxService {
         letter.triggerKind = LetterTriggerKind.Weekly;
         letter.stationery = letterStationery(false);
         letter.deliveredAt = LetterDelivery.arrivalDate(item.generatedAtMs, LetterDelivery.debugTimeScale(), Math.random);
+        // 世界笔友的回信：带上笔友 id、译文、危险标记（iOS reconcile 新建分支同款）
+        if (item.penPalId.length > 0) {
+          letter.penPalId = item.penPalId;
+          letter.translatedBody = item.translation.length > 0 ? item.translation : undefined;
+          letter.danger = item.danger;
+        }
         await LetterRepository.saveLetter(store, letter);
         adoptedCount++;
         // 5.4：补领新建的到达提醒——到达时刻已过就不排（免得一打开弹过期通知）
         this.notifyArrival(letter, true);
       }
-      // Skip：正文本机已有（按正文去重），不动
+      // Skip：正文本机已有（按正文去重）/ clientLetterId 对上的是一封不在写信中的信，不动
     }
     if (adoptedCount > 0) {
       this.bumpTick();

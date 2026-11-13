@@ -15,12 +15,12 @@ import { common } from '@kit.AbilityKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 
 /** 当前库结构版本 */
-export const DATABASE_VERSION: number = 2;
+export const DATABASE_VERSION: number = 4;
 
 /** 库文件名（应用沙箱 database/rdb/ 下） */
 export const DATABASE_NAME: string = 'memoir.db';
 
-/** 全量建表（最新版结构 = v2；05_DATA_MODEL.md §10 + U03 数据字段前置） */
+/** 全量建表（最新版结构 = v4；05_DATA_MODEL.md §10 + U03 数据字段前置） */
 const SCHEMA_V1: string[] = [
   `CREATE TABLE IF NOT EXISTS journal_entry (
   id TEXT PRIMARY KEY,
@@ -67,6 +67,10 @@ const SCHEMA_V1: string[] = [
   stationery TEXT,
   trigger_kind TEXT NOT NULL DEFAULT 'weekly',
   error_message TEXT,
+  pen_pal_id TEXT,
+  translated_body TEXT,
+  danger INTEGER,
+  postage INTEGER,
   generated_at INTEGER NOT NULL,
   delivered_at INTEGER,
   read_at INTEGER,
@@ -86,6 +90,15 @@ const SCHEMA_V1: string[] = [
   weather_code TEXT, weather_info TEXT, location_info TEXT,
   place_mode TEXT NOT NULL DEFAULT 'auto', manual_place_name TEXT,
   created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
+)`,
+  `CREATE TABLE IF NOT EXISTS pen_pal_note (
+  id TEXT PRIMARY KEY,
+  pen_pal_id TEXT NOT NULL,
+  text TEXT NOT NULL DEFAULT '',
+  kind TEXT NOT NULL DEFAULT 'recent',
+  noted_at INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER
 )`
 ];
 
@@ -104,11 +117,33 @@ export class SchemaMigration {
  * 版本迁移表。每项把库升一级，必须按 fromVersion 升序且自 1 起连续。
  * v2（6.3）：journal_entry 加两列可空字段（U03 数据字段前置，写作统计的
  * 心情图只读它们；旧心情 mood / mood_color_hex 保留不动，U03 本体移植时再清理）。
+ * v3（U01 邮票制）：letter 一次加齐世界笔友的四列（镜像 iOS SchemaV9 一次迁移）——
+ * pen_pal_id / translated_body / danger 本阶段先落库（B2 世界笔友、备份透传用），
+ * postage 邮票张数 B1 就接线；避免二次迁移。
+ * v4（U01 B3 笔友手记）：新表 pen_pal_note（镜像 iOS SchemaV11）——画像 + 大事
+ * 都存这张表，kind 区分；只存在本机，寄信随带、回执改写、备份包导出。
  */
 const MIGRATIONS: SchemaMigration[] = [
   new SchemaMigration(1, [
     'ALTER TABLE journal_entry ADD COLUMN mood_valence REAL',
     'ALTER TABLE journal_entry ADD COLUMN mood_labels TEXT'
+  ]),
+  new SchemaMigration(2, [
+    'ALTER TABLE letter ADD COLUMN pen_pal_id TEXT',
+    'ALTER TABLE letter ADD COLUMN translated_body TEXT',
+    'ALTER TABLE letter ADD COLUMN danger INTEGER',
+    'ALTER TABLE letter ADD COLUMN postage INTEGER'
+  ]),
+  new SchemaMigration(3, [
+    `CREATE TABLE IF NOT EXISTS pen_pal_note (
+  id TEXT PRIMARY KEY,
+  pen_pal_id TEXT NOT NULL,
+  text TEXT NOT NULL DEFAULT '',
+  kind TEXT NOT NULL DEFAULT 'recent',
+  noted_at INTEGER NOT NULL,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER
+)`
   ])
 ];
 

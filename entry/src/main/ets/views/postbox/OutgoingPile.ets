@@ -42,10 +42,14 @@ export struct OutgoingPile {
   @Prop items: OutgoingItem[] = [];
   /** 取消勾选的那几篇的 id（勾选状态归父组件，投信那一刻才算数） */
   @Prop excludedIds: string[] = [];
+  /** 信纸抬头写着寄给谁（「阿远、天野和 McRae」） */
+  @Prop recipients: string = '';
   /** false = 只是一张画（服务端拦着时半透明摆着） */
   interactive: boolean = true;
   /** 勾 / 取消勾一篇（interactive 才会调） */
   onToggle: (id: string) => void = (_id: string): void => {};
+  /** 点抬头的「寄给」：打开世界笔友地图挑收件人（undefined = 点不了也不画 ⊕） */
+  onTapRecipients: (() => void) | undefined = undefined;
   // ---- 版式度量（PostBoxMetrics 按机型/形态算好传入；默认 = iOS 绝对值） ----
   /** 整叠纸占的高（含垫纸露边 8）；同一形态内恒定（5.3 投信动画依赖） */
   @Prop totalHeightVp: number = 188;
@@ -157,24 +161,32 @@ export struct OutgoingPile {
       .opacity(opacity01)
   }
 
-  /** 头一行：这次寄出的日记 + 「勾上几篇 / 一共几篇」（不写成「N 篇」，免得七种语言各配一套单复数） */
+  /** 抬头：「寄给 阿远 ⊕」—— 像信封上写地址，点它去地图上挑收件人（2026-10-15 产品定） */
   @Builder
   private header() {
     Column() {
       Row() {
-        Text($r('app.string.s_9e19a026db'))
-          .fontSize(this.theme.captionFont.size)
-          .fontWeight(this.theme.captionFont.weight)
-          .fontFamily(this.theme.captionFont.family)
-          .fontStyle(FontStyle.Italic)
-          .fontColor(withAlpha(this.palette.ink, 0.55))
-          .layoutWeight(1)
-        Text(`${this.checkedCount()} / ${this.items.length}`)
-          .fontSize(this.theme.captionFont.size)
-          .fontWeight(this.theme.captionFont.weight)
-          .fontFamily(this.theme.captionFont.family)
-          .fontStyle(FontStyle.Italic)
-          .fontColor(withAlpha(this.palette.ink, 0.55))
+        Column() {
+          this.address()
+        }
+        .alignItems(HorizontalAlign.Start)
+        .layoutWeight(1)
+        .onClick((): void => {
+          if (this.onTapRecipients !== undefined && this.interactive) {
+            this.onTapRecipients();
+          }
+        })
+
+        // 勾上几篇 / 一共几篇。不写成「N 篇」，免得七种语言各配一套单复数；
+        // 一篇都没有时不写「0 / 0」
+        if (this.items.length > 0) {
+          Text(`${this.checkedCount()} / ${this.items.length}`)
+            .fontSize(this.theme.captionFont.size)
+            .fontWeight(this.theme.captionFont.weight)
+            .fontFamily(this.theme.captionFont.family)
+            .fontStyle(FontStyle.Italic)
+            .fontColor(withAlpha(this.palette.ink, 0.55))
+        }
       }
       .width('100%')
       .height(this.headerHeightVp)
@@ -183,6 +195,33 @@ export struct OutgoingPile {
     }
     .width('100%')
     .overlay(this.rule(), { align: Alignment.Bottom })
+  }
+
+  /** 「寄给 阿远 ⊕」：像信封上写地址。名字 13pt 不斜体（写得清楚），其余抬头样式 */
+  @Builder
+  private address() {
+    Row({ space: 5 }) {
+      Text($r('app.string.s_bfe4c57f10'))
+        .fontSize(this.theme.captionFont.size)
+        .fontWeight(this.theme.captionFont.weight)
+        .fontFamily(this.theme.captionFont.family)
+        .fontStyle(FontStyle.Italic)
+        .fontColor(withAlpha(this.palette.ink, 0.55))
+      Text(this.recipients.length === 0 ? '—' : this.recipients)
+        .fontSize(13)
+        .fontFamily(this.theme.bodyFont.family)
+        .fontColor(withAlpha(this.palette.ink, 0.85))
+        .maxLines(1)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .layoutWeight(1)
+      if (this.onTapRecipients !== undefined) {
+        SymbolGlyph($r('sys.symbol.plus_circle'))
+          .fontSize(11)
+          .fontColor([withAlpha(this.palette.ink, 0.55)])
+      }
+    }
+    .width('100%')
+    .alignItems(VerticalAlign.Center)
   }
 
   /** 一行日记：勾选框 + 日期 + 标题（没标题的用正文第一行，都没有「无题」） */

@@ -20,7 +20,8 @@ import {
   monthDayNumeric,
   firstWeekdayIndex,
   weekdayNarrowSymbols,
-  weekdayNarrow
+  weekdayNarrow,
+  relativeNamed
 } from '../../main/ets/services/AppDateFormatters';
 
 /** 2026-09-27 是星期日（本地时区构造，字段取本地值，断言与跑测时区无关） */
@@ -148,6 +149,58 @@ export default function appDateFormattersTest() {
       expect(weekdayNarrow(0, 'zh-Hans')).assertEqual('日');
       expect(weekdayNarrow(3, 'zh-Hans')).assertEqual('三');
       expect(weekdayNarrow(6, 'zh-Hans')).assertEqual('六');
+    })
+
+    // ---- U01 邮票：下一包几时到的相对时间（named 语感，CLDR 出词） ----
+
+    it('relativeNamedReturnsEmptyWhenTargetIsNow', 0, () => {
+      // 已经到了 / 快到了（≤1 分钟）→ ''（调用方换「新的一包很快就到」）
+      expect(relativeNamed(Date.now(), 'zh-Hans').length === 0).assertTrue();
+      expect(relativeNamed(Date.now() + 30_000, 'en').length === 0).assertTrue();
+      // 过去了也 ''（服务端时钟快了半分钟之类）
+      expect(relativeNamed(Date.now() - 60_000, 'zh-Hans').length === 0).assertTrue();
+    })
+
+    it('relativeNamedCallsDaysAcrossCalendarDays', 0, () => {
+      // 明晚到（今晚 23 点 → 明晚 20 点）说的是「明天」不是「20 小时后」：
+      // 跨了日历日（差 1）就用天，叫出名字
+      const tonight = new Date();
+      tonight.setHours(23, 0, 0, 0);
+      const tomorrowEvening = new Date(tonight.getTime());
+      tomorrowEvening.setDate(tomorrowEvening.getDate() + 1);
+      tomorrowEvening.setHours(20, 0, 0, 0);
+      expect(relativeNamed(tomorrowEvening.getTime(), 'zh-Hans')).assertEqual('明天');
+      expect(relativeNamed(tomorrowEvening.getTime(), 'en')).assertEqual('tomorrow');
+      // 后天（跨 2 个日历日）
+      const dayAfter = new Date(tonight.getTime());
+      dayAfter.setDate(dayAfter.getDate() + 2);
+      dayAfter.setHours(12, 0, 0, 0);
+      expect(relativeNamed(dayAfter.getTime(), 'zh-Hans')).assertEqual('后天');
+    })
+
+    it('relativeNamedUsesMinutesWithinTheHour', 0, () => {
+      // 当天且不到 1 小时：分钟（numeric:'auto' 的「N 分钟后」）。
+      // 固定挑本小时内剩下的分钟（30 封顶）：临近午夜 Date.now()+30min 会跨日历日、
+      // 走到「天」分支（2026-11-10 23:47 跑挂过）；本小时不够 2 分钟就跳过
+      const now = new Date();
+      const minutesAhead = Math.min(30, 59 - now.getMinutes());
+      if (minutesAhead >= 2) {
+        const target = now.getTime() + minutesAhead * 60_000;
+        const text = relativeNamed(target, 'zh-Hans');
+        expect(text.indexOf('分钟') >= 0).assertTrue();
+      }
+    })
+
+    it('relativeNamedUsesHoursWithinTheDay', 0, () => {
+      // 当天、1 小时以上：小时（只认本地时区，测试按本地日历日差 0 构造）
+      const now = new Date();
+      const target = new Date(now.getTime() + 3 * 3_600_000);
+      if (target.getDate() === now.getDate()) {
+        const text = relativeNamed(target.getTime(), 'zh-Hans');
+        expect(text.indexOf('小时') >= 0).assertTrue();
+        const en = relativeNamed(target.getTime(), 'en');
+        expect(en.indexOf('hour') >= 0).assertTrue();
+      }
     })
   })
 }

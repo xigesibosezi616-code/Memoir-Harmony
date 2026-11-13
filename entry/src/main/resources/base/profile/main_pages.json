@@ -1,7 +1,6 @@
 {
   "src": [
     "pages/Index",
-    "pages/LetterDebug",
     "pages/Compose",
     "pages/EditEntry"
   ]

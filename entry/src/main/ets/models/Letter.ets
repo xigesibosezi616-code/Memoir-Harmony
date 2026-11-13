@@ -38,8 +38,8 @@ export class Letter {
   status: string = LetterStatus.Pending;
   /** 回信正文。空 = 还没写好 */
   body: string = '';
-  /** 寄出那一刻的笔友名快照，之后改名不影响历史信件 */
-  fromCharacter: string = '青鸟';
+  /** 寄出那一刻的笔友名快照（没起名时是本地化的「笔友」），之后改名不影响历史信件 */
+  fromCharacter: string = '';
   /** 寄出那一刻的收信人昵称快照。没昵称时 undefined，抬头只写「致」 */
   toName?: string;
   /** 信纸。寄出那一刻定死，**显示时不实时读会员状态**（R-MEMBER-07） */
@@ -48,6 +48,14 @@ export class Letter {
   triggerKind: string = LetterTriggerKind.Weekly;
   /** 退回原因（仅 failed） */
   errorMessage?: string;
+  /** 世界笔友 id（U01；undefined = 自己起名的那位寄来的）。落库先备着，B2 用 */
+  penPalId?: string;
+  /** 世界笔友来信的译文（U01；undefined = 不带译文 / 不是世界笔友的信） */
+  translatedBody?: string;
+  /** 世界笔友来信贴了危险标签（U01；信箱页亮警示） */
+  danger?: boolean;
+  /** 这封信贴了几张邮票（U01；undefined = 自己起名那位的信不记张数） */
+  postage?: number;
   /** 🔴 **寄出时刻**（点下邮筒那一刻） */
   generatedAt: number;
   /** 🔴 **到达时刻** = 寄出 + [6h, 72h] 均匀随机，寄出时就算好（未来时间）。

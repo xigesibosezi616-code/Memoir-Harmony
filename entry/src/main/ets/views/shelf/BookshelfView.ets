@@ -27,11 +27,10 @@
  *   渲染服务侧的物理弹簧，中途换别的曲线改写会孤儿化 RS 动画；springMotion 不回调完成，
  *   完成链按动画时长用定时兜底
  * - 转角不交给动画系统：投影矩阵不能插值（插值的是角度，每帧重算，见 ShelfBook3DView），
- *   用 16ms 定时逐帧驱动
+ *   用 displaySync 帧回调 + 临界阻尼弹簧积分驱动
  * - LTPO 深闲置（约几十秒不动）触摸不唤醒低功耗链路，第一帧会冻住：触地先 poke 一帧
- * - 松手兜底走格子的 onTouch（Up/Cancel → dropBook）：顺序组合手势里只有最后一个
- *   手势能响应 onActionEnd（官方文档），只长按没拖就松手时谁的 end 都不回调，
- *   书会永远浮着（真机实证）；拖动中的格子用 opacity 0 隐藏而不是 Visibility.Hidden，
+ * - 松手兜底只走格子的 onTouch Up：Cancel 也可能是手势识别器接管 pan，不能当松手；
+ *   只长按没拖时 PanGesture 不回调 end，由 Up 兜底；拖动中的格子用 opacity 0 隐藏而不是 Visibility.Hidden，
  *   免得组件退出命中测试时把进行中的触摸流掐断
  *
  * 数据刷新与 HomeView 同一信号：Index.onPageShow bump `homeReloadTick`
@@ -39,6 +38,7 @@
  */
 import { common } from '@kit.AbilityKit';
 import { curves } from '@kit.ArkUI';
+import { displaySync } from '@kit.ArkGraphics2D';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { vibrator } from '@kit.SensorServiceKit';
 import {
@@ -51,10 +51,10 @@ import {
   autoScrollSpeed,
   changedSortOrders,
   clampedScrollOffset,
-  easeInOutCubic,
   moveItem,
   nearestIndex
 } from '../../models/ShelfDrag';
+import { SpringSimulation, springSettleGuardMs } from '../../models/SpringSimulation';
 import { BOOK_DETAIL_ALL_ENTRIES_PARAM } from './BookDetailView';
 import { COVER_EDITOR_CREATE_PARAM } from './CoverEditorView';
 import { AppDatabase } from '../../data/Database';
@@ -112,20 +112,19 @@ const PAGE_EDGE: number = 5;
 const LIFT_DEGREES: number = 32;
 /** 长按多久拿起：比系统默认略长，滑动浏览不误触 */
 const PRESS_DURATION_MS: number = 350;
-/** 拿起（转过去 + 浮起），iOS liftAnimation .smooth(0.45) */
-const LIFT_DURATION_MS: number = 450;
-/** 落位（其余书让开），iOS settleAnimation .smooth(0.42) */
-const SETTLE_DURATION_MS: number = 420;
-/** 转回正面，iOS turnBackAnimation .smooth(0.5) */
-const TURN_BACK_DURATION_MS: number = 500;
-/** 落位 420ms 定长走完 + 余量后接着转回（springMotion / onFinish 不可靠，定时兜底） */
-const SETTLE_CHAIN_DELAY_MS: number = 450;
-/** 转回帧动画走完的余量，之后才收摊换回格子里的书 */
-const TURN_DONE_EXTRA_MS: number = 50;
+/**
+ * 拿起 / 落位 / 转回的弹簧 response（秒）= iOS `.smooth(0.45/0.42/0.5)` 的 duration
+ * （SwiftUI smooth = spring(response: duration, dampingFraction: 1)，临界阻尼不弹不晃）。
+ * 位置/缩放走 animateTo + springMotion（渲染服务物理弹簧）；
+ * 转角走 displaySync 帧回调 + SpringSimulation 手动积分（投影矩阵不能插值，插的是角度）
+ */
+const LIFT_RESPONSE_S: number = 0.45;
+const SETTLE_RESPONSE_S: number = 0.42;
+const TURN_BACK_RESPONSE_S: number = 0.5;
+/** 落位弹簧视觉落定 ≈ 0.5s，之后接着转回（springMotion 不回调完成，定时串联） */
+const SETTLE_CHAIN_DELAY_MS: number = 480;
 /** 自动滚 16ms 一拍（iOS Task.sleep 16ms） */
 const AUTO_SCROLL_TICK_MS: number = 16;
-/** 转角帧动画的拍长 */
-const ANGLE_TICK_MS: number = 16;
 
 /** 跟手弹簧：很短的平滑，拖起来不生硬，又不至于明显拖在手指后面
  * （iOS interactiveSpring(response: 0.2, dampingFraction: 0.88)）。
@@ -178,7 +177,7 @@ export struct BookshelfView {
   @State private dragY: number = 0;
   /** 浮起（略放大 1.04 + 影子变深） */
   @State private lifted: boolean = false;
-  /** 浮书转角（弧度）：16ms 定时逐帧驱动（投影矩阵不能插值） */
+  /** 浮书转角（弧度）：displaySync 帧回调驱动（投影矩阵不能插值） */
   @State private bookAngleRad: number = 0;
   /** LTPO poke 用：触地抖一下透明度里一个看不见的小数，强制出一帧真实渲染 */
   @State private pokeTick: number = 0;
@@ -197,9 +196,17 @@ export struct BookshelfView {
   private scrollAccum: number = 0;
   private autoScrollSpeed: number = 0;
   private autoScrollTimer: number = -1;
-  private angleTimer: number = -1;
   private settleTimer: number = -1;
-  private turnDoneTimer: number = -1;
+  // ---- 转角弹簧驱动（displaySync 帧回调 + 手动积分；取代 16ms setInterval，Q32③） ----
+  private angleDriver: displaySync.DisplaySync | undefined = undefined;
+  private angleSpring: SpringSimulation | undefined = undefined;
+  private angleVelocity: number = 0;
+  private angleTargetRad: number = 0;
+  private angleLastFrameNs: number = -1;
+  /** 落定后要做的收尾（finishDrag + persistOrder）；undefined = 只转不收摊 */
+  private angleDone: (() => void) | undefined = undefined;
+  /** 帧回调链路断裂时的强制收尾兜底（后台冻结回前台等） */
+  private angleGuardTimer: number = -1;
 
   aboutToAppear(): void {
     const context = this.getUIContext().getHostContext();
@@ -276,6 +283,9 @@ export struct BookshelfView {
         }
       }
       .scrollBar(BarState.Off)
+      // 拿起后外层 Scroll 必须让出手势所有权（iOS scrollDisabled(drag != nil)）。
+      // 否则它抢走后续 pan，原格收到 Cancel 被误认为松手，书还没移动就掉回去
+      .enableScrollInteraction(this.dragId === '')
       // iOS alwaysBounce：内容不满一屏时也保留弹簧回弹（果冻感），HomeView 同款
       .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
       .width('100%')
@@ -473,15 +483,12 @@ export struct BookshelfView {
     // 拿起那一刻正在进行的触摸流有断在半路的风险（pan / onTouch 收不到后续事件，
     // 书卡在浮起状态收不回去）；opacity 0 视觉等效，触摸流全程不断
     .opacity(this.dragId === slot.key ? 0 : 1)
-    // 兜底网：顺序组合手势里只有最后一个手势能响应 onActionEnd（官方 GestureGroup
-    // 文档明示）。只长按拿起、没拖就松手时 PanGesture 没识别过 → 谁的 end 都不回调
-    // （真机实证：书永远浮着）。用自己的 onTouch 盯手指抬起 / 触摸取消补上这条路；
-    // 真拖动时 pan.onActionEnd 也会来，dropBook 幂等，先到先放下
+    // 兜底网：顺序组合手势里只有最后一个手势能响应 onActionEnd。只长按、没拖就
+    // 松手时 PanGesture 没识别过 → 用格子 onTouch 的 Up 补上落位。
+    // Cancel 不能在这里落位：手势识别器接管 pan 时也会给原格发 Cancel（真机日志实证），
+    // 那并不代表手指松开；真正的拖动取消由 PanGesture.onActionCancel 处理
     .onTouch((event: TouchEvent): void => {
-      if ((event.type === TouchType.Up || event.type === TouchType.Cancel)
-        && this.dragId === slot.key && !this.settling) {
-        hilog.debug(DOMAIN, TAG, 'DBG slot onTouch %{public}s key=%{public}s',
-          event.type === TouchType.Up ? 'Up' : 'Cancel', slot.key);
+      if (event.type === TouchType.Up && this.dragId === slot.key && !this.settling) {
         this.dropBook();
       }
     })
@@ -560,15 +567,13 @@ export struct BookshelfView {
     this.settling = false;
     this.dragId = slot.key;
     this.haptic();
-    hilog.debug(DOMAIN, TAG,
-      'DBG liftBook key=%{public}s base=%{public}s targetAngle=%{public}s',
-      slot.key, JSON.stringify([this.liftBaseX, this.liftBaseY]),
-      String(Math.round(bookBoxLiftAngle(LIFT_DEGREES) * 1000) / 1000));
-    // 浮起（略放大 + 影子变深）与转角同一拍开始；转角不进动画系统，16ms 定时逐帧驱动
-    this.getUIContext().animateTo({ duration: LIFT_DURATION_MS, curve: Curve.EaseInOut }, (): void => {
+    // 浮起（略放大 + 影子变深）与转角同一拍开始：
+    // 浮起走 animateTo 物理弹簧（springMotion = iOS .smooth 同款 response/damping）；
+    // 转角不进动画系统（投影矩阵不能插值），displaySync 帧回调驱动弹簧积分
+    this.getUIContext().animateTo({ curve: curves.springMotion(LIFT_RESPONSE_S, 1) }, (): void => {
       this.lifted = true;
     });
-    this.animateAngle(bookBoxLiftAngle(LIFT_DEGREES), LIFT_DURATION_MS);
+    this.animateAngle(bookBoxLiftAngle(LIFT_DEGREES), LIFT_RESPONSE_S);
   }
 
   /** 拖着走：其余书一动不动；书跟手（同一条弹簧逐帧 retarget）；边缘带自动滚 */
@@ -576,9 +581,6 @@ export struct BookshelfView {
     if (this.dragId === '' || this.settling) {
       return;
     }
-    hilog.debug(DOMAIN, TAG, 'DBG moveBook off=%{public}s accum=%{public}s',
-      JSON.stringify([Math.round(event.offsetX), Math.round(event.offsetY)]),
-      String(Math.round(this.scrollAccum)));
     this.panX = event.offsetX;
     this.panY = event.offsetY;
     this.getUIContext().animateTo({ curve: FOLLOW_SPRING }, (): void => {
@@ -614,9 +616,9 @@ export struct BookshelfView {
     }
     this.haptic();
     // 落位事务（iOS drop 的单个 withAnimation(settleAnimation)）：顺序变了其余书才让位
-    // （只有 position 变，组件不重建）；浮书滑向落点用同一条 .smooth(0.42) 平滑曲线，
-    // 不再用跟手弹簧——跟随已结束，孤儿化旧 RS 弹簧安全，且定长无过冲，与 iOS 一致
-    this.getUIContext().animateTo({ duration: SETTLE_DURATION_MS, curve: Curve.EaseInOut }, (): void => {
+    // （只有 position 变，组件不重建）；浮书滑向落点用同一条 .smooth(0.42) 物理弹簧
+    // （springMotion(0.42, 1)，临界阻尼无过冲），跟随已结束，不再用跟手弹簧
+    this.getUIContext().animateTo({ curve: curves.springMotion(SETTLE_RESPONSE_S, 1) }, (): void => {
       if (to !== from) {
         this.order = moveItem(this.order, from, to);
       }
@@ -624,22 +626,19 @@ export struct BookshelfView {
       this.dragY = this.slotCenterY(to + 1);
       this.lifted = false;
     });
-    // 完成链：落位 420ms 定长走完 → 转回 ~500ms → 收摊换回格子里的书
-    // （iOS completion 链；onFinish 被打断不回调，定时兜底）
+    // 完成链：落位弹簧视觉落定（~0.5s）→ 转回正面；转回用真实弹簧落定回调收尾
+    // （不再用盲等定时器：弹簧真的停了才换回格子里的书，无缝）
     this.settleTimer = setTimeout((): void => {
-      hilog.debug(DOMAIN, TAG, 'DBG settleTimer fired angle=%{public}s', String(Math.round(this.bookAngleRad * 1000) / 1000));
-      this.animateAngle(0, TURN_BACK_DURATION_MS);
-      this.turnDoneTimer = setTimeout((): void => {
-        hilog.debug(DOMAIN, TAG, 'DBG turnDoneTimer fired angle=%{public}s', String(Math.round(this.bookAngleRad * 1000) / 1000));
+      this.settleTimer = -1;
+      this.animateAngle(0, TURN_BACK_RESPONSE_S, (): void => {
         this.finishDrag();
         this.persistOrder();
-      }, TURN_BACK_DURATION_MS + TURN_DONE_EXTRA_MS);
+      });
     }, SETTLE_CHAIN_DELAY_MS);
   }
 
   /** 落位 / 转回都走完：浮书收起，格子里的书在新位置亮回来（几何一致，无缝换回） */
   private finishDrag(): void {
-    hilog.debug(DOMAIN, TAG, 'DBG finishDrag');
     this.dragId = '';
     this.settling = false;
     this.scrollAccum = 0;
@@ -647,49 +646,82 @@ export struct BookshelfView {
 
   /** 立刻收摊，不做动画（离开页面 / 窗口几何变了 / 状态异常） */
   private resetDrag(): void {
-    hilog.debug(DOMAIN, TAG, 'DBG resetDrag dragId=%{public}s', this.dragId);
     this.stopAutoScroll();
-    this.clearAngleTimer();
+    this.stopAngleDriver();
     if (this.settleTimer >= 0) {
       clearTimeout(this.settleTimer);
       this.settleTimer = -1;
-    }
-    if (this.turnDoneTimer >= 0) {
-      clearTimeout(this.turnDoneTimer);
-      this.turnDoneTimer = -1;
     }
     this.dragId = '';
     this.settling = false;
     this.lifted = false;
     this.bookAngleRad = 0;
+    this.angleVelocity = 0;
     this.scrollAccum = 0;
   }
 
-  /** 转角帧动画：投影矩阵不能插值，插值的永远是角度，每帧按角度重算投影 */
-  private animateAngle(targetRad: number, durationMs: number): void {
-    this.clearAngleTimer();
-    const fromRad = this.bookAngleRad;
-    hilog.debug(DOMAIN, TAG,
-      'DBG animateAngle from=%{public}s to=%{public}s dur=%{public}d',
-      String(Math.round(fromRad * 1000) / 1000), String(Math.round(targetRad * 1000) / 1000), durationMs);
-    const start = Date.now();
-    this.angleTimer = setInterval((): void => {
-      const elapsed = Date.now() - start;
-      const t = easeInOutCubic(elapsed / durationMs);
-      this.bookAngleRad = fromRad + (targetRad - fromRad) * t;
-      if (elapsed >= durationMs) {
-        this.bookAngleRad = targetRad;
-        this.clearAngleTimer();
-        hilog.debug(DOMAIN, TAG, 'DBG animateAngle DONE angle=%{public}s', String(Math.round(this.bookAngleRad * 1000) / 1000));
+  /**
+   * 转角弹簧驱动：displaySync 帧回调（vsync 对齐，真实帧间隔积分）+
+   * SpringSimulation（iOS .smooth 同款临界阻尼弹簧）。
+   * 落定后自动停驱动并回调 onDone（转回收摊用）；angleGuardTimer 兜底强制收尾。
+   * 旧实现 = 16ms setInterval 改状态：不对齐 vsync、掉帧补不齐 → Q32③「生硬卡顿」。
+   */
+  private animateAngle(targetRad: number, responseS: number, onDone?: () => void): void {
+    this.stopAngleDriver();
+    this.angleSpring = new SpringSimulation(responseS, 1);
+    this.angleTargetRad = targetRad;
+    this.angleLastFrameNs = -1;
+    this.angleDone = onDone;
+    const driver = displaySync.create();
+    driver.setExpectedFrameRateRange({ min: 30, max: 120, expected: 90 });
+    driver.on('frame', (info: displaySync.IntervalInfo): void => {
+      const spring = this.angleSpring;
+      if (spring === undefined) {
+        return;
       }
-    }, ANGLE_TICK_MS);
+      // 首帧没有上一帧时间戳：按 60Hz 拍长起步
+      const dtSec = this.angleLastFrameNs < 0 ? 1 / 60 : (info.timestamp - this.angleLastFrameNs) / 1e9;
+      this.angleLastFrameNs = info.timestamp;
+      const next = spring.step(this.bookAngleRad, this.angleTargetRad, this.angleVelocity, dtSec);
+      this.bookAngleRad = next[0];
+      this.angleVelocity = next[1];
+      if (spring.settled(this.bookAngleRad, this.angleTargetRad, this.angleVelocity)) {
+        this.bookAngleRad = this.angleTargetRad;
+        const done = this.angleDone;
+        this.stopAngleDriver();
+        if (done !== undefined) {
+          done();
+        }
+      }
+    });
+    driver.start();
+    this.angleDriver = driver;
+    // 兜底：弹簧 3×response + 100ms 内必定视觉落定；帧回调断了就强制收尾
+    this.angleGuardTimer = setTimeout((): void => {
+      if (this.angleDriver !== undefined) {
+        this.bookAngleRad = this.angleTargetRad;
+        const done = this.angleDone;
+        this.stopAngleDriver();
+        if (done !== undefined) {
+          done();
+        }
+      }
+    }, springSettleGuardMs(responseS));
   }
 
-  private clearAngleTimer(): void {
-    if (this.angleTimer >= 0) {
-      clearInterval(this.angleTimer);
-      this.angleTimer = -1;
+  /** 停掉转角驱动：帧回调、兜底定时器、弹簧状态一次收干净（幂等） */
+  private stopAngleDriver(): void {
+    if (this.angleDriver !== undefined) {
+      this.angleDriver.stop();
+      this.angleDriver = undefined;
     }
+    if (this.angleGuardTimer >= 0) {
+      clearTimeout(this.angleGuardTimer);
+      this.angleGuardTimer = -1;
+    }
+    this.angleSpring = undefined;
+    this.angleDone = undefined;
+    this.angleLastFrameNs = -1;
   }
 
   // ---- 拖到边缘自动滚 ----

@@ -8,8 +8,9 @@
  *   （188vp）的地方放「这次寄出的日记」那叠纸（5.3 投信动画要从纸飞到
  *   投信口，中途邮筒不能因下面换内容变大变小）
  * - 候选口径 R-POST-02/03 在 PostBoxLogic（纯逻辑，带单测）
- * - 进页面就问 GET /me/rhythm：这周寄不了提前说明，不等点了再拒
- *   （R-POST-05；问不到当作能寄，最终由服务端拦）
+ * - 进页面就问 GET /me/stamps（U01 邮票夹）：邮票用完了提前说明，不等点了才拒
+ *   （R-POST-05；问不到当作够寄，最终由服务端拦）。新的一包到了、夹子没满，
+ *   就浮出「领取」的小卡片（StampPackCard，不点也不耽误寄信）
  * - 点邮筒投信（5.3 落库 + 5.6 动画）：落库成功才起投信动画（displaySync
  *   逐帧推进 postingT，手感数值集中在 LetterPostingTimeline /
  *   LetterPostingFlightGeometry，单测钉死）；动画放完才申请通知授权
@@ -17,9 +18,10 @@
  * - 「此刻」每 5 秒推进（R-BOX-02）：在路上的信到点，右上角红点自己亮
  * - 切到本 tab / 登录态变化才重查（MainTabsView onChange 写
  *   STORAGE_KEY_POSTBOX_VISIBLE_TICK 驱动；tab 内容常驻不重建）
- * - 标题栏：左上不出「邮筒」二字（用户拍板，iOS 同款无标题），
+ * - 标题栏：左上不出「邮筒」二字（用户拍板，iOS 同款无标题）。
+ *   左上角「笔友」入口 → 世界笔友地图（挑这次寄给谁，U01 B2b）；
  *   右上角「信箱」入口 = 官方 Button（缩小版：高 32、图标 16、字 12），
- *   位置对齐首页页首「+」（安全区顶+28、右 20），带未读红点（红色用
+ *   位置对齐首页页首「+」（安全区顶+28、左 / 右 20），带未读红点（红色用
  *   destructive——accent 在部分主题是墨色会看成黑点）
  */
 import { relationalStore } from '@kit.ArkData';
@@ -38,9 +40,9 @@ import { LetterDelivery } from '../../models/LetterDelivery';
 import { Letter, LetterStatus, LetterTriggerKind, letterStationery } from '../../models/Letter';
 import { generateUuid } from '../../models/Uuid';
 import { JournalEntry } from '../../models/JournalEntry';
-import { RhythmResponse } from '../../models/Api';
+import { StampWallet } from '../../models/Api';
 import { ErrorToastKind } from '../../environment/ErrorPresenter';
-import { shortDate } from '../../services/AppDateFormatters';
+import { shortDate, relativeNamed } from '../../services/AppDateFormatters';
 import {
   PostBoxSituationKind,
   PostBoxState,
@@ -64,6 +66,7 @@ import {
 import { LetterPostingFeel } from '../../services/LetterPostingFeel';
 import { LetterPalette } from './LetterPalette';
 import { OutgoingPile } from './OutgoingPile';
+import { StampPackCard, StampPackPhase } from './StampPackCard';
 import { LetterPostingFlight } from './LetterPostingFlight';
 import { Postmark } from './Postmark';
 import { PostBoxMetrics } from './PostBoxMetrics';
@@ -75,7 +78,20 @@ import {
   STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_WINDOW_HEIGHT_VP
 } from '../../services/ImmersiveChrome';
-import { AppPrefs, PREF_KEY_PEN_PAL_NAME } from '../../services/AppPrefs';
+import { STORAGE_KEY_PEN_PAL_NAME } from '../../services/AppPrefs';
+import { PenPalName } from '../../models/PenPalName';
+import { PenPal, penPalLanguageKey } from '../../models/PenPal';
+import {
+  OWN_PEN_PAL_ID,
+  STORAGE_KEY_POST_RECIPIENTS,
+  filterRecipients,
+  recipientNames,
+  stampCount,
+  sendablePenPalIds
+} from '../../models/WorldMapLogic';
+import { arrivalDateMs, replyTimeTo } from '../../models/PenPalTravel';
+import { PenPalRoster } from '../../services/PenPalRoster';
+import { ApproximateLocation } from '../../services/ApproximateLocation';
 
 const DOMAIN = 0x0000;
 const TAG = 'PostBoxTabView';
@@ -113,13 +129,28 @@ export struct PostBoxTabView {
   @State private heldEntryIds: Set<string> = new Set<string>();
   /** 这一叠里取消勾选的（勾选状态本地持有，投信那一刻才算数） */
   @State private excluded: Set<string> = new Set<string>();
-  /** 服务端说现在能不能寄；问不到（未登录、断网）undefined，当作能寄（R-POST-05） */
-  @State private rhythm: RhythmResponse | undefined = undefined;
+  /** 邮票夹（GET /me/stamps，U01）；问不到（未登录、断网）undefined，当作够寄（R-POST-05） */
+  @State private stamps: StampWallet | undefined = undefined;
+  /** 「这周的邮票到了」小卡片的阶段（undefined = 不显示）；浮层挂在整页上（iOS stampPack） */
+  @State private stampPack: StampPackPhase | undefined = undefined;
+  /** 领到了几张（Claimed 阶段显示「+N」） */
+  @State private stampPackAdded: number = 0;
   /** 「此刻」（毫秒），定时推进——路上的信到点，红点自己亮（R-BOX-02） */
   @State private nowMs: number = Date.now();
   /** 邮筒插画左上 1 像素的颜色，当整页底色；取不到退回主题背景 */
   @State private pageColor: string | undefined = undefined;
-  @State private penPalName: string = '青鸟';
+  /** 笔友名镜像（iOS @AppStorage 观察语义）：改名处写镜像，这里即时跟上 */
+  @StorageProp(STORAGE_KEY_PEN_PAL_NAME) penPalName: string = '';
+  /** 本地化的「笔友」（s_8dcc9a2d73）：没起名时显示 / 寄信署名用它兜底（aboutToAppear 取一次） */
+  private unnamedPenPalLabel: string = '笔友';
+  /** 这次寄给谁（笔友 id 逗号分隔，自己那位 own；地图页挑好写回，这里跟着变） */
+  @StorageProp(STORAGE_KEY_POST_RECIPIENTS) recipientsStorage: string = OWN_PEN_PAL_ID;
+  /** 世界笔友名册（抬头「寄给」、邮票张数、寄信署名都要；aboutToAppear 备好） */
+  @State private roster: PenPal[] = [];
+  /** 服务端备好、现在能寄的世界笔友（问不到一位都不能寄，只寄自己那位） */
+  @State private availablePenPals: Set<string> = new Set<string>();
+  /** 你大概在哪（算世界笔友的回信要走多久；只在本机用，有权限才定） */
+  private location: ApproximateLocation = new ApproximateLocation();
   /** 「邮戳 + 在路上」快照（reload 时备好；Postmark 地点要查关联日记，渲染时不能异步） */
   @State private transitPlace: string = '';
   @State private transitHasOthers: boolean = false;
@@ -131,6 +162,8 @@ export struct PostBoxTabView {
   private navPathStack: NavPathStack = new NavPathStack();
   private store: relationalStore.RdbStore | undefined = undefined;
   private nowTimerId: number = -1;
+  /** 领到邮票后停一下再淡出（1.4s）的定时器（离开页面清掉） */
+  private stampPackTimerId: number = -1;
 
   // ---- 5.6 投信动画（displaySync 逐帧推进 postingT；手感集中在几何层单测） ----
   /** 正在投的那一封（undefined = 没在投信）。投进去就算寄出：落库成功才起动画 */
@@ -151,7 +184,12 @@ export struct PostBoxTabView {
   private postingUnderway: boolean = false;
 
   aboutToAppear(): void {
-    this.penPalName = AppPrefs.getString(PREF_KEY_PEN_PAL_NAME, '青鸟');
+    // 本地化的「笔友」兜底词取一次（没起名时显示用；语言运行时切换由页面重建覆盖）
+    const uiContext = this.getUIContext().getHostContext();
+    if (uiContext !== undefined) {
+      this.unnamedPenPalLabel =
+        uiContext.resourceManager.getStringSync($r('app.string.s_8dcc9a2d73').id);
+    }
     this.nowTimerId = setInterval((): void => {
       this.nowMs = Date.now();
     }, NOW_TICK_INTERVAL_MS);
@@ -167,6 +205,12 @@ export struct PostBoxTabView {
     const context = this.getUIContext().getHostContext();
     if (context !== undefined) {
       this.postingFeel.prepare(context.resourceManager);
+      // 世界笔友名册（rawfile 读一次进缓存；抬头「寄给」、邮票张数、寄信都要）
+      PenPalRoster.all(context).then((roster: PenPal[]): void => {
+        this.roster = roster;
+      });
+      // 有定位权限就悄悄定一次（不弹框）：世界笔友的回信时长按路程分档
+      this.location.refresh(context);
     }
   }
 
@@ -174,6 +218,10 @@ export struct PostBoxTabView {
     if (this.nowTimerId >= 0) {
       clearInterval(this.nowTimerId);
       this.nowTimerId = -1;
+    }
+    if (this.stampPackTimerId >= 0) {
+      clearTimeout(this.stampPackTimerId);
+      this.stampPackTimerId = -1;
     }
     // 5.6：动画没放完就离开页面——停驱动、停震、放掉解码器
     this.stopPostingSync();
@@ -189,9 +237,8 @@ export struct PostBoxTabView {
     this.navPathStack.pushPathByName('Letterbox', '');
   }
 
-  /** 换主题 = 换邮筒插画 = 底色重取；笔友名也顺手刷新（设置页改完回来生效） */
+  /** 换主题 = 换邮筒插画 = 底色重取（笔友名走 @StorageProp 镜像，改名自动跟上） */
   private onThemeChanged(): void {
-    this.penPalName = AppPrefs.getString(PREF_KEY_PEN_PAL_NAME, '青鸟');
     this.loadPageColor();
   }
 
@@ -212,6 +259,33 @@ export struct PostBoxTabView {
 
   private isLoggedIn(): boolean {
     return this.env.session !== undefined && this.env.session.isLoggedIn();
+  }
+
+  /** 是会员吗（世界笔友只有会员能寄，U01 决策 5） */
+  private isMemberNow(): boolean {
+    return this.env.membership !== undefined && this.env.membership.isMember;
+  }
+
+  /** 测试会员开着吗（TEST_UNLOCK 假会员；正式包恒 false） */
+  private isTestMemberNow(): boolean {
+    return this.env.membership !== undefined && this.env.membership.isTestMember;
+  }
+
+  /** 现在能寄的世界笔友 id：测试会员全放行（方便测试），否则只认服务端名单 */
+  private sendableIds(): Set<string> {
+    return sendablePenPalIds(this.roster, this.isTestMemberNow(), this.availablePenPals);
+  }
+
+  /** 现在有效的收件人（寄不了的世界笔友去掉，一位不剩退回自己那位） */
+  private recipientSet(): Set<string> {
+    return filterRecipients(this.recipientsStorage, this.isMemberNow(), this.sendableIds());
+  }
+
+  /** 抬头那句「寄给谁」（名片顺序连名，自己那位在前） */
+  private recipientNamesText(): string {
+    return recipientNames(this.recipientSet(),
+      PenPalName.display(this.penPalName, this.unnamedPenPalLabel),
+      this.roster, this.location.coordinate, this.appLanguage);
   }
 
   /** 邮筒插画左上 1 像素 → 整页底色（结果按主题 id 缓存） */
@@ -277,33 +351,97 @@ export struct PostBoxTabView {
       }
     };
     load();
-    this.refreshRhythm();
+    this.refreshStamps();
   }
 
-  /** 能不能寄，问服务端（R-POST-05/12：判定权只在服务端，这里只提前说明） */
-  private refreshRhythm(): void {
+  /**
+   * 问一下邮票夹（GET /me/stamps，U01）；新的一包到了、邮票夹又没满，就浮出
+   * 领取的小卡片（StampPackCard）。不点「领取」也不耽误寄信：寄的时候服务端
+   * 会把到期的那一包补上。问不到就照常让用户寄，最终由服务端拦（R-POST-05）。
+   */
+  private refreshStamps(): void {
     const session = this.env.session;
     const auth = this.env.auth;
     const token = session !== undefined ? session.token : null;
     if (!this.isLoggedIn() || auth === undefined || token === null) {
-      this.rhythm = undefined;
+      this.stamps = undefined;
       return;
     }
-    auth.fetchRhythm(token)
-      .then((rhythm: RhythmResponse): void => {
-        this.rhythm = rhythm;
+    auth.fetchStamps(token)
+      .then((wallet: StampWallet): void => {
+        this.stamps = wallet;
+        if (wallet.packReady && wallet.balance < wallet.cap &&
+          this.stampPack === undefined) {
+          this.getUIContext().animateTo({ duration: 350, curve: Curve.EaseOut }, (): void => {
+            this.stampPack = StampPackPhase.Ready;
+          });
+        }
       })
       .catch((err: BusinessError): void => {
-        // 问不到当作能寄，最终由服务端拦（R-POST-05）
-        hilog.warn(DOMAIN, TAG, 'fetch rhythm failed: %{public}s', JSON.stringify(err));
-        this.rhythm = undefined;
+        // 只是提前问一声：问不到当作够寄，最终由服务端拦（拦下了信会退回并说明原因）
+        hilog.warn(DOMAIN, TAG, 'fetch stamps failed: %{public}s', JSON.stringify(err));
       });
+    // 顺便问现在能寄哪几位世界笔友（iOS refreshStamps 同款）；问不到 =
+    // 一位都不能寄（只寄自己那位），下次进页再问
+    auth.fetchPenPals(token)
+      .then((ids: string[]): void => {
+        this.availablePenPals = new Set<string>(ids);
+      })
+      .catch((err: BusinessError): void => {
+        this.availablePenPals = new Set<string>();
+        hilog.warn(DOMAIN, TAG, 'fetch pen pals failed: %{public}s', JSON.stringify(err));
+      });
+  }
+
+  /** 点了「领取」：领这一包 →「+N」停一下（1.4s）再淡出（iOS claimStampPack） */
+  private claimStampPack(): void {
+    const session = this.env.session;
+    const auth = this.env.auth;
+    const token = session !== undefined ? session.token : null;
+    if (auth === undefined || token === null) {
+      this.stampPack = undefined;
+      return;
+    }
+    const before = this.stamps !== undefined ? this.stamps.balance : 0;
+    this.stampPack = StampPackPhase.Claiming;
+    auth.claimStamps(token)
+      .then((wallet: StampWallet): void => {
+        this.stamps = wallet;
+        this.stampPackAdded = Math.max(0, wallet.balance - before);
+        this.getUIContext().animateTo({ duration: 300, curve: Curve.EaseInOut }, (): void => {
+          this.stampPack = StampPackPhase.Claimed;
+        });
+        this.stampPackTimerId = setTimeout((): void => {
+          this.stampPackTimerId = -1;
+          this.getUIContext().animateTo({ duration: 350, curve: Curve.EaseOut }, (): void => {
+            this.stampPack = undefined;
+          });
+        }, 1400);
+      })
+      .catch((err: BusinessError): void => {
+        hilog.warn(DOMAIN, TAG, 'claim stamps failed: %{public}s', JSON.stringify(err));
+        this.stampPack = StampPackPhase.Ready;
+        this.presentErrorText($r('app.string.s_083af3c4ae'));
+      });
+  }
+
+  /** 「稍后」先收起，下次进邮筒页再出来（iOS onLater：easeOut 0.25） */
+  private dismissStampPack(): void {
+    this.getUIContext().animateTo({ duration: 250, curve: Curve.EaseOut }, (): void => {
+      this.stampPack = undefined;
+    });
+  }
+
+  /** 这次要贴几张（U01 决策 5/21）：一位一张、南极两张，自己那位也算一张 */
+  private postageNeeded(): number {
+    return stampCount(this.recipientSet(), this.roster);
   }
 
   /** 此刻的状况（R-POST-06 判定顺序，纯逻辑在 PostBoxLogic） */
   private state(): PostBoxState {
     return judgePostBoxState(new PostBoxStateInput(this.letters, this.entries,
-      this.heldEntryIds, this.ownedLetterIds(), this.rhythm, this.isLoggedIn(), this.nowMs));
+      this.heldEntryIds, this.ownedLetterIds(), this.stamps, this.postageNeeded(),
+      this.isLoggedIn(), this.nowMs));
   }
 
   /** 有信在路上（本机投的写信中 + 写好了还没到的；服务端拦着时下面半透明摆纸用） */
@@ -332,24 +470,25 @@ export struct PostBoxTabView {
   private statusLabel(): ResourceStr {
     // 5.6 投信动画中钉住「点邮筒…」：信还没进邮筒不说「在路上」，版式不跳
     if (this.posting !== undefined) {
-      return $r('app.string.s_ae7b18f8be', this.penPalName);
+      return $r('app.string.s_ae7b18f8be', this.recipientNamesText());
     }
     const state = this.state();
     switch (state.kind) {
       case PostBoxSituationKind.Returned:
         return $r('app.string.s_3b849347c8');
       case PostBoxSituationKind.NotLoggedIn:
-        return $r('app.string.s_6b3f21b5dd', this.penPalName);
+        return $r('app.string.s_6b3f21b5dd',
+          PenPalName.display(this.penPalName, this.unnamedPenPalLabel));
       case PostBoxSituationKind.JustPosted:
         return state.candidates.length === 0
           ? $r('app.string.s_b2e8e82a2a')
           : $r('app.string.s_e2322d97a3');
-      case PostBoxSituationKind.Blocked:
-        return this.rhythmLabel();
+      case PostBoxSituationKind.NoStamps:
+        return this.noStampsLabel();
       case PostBoxSituationKind.Ready:
         return this.checkedCount(state.candidates) === 0
           ? $r('app.string.s_7d8e819a4b')
-          : $r('app.string.s_ae7b18f8be', this.penPalName);
+          : $r('app.string.s_ae7b18f8be', this.recipientNamesText());
       case PostBoxSituationKind.InTransit:
         return $r('app.string.s_ce8689ed1e');
       case PostBoxSituationKind.NothingNew:
@@ -359,21 +498,18 @@ export struct PostBoxTabView {
     }
   }
 
-  /** 服务端拦着时提前说清楚（R-POST-12）；不用「额度 / 剩余 N 封」这类计量词（定价文档 §5.1） */
-  private rhythmLabel(): ResourceStr {
-    if (this.rhythm === undefined) {
-      return $r('app.string.s_589be40a92', this.penPalName);
+  /** 邮票用完了，说清下一包几时到（U01；不写「额度 / 剩余 N 封」这类计量词，定价文档 §5.1） */
+  private noStampsLabel(): ResourceStr {
+    const wallet = this.stamps;
+    if (wallet === undefined) {
+      return $r('app.string.s_7d07a38a9f');
     }
-    switch (this.rhythm.reason) {
-      case 'daily_cap':
-        return $r('app.string.s_c2b46a7849');
-      case 'monthly_cap':
-        return $r('app.string.s_cd2db65a0a', this.penPalName);
-      case 'welcome_pending':
-        return $r('app.string.s_524e22ba8d', this.penPalName);
-      default:
-        return $r('app.string.s_589be40a92', this.penPalName);
+    // 相对时间（明天 / in 3 hours，各语言 CLDR 出词）；已经到了或快到了换「很快就到」
+    const relative = relativeNamed(wallet.nextPackAtMs, this.appLanguage);
+    if (relative.length === 0) {
+      return $r('app.string.s_7d07a38a9f');
     }
+    return $r('app.string.s_8921bcd103', relative);
   }
 
   private excludedIdsArray(): string[] {
@@ -425,30 +561,18 @@ export struct PostBoxTabView {
     this.postingUnderway = true;
     // 点下邮筒的这一刻 = 寄出时刻，到达时刻从这里起算
     const sentAt = Date.now();
-    const letter = new Letter(generateUuid(), sentAt, Date.now());
-    letter.status = LetterStatus.Generating;
-    letter.body = '';
-    letter.fromCharacter = this.penPalName;
-    // 写信当刻的昵称快照；没登录 / 没设昵称时缺省，抬头退回只写「致」
-    const session = this.env.session;
-    if (session !== undefined) {
-      const user = session.user;
-      if (user !== null && user.displayName.length > 0) {
-        letter.toName = user.displayName;
-      }
-    }
-    letter.triggerKind = LetterTriggerKind.Weekly;
-    // 信纸在寄出这一刻定下（会员火漆信 6.x 接上即生效；当前恒普通信）
-    letter.stationery = letterStationery(false);
-    letter.deliveredAt = LetterDelivery.arrivalDate(sentAt, LetterDelivery.debugTimeScale(), Math.random);
+    // 寄给几位就落几封「写信中」的信：各自在后台写、各自按路程到（iOS post 同款）
+    const letters = this.makeLettersForRecipients(sentAt);
     const entryIds: string[] = [];
     for (const entry of checked) {
       entryIds.push(entry.id);
     }
     const save = async (): Promise<void> => {
       try {
-        await LetterRepository.saveLetter(store, letter);
-        await LetterRepository.linkLetterEntries(store, letter.id, entryIds);
+        for (const letter of letters) {
+          await LetterRepository.saveLetter(store, letter);
+          await LetterRepository.linkLetterEntries(store, letter.id, entryIds);
+        }
       } catch (err) {
         hilog.error(DOMAIN, TAG, 'post letter failed: %{public}s', JSON.stringify(err));
         this.postingUnderway = false;
@@ -456,7 +580,9 @@ export struct PostBoxTabView {
         return;
       }
       // 投进去就算寄出：交给本机队列，清掉勾选，立刻试寄一轮
-      outbox.enqueue(letter.id);
+      for (const letter of letters) {
+        outbox.enqueue(letter.id);
+      }
       this.excluded = new Set<string>();
       this.reload();
       // 5.6 投信动画（items/excludedIds 是点邮筒那一刻的快照，动画里要画）。
@@ -467,6 +593,59 @@ export struct PostBoxTabView {
       });
     };
     save();
+  }
+
+  /**
+   * 按现在的收件人落几封信（一位一封，iOS post 同款）：公共字段（状态、
+   * 触发、信纸、抬头昵称）一样，署名 / 邮票 / 到达时刻各按各的算。
+   * 自己那位在收件人里时永远有一封（世界笔友问不到也照寄）。
+   */
+  private makeLettersForRecipients(sentAt: number): Letter[] {
+    const letters: Letter[] = [];
+    const recipients = this.recipientSet();
+    // 写信当刻的昵称快照；没登录 / 没设昵称时缺省，抬头退回只写「致」
+    let toName: string | undefined = undefined;
+    const session = this.env.session;
+    if (session !== undefined && session.user !== null &&
+      session.user.displayName.length > 0) {
+      toName = session.user.displayName;
+    }
+    if (recipients.has(OWN_PEN_PAL_ID)) {
+      // 自己起名的那位：没有住址就在身边，两到六个小时就回
+      const letter = this.blankLetter(sentAt, toName);
+      letter.fromCharacter = PenPalName.display(this.penPalName, this.unnamedPenPalLabel);
+      letter.postage = 1;
+      letter.deliveredAt = LetterDelivery.arrivalDate(sentAt,
+        LetterDelivery.debugTimeScale(), Math.random);
+      letters.push(letter);
+    }
+    const languageKey = penPalLanguageKey(this.appLanguage);
+    for (const penPal of this.roster) {
+      if (!recipients.has(penPal.id)) {
+        continue;
+      }
+      // 世界笔友：署名快照按寄出这一刻的 App 语言，回信时长按离你多远分档
+      const letter = this.blankLetter(sentAt, toName);
+      letter.fromCharacter = penPal.surname.resolved(languageKey);
+      letter.penPalId = penPal.id;
+      letter.postage = penPal.postage;
+      letter.deliveredAt = arrivalDateMs(sentAt, replyTimeTo(penPal, this.location.coordinate),
+        Math.random(), LetterDelivery.debugTimeScale());
+      letters.push(letter);
+    }
+    return letters;
+  }
+
+  /** 一封「写信中」的信的公共字段（寄给谁不同，其他都一样） */
+  private blankLetter(sentAt: number, toName: string | undefined): Letter {
+    const letter = new Letter(generateUuid(), sentAt, Date.now());
+    letter.status = LetterStatus.Generating;
+    letter.body = '';
+    letter.toName = toName;
+    letter.triggerKind = LetterTriggerKind.Weekly;
+    // 信纸在寄出这一刻定下（会员火漆信 6.x 接上即生效；当前恒普通信）
+    letter.stationery = letterStationery(false);
+    return letter;
   }
 
   /**
@@ -514,7 +693,8 @@ export struct PostBoxTabView {
       ? session.user.displayName : undefined;
     // 会员火漆信是 6.x，现在投的都是普通封口；火漆管道先铺好
     const hasSeal = false;
-    this.posting = new PostingRun(items, excludedIds, hasSeal, PostingRun.sealMarkOf(displayName));
+    this.posting = new PostingRun(items, excludedIds, this.recipientNamesText(),
+      hasSeal, PostingRun.sealMarkOf(displayName));
     this.postingT = 0;
     this.postingStartNs = -1;
     this.postingFeel.play(hasSeal);
@@ -649,17 +829,18 @@ export struct PostBoxTabView {
       // 不碰 overlay 带子闭包、width('100%') 节点的 margin、Image 的 padding
       Column({ space: 14 }) {
         // 第一节 = 页首行 + 邮筒插画（内层不再加间距，几何自管）：
-        // 页首行只有右上「信箱」入口（官方 Button），位置对齐首页大屏页首的
-        // 「+」——顶 = 安全区顶 + 28、右 20（HomeView showcaseHeaderRow
-        // 同款几何）；入口高 32 + 底距 10 = 行高 70，插画顶 = 安全区顶
-        // + 70，与原版式逐像素一致（dome 位置不动）
+        // 页首行左「笔友」右「信箱」两个入口（官方 Button），对齐首页大屏
+        // 页首的「+」——顶 = 安全区顶 + 28、左 / 右 20（HomeView
+        // showcaseHeaderRow 同款几何）；入口高 32 + 底距 10 = 行高 70，
+        // 插画顶 = 安全区顶 + 70，与原版式逐像素一致（dome 位置不动）
         Column() {
           Row() {
+            this.penPalsEntry()
+            Blank()
             this.letterboxEntry()
           }
-          .justifyContent(FlexAlign.End)
           .width('100%')
-          .padding({ top: 28, right: 20, bottom: 10 })
+          .padding({ top: 28, left: 20, right: 20, bottom: 10 })
 
           // 邮筒插画（本身就是按钮；点邮筒投信是 5.3，本卡不挂动作）。
           // 插画已裁掉奶油边（dome ≈ 区顶）；行内 @Builder 调用渲染
@@ -743,10 +924,67 @@ export struct PostBoxTabView {
           fadeHeightVp: this.metrics().pileFadeHeightVp
         })
       }
+
+      // 这周的邮票到了：领取的小卡片（U01）。全页浮层——22% 黑遮罩连顶栏
+      // 一起压暗（iOS 挂导航外同款）；点遮罩不关，「稍后」才收起
+      if (this.stampPack !== undefined) {
+        Stack() {
+          Column()
+            .width('100%')
+            .height('100%')
+            .backgroundColor('rgba(0,0,0,0.22)')
+            .onClick((): void => {
+            })
+          StampPackCard({
+            phase: this.stampPack,
+            claimedAdded: this.stampPackAdded,
+            ink: postmarkInkHex(this.theme.id),
+            paper: this.palette().paper,
+            onClaim: (): void => {
+              this.claimStampPack();
+            },
+            onLater: (): void => {
+              this.dismissStampPack();
+            }
+          })
+            .transition(TransitionEffect.OPACITY
+              .combine(TransitionEffect.translate({ y: 14 })))
+        }
+        .width('100%')
+        .height('100%')
+        .transition(TransitionEffect.OPACITY)
+      }
       }
     }
     .mode(NavigationMode.Stack)
     .backgroundColor(this.pageColor !== undefined ? this.pageColor : this.theme.background)
+  }
+
+  /** 左上角「笔友」入口：与右上「信箱」同款胶囊（玻璃底 + 0.5 玻璃边），
+   *  打开世界笔友地图挑这次寄给谁（iOS penPalsButton 同位；sys.symbol
+   *  无裸 globe，取带信标的地球 globe_badge_message——信寄往世界各地）。
+   *  定位由外层页首行管（顶 = 安全区 + 28、左 20） */
+  @Builder
+  penPalsEntry() {
+    Button({ type: ButtonType.Capsule, stateEffect: true }) {
+      Row({ space: 5 }) {
+        SymbolGlyph($r('sys.symbol.globe_badge_message'))
+          .fontSize(16)
+          .fontColor([this.theme.textPrimary])
+        Text($r('app.string.s_8dcc9a2d73'))
+          .fontSize(12)
+          .fontWeight(this.theme.captionFont.weight)
+          .fontFamily(this.theme.captionFont.family)
+          .fontColor(this.theme.textPrimary)
+      }
+    }
+    .height(32)
+    .padding({ left: 12, right: 14 })
+    .backgroundColor(this.theme.glassBackground)
+    .border({ width: 0.5, color: this.theme.glassBorder })
+    .onClick((): void => {
+      this.navPathStack.pushPathByName('WorldMap', '');
+    })
   }
 
   /** 右上角信箱入口：官方 Button（Capsule 胶囊，缩小版）+ inbox 图标
@@ -824,11 +1062,15 @@ export struct PostBoxTabView {
         palette: this.palette(),
         items: outgoingItemsOf(this.state().candidates),
         excludedIds: this.excludedIdsArray(),
+        recipients: this.recipientNamesText(),
         interactive: true,
         totalHeightVp: this.metrics().pileHeightVp,
         headerHeightVp: this.metrics().pileHeaderHeightVp,
         rowHeightVp: this.metrics().pileRowHeightVp,
         fadeHeightVp: this.metrics().pileFadeHeightVp,
+        onTapRecipients: (): void => {
+          this.navPathStack.pushPathByName('WorldMap', '');
+        },
         onToggle: (id: string): void => {
           const next = new Set<string>(this.excluded);
           if (next.has(id)) {
@@ -842,13 +1084,14 @@ export struct PostBoxTabView {
       .width('100%')
       // 5.6：投信动画起飞那一刻量这叠纸的窗口矩形（动画里画它的快照）
       .id('postboxPile')
-    } else if (this.state().kind === PostBoxSituationKind.Blocked &&
+    } else if (this.state().kind === PostBoxSituationKind.NoStamps &&
       !this.hasLettersInTransit() && this.state().candidates.length > 0) {
-      // 这周寄不了，新写的先摆着，下次一起寄（只是画，不能勾）
+      // 邮票不够这次寄的，新写的先摆着，攒够了下次一起寄（只是画，不能勾）
       OutgoingPile({
         palette: this.palette(),
         items: outgoingItemsOf(this.state().candidates),
         excludedIds: this.excludedIdsArray(),
+        recipients: this.recipientNamesText(),
         interactive: false,
         totalHeightVp: this.metrics().pileHeightVp,
         headerHeightVp: this.metrics().pileHeaderHeightVp,

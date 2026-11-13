@@ -2,8 +2,9 @@
  * 后端统一错误 envelope 解析（10_BUILD_MANUAL.md 4.1；02_BACKEND_API.md types）。
  *
  *   { "error": { "code": "...", "message": "...", "detail?": "..." } }   ← 统一壳
- *   顶层可能还有：retryAfter（验证码冷却剩余秒）/ reason（429 来信节奏）/
- *   nextLetterAt（下一封可寄时刻，ISO8601 字符串，调用方用 ApiDates 再解析）/ tier
+ *   顶层可能还有：retryAfter（验证码冷却剩余秒）/ reason（429 被拦原因）/
+ *   nextLetterAt（下一封可寄时刻，ISO8601 字符串，调用方用 ApiDates 再解析）/
+ *   nextPackAt（no_stamps 时下一包几时到，ISO8601 字符串）/ tier
  *
  * `message` 服务端只出中文，客户端按 code / reason 自己渲染七种语言——
  * 本类只做忠实解析，不做本地化（那是 4.2+/5.x 调用方的事）。
@@ -21,6 +22,7 @@ interface ApiErrorRaw {
   reason?: string;
   retryAfter?: number;
   nextLetterAt?: string;
+  nextPackAt?: string;
   tier?: string;
 }
 
@@ -35,6 +37,8 @@ export class ApiErrorEnvelope {
   reason?: string;
   retryAfter?: number;
   nextLetterAt?: string;
+  /** `no_stamps` 时：下一包什么时候到（ISO8601 串，调用方用 ApiDates 再解析） */
+  nextPackAt?: string;
   tier?: string;
 
   constructor(code: string, message: string) {
@@ -72,6 +76,9 @@ export class ApiErrorEnvelope {
       }
       if (typeof raw.nextLetterAt === 'string') {
         envelope.nextLetterAt = raw.nextLetterAt;
+      }
+      if (typeof raw.nextPackAt === 'string') {
+        envelope.nextPackAt = raw.nextPackAt;
       }
       if (typeof raw.tier === 'string') {
         envelope.tier = raw.tier;

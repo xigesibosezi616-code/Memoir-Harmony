@@ -107,8 +107,6 @@ export struct ShowcaseOverview {
   /** 换级进来时手指底下那篇（-1 = 无，滚到顶） */
   pendingFocusIndex: number = -1;
   onOpen: (id: string) => void = (_id: string): void => {};
-  /** 调试行（脚手架，6.x 统一删） */
-  @BuilderParam debugRow: () => void = emptyOverviewSlot;
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
   @StorageProp(STORAGE_KEY_APP_LANGUAGE) @Watch('onDataChange')
   appLanguage: string = 'zh-Hans';
@@ -166,14 +164,6 @@ export struct ShowcaseOverview {
           })
         }
       }, (bundle: OverviewMonthBundle): string => bundle.key)
-
-      ListItem() {
-        Column() {
-          this.debugRow()
-        }
-        .width('100%')
-        .padding({ top: 8, bottom: 8 })
-      }
 
       // 给 Tab 栏留白（iOS Spacer 96 同款位置）
       ListItem() {
@@ -241,8 +231,4 @@ export struct ShowcaseOverview {
       }
     }
   }
-}
-
-@Builder
-function emptyOverviewSlot() {
 }

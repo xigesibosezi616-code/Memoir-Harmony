@@ -2,7 +2,7 @@
  * 邮筒页的候选日记与状况判定（10_BUILD_MANUAL.md 5.2；R-POST-02/03/04/06）。
  * 对应 iOS `PostBoxView.swift` 的 situation / entriesToSend / outgoingItems。
  *
- * 全部纯函数：信 / 日记 / 节奏 / 「此刻」由调用方注入，单测可跑穿各种时间线。
+ * 全部纯函数：信 / 日记 / 邮票夹 / 「此刻」由调用方注入，单测可跑穿各种时间线。
  * 判定顺序（R-POST-06）与候选口径（R-POST-02/03）是跨端行为规则，与 iOS 逐字一致：
  * - 候选按 `createdAt`（真正写下的时刻）判新，不按 `date`（用户可改的日记日期）——
  *   补记一篇上周的日记也算「新写的」
@@ -13,7 +13,7 @@
 import { Letter } from './Letter';
 import { LetterDelivery } from './LetterDelivery';
 import { JournalEntry } from './JournalEntry';
-import { RhythmResponse } from './Api';
+import { StampWallet } from './Api';
 
 /** 邮筒页此刻的状况（R-POST-06 判定顺序的产物；先命中先算） */
 export enum PostBoxSituationKind {
@@ -22,8 +22,8 @@ export enum PostBoxSituationKind {
   NotLoggedIn = 'notLoggedIn',
   /** 刚投了一封、还在写（本机负责的） */
   JustPosted = 'justPosted',
-  /** 服务端说这会儿不能寄（GET /me/rhythm 的 reason 驱动文案） */
-  Blocked = 'blocked',
+  /** 邮票不够这次寄的（U01；服务端回的邮票夹驱动文案） */
+  NoStamps = 'noStamps',
   /** 有新日记可寄 */
   Ready = 'ready',
   /** 寄过了、还在路上，也没有新日记 */
@@ -42,19 +42,22 @@ export class PostBoxStateInput {
   readonly heldEntryIds: Set<string>;
   /** 本机寄信队列负责的信 id（5.3；另一台设备投的信不归本机管，不进 Returned/JustPosted） */
   readonly ownedLetterIds: Set<string>;
-  /** GET /me/rhythm 的结果；问不到（未登录、断网）传 undefined，当作能寄（R-POST-05） */
-  readonly rhythm: RhythmResponse | undefined;
+  /** GET /me/stamps 的结果；问不到（未登录、断网）传 undefined，当作够寄（R-POST-05） */
+  readonly stamps: StampWallet | undefined;
+  /** 这次要贴几张（U01：一位收件人一张，南极两张；B1 只有自己起名那位恒 1，B2 按收件人算） */
+  readonly postageNeeded: number;
   readonly isLoggedIn: boolean;
   readonly nowMs: number;
 
   constructor(letters: Letter[], entries: JournalEntry[], heldEntryIds: Set<string>,
-    ownedLetterIds: Set<string>, rhythm: RhythmResponse | undefined,
+    ownedLetterIds: Set<string>, stamps: StampWallet | undefined, postageNeeded: number,
     isLoggedIn: boolean, nowMs: number) {
     this.letters = letters;
     this.entries = entries;
     this.heldEntryIds = heldEntryIds;
     this.ownedLetterIds = ownedLetterIds;
-    this.rhythm = rhythm;
+    this.stamps = stamps;
+    this.postageNeeded = postageNeeded;
     this.isLoggedIn = isLoggedIn;
     this.nowMs = nowMs;
   }
@@ -102,7 +105,7 @@ export function lastSentAtMs(letters: Letter[]): number | undefined {
 
 /**
  * 邮筒页此刻的状况，按 R-POST-06 的顺序判定（先命中先算）：
- * 有退回 → 未登录 → 本机有写信中的信 → 服务端拦 → 有可寄 → 在路上 → 没新日记 → 一篇都没有。
+ * 有退回 → 未登录 → 本机有写信中的信 → 邮票不够 → 有可寄 → 在路上 → 没新日记 → 一篇都没有。
  * 「本机负责」看 ownedLetterIds（寄信队列的本机负责表）：另一台设备投的信
  * （写信中 / 退回）不劫持本机的邮筒页（iOS isQueued && owns / isReturned 同款）。
  */
@@ -125,10 +128,12 @@ export function judgePostBoxState(input: PostBoxStateInput): PostBoxState {
     return new PostBoxState(PostBoxSituationKind.JustPosted,
       candidateEntries(input.letters, input.entries, input.heldEntryIds));
   }
-  // 4. 服务端说这会儿不能寄（问不到不算拦，最终由服务端拦）
-  if (input.rhythm !== undefined && !input.rhythm.canRequestNow) {
+  // 4. 邮票不够这次寄的（U01；问到邮票夹才算，问不到当作够寄，最终由服务端拦）。
+  //    新的一包到了（packReady）不算不够——寄的时候服务端会把到期的那包补上
+  if (input.stamps !== undefined && input.stamps.balance < input.postageNeeded &&
+    !input.stamps.packReady) {
     const candidates = candidateEntries(input.letters, input.entries, input.heldEntryIds);
-    return new PostBoxState(PostBoxSituationKind.Blocked, candidates);
+    return new PostBoxState(PostBoxSituationKind.NoStamps, candidates);
   }
   // 5. 有新日记可寄
   const candidates = candidateEntries(input.letters, input.entries, input.heldEntryIds);

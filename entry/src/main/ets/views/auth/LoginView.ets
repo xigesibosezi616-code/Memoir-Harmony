@@ -24,6 +24,7 @@
  * 悬浮 Tab 栏在页面上期间隐藏（STORAGE_KEY_HIDE_TAB_BAR，接近日志 sheet 盖全屏的语义）。
  */
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import { BusinessError } from '@kit.BasicServicesKit';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
 import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
@@ -371,6 +372,7 @@ export struct LoginView {
       if (session !== undefined) {
         session.establish(resp.token, resp.user);
         this.bumpSessionTick();
+        this.syncMembershipAfterLogin();
       }
       this.presentResourceToast($r('app.string.s_8d4a2f6e90'), ErrorToastKind.Success);
       this.stopCountdown();
@@ -406,6 +408,7 @@ export struct LoginView {
       const resp: BindPhoneResponse = await auth.bindPhone(this.phone, this.code, token);
       if (resp.switchedAccount && resp.token.length > 0 && session !== undefined) {
         session.establish(resp.token, resp.user);
+        this.syncMembershipAfterLogin();
         this.presentResourceToast($r('app.string.s_221b549139'), ErrorToastKind.Success);
       } else {
         if (session !== undefined) {
@@ -435,6 +438,18 @@ export struct LoginView {
   private bumpSessionTick(): void {
     AppStorage.setOrCreate(STORAGE_KEY_SESSION_TICK,
       (AppStorage.get<number>(STORAGE_KEY_SESSION_TICK) ?? 0) + 1);
+  }
+
+  /** 登录成功后同步会员（U02 R-MEMBER-10 登录时机）：把本机华为权益交服务端
+   *  （上回 503 的 jws 这里补交）+ 按需确认发货；静默失败，回前台再兜底 */
+  private syncMembershipAfterLogin(): void {
+    const membership = this.env.membership;
+    if (membership === undefined) {
+      return;
+    }
+    membership.syncPurchases().catch((err: BusinessError): void => {
+      hilog.warn(DOMAIN, TAG, 'membership sync after login failed: %{public}s', JSON.stringify(err));
+    });
   }
 
   // ---- 华为账号登录（U02-1）----
@@ -497,6 +512,7 @@ export struct LoginView {
       if (session !== undefined) {
         session.establish(resp.token, resp.user);
         this.bumpSessionTick();
+        this.syncMembershipAfterLogin();
       }
       this.presentResourceToast($r('app.string.s_8d4a2f6e90'), ErrorToastKind.Success);
       this.navPathStack.pop();

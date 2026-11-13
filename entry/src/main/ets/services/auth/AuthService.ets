@@ -12,12 +12,15 @@ import { ApiConfig } from '../http/ApiConfig';
 import { HttpRequest } from '../http/HttpRequest';
 import { HarmonyHttpClient } from '../http/HarmonyHttpClient';
 import { AuthResponse, MeResponse, SendCodeResponse, BindPhoneResponse,
-  ChangePhoneResponse, DeleteAccountResponse, RhythmResponse,
+  ChangePhoneResponse, DeleteAccountResponse, StampWallet,
   LetterRequest, LetterResponse, LetterSummaryDTO,
+  SubscriptionSyncResponse, PenPalLetterRequest, PenPalLetterResponse,
   parseAuthResponse, parseMeResponse, parseSendCodeResponse,
   parseBindPhoneResponse, parseChangePhoneResponse, parseDeleteAccountResponse,
-  parseRhythmResponse, parseOkResponse, parseLetterResponse,
-  parseLetterListResponse, letterRequestBody } from '../../models/Api';
+  parseStampsResponse, parseOkResponse, parseLetterResponse,
+  parseLetterListResponse, parseSubscriptionSyncResponse,
+  parsePenPalsResponse, parsePenPalLetterResponse,
+  letterRequestBody, penPalLetterRequestBody } from '../../models/Api';
 
 export class AuthService {
   private readonly client: HarmonyHttpClient;
@@ -113,12 +116,32 @@ export class AuthService {
     return this.client.send<DeleteAccountResponse>(request, parseDeleteAccountResponse);
   }
 
-  /** GET /me/rhythm（5.2 邮筒页进页面就问）：现在能不能寄信。判定权只在服务端，
-   *  客户端只拿它提前说明（R-POST-05/12）；问不到由调用方当能寄，最终由服务端拦 */
-  async fetchRhythm(token: string): Promise<RhythmResponse> {
-    const request = HttpRequest.get(`${ApiConfig.BASE_URL}/me/rhythm`,
-      HttpRequest.bearer(token), ApiConfig.TIMEOUT_RHYTHM_S);
-    return this.client.send<RhythmResponse>(request, parseRhythmResponse);
+  /** GET /me/stamps（U01 邮票夹，2026-10-16 起取代 /me/rhythm）：余额、下一包几时到。
+   *  **余额只认服务端**，这里只是提前问一声；问不到由调用方当能寄，最终由服务端拦 */
+  async fetchStamps(token: string): Promise<StampWallet> {
+    const request = HttpRequest.get(`${ApiConfig.BASE_URL}/me/stamps`,
+      HttpRequest.bearer(token), ApiConfig.TIMEOUT_STAMPS_S);
+    return this.client.send<StampWallet>(request, parseStampsResponse);
+  }
+
+  /** POST /me/stamps/claim（U01 领这一包）：领完回新的邮票夹快照 */
+  async claimStamps(token: string): Promise<StampWallet> {
+    // iOS EmptyBody 同款：空对象体
+    const emptyBody: Record<string, Object> = {};
+    const request = HttpRequest.postJSON(`${ApiConfig.BASE_URL}/me/stamps/claim`, emptyBody,
+      HttpRequest.bearer(token), ApiConfig.TIMEOUT_STAMPS_S);
+    return this.client.send<StampWallet>(request, parseStampsResponse);
+  }
+
+  /** POST /subscription/sync-huawei（U02 R-MEMBER-09 第 5 步）：交华为
+   *  `jwsSubscriptionStatus`，服务端验签落库。响应 `finished:false` → 调用方
+   *  自己 `iap.finishPurchase`；503（后端没部署 / 华为暂时查不到）抛给调用方，
+   *  下次启动或回前台时再交，本机权益照常 */
+  async syncHuawei(jwsSubscriptionStatus: string, token: string): Promise<SubscriptionSyncResponse> {
+    const body: Record<string, string> = { 'jwsSubscriptionStatus': jwsSubscriptionStatus };
+    const request = HttpRequest.postJSON(`${ApiConfig.BASE_URL}/subscription/sync-huawei`, body,
+      HttpRequest.bearer(token), ApiConfig.TIMEOUT_AUTH_S);
+    return this.client.send<SubscriptionSyncResponse>(request, parseSubscriptionSyncResponse);
   }
 
   /** POST /letter（5.3 寄信）：服务端写一封回信。响应丢了信其实已写好（服务端
@@ -131,11 +154,29 @@ export class AuthService {
   }
 
   /** GET /letters?limit=N（5.3 补领）：服务端已写好的信，按 generatedAt 倒序。
-   *  只拿它补领（按正文去重），不直接显示给用户（02「补领」⚠️ 注） */
+   *  只拿它补领（按 clientLetterId 对上 / 正文去重），不直接显示给用户（02「补领」⚠️ 注） */
   async fetchLetters(limit: number, token: string): Promise<LetterSummaryDTO[]> {
     const request = HttpRequest.get(
       `${ApiConfig.BASE_URL}/letters?limit=${limit}`, HttpRequest.bearer(token),
       ApiConfig.TIMEOUT_FETCH_S);
     return this.client.send<LetterSummaryDTO[]>(request, parseLetterListResponse);
+  }
+
+  /** GET /penpals（U01 世界笔友）：服务端已经备好人设、现在能寄的世界笔友 id。
+   *  问不到（断网 / 老服务端 404）由调用方当一位都不能寄（iOS fetchAvailablePenPals 同款） */
+  async fetchPenPals(token: string): Promise<string[]> {
+    const request = HttpRequest.get(`${ApiConfig.BASE_URL}/penpals`,
+      HttpRequest.bearer(token), ApiConfig.TIMEOUT_STAMPS_S);
+    return this.client.send<string[]>(request, parsePenPalsResponse);
+  }
+
+  /** POST /penpal-letter（U01 世界笔友寄信）：服务端按人设写一封母语原文 + 译文。
+   *  同一个 clientLetterId 再请求原样返回、不再写、不再扣票（重发安全）。
+   *  403 member_required / 404 unknown_pen_pal 直退不重试，分类在寄信队列做 */
+  async sendPenPalLetter(request: PenPalLetterRequest,
+    token: string): Promise<PenPalLetterResponse> {
+    const httpRequest = HttpRequest.postJSON(`${ApiConfig.BASE_URL}/penpal-letter`,
+      penPalLetterRequestBody(request), HttpRequest.bearer(token), ApiConfig.TIMEOUT_SEND_LETTER_S);
+    return this.client.send<PenPalLetterResponse>(httpRequest, parsePenPalLetterResponse);
   }
 }

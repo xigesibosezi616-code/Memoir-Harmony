@@ -47,7 +47,7 @@ export default function httpApiTest() {
     it('timeoutTiersMatchSpec', 0, () => {
       expect(ApiConfig.TIMEOUT_SEND_LETTER_S).assertEqual(90);
       expect(ApiConfig.TIMEOUT_FETCH_S).assertEqual(30);
-      expect(ApiConfig.TIMEOUT_RHYTHM_S).assertEqual(15);
+      expect(ApiConfig.TIMEOUT_STAMPS_S).assertEqual(15);
       expect(ApiConfig.TIMEOUT_DEFAULT_S).assertEqual(30);
     })
 
@@ -99,6 +99,16 @@ export default function httpApiTest() {
       const e = HttpMapping.fromStatus(429, BODY_429_RETRY_AFTER);
       expect(e.isRateLimited()).assertTrue();
       expect(e.envelope !== null && e.envelope.retryAfter).assertEqual(42);
+    })
+
+    it('map429NoStampsCarriesNextPackAt', 0, () => {
+      // U01 邮票用完了：reason='no_stamps'，顶层 nextPackAt（下一包几时到，ISO 串）
+      const body = '{"error":{"code":"rate_limited","message":"邮票用完了"},'
+        + '"reason":"no_stamps","nextPackAt":"2026-11-12T00:00:00.000Z","balance":0}';
+      const e = HttpMapping.fromStatus(429, body);
+      expect(e.isRateLimited()).assertTrue();
+      expect(e.envelope !== null && e.envelope.reason).assertEqual('no_stamps');
+      expect(e.envelope !== null && e.envelope.nextPackAt).assertEqual('2026-11-12T00:00:00.000Z');
     })
 
     // ---- 错误映射验收③：5xx → 服务端错误（isServerError / 非 network） ----
@@ -203,15 +213,15 @@ export default function httpApiTest() {
     // ---- HttpRequest：构造器 / Bearer / 超时默认与覆盖 ----
 
     it('getDefaultsToDefaultTimeout', 0, () => {
-      const r = HttpRequest.get(`${ApiConfig.BASE_URL}/me/rhythm`);
+      const r = HttpRequest.get(`${ApiConfig.BASE_URL}/me/stamps`);
       expect(r.method).assertEqual(HttpMethod.GET);
       expect(r.timeoutSeconds).assertEqual(ApiConfig.TIMEOUT_DEFAULT_S);
       expect(r.body).assertEqual('');
     })
 
     it('customTimeoutOverridesDefault', 0, () => {
-      const r = HttpRequest.get(`${ApiConfig.BASE_URL}/me/rhythm`, undefined,
-        ApiConfig.TIMEOUT_RHYTHM_S);
+      const r = HttpRequest.get(`${ApiConfig.BASE_URL}/me/stamps`, undefined,
+        ApiConfig.TIMEOUT_STAMPS_S);
       expect(r.timeoutSeconds).assertEqual(15);
     })
 

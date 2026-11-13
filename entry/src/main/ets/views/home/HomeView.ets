@@ -10,8 +10,6 @@
  *   还是同一篇；点卡片 / 格子进详情
  * - 空状态按模式分两句（U07 R-HOME-05）：大屏指向右上「+」，列表指向
  *   底部浮钮
- * - 展示方式切换（6.1 设置页就绪前的临时入口）：调试行「大屏 / 列表」
- *   （2026-10-23 用户拍板）
  * - 换级转场（U06 R-HOME-09）：0.4s FastOutSlowIn，翻页两级以手指那格
  *   为中心缩放（27% / 73%），宫格以顶边；往密旧层缩 0.6、新层 1.5 落下，
  *   往疏反向。两段式：先排好转场方向（旧层按新方向重画一次，退场动画
@@ -48,8 +46,6 @@ import {
   decodeDraftFromContinuation
 } from '../../services/AppContinuation';
 import { MediaStorageService } from '../../services/MediaStorageService';
-import { AppEnvironment } from '../../environment/AppEnvironment';
-import { ErrorToastKind } from '../../environment/ErrorPresenter';
 import { JournalEntry } from '../../models/JournalEntry';
 import {
   PINCH_IN_SCALE, PINCH_OUT_SCALE, ShowcaseZoomLevel, quadEntryIndexAtSlot,
@@ -69,6 +65,12 @@ import { ShowcaseOverview } from './showcase/ShowcaseOverview';
 const DOMAIN = 0x0000;
 const TAG = 'HomeView';
 
+/** MainTabsView 悬浮胶囊 Tab 栏高度（HdsTabs barFloatingStyle，2026-11-13
+ * 真机实测：Mate 80 Pro Max 1320×2848 胶囊 165px ≈ 49vp）。barOverlap=true
+ * 时 TabContent 一直铺到屏底、卡片沉进 Tab 栏背后显得偏下——pager 区底部
+ * 垫掉「胶囊高 + 底部安全区」，卡片正好落在页头与 Tab 栏的正中间 */
+const FLOATING_TAB_BAR_HEIGHT_VP: number = 49;
+
 /** 组件在窗口里的位置和大小（捏合换算「手指底下是哪篇」用） */
 class RectVp {
   readonly x: number;
@@ -86,7 +88,6 @@ class RectVp {
 
 @Component
 export struct HomeView {
-  @Consume env: AppEnvironment;
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
   @StorageProp(STORAGE_KEY_APP_LANGUAGE) appLanguage: string = 'zh-Hans';
   @StorageProp(STORAGE_KEY_SAFE_AREA_TOP_VP) safeAreaTopVp: number = 0;
@@ -103,7 +104,7 @@ export struct HomeView {
 
   // ---- 大屏模式状态（U06 / U07） ----
 
-  /** 展示方式：没选过默认大屏（U07 R-HOME-11）；调试行临时切换 */
+  /** 展示方式：没选过默认大屏（U07 R-HOME-11），设置→外观可改 */
   @State displayMode: string = HOME_DISPLAY_MODE_SHOWCASE;
   /** 一屏放几篇（0–3，U06 R-HOME-09 记住上次的级别） */
   @State zoom: number = ShowcaseZoomLevel.One;
@@ -345,15 +346,6 @@ export struct HomeView {
             .height(120)
             .width('100%')
         }
-
-        // 调试入口（脚手架，6.x 统一删）：含展示方式临时切换（6.1 设置页迁走）
-        ListItem() {
-          Column() {
-            this.debugRow()
-          }
-          .width('100%')
-          .padding({ top: 8, bottom: 8 })
-        }
       }
       .sticky(StickyStyle.Header)
       .scrollBar(BarState.Off)
@@ -431,7 +423,9 @@ export struct HomeView {
       if (this.entries.length === 0) {
         this.showcaseEmpty()
       } else if (this.zoom <= ShowcaseZoomLevel.Four) {
-        // 第 0 / 1 级：页首不动（整页上下锁死），卡片区左右翻
+        // 第 0 / 1 级：页首不动（整页上下锁死），卡片区左右翻。
+        // 底部垫高到 Tab 栏上缘：卡片在页头与悬浮 Tab 栏的正中间
+        // （2026-11-13 真机反馈「大屏卡片偏低」，此前沉进 barOverlap 的 Tab 栏背后）
         Column() {
           this.showcaseHeaderRow()
           if (this.zoom === ShowcaseZoomLevel.One) {
@@ -455,14 +449,10 @@ export struct HomeView {
               .layoutWeight(1)
               .transition(this.pagerTransition())
           }
-          Column() {
-            this.debugRow()
-          }
-          .width('100%')
-          .padding({ top: 4, bottom: 4 })
         }
         .width('100%')
         .height('100%')
+        .padding({ bottom: this.safeAreaBottomVp + FLOATING_TAB_BAR_HEIGHT_VP })
         .transition(this.pagerTransition())
       } else if (this.zoom === ShowcaseZoomLevel.Sixteen) {
         // 第 2 / 3 级（16 / 64 网格）：页首同样固定不动，卡片从它下面滚走
@@ -477,9 +467,6 @@ export struct HomeView {
             pendingFocusIndex: this.pendingFocusIndex,
             onOpen: (id: string): void => {
               this.openEntry(id);
-            },
-            debugRow: (): void => {
-              this.debugRow()
             }
           })
             .layoutWeight(1)
@@ -497,9 +484,6 @@ export struct HomeView {
             pendingFocusIndex: this.pendingFocusIndex,
             onOpen: (id: string): void => {
               this.openEntry(id);
-            },
-            debugRow: (): void => {
-              this.debugRow()
             }
           })
             .layoutWeight(1)
@@ -622,96 +606,9 @@ export struct HomeView {
       }
       .padding({ left: 16, right: 16 })
       .width('100%')
-
-      Column()
-        .layoutWeight(1)
-
-      Column() {
-        this.debugRow()
-      }
-      .width('100%')
-      .padding({ top: 4, bottom: this.safeAreaBottomVp + 8 })
     }
     .width('100%')
     .height('100%')
-  }
-
-  /** 调试行（脚手架，6.x 统一删）：展示方式临时切换 + 原四个调试入口 */
-  @Builder
-  private debugRow() {
-    Column({ space: 8 }) {
-      Row({ space: 8 }) {
-        Button($r('app.string.s_1ab35f0df8')) // 大屏
-          .fontSize(this.theme.bodyFont.size)
-          .fontColor(this.displayMode === HOME_DISPLAY_MODE_SHOWCASE
-            ? this.theme.cardBackground : this.theme.accent)
-          .backgroundColor(this.displayMode === HOME_DISPLAY_MODE_SHOWCASE
-            ? this.theme.accent : this.theme.accentBackground)
-          .borderRadius(10)
-          .onClick((): void => {
-            this.setDisplayMode(HOME_DISPLAY_MODE_SHOWCASE);
-          })
-        Button($r('app.string.s_d46f82fdf0')) // 列表
-          .fontSize(this.theme.bodyFont.size)
-          .fontColor(this.displayMode === HOME_DISPLAY_MODE_LIST
-            ? this.theme.cardBackground : this.theme.accent)
-          .backgroundColor(this.displayMode === HOME_DISPLAY_MODE_LIST
-            ? this.theme.accent : this.theme.accentBackground)
-          .borderRadius(10)
-          .onClick((): void => {
-            this.setDisplayMode(HOME_DISPLAY_MODE_LIST);
-          })
-      }
-      .justifyContent(FlexAlign.Center)
-
-      Row({ space: 12 }) {
-        Button('LetterDebug')
-          .fontSize(this.theme.bodyFont.size)
-          .fontColor(this.theme.accent)
-          .backgroundColor(this.theme.accentBackground)
-          .borderRadius(10)
-          .onClick((): void => {
-            this.getUIContext().getRouter().pushUrl({ url: 'pages/LetterDebug' });
-          })
-        Button('ToastDebug')
-          .fontSize(this.theme.bodyFont.size)
-          .fontColor(this.theme.accent)
-          .backgroundColor(this.theme.accentBackground)
-          .borderRadius(10)
-          .onClick((): void => {
-            const context = this.getUIContext().getHostContext();
-            if (context !== undefined) {
-              const message: string =
-                context.resourceManager.getStringSync($r('app.string.s_d60bcc29e2').id);
-              this.env.errors.present(message, ErrorToastKind.Error, 3000);
-            }
-          })
-      }
-      .justifyContent(FlexAlign.Center)
-
-      // ③⑥ 换级定位 / 懒加载验证造数（脚手架，6.x 统一删）
-      Row({ space: 12 }) {
-        Button('Seed15')
-          .fontSize(this.theme.bodyFont.size)
-          .fontColor(this.theme.accent)
-          .backgroundColor(this.theme.accentBackground)
-          .borderRadius(10)
-          .onClick((): void => {
-            this.seedTestEntries();
-          })
-        Button('Clear15')
-          .fontSize(this.theme.bodyFont.size)
-          .fontColor(this.theme.accent)
-          .backgroundColor(this.theme.accentBackground)
-          .borderRadius(10)
-          .onClick((): void => {
-            this.clearTestEntries();
-          })
-      }
-      .justifyContent(FlexAlign.Center)
-    }
-    .width('100%')
-    .padding({ top: 8, bottom: 8 })
   }
 
   // ---- 换级（U06 R-HOME-09） ----
@@ -855,78 +752,6 @@ export struct HomeView {
       return;
     }
     this.navPathStack.pushPathByName('EntryDetail', id);
-  }
-
-  /** 展示方式切换（6.1 设置页就绪前的临时入口） */
-  private setDisplayMode(mode: string): void {
-    if (this.displayMode === mode) {
-      return;
-    }
-    this.displayMode = mode;
-    AppPrefs.setHomeDisplayMode(mode);
-  }
-
-  /**
-   * 调试探造数（脚手架，6.x 统一删，③⑥ 验证用）：15 篇测试日记——
-   * 本月往前 0~9 天 10 篇 + 上月 30~34 天 5 篇，16 列总览跨两个月份组、
-   * 超屏可滚。id 定死（seed-test-01~15），已存在就跳过（幂等），
-   * Clear15 负责删。
-   */
-  private async seedTestEntries(): Promise<void> {
-    const context = this.getUIContext().getHostContext();
-    if (context === undefined) {
-      return;
-    }
-    try {
-      const store = await AppDatabase.open(context);
-      const existing = new Set<string>();
-      for (const entry of await EntryRepository.fetchAllEntries(store)) {
-        existing.add(entry.id);
-      }
-      const now = new Date();
-      let inserted = 0;
-      for (let i = 0; i < 15; i++) {
-        // 0~9 = 本月今天往前；10~14 = 上月对应天（ getDate() 自动借位 ）
-        const dayShift = i < 10 ? -i : -(20 + i);
-        const id = `seed-test-${i < 9 ? '0' : ''}${i + 1}`;
-        if (existing.has(id)) {
-          continue;
-        }
-        const at = new Date(now.getFullYear(), now.getMonth(),
-          now.getDate() + dayShift, 12, 0, 0).getTime();
-        const entry = new JournalEntry(id, at, at, at);
-        const day = new Date(at);
-        const month = day.getMonth() + 1;
-        entry.title = `测试日记 ${month}月${day.getDate()}日`;
-        entry.content = '自动验证用测试日记（换级定位 / 懒加载），验完由 Clear15 删除。';
-        entry.wordCount = entry.content.length;
-        await EntryRepository.insertEntry(store, entry);
-        inserted++;
-      }
-      hilog.info(DOMAIN, TAG, 'seed15 done, inserted: %{public}d', inserted);
-      await this.loadEntries(context);
-    } catch (err) {
-      hilog.error(DOMAIN, TAG, 'seed15 failed: %{public}s', JSON.stringify(err));
-    }
-  }
-
-  /** 调试探清数（脚手架，6.x 统一删）：删掉 Seed15 那 15 篇测试日记 */
-  private async clearTestEntries(): Promise<void> {
-    const context = this.getUIContext().getHostContext();
-    if (context === undefined) {
-      return;
-    }
-    try {
-      const store = await AppDatabase.open(context);
-      for (let i = 1; i <= 15; i++) {
-        const id = `seed-test-${i < 10 ? '0' : ''}${i}`;
-        await EntryRepository.deleteEntry(store, id);
-      }
-      hilog.info(DOMAIN, TAG, 'clear15 done');
-      await this.loadEntries(context);
-    } catch (err) {
-      hilog.error(DOMAIN, TAG, 'clear15 failed: %{public}s', JSON.stringify(err));
-    }
   }
 
   /** 换级一震（U06 R-HOME-09：soft 预设；强度档鸿蒙 vibrator 没有，记偏差） */

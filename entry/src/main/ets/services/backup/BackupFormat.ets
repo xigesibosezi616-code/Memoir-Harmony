@@ -10,7 +10,9 @@
  *   墨迹时间（addedAt 等）是 Unix 秒（浮点），与模型层约定一致，两者别混
  * - **导出侧 wire 类**字段名与 iOS 完全一致。老版本 iOS 把 `mood` / `moods` / `blocks` /
  *   `counts` 等当必填读，这些「作废字段」必须写空值（"" / []），删了老包就读不进去
- * - moodSummaries（会员情绪小结）、penPalNotes（笔友手记）：鸿蒙侧没有对应模型，**静默跳过**
+ * - moodSummaries（会员情绪小结）：鸿蒙侧没有对应模型，**静默跳过**；
+ *   penPalNotes（笔友手记，U01 B3）：跟 letters.json 同文件（顶层 `penPalNotes` 字段），
+ *   解析独立于 `letters`——手记坏不影响信导入（iOS decodePenPalNotes 同款）
  */
 import { TextStyleRun, decodeStyleRun } from '../../models/ContentBlock';
 
@@ -417,6 +419,15 @@ export class BackupLetterDto {
   deliveredAtMs?: number;
   readAtMs?: number;
   relatedEntryIDs: string[] = [];
+  // 世界笔友（2026-10-16）。**都可选，不升 `formatVersion`** —— 老包没有就是「自己起名的那位的信」
+  /** 世界笔友的 id；undefined = 自己起名的那位 */
+  penPalId?: string;
+  /** 译文（读信人的语言）；body 是笔友母语写的原文 */
+  translatedBody?: string;
+  /** 危险的那封：正面放译文 */
+  danger?: boolean;
+  /** 贴了几张邮票 */
+  postage?: number;
 }
 
 function parseLetterDto(raw: Object): BackupLetterDto | undefined {
@@ -475,6 +486,23 @@ function parseLetterDto(raw: Object): BackupLetterDto | undefined {
   if (relatedEntryIDs !== undefined) {
     letter.relatedEntryIDs = relatedEntryIDs;
   }
+  // 世界笔友四字段（可选；老包没有不阻断导入）
+  const penPalID = fieldString(rec, 'penPalID');
+  if (penPalID !== undefined) {
+    letter.penPalId = penPalID;
+  }
+  const translatedBody = fieldString(rec, 'translatedBody');
+  if (translatedBody !== undefined) {
+    letter.translatedBody = translatedBody;
+  }
+  const danger = fieldBoolean(rec, 'danger');
+  if (danger !== undefined) {
+    letter.danger = danger;
+  }
+  const postage = fieldNumber(rec, 'postage');
+  if (postage !== undefined && Number.isInteger(postage) && postage >= 0) {
+    letter.postage = Math.trunc(postage);
+  }
   return letter;
 }
 
@@ -497,6 +525,83 @@ export function parseBackupLetters(json: string): BackupLetterDto[] | undefined 
     const letter = parseLetterDto(raw);
     if (letter !== undefined) {
       result.push(letter);
+    }
+  }
+  return result;
+}
+
+// ---- letters.json 里的 penPalNotes（U01 B3 笔友手记）----
+
+/** 一条笔友手记的包内形态。日期全换算成毫秒；kind 原样存（可能有不认识的值） */
+export class BackupPenPalNoteDto {
+  id: string = '';
+  penPalID: string = '';
+  text: string = '';
+  kind?: string;
+  notedAtMs: number = 0;
+  createdAtMs: number = 0;
+  updatedAtMs?: number;
+}
+
+function parsePenPalNoteDto(raw: Object): BackupPenPalNoteDto | undefined {
+  const rec = raw as Record<string, Object>;
+  const id = fieldString(rec, 'id');
+  const penPalID = fieldString(rec, 'penPalID');
+  const text = fieldString(rec, 'text');
+  const notedAtRaw = fieldString(rec, 'notedAt');
+  const createdAtRaw = fieldString(rec, 'createdAt');
+  // id / penPalID / text / 两个日期缺一不可（iOS 非可选字段，缺 = 整条丢）
+  if (id === undefined || id.length === 0 || penPalID === undefined || penPalID.length === 0 ||
+    text === undefined || notedAtRaw === undefined || createdAtRaw === undefined) {
+    return undefined;
+  }
+  const notedAtMs = parseBackupIso8601(notedAtRaw);
+  const createdAtMs = parseBackupIso8601(createdAtRaw);
+  if (notedAtMs === undefined || createdAtMs === undefined) {
+    return undefined;
+  }
+  const note = new BackupPenPalNoteDto();
+  note.id = id;
+  note.penPalID = penPalID;
+  note.text = text;
+  note.notedAtMs = notedAtMs;
+  note.createdAtMs = createdAtMs;
+  const kind = fieldString(rec, 'kind');
+  if (kind !== undefined) {
+    note.kind = kind;
+  }
+  const updatedAtRaw = fieldString(rec, 'updatedAt');
+  if (updatedAtRaw !== undefined) {
+    const updatedAtMs = parseBackupIso8601(updatedAtRaw);
+    if (updatedAtMs !== undefined) {
+      note.updatedAtMs = updatedAtMs;
+    }
+  }
+  return note;
+}
+
+/**
+ * 解析 letters.json 里的 penPalNotes（iOS decodePenPalNotes 同款）。
+ * 从 letters.json 单独解：文件坏 / 字段缺 / 单条坏都当没有，**不影响信的导入**。
+ */
+export function parseBackupPenPalNotes(json: string | undefined): BackupPenPalNoteDto[] {
+  if (json === undefined) {
+    return [];
+  }
+  const rec = parseJsonObject(json);
+  if (rec === undefined) {
+    return [];
+  }
+  const notesRaw: Object | undefined = rec['penPalNotes'];
+  if (notesRaw === undefined || !Array.isArray(notesRaw)) {
+    return [];
+  }
+  const result: BackupPenPalNoteDto[] = [];
+  const rawNotes = notesRaw as Object[];
+  for (const raw of rawNotes) {
+    const note = parsePenPalNoteDto(raw);
+    if (note !== undefined) {
+      result.push(note);
     }
   }
   return result;
@@ -660,10 +765,28 @@ export class LetterWire {
   deliveredAt?: string;
   readAt?: string;
   relatedEntryIDs: string[] = [];
+  // 世界笔友四字段（可选；与 iOS BackupLetter 同名同义）
+  penPalID?: string;
+  translatedBody?: string;
+  danger?: boolean;
+  postage?: number;
 }
 
 export class LettersWire {
   letters: LetterWire[] = [];
+  /** 笔友手记（U01 B3）。undefined = 没有手记：字段整个不写（老包形状不变） */
+  penPalNotes?: PenPalNoteWire[];
+}
+
+/** 一条笔友手记（iOS BackupPenPalNote 同名同义；日期 ISO8601 无毫秒） */
+export class PenPalNoteWire {
+  id: string = '';
+  penPalID: string = '';
+  text: string = '';
+  kind?: string;
+  notedAt: string = '';
+  createdAt: string = '';
+  updatedAt?: string;
 }
 
 export class TagWire {

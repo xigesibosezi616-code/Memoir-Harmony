@@ -65,6 +65,8 @@ import { generateUuid } from '../../../models/Uuid';
 import { inkDay } from '../../../services/AppDateFormatters';
 import { PhotoAnchorCard } from '../photo/PhotoAnchorCard';
 import { AudioPlayerCard } from '../audio/AudioPlayerCard';
+import { AppEnvironment, STORAGE_KEY_APP_ENVIRONMENT } from '../../../environment/AppEnvironment';
+import { STORAGE_KEY_MEMBERSHIP_TICK } from '../../../services/membership/MembershipManager';
 import { RichTextAppearance, isTransparentColor } from './RichTextAppearance';
 
 const DOMAIN = 0x0000;
@@ -1226,6 +1228,8 @@ export class RichBodyController {
 export struct RichBodyEditor {
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
   @StorageProp(STORAGE_KEY_APP_LANGUAGE) appLanguage: string = 'zh-Hans';
+  /** 会员状态变化（7.2：会员款相纸的渲染回退随 tick 重算） */
+  @StorageProp(STORAGE_KEY_MEMBERSHIP_TICK) membershipTick: number = 0;
   controller: RichBodyController = new RichBodyController();
   editable: boolean = false;
   placeholderRes: Resource = $r('app.string.s_74bd07ef78');
@@ -1308,6 +1312,8 @@ export struct RichBodyEditor {
     PhotoAnchorCard({
       block: block,
       armed: armed,
+      // 会员到期：旧日记里的会员款相纸渲染退回宝丽来（R-MEMBER-08 本机判定）
+      isMember: this.isMemberNow(),
       onOpen: (blockId: string): void => {
         this.controller.requestOpenPhoto(blockId);
       },
@@ -1324,6 +1330,13 @@ export struct RichBodyEditor {
         this.controller.requestDelete(blockId);
       } : undefined
     })
+  }
+
+  /** 会员判定（R-MEMBER-08：AppStorage 里的本机快照） */
+  private isMemberNow(): boolean {
+    const env = AppStorage.get<AppEnvironment>(STORAGE_KEY_APP_ENVIRONMENT);
+    const membership = env !== undefined ? env.membership : undefined;
+    return membership !== undefined && membership.isMember;
   }
 
   build() {

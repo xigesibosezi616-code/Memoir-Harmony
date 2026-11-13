@@ -50,6 +50,8 @@ import { STORAGE_KEY_BACKUP_IMPORT_REQUEST_TICK,
 import { STORAGE_KEY_APP_LANGUAGE, LanguageManager,
   LanguageOption } from '../../services/LanguageManager';
 import { PostingRun } from '../../models/LetterPostingFlightGeometry';
+import { fullDate } from '../../services/AppDateFormatters';
+import { STORAGE_KEY_MEMBERSHIP_TICK } from '../../services/membership/MembershipManager';
 import { WaxSeal } from '../postbox/WaxSeal';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { BusinessError, deviceInfo, pasteboard } from '@kit.BasicServicesKit';
@@ -154,10 +156,16 @@ export struct SettingsTabView {
   @State private phoneMissing: boolean = false;
   /** 会员行火漆印的印面：用户昵称首字（PostingRun.sealMarkOf 取字口径） */
   @State private sealMark: string = '素';
+  /** 会员行：会员 → 状态页 + 有效期；非会员 → 付费页（iOS membershipSection 同款） */
+  @StorageProp(STORAGE_KEY_MEMBERSHIP_TICK) @Watch('reloadMembershipState')
+  membershipTick: number = 0;
+  @State private memberIsMember: boolean = false;
+  @State private memberExpiresAtMs: number = 0;
   private navPathStack: NavPathStack = new NavPathStack();
 
   aboutToAppear(): void {
     this.refreshSessionState();
+    this.reloadMembershipState();
     // 6.4 文件关联冷启动路由：挂载前主框架可能已 bump，手动消费
     if (this.backupImportRequestTick > 0) {
       this.onBackupImportRequested();
@@ -347,7 +355,17 @@ export struct SettingsTabView {
     .width('100%')
   }
 
-  // ---- 尺素会员（用户裁决：连会员页骨架一起做，Stage 7 IAP 后点亮）----
+  // ---- 尺素会员（R-SETTINGS-09；7.1 点亮：开通了 → 有效期 + 会员页，没开通 → 开通 + 付费页）----
+
+  /** 会员状态变化（tick）→ 重读本机快照驱动会员行 */
+  private reloadMembershipState(): void {
+    const membership = this.env.membership;
+    if (membership === undefined) {
+      return;
+    }
+    this.memberIsMember = membership.isMember;
+    this.memberExpiresAtMs = membership.expiresAtMs;
+  }
 
   @Builder
   private membershipCard() {
@@ -361,10 +379,27 @@ export struct SettingsTabView {
         .fontSize(ROW_TITLE_FONT_SIZE_FP)
         .fontColor(this.theme.textPrimary)
         .layoutWeight(1)
-      SymbolGlyph($r('sys.symbol.chevron_right'))
-        .fontSize(18)
-        .fontWeight(FontWeight.Medium)
-        .fontColor([this.theme.textTertiary])
+      if (this.memberIsMember) {
+        // 开通了：右缘有效期 → 会员状态页（iOS membershipSection 同款）
+        Text(this.memberExpiresAt(this.appLanguage))
+          .fontSize(ROW_VALUE_FONT_SIZE_FP)
+          .fontColor(this.theme.textTertiary)
+          .maxLines(1)
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+        SymbolGlyph($r('sys.symbol.chevron_right'))
+          .fontSize(18)
+          .fontWeight(FontWeight.Medium)
+          .fontColor([this.theme.textTertiary])
+      } else {
+        // 没开通：开通 → 付费页（accent 色，iOS 同款）
+        Text($r('app.string.s_a20949550e'))
+          .fontSize(ROW_VALUE_FONT_SIZE_FP)
+          .fontColor(this.theme.accent)
+        SymbolGlyph($r('sys.symbol.chevron_right'))
+          .fontSize(14)
+          .fontWeight(FontWeight.Medium)
+          .fontColor([this.theme.textTertiary])
+      }
     }
     .width('100%')
     .padding({ top: ROW_PADDING_V_VP, bottom: ROW_PADDING_V_VP,
@@ -375,8 +410,26 @@ export struct SettingsTabView {
     .width('100%')
     .margin({ top: CARD_GAP_VP })
     .onClick((): void => {
-      this.navPathStack.pushPathByName('Membership', '');
+      if (this.memberIsMember) {
+        this.navPathStack.pushPathByName('Membership', '');
+      } else {
+        this.navPathStack.pushPathByName('Paywall', '');
+      }
     })
+  }
+
+  /** 会员行右缘「有效期至 {日期}」（按当前语言格式化） */
+  private memberExpiresAt(appLanguage: string): string {
+    if (this.memberExpiresAtMs <= 0) {
+      return '';
+    }
+    const dateText = fullDate(new Date(this.memberExpiresAtMs), appLanguage);
+    const context = this.getUIContext().getHostContext();
+    if (context === undefined) {
+      return dateText;
+    }
+    return context.resourceManager.getStringSync(
+      $r('app.string.s_9b662606e2').id, dateText);
   }
 
   // ---- 第一组：外观 / 日记 / 笔友 / 位置与天气 / 语言 ----

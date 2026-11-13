@@ -5,7 +5,7 @@
  * - 基础地址一个常量：当前用阿里云函数计算域名；备案域名 https://api.sinaratech.com.cn
  *   上线后只改 BASE_URL 一处（09_OPEN_QUESTIONS.md Q15）
  * - 超时分级：寄信（DeepSeek 写信，服务端 75s 先放弃，客户端给足 90s）> 补领 / 默认 >
- *   节奏（iOS ProxyAIService 同款 15s）
+ *   邮票（轻量点查，只是提前问一声）
  */
 
 export class ApiConfig {
@@ -18,8 +18,8 @@ export class ApiConfig {
   /** GET /letters 补领（R-OUTBOX-07/09：响应丢了信其实已写好，靠它捞回） */
   static readonly TIMEOUT_FETCH_S: number = 30;
 
-  /** GET /me/rhythm 来信节奏（判定权在服务端，只是提前问一声） */
-  static readonly TIMEOUT_RHYTHM_S: number = 15;
+  /** GET /me/stamps / POST /me/stamps/claim 邮票夹（余额只认服务端，只是提前问一声） */
+  static readonly TIMEOUT_STAMPS_S: number = 15;
 
   /** auth 链路（发码 / 验码 / /me）：登录链路轻量点查，30s 太久（iOS LiveAuthService 同款） */
   static readonly TIMEOUT_AUTH_S: number = 15;

@@ -28,9 +28,11 @@ import { AppDatabase } from '../../data/Database';
 import { EntryRepository } from '../../data/EntryRepository';
 import { NotebookRepository } from '../../data/NotebookRepository';
 import { LetterRepository } from '../../data/LetterRepository';
+import { PenPalNoteRepository } from '../../data/PenPalNoteRepository';
 import { JournalEntry } from '../../models/JournalEntry';
 import { Notebook } from '../../models/Notebook';
 import { Letter } from '../../models/Letter';
+import { PenPalNote } from '../../models/PenPalNote';
 import { BackupFormat } from '../../services/backup/BackupFormat';
 import { lastPathComponent } from '../../services/backup/BackupFs';
 import { BackupExportService, BackupExportOptions,
@@ -552,8 +554,16 @@ export struct BackupExportView {
         const options = new BackupExportOptions();
         options.includesMedia = this.includesMedia;
         options.password = this.useEncryption ? this.password : undefined;
+        // 笔友手记（U01 B3）：导出那一刻全量取，读失败按空（信照常导）
+        let penPalNotes: PenPalNote[] = [];
+        try {
+          penPalNotes = await PenPalNoteRepository.listNotes(store);
+        } catch (err) {
+          hilog.warn(DOMAIN, TAG, 'load pen pal notes for export failed: %{public}s',
+            JSON.stringify(err));
+        }
         this.exported = await BackupExportService.export(context, store,
-          this.entries, this.letters, this.tags, options);
+          this.entries, this.letters, this.tags, penPalNotes, options);
       } finally {
         this.isExporting = false;
       }

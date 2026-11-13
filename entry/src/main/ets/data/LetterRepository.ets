@@ -3,9 +3,9 @@
  *
  * - 全量查回（generated_at 倒序，对齐 iOS @Query），「已到达 / 在路上」过滤
  *   与按到达时刻排序由调用方用 LetterDelivery 在内存里做（两端判定逐字一致，05 §6.1）
- * - saveLetter 是 upsert：调试插信（LetterDebug 页）与标已读（打开即已读，R-BOX-04）共用
+ * - saveLetter 是 upsert：标已读（打开即已读，R-BOX-04）等写场景共用
  * - status / triggerKind 原样存取字符串，不过枚举（05 §6：导入时可能有不认识的值）
- * - 信永久保留、无删信入口（R-BOX-09）；deleteAllLetters 仅供调试页清场
+ * - 信永久保留、无删信入口（R-BOX-09）；deleteAllLetters 仅供调试清场
  */
 import { relationalStore } from '@kit.ArkData';
 import { hilog } from '@kit.PerformanceAnalysisKit';
@@ -16,7 +16,8 @@ const TAG = 'LetterRepository';
 
 const LETTER_COLUMNS: string[] = [
   'id', 'status', 'body', 'from_character', 'to_name', 'stationery', 'trigger_kind',
-  'error_message', 'generated_at', 'delivered_at', 'read_at', 'updated_at'
+  'error_message', 'pen_pal_id', 'translated_body', 'danger', 'postage',
+  'generated_at', 'delivered_at', 'read_at', 'updated_at'
 ];
 
 /** 结果集行 → Letter（库列蛇形 → 模型驼峰；可空列判 null 再取） */
@@ -39,6 +40,19 @@ function rowToLetter(result: relationalStore.ResultSet): Letter {
   if (!result.isColumnNull(result.getColumnIndex('error_message'))) {
     letter.errorMessage = result.getString(result.getColumnIndex('error_message'));
   }
+  // U01 世界笔友四列（v3 迁移加的，全可空；pen_pal_id 空 = 自己起名那位的信）
+  if (!result.isColumnNull(result.getColumnIndex('pen_pal_id'))) {
+    letter.penPalId = result.getString(result.getColumnIndex('pen_pal_id'));
+  }
+  if (!result.isColumnNull(result.getColumnIndex('translated_body'))) {
+    letter.translatedBody = result.getString(result.getColumnIndex('translated_body'));
+  }
+  if (!result.isColumnNull(result.getColumnIndex('danger'))) {
+    letter.danger = result.getLong(result.getColumnIndex('danger')) !== 0;
+  }
+  if (!result.isColumnNull(result.getColumnIndex('postage'))) {
+    letter.postage = result.getLong(result.getColumnIndex('postage'));
+  }
   if (!result.isColumnNull(result.getColumnIndex('delivered_at'))) {
     letter.deliveredAt = result.getLong(result.getColumnIndex('delivered_at'));
   }
@@ -59,6 +73,10 @@ export function letterToValues(letter: Letter): relationalStore.ValuesBucket {
     'stationery': letter.stationery ?? null,
     'trigger_kind': letter.triggerKind,
     'error_message': letter.errorMessage ?? null,
+    'pen_pal_id': letter.penPalId ?? null,
+    'translated_body': letter.translatedBody ?? null,
+    'danger': letter.danger === undefined ? null : (letter.danger ? 1 : 0),
+    'postage': letter.postage ?? null,
     'generated_at': letter.generatedAt,
     'delivered_at': letter.deliveredAt ?? null,
     'read_at': letter.readAt ?? null,

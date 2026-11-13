@@ -19,7 +19,7 @@ import { LOCATION_PRECISION_CITY, LOCATION_PRECISION_DISTRICT, LOCATION_PRECISIO
 export const PREF_KEY_HAS_COMPLETED_ONBOARDING = 'hasCompletedOnboarding';
 /** 用户同意过的协议版本号。空串 = 从没同意过（R-APP-02） */
 export const PREF_KEY_ACCEPTED_LEGAL_VERSION = 'acceptedLegalVersion';
-/** 笔友名（对应 iOS `penPalName`，默认「青鸟」） */
+/** 笔友名（对应 iOS `penPalName`，默认空串 = 还没起名，见 `PenPalName`） */
 export const PREF_KEY_PEN_PAL_NAME = 'penPalName';
 /** 开场封面开关（对应 iOS `showSplashAnimation`，默认开） */
 export const PREF_KEY_SHOW_SPLASH_ANIMATION = 'showSplashAnimation';
@@ -45,6 +45,8 @@ export const PREF_KEY_BEST_STREAK_DAYS = 'writingStats.bestStreakDays';
 export const PREF_KEY_HUAWEI_CLOUD_BACKUP_ON = 'huaweiCloudBackupOn';
 /** 拍照方式（问题四：app=尺素相机 / system=华为系统相机；Harmony 专属，iOS 无此键） */
 export const PREF_KEY_CAMERA_MODE = 'cameraMode';
+/** 测试期假会员（7.1 TEST_UNLOCK 打开时「开通」直接记成会员；上架前关开关即失效） */
+export const PREF_KEY_TEST_MEMBER = 'testMember';
 
 /** 目录版式取值（iOS `BookContentsView.Layout`） */
 export const BOOK_CONTENTS_LAYOUT_LIST = 'list';
@@ -69,6 +71,13 @@ export const STORAGE_KEY_HAS_COMPLETED_ONBOARDING = 'hasCompletedOnboarding';
  * `showSplashAnimation` 用户开关、首启不查 —— UI 直接照这个值显示，不再自行判断
  */
 export const STORAGE_KEY_SHOW_SPLASH = 'showSplash';
+/**
+ * 笔友名镜像（iOS `@AppStorage(PenPalName.storageKey)` 的观察语义）：EntryAbility
+ * 启动时从偏好写初值，改名处（OnboardingView / SettingsPenPalView / PenPalNamingSheet）
+ * 写偏好时同步写镜像，观察方（Index 按需弹补起名层、PostBoxTabView 状态行）用
+ * @StorageProp 即时跟上
+ */
+export const STORAGE_KEY_PEN_PAL_NAME = 'penPalName';
 
 export class AppPrefs {
   static readonly PREFS_NAME = 'memoir_prefs';

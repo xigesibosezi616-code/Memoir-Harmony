@@ -83,6 +83,7 @@ import { MoodSelector } from './MoodSelector';
 import { NotebookSelector } from './NotebookSelector';
 import { CreateNotebookDialog } from './CreateNotebookDialog';
 import { LocationPickerView } from './LocationPickerView';
+import { STORAGE_KEY_MEMBERSHIP_TICK } from '../../services/membership/MembershipManager';
 
 const DOMAIN = 0x0000;
 const TAG = 'ComposeView';
@@ -97,6 +98,10 @@ export struct ComposeView {
   @StorageProp(STORAGE_KEY_APP_ENVIRONMENT) env: AppEnvironment =
     new AppEnvironment(createDefaultErrorPresenter());
   @StorageProp(STORAGE_KEY_SAFE_AREA_BOTTOM_VP) safeAreaBottomVp: number = 0;
+  /** 会员状态变化（7.2：相纸选择器的会员锁随 tick 重算） */
+  @StorageProp(STORAGE_KEY_MEMBERSHIP_TICK) membershipTick: number = 0;
+  /** 付费页挂本页 Navigation（会员锁点按弹 Paywall，路由表解析） */
+  private paywallStack: NavPathStack = new NavPathStack();
 
   @State title: string = '';
   @State bodyText: string = '';
@@ -256,7 +261,7 @@ export struct ComposeView {
     Stack() {
       // Navigation 自定义标题栏：沉浸光感 Button 的官方生效范围（API 26，
       // 《沉浸光感常见问题》）；标题栏自动避让状态栏
-      Navigation() {
+      Navigation(this.paywallStack) {
         Column() {
           Scroll() {
           Column({ space: 16 }) {
@@ -747,6 +752,10 @@ export struct ComposeView {
       PaperStylePickerSheet({
         pixelMap: this.paperSheetPixelMap,
         showPositionPicker: this.restylePhotoId === undefined,
+        isMember: this.isMember(),
+        onLockedPick: (): void => {
+          this.paywallStack.pushPathByName('Paywall', '');
+        },
         onSelect: (style: PaperStyle, position: PhotoPosition): void => {
           this.onPaperStylePicked(style, position);
         },
@@ -758,6 +767,12 @@ export struct ComposeView {
   }
 
   /** 选定相纸：换相纸（已有照片）或落盘新照片按所选边插到光标处 */
+  /** 会员判定（R-MEMBER-08：本机快照，相纸选择器的会员锁用） */
+  private isMember(): boolean {
+    const membership = this.env.membership;
+    return membership !== undefined && membership.isMember;
+  }
+
   private async onPaperStylePicked(style: PaperStyle, position: PhotoPosition): Promise<void> {
     this.showPaperSheet = false;
     const restyleId = this.restylePhotoId;

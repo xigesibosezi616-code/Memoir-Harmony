@@ -20,7 +20,7 @@ export struct LetterPostingFlight {
   /** 逐帧推进的动画时刻（秒，0 ~ TOTAL） */
   @Prop t: number = 0;
   /** 正在投的这一封（点下邮筒那一刻的快照） */
-  run: PostingRun = new PostingRun([], [], false, '素');
+  run: PostingRun = new PostingRun([], [], '', false, '素');
   /** 信件用料（跟着主题换） */
   palette: LetterPalette = LetterPalette.bamboo;
   /** 那叠日记的窗口矩形（动画期间版式恒定，点那一刻量好） */
@@ -46,6 +46,7 @@ export struct LetterPostingFlight {
             palette: this.palette,
             items: this.run.items,
             excludedIds: this.run.excludedIds,
+            recipients: this.run.recipients,
             interactive: false,
             totalHeightVp: this.totalHeightVp,
             headerHeightVp: this.headerHeightVp,

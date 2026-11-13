@@ -224,7 +224,7 @@ export struct SettingsJournalView {
     }
   }
 
-  // ---- 拍照方式（问题四；行尾值 + 上下小箭头 + 行尾小菜单，样式对齐位置精度行） ----
+  // ---- 相机切换（2026-11-12 工单四更名，旧名「拍照方式」；行尾值 + 上下小箭头 + 行尾小菜单） ----
 
   @Builder
   private cameraModeRow() {

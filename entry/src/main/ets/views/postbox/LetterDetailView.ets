@@ -1,6 +1,10 @@
 /**
  * 来信详情（10_BUILD_MANUAL.md 5.1 / 5.7）。对应 iOS `Views/PostBox/LetterDetailView.swift`。
  *
+ * - 世界笔友的信（`penPalId` 非空，U01 读信规则 2026-10-16）：一张两面写字的信纸 ——
+ *   正面是他用母语写的原文，翻过来是译文；危险的那封**正面直接是读信人的语言**，
+ *   信纸下面再附一张求助卡片（`CrisisHelpCard`）。他的母语和你的语言相同时只有一面、
+ *   不翻。信纸下面一行小字写明他是虚构的 AI 笔友。不写「致 XXX」—— 信里他自己会称呼你
  * - 普通信**打开即已读**（R-BOX-04）：首次装载时 status → read 落库（只第一次有效）
  * - 火漆信（尺素会员寄出的，见 `Letter.isSealed`）：没拆过的先是一枚封着的信封，
  *   一下一下拆开（`SealedLetterOpener`），**打碎火漆那一刻才算已读**；
@@ -14,7 +18,7 @@
  */
 import { TOP_BAR_CONTENT_GAP_VP, TOP_BAR_ROW_HEIGHT_VP } from '../components/PageChrome';
 import { relationalStore } from '@kit.ArkData';
-import { LengthMetrics } from '@kit.ArkUI';
+import { LengthMetrics, MeasureText } from '@kit.ArkUI';
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { AppTheme } from '../../theme/AppTheme';
 import { BambooTheme } from '../../theme/BambooTheme';
@@ -30,13 +34,23 @@ import { Letter, LetterStatus } from '../../models/Letter';
 import { LetterDelivery } from '../../models/LetterDelivery';
 import { LetterOpeningTimeline } from '../../models/LetterOpeningTimeline';
 import { PostingRun } from '../../models/LetterPostingFlightGeometry';
+import { LetterLanguage } from '../../models/LetterLanguage';
+import { PenPalRoster } from '../../services/PenPalRoster';
 import { dayAndWeekday } from '../../services/AppDateFormatters';
 import { LetterPalette } from './LetterPalette';
 import { SealedLetterOpener } from './SealedLetterOpener';
-import { LetterStationery } from './LetterStationery';
+import { CrisisHelpCard } from './CrisisHelpCard';
+import { LetterStationery, LINE_HEIGHT_VP } from './LetterStationery';
 
 const DOMAIN = 0x0000;
 const TAG = 'LetterDetailView';
+
+/** '#RRGGBB' + 透明度 → '#AARRGGBB'（翻面按钮描边用，LetterStationery 同款） */
+function withAlpha(hex: string, alpha01: number): string {
+  const a = Math.round(Math.max(0, Math.min(1, alpha01)) * 255);
+  const s = a.toString(16);
+  return `#${s.length < 2 ? '0' : ''}${s}${hex.substring(1)}`;
+}
 
 /** 系统路由表入口（router_map.json → name `LetterDetail`）：信箱行推入 */
 @Builder
@@ -55,6 +69,19 @@ export struct LetterDetailView {
   @State private letter: Letter | undefined = undefined;
   /** 火漆信这次进来时还封着、还没拆完。进来那一刻定下，拆完变 false（iOS sealed） */
   @State private sealed: boolean = false;
+  /** 世界笔友的信：现在看的是不是背面 */
+  @State private showsBack: boolean = false;
+  /** 翻面动画角度：前半程 0→90 收拢、90° 那一刻换面、后半程 90→0 展开（U01：0.6 秒不回弹） */
+  @State private flipAngle: number = 0;
+  /** 翻面动画进行中（连点不理，防打断换面时机） */
+  private flipping: boolean = false;
+  /** 两面同纸的信纸实测宽度（vp）：换纸宽（旋转屏 / 分屏）时重算补齐行数 */
+  @State private paperWidthVp: number = 0;
+  /** 两面各自的补齐空行数（字少的那面多画几格空行，两面一样大，U01 读信规则 3） */
+  @State private frontBlankLines: number = 2;
+  @State private backBlankLines: number = 2;
+  /** 信头的地名（名册里这位的 place，按 App 语言取；名册里没有 = ''，只写信上的署名） */
+  @State private senderPlace: string = '';
   private navPathStack: NavPathStack = new NavPathStack();
   private store: relationalStore.RdbStore | undefined = undefined;
 
@@ -64,13 +91,12 @@ export struct LetterDetailView {
         this.topBar()
 
         if (this.letter !== undefined) {
-          if (this.letter.isSealed) {
-            // 火漆信：没拆过的是一枚封着的信封；拆完（或上次已拆过）摊开成信纸
-            if (this.sealed) {
-              this.sealedEnvelopeView(this.letter)
-            } else {
-              this.stationeryView(this.letter)
-            }
+          if (this.letter.isSealed && this.sealed) {
+            this.sealedEnvelopeView(this.letter)
+          } else if (this.isWorldLetter(this.letter)) {
+            this.worldLetterView(this.letter)
+          } else if (this.letter.isSealed) {
+            this.stationeryView(this.letter)
           } else {
             this.plainLetterView(this.letter)
           }
@@ -153,6 +179,243 @@ export struct LetterDetailView {
     .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
     .width('100%')
     .layoutWeight(1)
+  }
+
+  // ---- 世界笔友的信（U01 读信规则，2026-10-16） ----
+
+  /** 世界笔友写来的：penPalId 非空。自己起名的那位 penPalId 为空，照 v1 读信页不变 */
+  private isWorldLetter(letter: Letter): boolean {
+    return letter.penPalId !== undefined && letter.penPalId.length > 0;
+  }
+
+  /** 有没有译文。他的母语和你的语言相同（如西安的吴写给写中文的你）就只有原文一面 */
+  private hasTranslation(letter: Letter): boolean {
+    return letter.translatedBody !== undefined && letter.translatedBody.length > 0;
+  }
+
+  /** 危险的那封正面是译文（读信人的语言），平常正面是原文 */
+  private frontIsTranslation(letter: Letter): boolean {
+    return this.hasTranslation(letter) && letter.danger === true;
+  }
+
+  private frontText(letter: Letter): string {
+    if (this.frontIsTranslation(letter)) {
+      return letter.translatedBody ?? '';
+    }
+    return letter.body;
+  }
+
+  private backText(letter: Letter): string {
+    if (this.frontIsTranslation(letter)) {
+      return letter.body;
+    }
+    return letter.translatedBody ?? '';
+  }
+
+  /** 这封信是用哪种语言写给你的：有译文看译文，没有就看原文（和你的语言相同）。
+   *  求助卡片按它选热线 —— 和服务端写进信里的那条一致 */
+  private readerLanguage(letter: Letter): string {
+    const text = this.hasTranslation(letter) ? (letter.translatedBody ?? '') : letter.body;
+    return LetterLanguage.forLetter([text], this.appLanguage);
+  }
+
+  /** 信头「斯图尔特岛 · McRae」。名册里找不到这位（比如老版本没有的笔友）就只写信上的署名 */
+  private worldSender(letter: Letter): string {
+    if (this.senderPlace.length > 0) {
+      return `${this.senderPlace} · ${letter.fromCharacter}`;
+    }
+    return letter.fromCharacter;
+  }
+
+  @Builder
+  private worldLetterView(letter: Letter) {
+    Scroll() {
+      Column({ space: 18 }) {
+        if (this.hasTranslation(letter)) {
+          this.twoSidedSheet(letter)
+        } else {
+          // 他的母语和你的语言相同：只有一面，没有翻面按钮
+          this.worldSide(letter, letter.body, 2)
+        }
+        if (letter.danger === true) {
+          // 危险的那封：信纸下面固定附一张求助卡片（热线和信里写的一致）
+          CrisisHelpCard({
+            language: this.readerLanguage(letter),
+            palette: LetterPalette.of(this.theme.id)
+          })
+            .margin({ top: 6 })
+        }
+        // 信末写明：他是虚构的 AI 笔友（产品定：名册、信末、隐私协议都写清）
+        Text($r('app.string.s_13d655e2da', letter.fromCharacter))
+          .fontSize(this.theme.captionFont.size)
+          .fontWeight(this.theme.captionFont.weight)
+          .fontFamily(this.theme.captionFont.family)
+          .fontColor(this.theme.textTertiary)
+          .textAlign(TextAlign.Center)
+      }
+      .width('100%')
+      .alignItems(HorizontalAlign.Center)
+      .padding({
+        left: 16,
+        right: 16,
+        top: 12,
+        bottom: this.safeAreaBottomVp + 60
+      })
+    }
+    // Scroll 高度受限后内容小于视口默认居中（官方 FAQ faqs-arkui-725）——显式顶对齐
+    .align(Alignment.Top)
+    .scrollBar(BarState.Off)
+    .edgeEffect(EdgeEffect.Spring, { alwaysEnabled: true })
+    .width('100%')
+    .layoutWeight(1)
+  }
+
+  /** 两面写字的那张纸，下面是翻面的按钮（U01 读信规则 3） */
+  @Builder
+  private twoSidedSheet(letter: Letter) {
+    Column() {
+      if (!this.showsBack) {
+        this.worldSide(letter, this.frontText(letter), this.frontBlankLines)
+      } else {
+        this.worldSide(letter, this.backText(letter), this.backBlankLines)
+      }
+    }
+    .width('100%')
+    // 绕竖轴翻面（iOS rotation3DEffect perspective 0.3 同款）
+    .rotate({ y: 1, angle: this.flipAngle, perspective: 0.3 })
+    .onAreaChange((_oldArea: Area, newArea: Area): void => {
+      const w = Math.round(Number(newArea.width) * 10) / 10;
+      if (w !== this.paperWidthVp) {
+        this.paperWidthVp = w;
+        this.recomputeBlankLines();
+      }
+    })
+
+    // 翻面：说清楚背面是什么（原文 / 译文），而不是一个光秃秃的「翻转」
+    Button({ type: ButtonType.Capsule, stateEffect: true }) {
+      Row({ space: 6 }) {
+        SymbolGlyph($r('sys.symbol.arrow_left_arrow_right'))
+          .fontSize(14)
+          .fontWeight(FontWeight.Medium)
+          .fontColor([this.theme.textPrimary])
+        Text(this.flipButtonTitle(letter))
+          .fontSize(14)
+          .fontWeight(FontWeight.Medium)
+          .fontColor(this.theme.textPrimary)
+      }
+    }
+    .padding({ left: 16, right: 16, top: 8, bottom: 8 })
+    .backgroundColor(Color.Transparent)
+    .border({ width: 0.8, color: withAlpha(this.textPrimaryHex(), 0.4) })
+    .onClick((): void => {
+      this.flip();
+    })
+  }
+
+  /** 信纸的一面。信头是寄信人（地名 · 姓）—— 世界笔友的信里自己会称呼你，不再写「致 XXX」 */
+  @Builder
+  private worldSide(letter: Letter, content: string, blankLines: number) {
+    LetterStationery({
+      palette: LetterPalette.of(this.theme.id),
+      date: dayAndWeekday(new Date(letter.generatedAt), this.appLanguage),
+      salutation: this.worldSender(letter),
+      content: content,
+      blankLines: blankLines
+    })
+  }
+
+  /** 现在看的这面是原文 → 按钮写「看译文」；是译文 → 「看原文」 */
+  private flipButtonTitle(letter: Letter): ResourceStr {
+    if (this.showsBack === this.frontIsTranslation(letter)) {
+      return $r('app.string.s_4494ba640a'); // 看译文
+    }
+    return $r('app.string.s_18cb8ddf9d'); // 看原文
+  }
+
+  /** theme.textPrimary（各主题实际是 0xAARRGGBB 数字色）→ '#RRGGBB'；不是数字退墨黑 */
+  private textPrimaryHex(): string {
+    const color = this.theme.textPrimary;
+    if (typeof color === 'number') {
+      return `#${(color & 0xFFFFFF).toString(16).padStart(6, '0')}`;
+    }
+    return '#000000';
+  }
+
+  /**
+   * 把信纸翻过去：像拿起一张纸翻面 —— 平滑、不回弹（U01：0.6 秒缓入缓出，
+   * 转到 90° 那一刻换面）。前半程收拢到 90°（EaseIn），换面，后半程展开（EaseOut）。
+   * iOS 在系统「减弱动态效果」打开时直接换面；鸿蒙没有对应的公开系统设置，恒走动画
+   */
+  private flip(): void {
+    if (this.flipping) {
+      return;
+    }
+    this.flipping = true;
+    this.getUIContext().keyframeAnimateTo({
+      onFinish: (): void => {
+        this.flipping = false;
+      }
+    }, [
+      { duration: 300, curve: Curve.EaseIn, event: (): void => {
+        this.flipAngle = 90;
+      } },
+      { duration: 300, curve: Curve.EaseOut, event: (): void => {
+        // 90° 侧棱那一刻换面（之前看不见背面，之后看不见正面）；角度归零展开新面
+        this.showsBack = !this.showsBack;
+        this.flipAngle = 0;
+      } }
+    ]);
+  }
+
+  /**
+   * 同一张纸两面一样大：字少的那一面多画几格空行（U01 读信规则 3）。
+   * 两面的文字高度用 measure 离线量（和 LetterStationery 正文同参：serif / 15 / 行高 30），
+   * 不依赖布局结果，不会和纸高互相反馈
+   */
+  private recomputeBlankLines(): void {
+    const letter = this.letter;
+    if (letter === undefined || !this.hasTranslation(letter) || this.paperWidthVp <= 0) {
+      return;
+    }
+    // 正文区左右各留 28（LetterStationery 纸内边距），与量字宽一致
+    const textWidth = this.paperWidthVp - 56;
+    if (textWidth <= 0) {
+      return;
+    }
+    const frontHeight = this.textHeightVp(this.frontText(letter), textWidth);
+    const backHeight = this.textHeightVp(this.backText(letter), textWidth);
+    const maxHeight = Math.max(frontHeight, backHeight);
+    this.frontBlankLines = 2 + Math.max(0, Math.ceil((maxHeight - frontHeight) / LINE_HEIGHT_VP));
+    this.backBlankLines = 2 + Math.max(0, Math.ceil((maxHeight - backHeight) / LINE_HEIGHT_VP));
+  }
+
+  /** 量这段字在 widthVp 宽里占多高（与 LetterStationery 正文渲染参数一致） */
+  private textHeightVp(text: string, widthVp: number): number {
+    const size: SizeOptions = MeasureText.measureTextSize({
+      textContent: text,
+      fontSize: 15,
+      lineHeight: LINE_HEIGHT_VP,
+      fontFamily: 'serif',
+      constraintWidth: widthVp
+    });
+    return Number(size.height);
+  }
+
+  /** 名册里这位的地名（信头「地名 · 姓」用；取不到 / 名册里没有就只写信上的署名） */
+  private async loadSenderPlace(letter: Letter): Promise<void> {
+    const context = this.getUIContext().getHostContext();
+    const id = letter.penPalId ?? '';
+    if (context === undefined || id.length === 0) {
+      return;
+    }
+    try {
+      const penPal = await PenPalRoster.penPal(id, context);
+      this.senderPlace = penPal !== null ? penPal.place.resolved(this.appLanguage) : '';
+    } catch (err) {
+      hilog.warn(DOMAIN, TAG, 'load penpal place failed id=%{public}s: %{public}s',
+        id, JSON.stringify(err));
+      this.senderPlace = '';
+    }
   }
 
   // ---- 火漆信：封着的信封，一下一下拆开（R-BOX-05，5.7） ----
@@ -257,6 +520,10 @@ export struct LetterDetailView {
         this.markLetterRead(letter, now);
       }
       this.letter = letter;
+      if (this.isWorldLetter(letter)) {
+        // 信头「地名 · 姓」：名册里查这位的地名（查不到就只写署名）
+        await this.loadSenderPlace(letter);
+      }
     } catch (err) {
       hilog.error(DOMAIN, TAG, 'load letter failed id=%{public}s: %{public}s',
         this.letterId, JSON.stringify(err));

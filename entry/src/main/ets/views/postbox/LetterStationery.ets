@@ -43,8 +43,9 @@ class GrainRandom {
 }
 
 
-/** 正文行高（vp）：格线的间距也用它（用户反馈 34 太松，收紧到 30） */
-const LINE_HEIGHT_VP: number = 30;
+/** 正文行高（vp）：格线的间距也用它（用户反馈 34 太松，收紧到 30）。
+ *  导出给读信页算「两面同纸」的补齐行数用，别改单边 */
+export const LINE_HEIGHT_VP: number = 30;
 /** 正文（vp，用户反馈 17 偏大，缩到 15；抬头「致 XXX」22 不动） */
 const BODY_FONT_SIZE_VP: number = 15;
 /**
@@ -53,8 +54,8 @@ const BODY_FONT_SIZE_VP: number = 15;
  * + iOS ruleGap ≈ 1.5vp → 25.5（17fp/34 时是 28.1 + 1.4 = 29.5）
  */
 const FIRST_RULE_Y_VP: number = 25.5;
-/** 正文之后再多画的空行数（iOS blankLines；空行也占纸高，iOS height(forWidth:) 同款） */
-const BLANK_LINES: number = 2;
+/** 正文之后再多画的空行数默认值（iOS blankLines；空行也占纸高，iOS height(forWidth:) 同款） */
+const BLANK_LINES_DEFAULT: number = 2;
 /** 素笺细框：外框内缩与线宽（iOS strokeBorder padding 12 / lineWidth 0.8） */
 const FRAME_OUTER_INSET_VP: number = 12;
 const FRAME_OUTER_WIDTH_VP: number = 0.8;
@@ -71,6 +72,8 @@ export struct LetterStationery {
   salutation: ResourceStr = '';
   /** 正文（已含开头、结尾、签名） */
   content: string = '';
+  /** 正文之后再多画的空行数（世界笔友两面同纸时，字少的那面加行补齐，U01「两面一样大」） */
+  blankLines: number = BLANK_LINES_DEFAULT;
   /** 要画几条格线（正文实测高度推出来，见 onAreaChange） */
   @State private ruleCount: number = 3;
   /** 纸面实测尺寸（vp）：细框/纤维按它画。实测前不画（首帧不闪框） */
@@ -159,9 +162,9 @@ export struct LetterStationery {
             .lineHeight(LINE_HEIGHT_VP)
             .width('100%')
             .onAreaChange((_oldArea: Area, newArea: Area): void => {
-              // 行高被 lineHeight 钉死，实测高度 ≈ 行数 × 34，取整防浮点尾差多画一条
+              // 行高被 lineHeight 钉死，实测高度 ≈ 行数 × 行高，取整防浮点尾差多画一条
               const lines = Math.round(Number(newArea.height) / LINE_HEIGHT_VP);
-              const next = lines + BLANK_LINES;
+              const next = lines + this.blankLines;
               if (next !== this.ruleCount) {
                 this.ruleCount = next;
               }
@@ -171,7 +174,7 @@ export struct LetterStationery {
         .alignContent(Alignment.TopStart)
         // 空白格也是纸的一部分（iOS RuledText 高度 = 文字 + 空行数 × 行高）；
         // 不垫高的话空行格线会溢出纸面、串到落款上（真机实锤）
-        .padding({ bottom: BLANK_LINES * LINE_HEIGHT_VP })
+        .padding({ bottom: this.blankLines * LINE_HEIGHT_VP })
 
         // 落款一行小字
         Text($r('app.string.s_f29761cd03'))

@@ -143,33 +143,81 @@ export default function letterOutboxLogicTest() {
       expect(dominantMoodOf([])).assertEqual('');
     })
 
-    // ---- R-OUTBOX-07/09：补领匹配 ----
+    // ---- R-OUTBOX-07/09 + U01 clientLetterId 语义：补领匹配 ----
+
+    it('reconcileAdoptsByClientLetterIdFirst', 0, () => {
+      // 带本机信件 id 的：对得上就是那一封的回信，不用猜（U01 2026-10-16 起）
+      const remote = [new RemoteLetter('回信', '朴', 20_000, 'L1', 'park', '译文', false)];
+      const waiting = [new WaitingLetter('L1', 21_000, '')];
+      const actions = reconcilePlan(remote, waiting, new Set<string>(), new Set<string>());
+      expect(actions.length).assertEqual(1);
+      expect(actions[0].kind).assertEqual(ReconcileActionKind.Adopt);
+      expect(actions[0].adoptLetterId).assertEqual('L1');
+    })
+
+    it('reconcileClientLetterIdBeatsBodyDedupe', 0, () => {
+      // clientLetterId 认领在正文去重**之前**：正文虽已在本机（比如另一封同文），
+      // 但 id 对着写信中的信，仍是它认领（iOS reconcile 顺序同款）
+      const existing = new Set<string>(['回信']);
+      const remote = [new RemoteLetter('回信', '朴', 20_000, 'L1', 'park', '', false)];
+      const waiting = [new WaitingLetter('L1', 19_000, 'park')];
+      const actions = reconcilePlan(remote, waiting, existing, new Set<string>());
+      expect(actions[0].kind).assertEqual(ReconcileActionKind.Adopt);
+      expect(actions[0].adoptLetterId).assertEqual('L1');
+    })
+
+    it('reconcileSkipsClientLetterIdMatchingNonWritingLetter', 0, () => {
+      // 对得上的是一封**不在写信中**的本机信：已收下 / 已退回，跳过不复活（iOS guard isQueued）
+      const remote = [new RemoteLetter('回信', '朴', 20_000, 'L9', 'park', '', false)];
+      const known = new Set<string>(['L9']);
+      const waiting = [new WaitingLetter('L1', 19_000, '')];
+      const actions = reconcilePlan(remote, waiting, new Set<string>(), known);
+      expect(actions[0].kind).assertEqual(ReconcileActionKind.Skip);
+      // 不认识的 id（别的机器寄的）：对不上 waiting 也不猜，新落一封
+      const unknown = [new RemoteLetter('回信', '朴', 20_000, 'LX', 'park', '', false)];
+      const actions2 = reconcilePlan(unknown, waiting, new Set<string>(), known);
+      expect(actions2[0].kind).assertEqual(ReconcileActionKind.Create);
+    })
 
     it('reconcileAdoptsWithinClockSkewBoundary', 0, () => {
+      // 老信时间猜（clientLetterId、penPalId 都为空才走）：
       // 手机钟慢了：waiting 比服务端回信晚写也认（恰好 5 分钟，<= 含等于）
-      const remote = [new RemoteLetter('回信', '青鸟', 20_000)];
-      const boundary = [new WaitingLetter('L1', 20_000 + OUTBOX_CLOCK_SKEW_MS)];
-      const actions = reconcilePlan(remote, boundary, new Set<string>());
+      const remote = [new RemoteLetter('回信', '青鸟', 20_000, '', '', '', false)];
+      const boundary = [new WaitingLetter('L1', 20_000 + OUTBOX_CLOCK_SKEW_MS, '')];
+      const actions = reconcilePlan(remote, boundary, new Set<string>(), new Set<string>());
       expect(actions.length).assertEqual(1);
       expect(actions[0].kind).assertEqual(ReconcileActionKind.Adopt);
       expect(actions[0].adoptLetterId).assertEqual('L1');
       // 晚超过 5 分钟：不是这封的回信 → 新落一封
-      const tooLate = [new WaitingLetter('L2', 20_000 + OUTBOX_CLOCK_SKEW_MS + 1)];
-      const actions2 = reconcilePlan(remote, tooLate, new Set<string>());
+      const tooLate = [new WaitingLetter('L2', 20_000 + OUTBOX_CLOCK_SKEW_MS + 1, '')];
+      const actions2 = reconcilePlan(remote, tooLate, new Set<string>(), new Set<string>());
+      expect(actions2[0].kind).assertEqual(ReconcileActionKind.Create);
+    })
+
+    it('reconcileTimeGuessOnlyForOwnPenPalLetters', 0, () => {
+      // 世界笔友的信（有 penPalId、没 clientLetterId）不参与时间猜 → 新落一封
+      const remote = [new RemoteLetter('回信', '朴', 20_000, '', 'park', '', false)];
+      const waiting = [new WaitingLetter('L1', 19_000, 'park')];
+      const actions = reconcilePlan(remote, waiting, new Set<string>(), new Set<string>());
+      expect(actions[0].kind).assertEqual(ReconcileActionKind.Create);
+      // 老信的时间猜也只认领自起名的 waiting（世界笔友的信不按时间猜）
+      const oldRemote = [new RemoteLetter('回信', '青鸟', 20_000, '', '', '', false)];
+      const worldWaiting = [new WaitingLetter('L2', 19_000, 'park')];
+      const actions2 = reconcilePlan(oldRemote, worldWaiting, new Set<string>(), new Set<string>());
       expect(actions2[0].kind).assertEqual(ReconcileActionKind.Create);
     })
 
     it('reconcileProcessesRemoteOldestFirst', 0, () => {
       // 传入乱序：先处理写信早的那条，认领最早的 waiting
       const remote = [
-        new RemoteLetter('后写的回信', '青鸟', 30_000),
-        new RemoteLetter('先写的回信', '青鸟', 20_000)
+        new RemoteLetter('后写的回信', '青鸟', 30_000, '', '', '', false),
+        new RemoteLetter('先写的回信', '青鸟', 20_000, '', '', '', false)
       ];
       const waiting = [
-        new WaitingLetter('L1', 19_000),
-        new WaitingLetter('L2', 29_000)
+        new WaitingLetter('L1', 19_000, ''),
+        new WaitingLetter('L2', 29_000, '')
       ];
-      const actions = reconcilePlan(remote, waiting, new Set<string>());
+      const actions = reconcilePlan(remote, waiting, new Set<string>(), new Set<string>());
       expect(actions.length).assertEqual(2);
       // 先写的回信归 L1（升序第一个动作），后写的归 L2
       expect(actions[0].remote.body).assertEqual('先写的回信');
@@ -181,11 +229,11 @@ export default function letterOutboxLogicTest() {
     it('reconcileDoesNotReuseAdoptedLetter', 0, () => {
       // 两条服务端信、一封 waiting：第一条认领掉，第二条对不上 → Create
       const remote = [
-        new RemoteLetter('回信一', '青鸟', 20_000),
-        new RemoteLetter('回信二', '青鸟', 21_000)
+        new RemoteLetter('回信一', '青鸟', 20_000, '', '', '', false),
+        new RemoteLetter('回信二', '青鸟', 21_000, '', '', '', false)
       ];
-      const waiting = [new WaitingLetter('L1', 19_000)];
-      const actions = reconcilePlan(remote, waiting, new Set<string>());
+      const waiting = [new WaitingLetter('L1', 19_000, '')];
+      const actions = reconcilePlan(remote, waiting, new Set<string>(), new Set<string>());
       expect(actions[0].kind).assertEqual(ReconcileActionKind.Adopt);
       expect(actions[1].kind).assertEqual(ReconcileActionKind.Create);
     })
@@ -193,17 +241,17 @@ export default function letterOutboxLogicTest() {
     it('reconcileSkipsBodiesAlreadyLocal', 0, () => {
       // 正文去重：本机已有的跳过（不认领也不新落，R-OUTBOX-07）
       const existing = new Set<string>(['已有的回信']);
-      const remote = [new RemoteLetter('已有的回信', '青鸟', 20_000)];
-      const waiting = [new WaitingLetter('L1', 19_000)];
-      const actions = reconcilePlan(remote, waiting, existing);
+      const remote = [new RemoteLetter('已有的回信', '青鸟', 20_000, '', '', '', false)];
+      const waiting = [new WaitingLetter('L1', 19_000, '')];
+      const actions = reconcilePlan(remote, waiting, existing, new Set<string>());
       expect(actions.length).assertEqual(1);
       expect(actions[0].kind).assertEqual(ReconcileActionKind.Skip);
       expect(actions[0].adoptLetterId).assertEqual('');
     })
 
     it('reconcileCreatesWhenNothingWaiting', 0, () => {
-      const remote = [new RemoteLetter('别处的回信', '青鸟', 20_000)];
-      const actions = reconcilePlan(remote, [], new Set<string>());
+      const remote = [new RemoteLetter('别处的回信', '青鸟', 20_000, '', '', '', false)];
+      const actions = reconcilePlan(remote, [], new Set<string>(), new Set<string>());
       expect(actions[0].kind).assertEqual(ReconcileActionKind.Create);
     })
 

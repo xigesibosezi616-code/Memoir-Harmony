@@ -8,8 +8,9 @@
  * - **导出只读库不写库**，任何时刻取消都不伤数据；临时目录用完即删（finally）
  * - 日记本按书架顺序写出 —— 导入端按数组顺序接在书架末尾（merge），
  *   书架顺序就这样带过去了，备份格式不用为 sortOrder 加字段
- * - moodSummaries（会员情绪小结）/ penPalNotes（笔友手记）鸿蒙侧没有对应模型，
- *   **不写这两个字段**（可选字段，老格式的包长得和以前一样）
+ * - moodSummaries（会员情绪小结）鸿蒙侧没有对应模型，**不写这个字段**（可选字段，
+ *   老格式的包长得和以前一样）；penPalNotes（笔友手记，U01 B3）写进 letters.json，
+ *   没有手记时字段整个不写（iOS 导出空时 nil 同款）
  */
 import { relationalStore } from '@kit.ArkData';
 import { common, bundleManager } from '@kit.AbilityKit';
@@ -21,11 +22,12 @@ import { ContentBlock, ContentBlockType } from '../../models/ContentBlock';
 import { Notebook } from '../../models/Notebook';
 import { Letter } from '../../models/Letter';
 import { WritingStreak } from '../../models/WritingStreak';
+import { PenPalNote } from '../../models/PenPalNote';
 import { AppPrefs } from '../AppPrefs';
 import { PHOTO_DIR_NAME, AUDIO_DIR_NAME } from '../MediaStorage';
 import { BackupFormat, toBackupIso8601, ManifestWire, ManifestCountsWire,
   BlockWire, EntryWire, WritingStatsWire, EntriesWire, LetterWire, LettersWire,
-  TagWire, TaxonomyWire } from './BackupFormat';
+  PenPalNoteWire, TagWire, TaxonomyWire } from './BackupFormat';
 import { BackupCrypto } from './BackupCrypto';
 import { readBytes, writeBytes, writeTextFile, removeTree, ensureDir,
   fileExists, fileSizeOf, lastPathComponent } from './BackupFs';
@@ -126,7 +128,7 @@ export class BackupExportService {
    */
   static async export(context: common.Context, store: relationalStore.RdbStore,
     entries: JournalEntry[], letters: Letter[], tags: Notebook[],
-    options: BackupExportOptions): Promise<BackupExportResult> {
+    penPalNotes: PenPalNote[], options: BackupExportOptions): Promise<BackupExportResult> {
     if (entries.length === 0) {
       throw new BackupExportFailure(BackupExportError.NothingToExport);
     }
@@ -186,6 +188,14 @@ export class BackupExportService {
           links.get(letter.id) ?? []));
       }
       lettersFile.letters = wireLetters;
+      // 笔友手记（U01 B3）：没有时字段整个不写（老包形状不变）
+      if (penPalNotes.length > 0) {
+        const wireNotes: PenPalNoteWire[] = [];
+        for (const note of penPalNotes) {
+          wireNotes.push(BackupExportService.makeWirePenPalNote(note));
+        }
+        lettersFile.penPalNotes = wireNotes;
+      }
       if (!writeTextFile(`${stage}/${BackupFormat.lettersFile}`,
         JSON.stringify(lettersFile, null, 2))) {
         throw new BackupExportFailure(BackupExportError.AssemblyFailed, 'write letters.json failed');
@@ -380,7 +390,8 @@ export class BackupExportService {
     return wire;
   }
 
-  private static makeWireLetter(letter: Letter, relatedEntryIds: string[]): LetterWire {
+  /** Letter → 包内 wire 形态。非 private：letters 导出 round-trip 单测直接调 */
+  static makeWireLetter(letter: Letter, relatedEntryIds: string[]): LetterWire {
     const wire = new LetterWire();
     wire.id = letter.id;
     wire.body = letter.body;
@@ -398,6 +409,27 @@ export class BackupExportService {
       wire.readAt = toBackupIso8601(letter.readAt);
     }
     wire.relatedEntryIDs = relatedEntryIds;
+    // 世界笔友四字段（可选；老包导入的信没有，原样不写）
+    wire.penPalID = letter.penPalId;
+    wire.translatedBody = letter.translatedBody;
+    wire.danger = letter.danger;
+    wire.postage = letter.postage;
+    return wire;
+  }
+
+  /** PenPalNote → 包内 wire 形态（U01 B3）。非 private：round-trip 单测直接调 */
+  static makeWirePenPalNote(note: PenPalNote): PenPalNoteWire {
+    const wire = new PenPalNoteWire();
+    wire.id = note.id;
+    wire.penPalID = note.penPalID;
+    wire.text = note.text;
+    // kind 原样写出（可能有不认识的值），undefined 时省略（导入端按 recent）
+    wire.kind = note.kind;
+    wire.notedAt = toBackupIso8601(note.notedAtMs);
+    wire.createdAt = toBackupIso8601(note.createdAtMs);
+    if (note.updatedAtMs !== undefined) {
+      wire.updatedAt = toBackupIso8601(note.updatedAtMs);
+    }
     return wire;
   }
 

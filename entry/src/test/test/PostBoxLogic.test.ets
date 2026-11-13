@@ -5,15 +5,15 @@
  * - 候选按 createdAt（真正写下的时刻）判新，不按 date（用户可改的日记日期）
  * - 上次寄信 = 真信 ∪ 写信中里最大 generatedAt；退回不算，退回信关联的日记不进候选
  * - 一次最多 14 篇（LetterDelivery.maximumEntriesPerLetter）
- * - 判定顺序：退回 → 未登录 → 写信中 → 服务端拦 → 有可寄 → 在路上 → 没新日记 → 一篇都没有
+ * - 判定顺序：退回 → 未登录 → 写信中 → 邮票不够 → 有可寄 → 在路上 → 没新日记 → 一篇都没有
  * - Returned/JustPosted 都要求本机负责（ownedLetterIds；另一台设备投的不算）
- * 外加标题口径（标题 → 正文第一行 ≤30 字 → 「无题」）与 parseRhythmResponse。
+ * 外加标题口径（标题 → 正文第一行 ≤30 字 → 「无题」）与 parseStampsResponse（U01 邮票夹）。
  */
 import { describe, it, expect } from '@ohos/hypium';
 import { Letter, LetterStatus } from '../../main/ets/models/Letter';
 import { JournalEntry } from '../../main/ets/models/JournalEntry';
 import { LetterDelivery } from '../../main/ets/models/LetterDelivery';
-import { RhythmResponse, parseRhythmResponse } from '../../main/ets/models/Api';
+import { StampWallet, parseStampsResponse } from '../../main/ets/models/Api';
 import {
   PostBoxSituationKind,
   PostBoxStateInput,
@@ -42,9 +42,13 @@ function makeEntry(id: string, date: number, createdAt: number): JournalEntry {
   return new JournalEntry(id, date, createdAt, createdAt);
 }
 
+function makeWallet(balance: number, packReady: boolean): StampWallet {
+  return new StampWallet(balance, 999, NOW + 86_400_000, packReady, false);
+}
+
 function input(letters: Letter[], entries: JournalEntry[], held: Set<string>,
-  rhythm: RhythmResponse | undefined, loggedIn: boolean,
-  owned?: Set<string>): PostBoxStateInput {
+  stamps: StampWallet | undefined, loggedIn: boolean,
+  owned?: Set<string>, postageNeeded?: number): PostBoxStateInput {
   // 不传 owned 默认全部归本机：老用例只关心判定顺序；owns 门控单独出用例
   let ownedIds = owned;
   if (ownedIds === undefined) {
@@ -53,7 +57,8 @@ function input(letters: Letter[], entries: JournalEntry[], held: Set<string>,
       ownedIds.add(letter.id);
     }
   }
-  return new PostBoxStateInput(letters, entries, held, ownedIds, rhythm, loggedIn, NOW);
+  return new PostBoxStateInput(letters, entries, held, ownedIds, stamps,
+    postageNeeded ?? 1, loggedIn, NOW);
 }
 
 export default function postBoxLogicTest() {
@@ -128,8 +133,8 @@ export default function postBoxLogicTest() {
     it('returnedWinsOverEverything', 0, () => {
       const bounced = makeLetter('L1', LetterStatus.Failed, '', 9000);
       const entries = [makeEntry('E1', 9500, 9500)];
-      const rhythm = new RhythmResponse('free', true, 'ok', '');
-      const state = judgePostBoxState(input([bounced], entries, new Set<string>(), rhythm, false));
+      const wallet = makeWallet(0, false);
+      const state = judgePostBoxState(input([bounced], entries, new Set<string>(), wallet, false));
       expect(state.kind).assertEqual(PostBoxSituationKind.Returned);
       // 退回卡片要渲染那封信：最近投的带出来
       expect(state.returnedLetter?.id).assertEqual('L1');
@@ -160,17 +165,18 @@ export default function postBoxLogicTest() {
       expect(state.kind).assertEqual(PostBoxSituationKind.NotLoggedIn);
     })
 
-    it('justPostedComesBeforeBlockedAndReady', 0, () => {
+    it('justPostedComesBeforeNoStampsAndReady', 0, () => {
       const writing = makeLetter('L1', LetterStatus.Generating, '', 5000);
       const entries = [makeEntry('E1', 6000, 6000)];
-      // 服务端说能寄、也有新日记 —— 写信中优先
-      const state = judgePostBoxState(input([writing], entries, new Set<string>(), undefined, true));
+      // 邮票够、也有新日记 —— 写信中优先
+      const state = judgePostBoxState(input([writing], entries, new Set<string>(),
+        makeWallet(3, false), true));
       expect(state.kind).assertEqual(PostBoxSituationKind.JustPosted);
       // 候选照算：状态行要区分「投进邮筒了」和「刚寄出过一会儿再寄」
       expect(state.candidates.length).assertEqual(1);
-      // 服务端说不能寄也一样：写信中优先
-      const blocked = new RhythmResponse('free', false, 'weekly_pending', '2099-01-01T00:00:00Z');
-      const state2 = judgePostBoxState(input([writing], entries, new Set<string>(), blocked, true));
+      // 邮票不够也一样：写信中优先
+      const state2 = judgePostBoxState(input([writing], entries, new Set<string>(),
+        makeWallet(0, false), true));
       expect(state2.kind).assertEqual(PostBoxSituationKind.JustPosted);
     })
 
@@ -183,24 +189,36 @@ export default function postBoxLogicTest() {
       expect(state.kind).assertEqual(PostBoxSituationKind.Ready);
     })
 
-    it('blockedShowsCandidatesForThePile', 0, () => {
+    it('noStampsWhenBalanceShortAndNoPackReady', 0, () => {
       const sent = makeLetter('L1', LetterStatus.Delivered, '回信', 5000);
       sent.deliveredAt = 5001;
       const entries = [makeEntry('E1', 6000, 6000)];
-      const rhythm = new RhythmResponse('free', false, 'weekly_pending', '2099-01-01T00:00:00Z');
-      const state = judgePostBoxState(input([sent], entries, new Set<string>(), rhythm, true));
-      expect(state.kind).assertEqual(PostBoxSituationKind.Blocked);
-      // 这周寄不了，新写的先摆着：候选要给下半区的纸
+      const wallet = makeWallet(0, false);
+      const state = judgePostBoxState(input([sent], entries, new Set<string>(), wallet, true));
+      expect(state.kind).assertEqual(PostBoxSituationKind.NoStamps);
+      // 邮票不够，新写的先摆着：候选要给下半区的纸
       expect(state.candidates.length).assertEqual(1);
-      // 问不到节奏（undefined）不拦：直接 Ready
+      // 问不到邮票夹（undefined）不拦：直接 Ready
       const state2 = judgePostBoxState(input([sent], entries, new Set<string>(), undefined, true));
       expect(state2.kind).assertEqual(PostBoxSituationKind.Ready);
+      // 新的一包到了（packReady）不算不够：寄的时候服务端会把那包补上
+      const state3 = judgePostBoxState(input([sent], entries, new Set<string>(),
+        makeWallet(0, true), true));
+      expect(state3.kind).assertEqual(PostBoxSituationKind.Ready);
+      // 余额够也不拦
+      const state4 = judgePostBoxState(input([sent], entries, new Set<string>(),
+        makeWallet(2, false), true));
+      expect(state4.kind).assertEqual(PostBoxSituationKind.Ready);
+      // 多位收件人（B2 南极两张）：postageNeeded 抬高，2 张也不够
+      const state5 = judgePostBoxState(input([sent], entries, new Set<string>(),
+        makeWallet(2, false), true, undefined, 3));
+      expect(state5.kind).assertEqual(PostBoxSituationKind.NoStamps);
     })
 
     it('readyWhenFreshEntriesExist', 0, () => {
       const entries = [makeEntry('E1', 1000, 1000)];
-      const rhythm = new RhythmResponse('free', true, 'ok', '');
-      const state = judgePostBoxState(input([], entries, new Set<string>(), rhythm, true));
+      const state = judgePostBoxState(input([], entries, new Set<string>(),
+        makeWallet(3, false), true));
       expect(state.kind).assertEqual(PostBoxSituationKind.Ready);
       expect(state.candidates.length).assertEqual(1);
     })
@@ -333,28 +351,37 @@ export default function postBoxLogicTest() {
       expect(postmarkInkHex('polar')).assertEqual('#8FA8BF');
     })
 
-    // ---- parseRhythmResponse（GET /me/rhythm 的形状） ----
+    // ---- parseStampsResponse（GET /me/stamps 的形状，U01 邮票夹） ----
 
-    it('parseRhythmResponseReadsAllFields', 0, () => {
-      const raw = '{"tier":"free","canRequestNow":false,"reason":"weekly_pending",' +
-        '"nextLetterAt":"2099-01-01T00:00:00Z"}';
-      const r = parseRhythmResponse(raw);
-      expect(r.tier).assertEqual('free');
-      expect(r.canRequestNow).assertFalse();
-      expect(r.reason).assertEqual('weekly_pending');
-      expect(r.nextLetterAt).assertEqual('2099-01-01T00:00:00Z');
-      // nextLetterAt 可为 null（现在就能寄）
-      const ok = parseRhythmResponse('{"tier":"subscribed","canRequestNow":true,"reason":"ok","nextLetterAt":null}');
-      expect(ok.canRequestNow).assertTrue();
-      expect(ok.nextLetterAt).assertEqual('');
+    it('parseStampsResponseReadsAllFields', 0, () => {
+      const raw = '{"balance":20,"cap":999,"nextPackAt":"2099-01-01T00:00:00Z",' +
+        '"packReady":false,"isMember":true}';
+      const wallet = parseStampsResponse(raw);
+      expect(wallet.balance).assertEqual(20);
+      expect(wallet.cap).assertEqual(999);
+      expect(wallet.nextPackAtMs).assertEqual(Date.parse('2099-01-01T00:00:00Z'));
+      expect(wallet.packReady).assertFalse();
+      expect(wallet.isMember).assertTrue();
+      // packReady / isMember 缺省 false（typeof 校验，只在 === true 时为真）
+      const sparse = parseStampsResponse('{"balance":3,"cap":999,"nextPackAt":"2099-01-01T00:00:00Z"}');
+      expect(sparse.packReady).assertFalse();
+      expect(sparse.isMember).assertFalse();
     })
 
-    it('parseRhythmResponseRejectsBadShapes', 0, () => {
-      const bad: string[] = ['{"tier":"free"}', '[]', 'not json'];
+    it('parseStampsResponseRejectsBadShapes', 0, () => {
+      // balance / cap / nextPackAt 缺一不可；nextPackAt 形状不对也拒
+      const bad: string[] = [
+        '{"cap":999,"nextPackAt":"2099-01-01T00:00:00Z"}',
+        '{"balance":3,"nextPackAt":"2099-01-01T00:00:00Z"}',
+        '{"balance":3,"cap":999}',
+        '{"balance":3,"cap":999,"nextPackAt":"不是 ISO 串"}',
+        '[]',
+        'not json'
+      ];
       for (const raw of bad) {
         let caught = false;
         try {
-          parseRhythmResponse(raw);
+          parseStampsResponse(raw);
         } catch (e) {
           caught = true;
         }

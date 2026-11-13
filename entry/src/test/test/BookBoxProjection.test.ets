@@ -135,5 +135,44 @@ export default function bookBoxProjectionTest() {
       expect(projectedWidth).assertLess(COVER_W);
       expect(projectedWidth).assertLarger(COVER_W * Math.cos(32 * Math.PI / 180) - 0.5);
     })
+
+    it('unitScale_scales_perspective_strength', 0, () => {
+      // matrix4 工作在 px 坐标系（官方文档）：视距必须随密度放大，
+      // 同一物理旋转在 px 口径下的投影点坐标也应同比放大（Q32① 修复）
+      const angle = bookBoxLiftAngle(32);
+      const m1 = bookBoxFaceMatrix(BookBoxFace.Cover, angle, COVER_W, COVER_H, DEPTH, 1);
+      const m3 = bookBoxFaceMatrix(BookBoxFace.Cover, angle, COVER_W * 3, COVER_H * 3, DEPTH * 3, 3);
+      const p1 = bookBoxProjectPoint(m1, COVER_W, 0, 0);
+      const p3 = bookBoxProjectPoint(m3, COVER_W * 3, 0, 0);
+      expect(p3[0]).assertClose(p1[0] * 3, 0.01);
+      expect(p3[1]).assertClose(p1[1] * 3, 0.01);
+    })
+
+    it('unitScale_one_keeps_legacy_behavior', 0, () => {
+      // 默认 unitScale = 1：与旧五参调用逐位一致（向后兼容）
+      const angle = bookBoxLiftAngle(32);
+      const legacy = bookBoxFaceMatrix(BookBoxFace.Cover, angle, COVER_W, COVER_H, DEPTH);
+      const scaled = bookBoxFaceMatrix(BookBoxFace.Cover, angle, COVER_W, COVER_H, DEPTH, 1, 0);
+      for (let i = 0; i < 16; i++) {
+        expect(scaled[i]).assertClose(legacy[i], 0.000001);
+      }
+    })
+
+    it('spineOverlap_pushes_spine_edge_past_cover_plane', 0, () => {
+      // Q32② 红线修复：书脊封面侧边缘（视图 x = DEPTH + overlap）要探过封面左缘
+      //（探入封面侧，由后画的封面盖住，拼缝不露底）；书脊内侧边缘保持不动
+      const overlap = 2;
+      const angle = bookBoxLiftAngle(32);
+      const cover = bookBoxFaceMatrix(BookBoxFace.Cover, angle, COVER_W, COVER_H, DEPTH);
+      const spine = bookBoxFaceMatrix(BookBoxFace.Spine, angle, COVER_W, COVER_H, DEPTH, 1, overlap);
+      const coverEdge = bookBoxProjectPoint(cover, 0, 0, 0);
+      const spineCoverSide = bookBoxProjectPoint(spine, DEPTH + overlap, 0, 0);
+      expect(spineCoverSide[0] > coverEdge[0] + 0.5).assertTrue();
+      const spineBack = bookBoxProjectPoint(spine, 0, 0, 0);
+      const spineBackNoOverlap = bookBoxProjectPoint(
+        bookBoxFaceMatrix(BookBoxFace.Spine, angle, COVER_W, COVER_H, DEPTH, 1, 0), 0, 0, 0);
+      expect(spineBack[0]).assertClose(spineBackNoOverlap[0], 0.0001);
+      expect(spineBack[1]).assertClose(spineBackNoOverlap[1], 0.0001);
+    })
   })
 }

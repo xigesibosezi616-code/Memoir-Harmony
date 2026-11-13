@@ -3,8 +3,11 @@
  * 对应 iOS `DefaultPaperStylePickerView.swift`。
  *
  * - 六种相纸单选（`defaultPaperStyle`，插照片时预选；05 §3.5）
- * - 行值按实际存的偏好打勾；选完落偏好即生效（下次插照片预选）
- * - 会员锁（四种会员款）阶段 7 再上：本阶段全放开（2.6 起判定恒放开）
+ * - 会员锁（7.2 点亮）：四款会员款对非会员挂小火漆（iOS MemberBadge）、
+ *   点按弹付费页、不改默认；原图 / 宝丽来不拦
+ * - 打勾按**实际生效**的样式（effectivePaperStyle：会员到期后存着的会员款
+ *   实际已退回宝丽来，勾跟着退——iOS `PaperStyle.defaultStyle(raw:isMember:)` 同款）
+ * - 选完落偏好即生效（下次插照片预选）
  *
  * 路由：系统路由表（router_map.json → name `DefaultPaperStyle`），
  * 由 SettingsJournalView 推入。
@@ -16,7 +19,11 @@ import { STORAGE_KEY_THEME } from '../../theme/ThemeManager';
 import { STORAGE_KEY_SAFE_AREA_TOP_VP,
   STORAGE_KEY_SAFE_AREA_BOTTOM_VP } from '../../services/ImmersiveChrome';
 import { AppPrefs, PREF_KEY_DEFAULT_PAPER_STYLE } from '../../services/AppPrefs';
-import { PaperStyle, paperStyleFromRaw } from '../../models/ContentBlock';
+import { AppEnvironment, STORAGE_KEY_APP_ENVIRONMENT } from '../../environment/AppEnvironment';
+import { PaperStyle, paperStyleFromRaw, isMemberPaperStyle,
+  effectivePaperStyle } from '../../models/ContentBlock';
+import { STORAGE_KEY_MEMBERSHIP_TICK } from '../../services/membership/MembershipManager';
+import { WaxSeal } from '../postbox/WaxSeal';
 
 /** 一个相纸选项（值 + 显示名词条） */
 class PaperOption {
@@ -39,8 +46,10 @@ export struct DefaultPaperStylePickerView {
   @StorageProp(STORAGE_KEY_THEME) theme: AppTheme = new BambooTheme();
   @StorageProp(STORAGE_KEY_SAFE_AREA_TOP_VP) safeAreaTopVp: number = 0;
   @StorageProp(STORAGE_KEY_SAFE_AREA_BOTTOM_VP) safeAreaBottomVp: number = 0;
+  /** 会员状态变化（7.2：会员锁 + 生效样式打勾随 tick 重算） */
+  @StorageProp(STORAGE_KEY_MEMBERSHIP_TICK) membershipTick: number = 0;
 
-  /** 当前选中的默认相纸（打勾；非法值按宝丽来兜底） */
+  /** 当前选中的默认相纸（打勾按实际生效值；非法值按宝丽来兜底） */
   @State private selected: PaperStyle = PaperStyle.Polaroid;
 
   private navPathStack: NavPathStack = new NavPathStack();
@@ -179,8 +188,13 @@ export struct DefaultPaperStylePickerView {
         .fontWeight(this.theme.bodyFont.weight)
         .fontFamily(this.theme.bodyFont.family)
         .fontColor(this.theme.textPrimary)
-        .layoutWeight(1)
-      if (this.selected === option.style) {
+      // 会员款角标：小火漆印（iOS MemberBadge(size: 16)；仅非会员 + 会员款出现）
+      if (this.lockedStyle(option.style)) {
+        WaxSeal({ sizeVp: 16 })
+      }
+      Blank()
+      // 打勾按实际生效的样式（会员到期后存着的会员款已退回宝丽来）
+      if (effectivePaperStyle(this.selected, this.isMember()) === option.style) {
         SymbolGlyph($r('sys.symbol.checkmark'))
           .fontSize(14)
           .fontWeight(FontWeight.Medium)
@@ -191,10 +205,27 @@ export struct DefaultPaperStylePickerView {
     .padding({ top: 15, bottom: 15, left: 20, right: 20 })
     .alignItems(VerticalAlign.Center)
     .onClick((): void => {
+      // 会员款对非会员：只弹付费页，不改默认（iOS 同款）
+      if (this.lockedStyle(option.style)) {
+        this.navPathStack.pushPathByName('Paywall', '');
+        return;
+      }
       if (this.selected !== option.style) {
         this.selected = option.style;
         AppPrefs.putString(PREF_KEY_DEFAULT_PAPER_STYLE, option.style);
       }
     })
+  }
+
+  /** 会员判定（R-MEMBER-08：本机快照） */
+  private isMember(): boolean {
+    const env = AppStorage.get<AppEnvironment>(STORAGE_KEY_APP_ENVIRONMENT);
+    const membership = env !== undefined ? env.membership : undefined;
+    return membership !== undefined && membership.isMember;
+  }
+
+  /** 这款相纸此刻对用户上不上锁：会员款 && 非会员（原图 / 宝丽来恒 false） */
+  private lockedStyle(style: PaperStyle): boolean {
+    return isMemberPaperStyle(style) && !this.isMember();
   }
 }

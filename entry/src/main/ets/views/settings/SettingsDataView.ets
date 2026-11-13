@@ -12,6 +12,9 @@
  * - 红字提醒随云备份行：只写有把握的「换新手机时可从云备份恢复」——
  *   同机卸载重装可恢复是端云同步（6.6）的能力，系统云备份没有按应用
  *   单独恢复的流程，不冒领
+ * - 红字提示 2026-11-12 工单五合并：原 footer 的「实际备份状态以系统
+ *   「华为云备份」设置为准」口径句并入红字（s_669abe2f94），名字统一
+ *   「华为云备份」；footer 不再有云备份口径句
  * - 导出 / 导入备份：行先立（6.5 / 6.4 接路由），分组结构与文案一次到位
  * - 同步 Live Photo 视频不做（Q10 死设置）
  * - 照片与录音占用（R-DATA-08）：扫盘统计（usage()），值未回来显示「统计中…」
@@ -109,13 +112,8 @@ export struct SettingsDataView {
             .backgroundColor(this.theme.settingsCardBackground)
             .width('100%')
 
-            // footer：云备份口径说明 + 导入语义 + 残留文件说明
+            // footer：导入语义 + 残留文件说明（云备份口径句 2026-11-12 已并入上方红字提示）
             Column({ space: 6 }) {
-              Text($r('app.string.s_05d0319b2b'))
-                .fontSize(this.theme.labelFont.size)
-                .fontWeight(this.theme.labelFont.weight)
-                .fontFamily(this.theme.labelFont.family)
-                .fontColor(this.theme.textTertiary)
               Text($r('app.string.s_06829794c0'))
                 .fontSize(this.theme.labelFont.size)
                 .fontWeight(this.theme.labelFont.weight)

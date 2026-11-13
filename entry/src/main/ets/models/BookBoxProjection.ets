@@ -16,7 +16,10 @@
  * 它按列主序读 = 行向量矩阵的转置 = 列向量约定，正好接上（见该文件）。
  */
 
-/** 视点到封面的距离（vp）。越小透视越强；520 对手机上一本书比较克制（iOS 同款） */
+/** 视点到封面的距离（vp，iOS pt 口径）。越小透视越强；520 对手机上一本书比较克制（iOS 同款）。
+ *  注意：鸿蒙 `matrix4` 作用在 **px 坐标系**（官方文档：`matrix4` 的 translate/center 单位为 px，
+ *  rotate 属性的 perspective 单位也为 px），调用方传 px 尺寸时，本函数内部按
+ *  `unitScale`（= 屏幕密度 px/vp）把视距同步放大，透视强度才与 iOS 一致 */
 export const BOOK_BOX_EYE_DISTANCE: number = 520;
 
 /** 盒子的面：封面 / 书脊（封面左边那一面） */
@@ -79,15 +82,28 @@ export function bookBoxFaceVisible(face: BookBoxFace, angle: number): boolean {
  *
  * - face: 哪个面
  * - angle: 整本书绕竖轴转的角度（弧度），0 = 正面
- * - coverWidth / coverHeight: 封面（盒子正面，不含书口）的宽高
- * - depth: 书的厚度
+ * - coverWidth / coverHeight: 封面（盒子正面，不含书口）的宽高（与 unitScale 同口径：
+ *   喂给 matrix4 时必须是 px）
+ * - depth: 书的厚度（同上口径）
+ * - unitScale: 视距放大倍数 = 屏幕密度（px/vp）。matrix4 在 px 坐标系工作，
+ *   eyeDistance（vp 口径 520）必须同步放大，否则透视强度是 iOS 的 ~3 倍（Q32①）
+ * - spineOverlap: 书脊面向封面一侧探出的重叠量（同口径）。封面/书脊两颗矩阵各自
+ *   栅格化，交界抗锯齿会露出 1px 底（Q32② 红线）；书脊向封面平面探出这一点量，
+ *   由后画的封面盖住探出部分，拼缝被压死。封面几何不变
  */
 export function bookBoxFaceMatrix(face: BookBoxFace, angle: number,
-  coverWidth: number, coverHeight: number, depth: number): number[] {
+  coverWidth: number, coverHeight: number, depth: number,
+  unitScale: number = 1, spineOverlap: number = 0): number[] {
+  const scale = unitScale > 0 ? unitScale : 1;
+  const eyeDistance = BOOK_BOX_EYE_DISTANCE * scale;
+  const overlap = face === BookBoxFace.Spine ? Math.max(0, spineOverlap) : 0;
   const faceAngle = face === BookBoxFace.Cover ? 0 : spineFaceAngle();
   const offsetX = face === BookBoxFace.Cover ? 0 : -coverWidth / 2;
-  const offsetZ = face === BookBoxFace.Cover ? depth / 2 : 0;
-  const faceCenterX = face === BookBoxFace.Cover ? coverWidth / 2 : depth / 2;
+  // 书脊面宽 depth + overlap、中心同步挪：局部坐标居中后 z 范围对称，
+  // offsetZ +overlap/2 把整体推向封面平面（+z）——封面侧边缘探到
+  // coverPlane + overlap、书脊内侧边缘保持 −depth/2 不动（与转向符号无关）
+  const offsetZ = face === BookBoxFace.Cover ? depth / 2 : overlap / 2;
+  const faceCenterX = face === BookBoxFace.Cover ? coverWidth / 2 : (depth + overlap) / 2;
   const boxCenterX = coverWidth / 2;
   const boxCenterY = coverHeight / 2;
 
@@ -99,7 +115,7 @@ export function bookBoxFaceMatrix(face: BookBoxFace, angle: number,
   t = matMultiply(t, matRotateY(angle));
   // 把封面所在的平面挪回 z = 0：不转的时候投影出来和平面的书一样大，拿起那一下不会「跳」
   t = matMultiply(t, matTranslate(0, 0, -depth / 2));
-  t = matMultiply(t, matPerspective(BOOK_BOX_EYE_DISTANCE));
+  t = matMultiply(t, matPerspective(eyeDistance));
   // 盒子中心放回面视图里该在的位置（两个面里是同一个点）
   t = matMultiply(t, matTranslate(boxCenterX, boxCenterY, 0));
   // z′ 行清零：投影只消费 x′/y′/w′，但整颗矩阵会交给 ArkUI —— 透视平移会在

@@ -28,11 +28,11 @@ import cameraSessionTest from './test/CameraSession.test'
 import cameraPhotoFilesTest from './test/CameraPhotoFiles.test'
 import placeWeatherFormatTest from './test/PlaceWeatherFormat.test'
 import shelfDragTest from './test/ShelfDrag.test'
+import springSimulationTest from './test/SpringSimulation.test'
 import bookBoxProjectionTest from './test/BookBoxProjection.test'
 import bookContentsLogicTest from './test/BookContentsLogic.test'
 import coverEditTest from './test/CoverEdit.test'
 import readerPagesTest from './test/ReaderPages.test'
-import curlMathTest from './test/CurlMath.test'
 import eyeFlipMachineTest from './test/EyeFlipMachine.test'
 import showcaseDigestTest from './test/ShowcaseDigest.test'
 import dominantColorTest from './test/DominantColor.test'
@@ -46,6 +46,7 @@ import postBoxMetricsTest from './test/PostBoxMetrics.test'
 import letterOutboxLogicTest from './test/LetterOutboxLogic.test'
 import notifyLogicTest from './test/NotifyLogic.test'
 import letterApiTest from './test/LetterApi.test'
+import membershipLogicTest from './test/MembershipLogic.test'
 import letterLanguageTest from './test/LetterLanguage.test'
 import letterPostingTimelineTest from './test/LetterPostingTimeline.test'
 import letterPostingFlightGeometryTest from './test/LetterPostingFlightGeometry.test'
@@ -56,6 +57,14 @@ import statsCalculatorBundle from './test/StatsCalculator.test'
 import moodInsightsBundle from './test/MoodInsights.test'
 import backupFormatTest from './test/BackupFormat.test'
 import backupTagPlanTest from './test/BackupTagPlan.test'
+import penPalTest from './test/PenPal.test'
+import penPalTravelTest from './test/PenPalTravel.test'
+import mapDaylightTest from './test/MapDaylight.test'
+import penPalLocalTimeTest from './test/PenPalLocalTime.test'
+import penPalNameTest from './test/PenPalName.test'
+import worldMapLogicTest from './test/WorldMapLogic.test'
+import mapInkTest from './test/MapInk.test'
+import penPalNotebookTest from './test/PenPalNotebook.test'
 
 export default function testsuite() {
   themeManagerTest()
@@ -88,11 +97,11 @@ export default function testsuite() {
   cameraPhotoFilesTest()
   placeWeatherFormatTest()
   shelfDragTest()
+  springSimulationTest()
   bookBoxProjectionTest()
   bookContentsLogicTest()
   coverEditTest()
   readerPagesTest()
-  curlMathTest()
   eyeFlipMachineTest()
   showcaseDigestTest()
   dominantColorTest()
@@ -106,6 +115,7 @@ export default function testsuite() {
   letterOutboxLogicTest()
   notifyLogicTest()
   letterApiTest()
+  membershipLogicTest()
   letterLanguageTest()
   letterPostingTimelineTest()
   letterPostingFlightGeometryTest()
@@ -116,4 +126,12 @@ export default function testsuite() {
   moodInsightsBundle()
   backupFormatTest()
   backupTagPlanTest()
+  penPalTest()
+  penPalTravelTest()
+  mapDaylightTest()
+  penPalLocalTimeTest()
+  penPalNameTest()
+  worldMapLogicTest()
+  mapInkTest()
+  penPalNotebookTest()
 }
